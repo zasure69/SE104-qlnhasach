@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DS Thể loại - Quản lý</title>
+    
+    <!-- Link Font Awesome để có icon --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* * --- PHẦN CSS --- 
+         * (Giữ nguyên toàn bộ CSS từ file trước)
+         */
+
+        /* Biến màu và Cài đặt chung */
+        :root {
+            --primary-color: #2c3e50; /* Màu sidebar */
+            --secondary-color: #3498db; /* Màu active */
+            --green-accent: #1EE4AC; /* Màu nút Thêm */
+            --green-accent-hover: #1ac096;
+            --red-accent: #e74c3c; /* Màu nút Xóa */
+            --red-accent-hover: #c0392b;
+            --light-bg: #f0f4f8;
+            --white-bg: #ffffff;
+            --text-dark: #222;
+            --text-light: #555;
+            --text-white: #ecf0f1;
+            --border-color: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+        }
+
+        /* --- Layout chính --- */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+            transition: grid-template-columns 0.3s ease-in-out;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease-in-out; 
+            overflow-x: hidden; 
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .sidebar-header i {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-white);
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+
+        .sidebar-nav a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-nav a.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        /* --- Nội dung chính --- */
+        .main-content {
+            background-color: var(--light-bg);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        /* --- Thanh Header --- */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: var(--white-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+        
+        .top-bar h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .user-menu {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        .menu-toggle {
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            cursor: pointer;
+        }
+
+        /* --- Vùng nội dung (Bảng) --- */
+        .content-wrapper {
+            padding: 1.5rem;
+            background-color: var(--white-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- Các loại nút --- */
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--green-accent);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--green-accent-hover);
+            box-shadow: 0 4px 8px rgba(30, 228, 172, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: var(--text-light);
+        }
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        .btn-danger {
+            background-color: var(--red-accent);
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: var(--red-accent-hover);
+        }
+
+        /* --- Bảng --- */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .data-table { /* Đổi tên class chung hơn */
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px; /* Điều chỉnh nếu cần */
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        .data-table thead th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .action-icon {
+            color: var(--secondary-color);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .action-icon:hover {
+            color: #2980b9;
+        }
+
+
+        /* --- Modal (Cửa sổ Pop-up) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none; /* Ẩn ban đầu */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: var(--white-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px; /* Giảm chiều rộng cho modal này */
+            animation: slideIn 0.3s ease;
+            display: flex; 
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .close-modal {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            flex-grow: 1; 
+        }
+
+        .modal-form-grid { 
+            display: grid;
+            /* Chỉ cần 1 cột cho form này */
+            grid-template-columns: 1fr; 
+            gap: 1.25rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input,
+        .form-group textarea { /* Thêm textarea */
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-family: inherit; /* Đảm bảo textarea dùng font giống input */
+        }
+        .form-group textarea {
+            min-height: 80px; /* Chiều cao tối thiểu cho textarea */
+            resize: vertical; /* Cho phép thay đổi chiều cao */
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end; /* Mặc định căn phải */
+            gap: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            background-color: #f9f9f9;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        
+        .modal-footer .btn {
+            flex-grow: 1; 
+            text-align: center;
+            font-size: 0.9rem; 
+        }
+
+        /* Nút Xóa đặc biệt trong modal Chỉnh sửa */
+        #edit-modal .modal-footer {
+            justify-content: space-between; /* Đẩy nút xóa sang trái */
+        }
+        #edit-modal .modal-footer > div {
+             display: flex; 
+             gap: 0.75rem; 
+             flex-grow: 1; 
+             justify-content: flex-end; 
+        }
+        #edit-modal .modal-footer > div .btn {
+            flex-grow: 1; 
+        }
+
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-30px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+
+        /* --- Responsive Design --- */
+
+        @media (min-width: 992.01px) {
+            .dashboard-container.sidebar-collapsed {
+                grid-template-columns: 0 1fr;
+            }
+            .dashboard-container.sidebar-collapsed .sidebar {
+                width: 0;
+                padding-left: 0;
+                padding-right: 0;
+                transform: translateX(-250px);
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .dashboard-container {
+                grid-template-columns: 1fr; 
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -260px; 
+                top: 0;
+                height: 100vh;
+                width: 250px;
+                z-index: 900;
+                box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            }
+            .sidebar.active {
+                left: 0; 
+            }
+
+            .menu-toggle {
+                 display: block; 
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            .top-bar {
+                padding: 1rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            /* Form modal vẫn giữ 1 cột */
+             .modal-form-grid { 
+                grid-template-columns: 1fr;
+            }
+
+            .top-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .user-menu {
+                align-self: flex-end;
+            }
+
+            .content-wrapper {
+                padding: 1rem;
+            }
+            
+            .content-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            
+            .btn-add-new {
+                width: 100%;
+                text-align: center;
+            }
+
+            .modal-footer {
+                flex-direction: column; 
+                align-items: stretch;
+            }
+            #edit-modal .modal-footer {
+                justify-content: flex-start; 
+            }
+            #edit-modal .modal-footer > div {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+             .modal-footer .btn {
+                flex-grow: 0; 
+                width: 100%; 
+                font-size: 0.9rem; 
+             }
+              #edit-modal .modal-footer > div .btn {
+                 flex-grow: 0; 
+             }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        
+        <!-- --- Sidebar --- -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-book-open"></i>
+                <h2>QUẢN LÝ NHÀ SÁCH</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="./dashboard.html"><i class="fas fa-home"></i> Tổng quan</a></li>
+                    <li><a href="./employees.html"><i class="fas fa-users"></i>Nhân Viên</a></li>
+                    <li><a href="./books.html"><i class="fas fa-book"></i>Sách</a></li>
+                    <li><a href="./customers.html"><i class="fas fa-id-card"></i>Khách hàng</a></li> 
+                    <li><a href="./types.html"  class="active"><i class="fas fa-tags"></i>Thể loại</a></li>
+                    <li><a href="./books_import.html"><i class="fas fa-file-invoice"></i>Phiếu nhập sách</a></li>
+                    <li><a href="./promotion.html"><i class="fas fa-gift"></i>Khuyến mãi</a></li>
+                    <li><a href="./bills.html"><i class="fas fa-receipt"></i>Phiếu thu tiền</a></li>
+                    <li><a href="/search.html"><i class="fas fa-search"></i> Tra cứu</a></li>
+                    <li><a href="/report.html"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li> 
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- --- Nội dung chính --- -->
+        <main class="main-content">
+            
+            <!-- Header -->
+            <header class="top-bar">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <!-- Nút menu -->
+                    <button class="menu-toggle" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <!-- Cập nhật tiêu đề -->
+                    <h1>Danh sách Thể loại</h1> 
+                </div>
+                <div class="user-menu">
+                    Chào, Admin <i class="fas fa-chevron-down"></i>
+                </div>
+            </header>
+
+            <!-- Vùng nội dung chính (Bảng) -->
+            <div class="content-wrapper">
+                <div class="content-header">
+                     <!-- Cập nhật tiêu đề -->
+                    <h2>Thể loại</h2>
+                    <!-- Cập nhật nút -->
+                    <button class="btn btn-primary btn-add-new" id="open-add-modal"> 
+                        <i class="fas fa-plus"></i> Thêm mới Thể loại
+                    </button>
+                </div>
+
+                <!-- Bảng responsive -->
+                <div class="table-responsive">
+                    <!-- Cập nhật class bảng -->
+                    <table class="data-table"> 
+                        <thead>
+                            <tr>
+                                <!-- Cập nhật cột -->
+                                <th>STT</th>
+                                <th>Mã Thể loại</th> 
+                                <th>Tên thể loại</th>
+                                <th>Mô tả</th>
+                                <th></th> <!-- Cột sửa -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dữ liệu mẫu -->
+                            <tr>
+                                <td>1</td>
+                                <td>TL01</td>
+                                <td>Tiểu thuyết</td>
+                                <td>Mô tả về tiểu thuyết...</td>
+                                <td>
+                                    <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>TL02</td>
+                                <td>Truyện ngắn</td>
+                                <td>Mô tả về truyện ngắn...</td>
+                                <td>
+                                    <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+    <!-- --- MODAL THÊM MỚI THỂ LOẠI --- -->
+    <div class="modal-overlay" id="add-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                 <!-- Cập nhật tiêu đề -->
+                <h2>Thêm mới thông tin Thể loại</h2>
+                <button class="close-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <!-- Cập nhật id form -->
+            <form id="add-the-loai-form"> 
+                <div class="modal-body">
+                     <!-- Cập nhật grid cho form đơn giản hơn -->
+                    <div class="modal-form-grid"> 
+                        <!-- Cập nhật trường -->
+                        <div class="form-group">
+                            <label for="add-ten-the-loai">Tên thể loại</label>
+                            <input type="text" id="add-ten-the-loai" placeholder="Tiểu thuyết">
+                        </div>
+                        <div class="form-group">
+                            <label for="add-mo-ta">Mô tả</label>
+                            <textarea id="add-mo-ta" placeholder="Mô tả ngắn..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- --- MODAL CHỈNH SỬA THỂ LOẠI --- -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- Cập nhật tiêu đề -->
+                <h2>Chỉnh sửa thông tin Thể loại</h2>
+                <button class="close-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <!-- Cập nhật id form -->
+            <form id="edit-the-loai-form">
+                <div class="modal-body">
+                    <div class="modal-form-grid">
+                         <!-- Cập nhật trường -->
+                        <div class="form-group">
+                            <label for="edit-ten-the-loai">Tên thể loại</label>
+                            <input type="text" id="edit-ten-the-loai" value="Tiểu thuyết">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-mo-ta">Mô tả</label>
+                            <textarea id="edit-mo-ta">Mô tả về tiểu thuyết...</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                     <!-- Cập nhật nút xóa -->
+                    <button type="button" class="btn btn-danger">Xóa thể loại</button> 
+                    <div>
+                        <button type="button" class="btn btn-secondary close-modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- Xử lý Responsive Sidebar ---
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const container = document.querySelector('.dashboard-container'); 
+
+            if (menuToggle && sidebar && container) {
+                menuToggle.addEventListener('click', function() {
+                    if (window.innerWidth <= 992) {
+                        sidebar.classList.toggle('active');
+                    } else {
+                        container.classList.toggle('sidebar-collapsed');
+                    }
+                });
+            }
+
+            // --- Xử lý Mở/Đóng Modal ---
+            const addModal = document.getElementById('add-modal');
+            const editModal = document.getElementById('edit-modal');
+            
+            const openAddModalBtn = document.getElementById('open-add-modal');
+            const openEditModalBtns = document.querySelectorAll('.open-edit-modal');
+            const closeModalBtns = document.querySelectorAll('.close-modal');
+
+            if (openAddModalBtn && addModal) {
+                openAddModalBtn.addEventListener('click', function() {
+                    addModal.style.display = 'flex';
+                });
+            }
+
+            if (openEditModalBtns.length > 0 && editModal) {
+                openEditModalBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        editModal.style.display = 'flex';
+                    });
+                });
+            }
+
+            if (closeModalBtns.length > 0) {
+                closeModalBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        btn.closest('.modal-overlay').style.display = 'none';
+                    });
+                });
+            }
+
+            window.addEventListener('click', function(event) {
+                if (event.target.classList.contains('modal-overlay')) {
+                    event.target.style.display = 'none';
+                }
+            });
+
+        });
+    </script>
+
+</body>
+</html>
