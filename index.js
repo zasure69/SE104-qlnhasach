@@ -1,8 +1,9 @@
 const express = require('express');
 const path = require('path');
 const sequelize = require('./config/db'); // Import kết nối sequelize
-//const User = require('./models/User'); // Import model User (ví dụ)
-
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+const authenticateToken = require('./middleware/authMiddleware'); // Import Middleware xác thực JWT
 require('dotenv').config();
 
 const app = express();
@@ -10,6 +11,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware để đọc JSON
 app.use(express.json());
+app.use(cookieParser());
 // --- CẤU HÌNH TEMPLATE ENGINE ---
 // 1. Đặt 'view engine' là 'ejs'
 app.set('view engine', 'ejs');
@@ -17,40 +19,39 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // --- Định nghĩa Routes ---
+// --- ROUTE GỐC (Xử lý chuyển hướng) ---
+app.get('/', (req, res) => {
+  // 1. Lấy token từ cookie
+  const token = req.cookies.authToken;
 
-// // GET: Lấy tất cả users
-// app.get('/users', async (req, res) => {
-//   try {
-//     // Dùng method .findAll() của Sequelize
-//     const users = await User.findAll();
-//     res.status(200).json(users);
-//   } catch (err) {
-//     console.error('Lỗi khi lấy users:', err);
-//     res.status(500).json({ error: 'Lỗi server nội bộ' });
-//   }
-// });
+  // 2. Nếu không có token -> chuyển đến trang login
+  if (!token) {
+      return res.redirect('/login');
+  }
 
-// // POST: Tạo user mới
-// app.post('/users', async (req, res) => {
-//   try {
-//     const { name, email } = req.body;
+  // 3. Nếu có token, kiểm tra xem nó có hợp lệ không
+  jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
+      if (err) {
+          // 4. Token không hợp lệ (hết hạn, sai) -> xóa cookie và đến login
+          res.clearCookie('authToken');
+          return res.redirect('/login');
+      }
+      
+      // 5. Token hợp lệ -> chuyển đến dashboard
+      return res.redirect('/dashboard');
+  });
+});
 
-//     if (!name || !email) {
-//       return res.status(400).json({ error: 'Vui lòng cung cấp name và email' });
-//     }
+const userRoutes = require('./routes/userRoutes');
+app.use('/', userRoutes);
+app.use(authenticateToken); // Áp dụng middleware xác thực cho các route sau
+// route được bảo vệ
+const dashboardRoutes = require('./routes/dashboardRoutes');
+app.use('/dashboard', dashboardRoutes);
 
-//     // Dùng method .create() của Sequelize
-//     const newUser = await User.create({ name, email });
-//     res.status(201).json(newUser);
-//   } catch (err) {
-//     // Xử lý lỗi nếu email bị trùng (lỗi unique constraint)
-//     if (err.name === 'SequelizeUniqueConstraintError') {
-//       return res.status(409).json({ error: 'Email đã tồn tại' });
-//     }
-//     console.error('Lỗi khi tạo user:', err);
-//     res.status(500).json({ error: 'Lỗi server nội bộ' });
-//   }
-// });
+// Route xử lý API của Admin
+const adminRoutes = require('./routes/adminRoutes');
+app.use('/api/admin', adminRoutes);
 
 // --- Khởi động Server và Đồng bộ Database ---
 

@@ -206,5 +206,53 @@
         });
     </script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (event) => {
+                    event.preventDefault(); // Ngăn form tự reload
+
+                    try {
+                        const response = await fetch('/api/login', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                username: usernameInput.value,
+                                password: passwordInput.value
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            // Đăng nhập thành công!
+                            // Server đã set cookie, không cần lưu token ở đây
+                            //alert(data.message); 
+                            
+                            // Chuyển hướng đến trang chính
+                            // (Sửa /dashboard thành trang của bạn, ví dụ /books)
+                            window.location.href = '/dashboard'; 
+                        } else {
+                            // Đăng nhập thất bại
+                            alert('Lỗi: ' + (data.error || 'Có lỗi xảy ra'));
+                        }
+                    } catch (error) {
+                        console.error('Lỗi fetch:', error);
+                        alert('Không thể kết nối đến server.');
+                    }
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
+
 </body>
 </html>
