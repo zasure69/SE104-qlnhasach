@@ -132,14 +132,31 @@
         .data-table thead th { background-color: #f9f9f9; font-weight: 600; color: var(--text-light); }
         .data-table tbody tr:hover { background-color: #f5f5f5; }
         
-        /* --- Phần Tóm tắt Báo cáo (VD: Tổng doanh thu) --- */
+        /* SỬA: CSS cho Tổng doanh thu */
         .report-summary {
             text-align: right;
             font-weight: 700;
-            font-size: 1rem;
-            padding-top: 1rem;
+            font-size: 1.1rem; /* Tăng cỡ chữ */
+            color: var(--text-dark);
+            margin-bottom: 1.5rem; /* Thêm khoảng cách dưới */
+            padding-top: 0; /* Xóa padding top */
+            margin-top: 0; /* Xóa margin top */
+            border-top: none; /* Xóa border top */
         }
-
+        /* --- THÊM: CSS CHO LOADER VÀ TOAST --- */
+        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.7); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .loader-overlay.show { display: flex; }
+        .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--secondary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 2001; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast { background-color: var(--white-bg); padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 0.75rem; opacity: 0; transform: translateX(100%); transition: all 0.3s ease; border-left: 5px solid; }
+        .toast.show { opacity: 1; transform: translateX(0); }
+        .toast.success { border-left-color: var(--green-accent); }
+        .toast.success .toast-icon { color: var(--green-accent); }
+        .toast.error { border-left-color: var(--red-accent); }
+        .toast.error .toast-icon { color: var(--red-accent); }
+        .toast-message { font-size: 0.9rem; font-weight: 500; color: var(--text-dark); }
+        /* --- HẾT CSS MỚI --- */
 
         /* --- Responsive Design --- */
         @media (min-width: 992.01px) {
@@ -167,6 +184,12 @@
     </style>
 </head>
 <body>
+    <!-- THÊM: Loader và Toast Container -->
+    <div class="loader-overlay" id="loader">
+        <div class="loader"></div>
+    </div>
+    <div class="toast-container" id="toast-container"></div>
+    <!-- KẾT THÚC THÊM MỚI -->
 
     <div class="dashboard-container">
         
@@ -183,10 +206,10 @@
                     <li><a href="./customers.html"><i class="fas fa-id-card"></i>Khách hàng</a></li> 
                     <li><a href="./types.html"><i class="fas fa-tags"></i>Thể loại</a></li>
                     <li><a href="./books_import.html"><i class="fas fa-file-invoice"></i>Phiếu nhập sách</a></li>
-                    <li><a href="./promotion.html"><i class="fas fa-gift"></i>Khuyến mãi</a></li>
                     <li><a href="./bills.html"><i class="fas fa-receipt"></i>Phiếu thu tiền</a></li>
-                    <li><a href="/search.html"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="/report.html"  class="active"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li> 
+                    <li><a href="./search.html"><i class="fas fa-search"></i> Tra cứu</a></li>
+                    <li><a href="./report.html"  class="active"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+                    <li><a href="./changerule.html"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
         </aside>
@@ -302,6 +325,10 @@
                                  <input type="month" id="month-doanh-thu" value="1999-01">
                              </div>
                         </div>
+                        <!-- Phần tóm tắt doanh thu -->
+                        <div class="report-summary">
+                            Tổng doanh thu: 2000000 
+                        </div>
                         <div class="table-responsive">
                             <table class="data-table" id="revenue-report-table"> 
                                 <thead> 
@@ -327,10 +354,7 @@
                             </table>
                              <div class="empty-table-rows"></div>
                         </div>
-                        <!-- Phần tóm tắt doanh thu -->
-                        <div class="report-summary">
-                            Tổng doanh thu: 2000000 
-                        </div>
+                        
                     </div>
 
                 </div>
@@ -340,6 +364,40 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+
+            // --- THÊM: Các hàm điều khiển Loader và Toast ---
+            const loader = document.getElementById('loader');
+            const toastContainer = document.getElementById('toast-container');
+
+            function showLoader() { loader.style.display = 'flex'; }
+            function hideLoader() { loader.style.display = 'none'; }
+            
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.classList.add('toast', type);
+                toast.innerHTML = `
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i>
+                    <span class="toast-message">${message}</span>
+                `;
+                toastContainer.appendChild(toast);
+                setTimeout(() => { toast.classList.add('show'); }, 100);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    toast.addEventListener('transitionend', () => {
+                        if (toast.parentNode) { toast.parentNode.removeChild(toast); }
+                    });
+                }, 3000);
+            }
+
+            function simulateApiCall(callback) {
+                showLoader();
+                setTimeout(() => {
+                    hideLoader();
+                    const success = Math.random() > 0.2; 
+                    callback(success); 
+                }, 1500); // Giả lập 1.5 giây tải báo cáo
+            }
+            // --- KẾT THÚC HÀM MỚI ---
             
             // --- Xử lý Responsive Sidebar ---
             const menuToggle = document.getElementById('menu-toggle');
@@ -374,8 +432,17 @@
              const monthInputs = document.querySelectorAll('.report-filter input[type="month"]');
              monthInputs.forEach(input => {
                  input.addEventListener('change', function() {
-                     console.log(`Tháng/Năm được chọn cho ${this.id}: ${this.value}`);
-                     // Thêm logic để load lại dữ liệu báo cáo tương ứng với tháng được chọn
+                    console.log(`Đang tải báo cáo cho ${this.id}: ${this.value}`);
+                     
+                     simulateApiCall((success) => {
+                         if (success) {
+                             // Nếu thành công, giả lập cập nhật dữ liệu (ở đây chỉ hiện toast)
+                             showToast('Tải báo cáo thành công!', 'success');
+                             // TODO: Thêm logic cập nhật bảng với dữ liệu mới
+                         } else {
+                             showToast('Tải báo cáo thất bại!', 'error');
+                         }
+                     });
                  });
              });
 
