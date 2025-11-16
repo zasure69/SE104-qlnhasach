@@ -28,7 +28,8 @@
             --text-light: #555;
             --text-white: #ecf0f1;
             --border-color: #e0e0e0;
-            --disabled-bg: #e9ecef; /* Thêm màu cho input bị disable */
+            --disabled-bg: #e9ecef;
+            /* Thêm màu cho input bị disable */
         }
 
         * {
@@ -149,6 +150,58 @@
             font-weight: 500;
             color: var(--text-light);
             cursor: pointer;
+            position: relative;
+        }
+
+        .user-menu .user-trigger {
+            cursor: pointer;
+            display: inline-block; /* Giúp dễ click hơn */
+        }
+
+        .user-menu .dropdown-menu {
+            display: none; /* Ẩn ban đầu */
+            position: absolute;
+            top: 100%; /* Hiển thị ngay bên dưới */
+            right: 0;
+            background-color: var(--white-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            min-width: 150px; /* Độ rộng tối thiểu */
+            z-index: 1000;
+            overflow: hidden; /* Để bo góc */
+        }
+
+        /* Hiển thị menu khi di chuột vào .user-menu */
+        .user-menu:hover .dropdown-menu {
+            display: block;
+        }
+
+        .user-menu .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .user-menu .dropdown-menu a:hover {
+            background-color: var(--light-bg);
+            color: var(--red-accent, #e74c3c); /* Dùng màu đỏ cho logout */
+        }
+
+        .user-menu .dropdown-menu a i {
+            width: 16px;
+            text-align: center;
+            color: var(--text-light);
+            transition: color 0.2s ease;
+        }
+
+        .user-menu .dropdown-menu a:hover i {
+            color: var(--red-accent, #e74c3c);
         }
 
         .menu-toggle {
@@ -230,7 +283,7 @@
             width: 100%;
             border-collapse: collapse;
             /* SỬA: Bỏ min-width để bảng co lại */
-            /* min-width: 800px; */ 
+            /* min-width: 800px; */
         }
 
         .data-table th,
@@ -283,7 +336,8 @@
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             width: 100%;
-            max-width: 500px; /* SỬA: Thu nhỏ modal */
+            max-width: 500px;
+            /* SỬA: Thu nhỏ modal */
             animation: slideIn 0.3s ease;
             display: flex;
             flex-direction: column;
@@ -341,9 +395,9 @@
             font-size: 0.9rem;
             font-family: inherit;
         }
-        
+
         /* SỬA: Style cho input bị khóa */
-         .form-group input:disabled {
+        .form-group input:disabled {
             background-color: var(--disabled-bg);
             cursor: not-allowed;
             color: var(--text-light);
@@ -358,7 +412,8 @@
         /* SỬA: Footer modal Sửa */
         .modal-footer {
             display: flex;
-            justify-content: flex-end; /* Căn phải 2 nút */
+            justify-content: flex-end;
+            /* Căn phải 2 nút */
             gap: 0.75rem;
             padding: 1.25rem 1.5rem;
             border-top: 1px solid var(--border-color);
@@ -366,60 +421,217 @@
             border-bottom-left-radius: 12px;
             border-bottom-right-radius: 12px;
         }
-        
+
         .modal-footer .btn {
-            flex-grow: 1; /* Cho 2 nút bằng nhau */
+            flex-grow: 1;
+            /* Cho 2 nút bằng nhau */
             text-align: center;
-            font-size: 0.9rem; 
+            font-size: 0.9rem;
         }
-        
+
         /* Style cho nút Hủy, Lưu */
-        #edit-modal .modal-footer .btn-secondary { background-color: #f0f0f0; color: var(--text-light); }
-        #edit-modal .modal-footer .btn-secondary:hover { background-color: #e0e0e0; }
-        #edit-modal .modal-footer .btn-primary { background-color: var(--green-accent); color: white; }
-        #edit-modal .modal-footer .btn-primary:hover { background-color: var(--green-accent-hover); }
+        #edit-modal .modal-footer .btn-secondary {
+            background-color: #f0f0f0;
+            color: var(--text-light);
+        }
+
+        #edit-modal .modal-footer .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        #edit-modal .modal-footer .btn-primary {
+            background-color: var(--green-accent);
+            color: white;
+        }
+
+        #edit-modal .modal-footer .btn-primary:hover {
+            background-color: var(--green-accent-hover);
+        }
 
         /* --- THÊM: CSS CHO LOADER VÀ TOAST --- */
-        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.7); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .loader-overlay.show { display: flex; }
-        .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--secondary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 2001; display: flex; flex-direction: column; gap: 0.5rem; }
-        .toast { background-color: var(--white-bg); padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 0.75rem; opacity: 0; transform: translateX(100%); transition: all 0.3s ease; border-left: 5px solid; }
-        .toast.show { opacity: 1; transform: translateX(0); }
-        .toast.success { border-left-color: var(--green-accent); }
-        .toast.success .toast-icon { color: var(--green-accent); }
-        .toast.error { border-left-color: var(--red-accent); }
-        .toast.error .toast-icon { color: var(--red-accent); }
-        .toast-message { font-size: 0.9rem; font-weight: 500; color: var(--text-dark); }
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .loader-overlay.show {
+            display: flex;
+        }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 2001;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            background-color: var(--white-bg);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            border-left: 5px solid;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left-color: var(--green-accent);
+        }
+
+        .toast.success .toast-icon {
+            color: var(--green-accent);
+        }
+
+        .toast.error {
+            border-left-color: var(--red-accent);
+        }
+
+        .toast.error .toast-icon {
+            color: var(--red-accent);
+        }
+
+        .toast-message {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
         /* --- HẾT CSS MỚI --- */
 
         /* --- Animations --- */
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideIn { from { transform: translateY(-30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-30px) scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
 
         /* --- Responsive Design --- */
         @media (min-width: 992.01px) {
-            .dashboard-container.sidebar-collapsed { grid-template-columns: 0 1fr; }
-            .dashboard-container.sidebar-collapsed .sidebar { width: 0; padding-left: 0; padding-right: 0; transform: translateX(-250px); }
+            .dashboard-container.sidebar-collapsed {
+                grid-template-columns: 0 1fr;
+            }
+
+            .dashboard-container.sidebar-collapsed .sidebar {
+                width: 0;
+                padding-left: 0;
+                padding-right: 0;
+                transform: translateX(-250px);
+            }
         }
 
         @media (max-width: 992px) {
-            .dashboard-container { grid-template-columns: 1fr; }
-            .sidebar { position: fixed; left: -260px; top: 0; height: 100vh; width: 250px; z-index: 1050; box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1); }
-            .sidebar.active { left: 0; }
-            .main-content { padding: 1rem; }
-            .top-bar { padding: 1rem; }
-            .menu-toggle { display: block; }
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                height: 100vh;
+                width: 250px;
+                z-index: 1050;
+                box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .top-bar {
+                padding: 1rem;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
         }
 
         @media (max-width: 768px) {
-            .top-bar { gap: 0.5rem; }
-            .top-bar-left h1 { font-size: 1.25rem; }
-            .user-menu { font-size: 0.8rem; }
-            .content-wrapper { border-radius: 8px; }
-            .modal-footer { flex-direction: column; align-items: stretch; }
-            .modal-footer .btn { width: 100%; }
+            .top-bar {
+                gap: 0.5rem;
+            }
+
+            .top-bar-left h1 {
+                font-size: 1.25rem;
+            }
+
+            .user-menu {
+                font-size: 0.8rem;
+            }
+
+            .content-wrapper {
+                border-radius: 8px;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .modal-footer .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -441,16 +653,16 @@
             <nav class="sidebar-nav">
                 <!-- SỬA: Cập nhật link sidebar -->
                 <ul>
-                    <li><a href="./dashboard.html"><i class="fas fa-home"></i> Tổng quan</a></li>
-                    <li><a href="./employees.html"><i class="fas fa-users"></i>Nhân Viên</a></li>
-                    <li><a href="./books.html"><i class="fas fa-book"></i>Sách</a></li>
-                    <li><a href="./customers.html"><i class="fas fa-id-card"></i>Khách hàng</a></li> 
-                    <li><a href="./types.html"><i class="fas fa-tags"></i>Thể loại</a></li>
-                    <li><a href="./books_import.html"><i class="fas fa-file-invoice"></i>Phiếu nhập sách</a></li>
-                    <li><a href="./bills.html"><i class="fas fa-receipt"></i>Phiếu thu tiền</a></li>
-                    <li><a href="./search.html"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="./report.html"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="./changerule.html"  class="active"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
+                    <li><a href="/dashboard"><i class="fas fa-home"></i> Tổng quan</a></li>
+                    <li><a href="/dashboard/employees" ><i class="fas fa-users"></i>Nhân Viên</a></li>
+                    <li><a href="/dashboard/books"><i class="fas fa-book"></i>Sách</a></li>
+                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>Khách hàng</a></li> 
+                    <li><a href="/dashboard/types-authors"><i class="fas fa-tags"></i>Thể loại & Tác giả</a></li>
+                    <li><a href="/dashboard/books-import"><i class="fas fa-file-invoice"></i>Phiếu nhập sách</a></li>
+                    <li><a href="/dashboard/bills"><i class="fas fa-receipt"></i>Phiếu thu tiền</a></li>
+                    <li><a href="/dashboard/search" class="active"><i class="fas fa-search"></i> Tra cứu</a></li>
+                    <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+                    <li><a href="#"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
         </aside>
@@ -463,48 +675,47 @@
                     <!-- SỬA: Đổi tiêu đề -->
                     <h1>Thay đổi quy định</h1>
                 </div>
-                <div class="user-menu"> Chào, Admin <i class="fas fa-chevron-down"></i> </div>
+                <div class="user-menu">
+                    <span class="user-trigger">
+                        Chào, <strong><%= username %></strong> <i class="fas fa-chevron-down"></i>
+                    </span>
+
+                    <div class="dropdown-menu">
+                        <a href="#" id="logout-button">
+                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
             </header>
 
             <div class="content-wrapper">
                 <div class="content-header">
-                    <!-- SỬA: Đổi tiêu đề -->
-                    <h2>Danh sách quy định</h2> 
-                    <!-- XÓA: Nút Thêm mới -->
-                    <!-- <button class="btn btn-primary btn-add-new" id="open-add-modal"> ... </button> -->
+                    <h2>Danh sách tham số</h2>
                 </div>
                 <div class="table-responsive">
                     <table class="data-table">
                         <thead>
-                            <!-- SỬA: Cập nhật cột -->
                             <tr>
+                                <th>STT</th>
                                 <th>Tham số</th>
                                 <th>Giá trị</th>
-                                <th></th> <!-- Cột Sửa -->
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                             <!-- SỬA: Dữ liệu mẫu mới -->
-                            <tr>
-                                <td>Số lượng nhập tối thiểu</td>
-                                <td>150</td>
-                                <td> <i class="fas fa-pencil-alt action-icon open-edit-modal"></i> </td>
-                            </tr>
-                            <tr>
-                                <td>Số lượng tồn tối thiểu (sau khi bán)</td>
-                                <td>20</td>
-                                <td> <i class="fas fa-pencil-alt action-icon open-edit-modal"></i> </td>
-                            </tr>
-                             <tr>
-                                <td>Tỷ lệ tính đơn giá bán</td>
-                                <td>1.05</td>
-                                <td> <i class="fas fa-pencil-alt action-icon open-edit-modal"></i> </td>
-                            </tr>
-                            <tr>
-                                <td>Số tiền thu không vượt quá số tiền nợ</td>
-                                <td>Có</td>
-                                <td> <i class="fas fa-pencil-alt action-icon open-edit-modal"></i> </td>
-                            </tr>
+                            <% if (rules && rules.length > 0) { %>
+                                <% rules.forEach((rule, index) => { %>
+                                    <tr data-id="<%= rule.TenThamSo %>"">
+                                        <td><%= index + 1 %></td>
+                                        <td><%= rule.TenThamSo %></td>
+                                        <td><%= rule.GiaTri %></td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="4" style="text-align: center;">Không có tham số nào.</td>
+                                </tr>
+                            <% } %>
                         </tbody>
                     </table>
                 </div>
@@ -525,15 +736,15 @@
             <form id="edit-regulation-form">
                 <div class="modal-body">
                     <div class="modal-form-grid">
-                        <div class="form-group"> 
-                            <label for="edit-param-name">Tham số</label> 
+                        <div class="form-group">
+                            <label for="edit-param-name">Tham số</label>
                             <!-- Tham số bị khóa, không cho sửa -->
-                            <input type="text" id="edit-param-name" readonly disabled> 
+                            <input type="text" id="edit-param-name" readonly disabled>
                         </div>
-                        <div class="form-group"> 
-                            <label for="edit-param-value">Giá trị</label> 
+                        <div class="form-group">
+                            <label for="edit-param-value">Giá trị</label>
                             <!-- Chỉ cho sửa giá trị -->
-                            <input type="text" id="edit-param-value"> 
+                            <input type="text" id="edit-param-value">
                         </div>
                     </div>
                 </div>
@@ -541,9 +752,9 @@
                 <div class="modal-footer">
                     <!-- XÓA: Nút Xóa -->
                     <!-- <button type="button" class="btn btn-danger">Xóa...</button> -->
-                    <div> 
-                        <button type="button" class="btn btn-secondary close-modal">Hủy</button> 
-                        <button type="submit" class="btn btn-primary">Lưu</button> 
+                    <div>
+                        <button type="button" class="btn btn-secondary close-modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
                     </div>
                 </div>
             </form>
@@ -560,7 +771,7 @@
 
             function showLoader() { loader.style.display = 'flex'; }
             function hideLoader() { loader.style.display = 'none'; }
-            
+
             function showToast(message, type = 'success') {
                 const toast = document.createElement('div');
                 toast.classList.add('toast', type);
@@ -577,17 +788,8 @@
                     });
                 }, 3000);
             }
-
-            function simulateApiCall(callback) {
-                showLoader();
-                setTimeout(() => {
-                    hideLoader();
-                    const success = Math.random() > 0.2; 
-                    callback(success); 
-                }, 1500); 
-            }
             // --- KẾT THÚC HÀM MỚI ---
-            
+
             // --- Xử lý Sidebar ---
             const menuToggle = document.getElementById('menu-toggle');
             const sidebar = document.getElementById('sidebar');
@@ -609,26 +811,28 @@
 
             let currentEditingRow = null; // Biến lưu trữ hàng đang sửa
 
-            // Mở modal Sửa
-            if (openEditModalBtns.length > 0 && editModal) {
-                openEditModalBtns.forEach(btn => {
-                    btn.addEventListener('click', (event) => {
-                        currentEditingRow = event.target.closest('tr'); // Lưu lại hàng đang sửa
+            // SỬA: Gắn sự kiện vào tbody (thay vì querySelectorAll)
+            const tableBody = document.querySelector('.data-table tbody'); // Lấy tbody
+            if (tableBody && editModal) {
+                tableBody.addEventListener('click', (event) => {
+                    if (event.target.classList.contains('open-edit-modal')) {
+                        currentEditingRow = event.target.closest('tr');
                         if (!currentEditingRow) return;
 
-                        const paramName = currentEditingRow.cells[0].textContent;
-                        const paramValue = currentEditingRow.cells[1].textContent;
+                        // Lấy dữ liệu từ ô 1 và 2 (STT là 0)
+                        const paramName = currentEditingRow.cells[1].textContent;
+                        const paramValue = currentEditingRow.cells[2].textContent;
 
                         // Điền dữ liệu vào modal
                         editParamNameInput.value = paramName.trim();
                         editParamValueInput.value = paramValue.trim();
-                        
+
                         editModal.style.display = 'flex';
-                        editParamValueInput.focus(); // Focus vào ô giá trị
-                    });
+                        editParamValueInput.focus();
+                    }
                 });
             }
-            
+
             // Đóng modal Sửa
             mainCloseModalBtns.forEach(btn => {
                 btn.addEventListener('click', (event) => {
@@ -643,31 +847,63 @@
                 }
             });
 
-            // Xử lý Lưu thay đổi
             if (editForm) {
-                editForm.addEventListener('submit', function(event) {
-                    event.preventDefault(); 
-                    
+                editForm.addEventListener('submit', async function (event) { // Thêm 'async'
+                    event.preventDefault();
+                    if (!currentEditingRow) return;
+
+                    const tenThamSo = currentEditingRow.dataset.id; // Lấy 'TenThamSo' từ data-id
                     const newValue = editParamValueInput.value;
-                    
-                    simulateApiCall((success) => {
-                        if (success) {
+
+                    showLoader(); // Hiển thị loader
+
+                    try {
+                        // Gọi API đã tạo ở bước trước
+                        const response = await fetch(`/api/admin/change-rules/${tenThamSo}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ GiaTri: newValue })
+                        });
+                        
+                        const result = await response.json();
+                        hideLoader(); // Ẩn loader
+
+                        if (response.ok) {
                             if (currentEditingRow) {
                                 // Cập nhật giá trị mới vào bảng
-                                currentEditingRow.cells[1].textContent = newValue;
+                                currentEditingRow.cells[2].textContent = result.rule.GiaTri;
                             }
                             editModal.style.display = 'none'; // Đóng modal
                             showToast('Cập nhật quy định thành công!', 'success');
                             currentEditingRow = null; // Reset
                         } else {
                             // Nếu lỗi, không đóng modal
-                            showToast('Cập nhật thất bại! Vui lòng thử lại.', 'error');
+                            showToast(`Cập nhật thất bại: ${result.error}`, 'error');
                         }
-                    });
+                    } catch (err) {
+                        hideLoader();
+                        showToast('Lỗi kết nối máy chủ!', 'error');
+                    }
+                });
+            }
+            
+            const logoutButton = document.getElementById('logout-button');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', async (event) => {
+                    event.preventDefault(); // Ngăn thẻ <a> nhảy trang
+                    
+                    try {
+                        // Gọi API /api/logout
+                        await fetch('/api/logout', { method: 'GET' });
+                        window.location.href = '/login';
+
+                    } catch (error) {
+                        console.error('Lỗi khi đăng xuất:', error);
+                        window.location.href = '/login';
+                    }
                 });
             }
 
-            
         });
     </script>
 

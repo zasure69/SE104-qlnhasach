@@ -49,9 +49,18 @@ app.use(authenticateToken); // Áp dụng middleware xác thực cho các route 
 const dashboardRoutes = require('./routes/dashboardRoutes');
 app.use('/dashboard', dashboardRoutes);
 
+const customersRoutes = require('./routes/customersRoutes');
+app.use('/api/customers', customersRoutes);
+
+const searchRoutes = require('./routes/searchRoutes');
+app.use('/api/search', searchRoutes);
+
 // Route xử lý API của Admin
-const adminRoutes = require('./routes/adminRoutes');
-app.use('/api/admin', adminRoutes);
+const employeesRoutes = require('./routes/employeesRoutes');
+app.use('/api/employees', employeesRoutes);
+
+const changeruleRoutes = require('./routes/changeruleRoutes');
+app.use('/api/change-rules', changeruleRoutes);
 
 // --- Khởi động Server và Đồng bộ Database ---
 
