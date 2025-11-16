@@ -69,13 +69,13 @@ const getLoginPage = (req, res) => {
 // =============================================================
 // HÀM ĐĂNG KÝ 
 // =============================================================
-const register = async (req, res) => {
+const registerEmployee = async (req, res) => {
   try {
     const { username, password, hoTen, soDienThoai, chucVu, ngayNhanViec } = req.body;
     const newMaNhanVien = await generateNewEmployeeId();
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-
+    console.log("hoTen:", hoTen);
     // SỬA: Dùng db.User
     const newUser = await db.User.create({
       MaNhanVien: newMaNhanVien,
@@ -150,6 +150,67 @@ const login = async (req, res) => {
   }
 };
 
+// =============================================================
+// HÀM SỬA NHÂN VIÊN (UPDATE)
+// =============================================================
+const updateEmployee = async (req, res) => {
+  const maNhanVien = req.params.maNV;
+  const { hoTen, ngaySinh, soDienThoai, chucVu, ngayNhanViec, password } = req.body;
+
+  try {
+      const user = await db.User.findByPk(maNhanVien);
+      if (!user) {
+          return res.status(404).json({ error: 'Không tìm thấy nhân viên.' });
+      }
+
+      // Cập nhật thông tin
+      user.HoTen = hoTen;
+      user.NgaySinh = ngaySinh;
+      user.SoDienThoai = soDienThoai;
+      user.ChucVu = chucVu;
+      user.NgayNhanViec = ngayNhanViec;
+
+      // Chỉ cập nhật mật khẩu NẾU nó được cung cấp
+      if (password && password.length > 0) {
+          const salt = await bcrypt.genSalt(10);
+          user.Password = await bcrypt.hash(password, salt);
+      }
+
+      await user.save();
+      res.status(200).json({ message: 'Cập nhật nhân viên thành công!', user: user });
+
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Lỗi server nội bộ' });
+  }
+};
+
+// =============================================================
+// HÀM XÓA NHÂN VIÊN (DELETE)
+// =============================================================
+const deleteEmployee = async (req, res) => {
+  const maNhanVien = req.params.maNV;
+
+  try {
+      const user = await db.User.findByPk(maNhanVien);
+      if (!user) {
+          return res.status(404).json({ error: 'Không tìm thấy nhân viên.' });
+      }
+
+      // (Thêm logic kiểm tra an toàn ở đây, ví dụ: không cho xóa chính mình)
+      // if (req.user.id === maNhanVien) {
+      //     return res.status(403).json({ error: 'Bạn không thể tự xóa chính mình.' });
+      // }
+
+      await user.destroy();
+      res.status(200).json({ message: 'Xóa nhân viên thành công!' });
+
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Lỗi server nội bộ' });
+  }
+};
+
 // --- THÊM: HÀM ĐĂNG XUẤT ---
 const logout = (req, res) => {
     res.clearCookie('authToken'); // Xóa cookie
@@ -158,7 +219,9 @@ const logout = (req, res) => {
 
 module.exports = {
   getLoginPage,
-  register,
+  registerEmployee,
+  updateEmployee,
+  deleteEmployee,
   login,
   logout
 };

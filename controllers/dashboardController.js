@@ -21,7 +21,118 @@ const getUserInfo = (req) => {
     }
   };
 
+  const getEmployeesPage = async (req, res) => {
+    try {
+      // 1. Lấy thông tin user (để hiển thị "Chào, username")
+      const userInfo = {
+          username: req.user.username,
+          role: req.user.role
+      };
+  
+      // 2. Lấy TẤT CẢ nhân viên từ database
+      //    Chúng ta dùng db.User vì nó ánh xạ đến bảng NHANVIEN
+      const allEmployees = await db.User.findAll({
+          raw: true // Lấy dữ liệu dạng JSON thuần
+      });
+  
+      // 3. Render trang 'employees.ejs' VÀ TRUYỀN DỮ LIỆU VÀO
+      res.render('employees', {
+        ...userInfo, // Gửi 'username' và 'role'
+        employees: allEmployees // <-- GỬI BIẾN 'employees'
+      });
+  
+    } catch (err) {
+      console.error('Lỗi khi lấy dữ liệu nhân viên:', err);
+      res.status(500).send('Lỗi Server');
+    }
+  };
+
+  const getCustomersPage = async (req, res) => {
+    try {
+      // 1. Lấy thông tin user (để hiển thị "Chào, username")
+      const userInfo = {
+          username: req.user.username,
+          role: req.user.role
+      };
+  
+      // 2. Lấy TẤT CẢ khách hàng từ database
+      const allCustomers = await db.KhachHang.findAll({
+          raw: true // Lấy dữ liệu dạng JSON thuần
+      });
+  
+      // 3. Render trang 'customers.ejs' VÀ TRUYỀN DỮ LIỆU VÀO
+      res.render('customers', {
+        ...userInfo, // Gửi 'username' và 'role'
+        customers: allCustomers // <-- GỬI BIẾN 'customers'
+      });
+  
+    } catch (err) {
+      console.error('Lỗi khi lấy dữ liệu nhân viên:', err);
+      res.status(500).send('Lỗi Server');
+    }
+  };
+
+  const getSearchPage = async (req, res) => { // <-- 1. CHUYỂN THÀNH ASYNC
+    try {
+      const userInfo = {
+          username: req.user.username,
+          role: req.user.role
+      };
+  
+      // 2. Lấy TẤT CẢ khách hàng
+      const allCustomers = await db.KhachHang.findAll({ raw: true });
+  
+      // // 3. Lấy TẤT CẢ sách (với join)
+      // const allBooks = await db.Sach.findAll({
+      //   include: [{
+      //     model: db.DauSach,
+      //     required: true,
+      //     include: [{
+      //       model: db.TheLoai,
+      //       required: false // Vẫn lấy sách dù chưa có thể loại
+      //     }]
+      //   }],
+      //   raw: true,
+      //   nest: true
+      // });
+  
+      // 4. Render trang VÀ gửi dữ liệu vào
+      res.render('search', { 
+          ...userInfo,
+          customers: allCustomers, // Gửi danh sách khách hàng
+          //books: allBooks          // Gửi danh sách sách
+      });
+  
+    } catch (err) {
+      console.error('Lỗi render trang tra cứu:', err);
+      res.status(500).send('Lỗi Server');
+    }
+  };
+
+  const getChangeRulePage = async (req, res) => {
+    try {
+      const userInfo = getUserInfo(req);
+  
+      // 1. Lấy tất cả quy định từ DB
+      const allRules = await db.ThamSo.findAll({ raw: true });
+  
+      // 2. Render trang và gửi dữ liệu vào
+      res.render('changerule', { 
+          ...userInfo,
+          rules: allRules // Gửi object chứa các quy định
+      });
+  
+    } catch (err) {
+      console.error('Lỗi khi lấy dữ liệu quy định:', err);
+      res.status(500).send('Lỗi Server');
+    }
+  };
+
   // Xuất tất cả các hàm
 module.exports = {
-    getDashboardPage
+    getDashboardPage,
+    getEmployeesPage,
+    getCustomersPage,
+    getSearchPage,
+    getChangeRulePage
   };

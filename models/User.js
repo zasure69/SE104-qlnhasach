@@ -13,11 +13,11 @@ const User = sequelize.define('User', {
     allowNull: false
   },
   NgaySinh: {
-    type: DataTypes.DATEONLY // Dùng DATEONLY thay vì DATE [cite: 761]
+    type: DataTypes.DATEONLY // Dùng DATEONLY thay vì DATE
   },
   SoDienThoai: {
     type: DataTypes.STRING(15),
-    unique: true // Ràng buộc UNIQUE [cite: 761]
+    unique: true // Ràng buộc UNIQUE
   },
   ChucVu: {
     type: DataTypes.STRING(50) // NVARCHAR(50) -> STRING
@@ -25,20 +25,19 @@ const User = sequelize.define('User', {
   Username: {
     type: DataTypes.STRING(50),
     allowNull: false,
-    unique: true // Ràng buộc NOT NULL, UNIQUE [cite: 761]
+    unique: true // Ràng buộc NOT NULL, UNIQUE
   },
   Password: {
-    type: DataTypes.STRING(256), // Phải đủ dài để lưu hash [cite: 761]
+    type: DataTypes.STRING(256), // Phải đủ dài để lưu hash
     allowNull: false
   },
   NgayNhanViec: {
-    type: DataTypes.DATEONLY, // Dùng DATEONLY [cite: 761]
+    type: DataTypes.DATEONLY, // Dùng DATEONLY
     allowNull: false
   }
 }, {
-  // Cấu hình thêm
   tableName: 'NHANVIEN', // Chỉ định rõ tên bảng trong DB 
-  timestamps: false // Tắt tự động thêm cột createdAt và updatedAt
+  timestamps: false 
 });
 
 module.exports = User;

@@ -150,6 +150,58 @@
             font-weight: 500;
             color: var(--text-light);
             cursor: pointer;
+            position: relative;
+        }
+
+        .user-menu .user-trigger {
+            cursor: pointer;
+            display: inline-block; /* Giúp dễ click hơn */
+        }
+
+        .user-menu .dropdown-menu {
+            display: none; /* Ẩn ban đầu */
+            position: absolute;
+            top: 100%; /* Hiển thị ngay bên dưới */
+            right: 0;
+            background-color: var(--white-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            min-width: 150px; /* Độ rộng tối thiểu */
+            z-index: 1000;
+            overflow: hidden; /* Để bo góc */
+        }
+
+        /* Hiển thị menu khi di chuột vào .user-menu */
+        .user-menu:hover .dropdown-menu {
+            display: block;
+        }
+
+        .user-menu .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .user-menu .dropdown-menu a:hover {
+            background-color: var(--light-bg);
+            color: var(--red-accent, #e74c3c); /* Dùng màu đỏ cho logout */
+        }
+
+        .user-menu .dropdown-menu a i {
+            width: 16px;
+            text-align: center;
+            color: var(--text-light);
+            transition: color 0.2s ease;
+        }
+
+        .user-menu .dropdown-menu a:hover i {
+            color: var(--red-accent, #e74c3c);
         }
 
         .menu-toggle {
@@ -522,7 +574,17 @@
                     </button>
                     <h1>Phiếu thu tiền</h1>
                 </div>
-                <div class="user-menu"> Chào, Admin <i class="fas fa-chevron-down"></i> </div>
+                <div class="user-menu"> 
+                    <span class="user-trigger">
+                        Chào, <strong><%= username %></strong> <i class="fas fa-chevron-down"></i>
+                    </span>
+
+                    <div class="dropdown-menu">
+                        <a href="#" id="logout-button">
+                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                        </a>
+                    </div> 
+                </div>
             </header>
 
             <div class="content-wrapper">
@@ -715,6 +777,23 @@
                     // Ở đây chỉ mô phỏng:
                     alert("Chức năng 'In ra Word' đang được phát triển.");
                     // Nếu muốn in nội dung trang hiện tại ra PDF/Máy in, dùng: window.print();
+                });
+            }
+
+            const logoutButton = document.getElementById('logout-button');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', async (event) => {
+                    event.preventDefault(); // Ngăn thẻ <a> nhảy trang
+                    
+                    try {
+                        // Gọi API /api/logout
+                        await fetch('/api/logout', { method: 'GET' });
+                        window.location.href = '/login';
+
+                    } catch (error) {
+                        console.error('Lỗi khi đăng xuất:', error);
+                        window.location.href = '/login';
+                    }
                 });
             }
         });
