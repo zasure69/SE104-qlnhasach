@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lập phiếu nhập sách</title>
+
+    <!-- Link Font Awesome để có icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* * --- PHẦN CSS --- 
+         */
+
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --green-accent: #1EE4AC;
+            --green-accent-hover: #1ac096;
+            --red-accent: #e74c3c;
+            --red-accent-hover: #c0392b;
+            --blue-accent: #3498db;
+            --blue-accent-hover: #2980b9;
+            --light-bg: #f0f4f8;
+            --white-bg: #ffffff;
+            --text-dark: #222;
+            --text-light: #555;
+            --text-white: #ecf0f1;
+            --border-color: #e0e0e0;
+            --disabled-bg: #e9ecef;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+        }
+
+        /* --- Layout chính --- */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+            transition: grid-template-columns 0.3s ease-in-out;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease-in-out;
+            overflow-x: hidden;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .sidebar-header i {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-white);
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+
+        .sidebar-nav a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-nav a.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        /* --- Nội dung chính --- */
+        .main-content {
+            background-color: var(--light-bg);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        /* --- Thanh Header --- */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: var(--white-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .top-bar-left h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .user-menu {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        .menu-toggle {
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            cursor: pointer;
+            padding: 0.25rem;
+            line-height: 1;
+        }
+
+        /* --- Vùng nội dung --- */
+        .content-wrapper {
+            padding: 1.5rem;
+            background-color: var(--white-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .content-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* --- Các loại nút --- */
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--green-accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--green-accent-hover);
+            box-shadow: 0 4px 8px rgba(30, 228, 172, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        .btn-danger {
+            background-color: var(--red-accent);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--red-accent-hover);
+        }
+
+        .btn-print {
+            background-color: var(--blue-accent);
+            color: white;
+        }
+
+        .btn-print:hover {
+            background-color: var(--blue-accent-hover);
+        }
+
+        /* --- Bảng Danh sách nhập --- */
+        .table-responsive {
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        /* Giảm margin bottom */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        .data-table thead th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .action-icon {
+            color: var(--secondary-color);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .action-icon:hover {
+            color: #2980b9;
+        }
+
+        .empty-table-rows {
+            height: 100px;
+            background-color: #f9f9f9;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* --- Phần Tổng tiền và Nút chính --- */
+        .main-actions-footer {
+            display: flex;
+            justify-content: space-between;
+            /* Đẩy tổng tiền và nút ra 2 bên */
+            align-items: center;
+            /* Căn giữa theo chiều dọc */
+            margin-top: 1.5rem;
+        }
+
+        .total-amount-display-table {
+            font-weight: 700;
+            font-size: 1rem;
+            margin: 0;
+            /* Bỏ margin cũ */
+        }
+
+        .main-action-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* --- Bộ lọc Ngày nhập --- */
+        .report-filter {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-filter label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .date-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .date-input-wrapper input[type="date"] {
+            padding: 0.6rem 0.75rem 0.6rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            min-width: 150px;
+        }
+
+        .date-input-wrapper input[type="date"]:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .date-input-wrapper .calendar-icon {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            pointer-events: none;
+        }
+
+        /* --- Modal (Thêm/Sửa) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: var(--white-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 750px;
+            animation: slideIn 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .close-modal {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .modal-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .form-group input:disabled {
+            background-color: var(--disabled-bg);
+            cursor: not-allowed;
+            color: var(--text-light);
+            border-color: var(--border-color);
+        }
+
+        .modal-form-grid .date-input-wrapper {
+            display: block;
+        }
+
+        /* Modal Footer chung */
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            background-color: #f9f9f9;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+
+        .modal-footer .btn {
+            flex-grow: 1; 
+            text-align: center;
+            font-size: 0.9rem; 
+        }
+
+        /* Nút Hủy, Lưu trong modal THÊM */
+        #add-modal .modal-footer .btn-secondary {
+            background-color: #f0f0f0;
+            color: var(--text-light);
+        }
+
+        #add-modal .modal-footer .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        #add-modal .modal-footer .btn-primary {
+            background-color: var(--green-accent);
+            color: white;
+        }
+
+        #add-modal .modal-footer .btn-primary:hover {
+            background-color: var(--green-accent-hover);
+        }
+
+        /* Nút trong modal SỬA (CHỈ CÒN 3 NÚT) */
+        /* Nút Xóa đặc biệt trong modal Chỉnh sửa */
+        #edit-modal .modal-footer {
+            justify-content: space-between; /* Đẩy nút xóa sang trái */
+        }
+        #edit-modal .modal-footer > div {
+             display: flex; 
+             gap: 0.75rem; 
+             flex-grow: 1; 
+             justify-content: flex-end; 
+        }
+        #edit-modal .modal-footer > div .btn {
+            flex-grow: 1; 
+        }
+
+        /* XÓA: #edit-modal .modal-footer .btn-print {...} */
+        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.7); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .loader-overlay.show { display: flex; }
+        .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--secondary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 2001; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast { background-color: var(--white-bg); padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 0.75rem; opacity: 0; transform: translateX(100%); transition: all 0.3s ease; border-left: 5px solid; }
+        .toast.show { opacity: 1; transform: translateX(0); }
+        .toast.success { border-left-color: var(--green-accent); }
+        .toast.success .toast-icon { color: var(--green-accent); }
+        .toast.error { border-left-color: var(--red-accent); }
+        .toast.error .toast-icon { color: var(--red-accent); }
+        .toast-message { font-size: 0.9rem; font-weight: 500; color: var(--text-dark); }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-30px) scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* --- Responsive Design --- */
+        @media (min-width: 992.01px) {
+            .dashboard-container.sidebar-collapsed {
+                grid-template-columns: 0 1fr;
+            }
+
+            .dashboard-container.sidebar-collapsed .sidebar {
+                width: 0;
+                padding-left: 0;
+                padding-right: 0;
+                transform: translateX(-250px);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                height: 100vh;
+                width: 250px;
+                z-index: 1050;
+                box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .top-bar {
+                padding: 1rem;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .modal-form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .top-bar {
+                gap: 0.5rem;
+            }
+
+            .top-bar-left h1 {
+                font-size: 1.25rem;
+            }
+
+            .user-menu {
+                font-size: 0.8rem;
+            }
+
+            .content-wrapper {
+                border-radius: 8px;
+                padding: 1rem;
+            }
+
+            .content-header h2 {
+                font-size: 1.25rem;
+            }
+
+            .report-filter {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            #edit-modal .modal-footer {
+                justify-content: flex-start;
+            }
+
+            #edit-modal .modal-footer>.btn-danger {
+                margin-right: 0;
+                margin-bottom: 0.75rem;
+            }
+
+            #edit-modal .modal-footer>div {
+                flex-direction: column;
+            }
+
+            .modal-footer .btn,
+            #edit-modal .modal-footer>div .btn {
+                width: 100%;
+            }
+
+            .main-actions-footer {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            /* Nút chính xếp chồng */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header"> <i class="fas fa-book-open"></i>
+                <h2>QUẢN LÝ NHÀ SÁCH</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="./dashboard.html"><i class="fas fa-home"></i> Tổng quan</a></li>
+                    <li><a href="./employees.html"><i class="fas fa-users"></i>Nhân Viên</a></li>
+                    <li><a href="./books.html"><i class="fas fa-book"></i>Sách</a></li>
+                    <li><a href="./customers.html"><i class="fas fa-id-card"></i>Khách hàng</a></li> 
+                    <li><a href="./types.html"><i class="fas fa-tags"></i>Thể loại</a></li>
+                    <li><a href="./books_import.html" class="active"><i class="fas fa-file-invoice"></i>Phiếu nhập sách</a></li>
+                    <li><a href="./bills.html"><i class="fas fa-receipt"></i>Phiếu thu tiền</a></li>
+                    <li><a href="./search.html"><i class="fas fa-search"></i> Tra cứu</a></li>
+                    <li><a href="./report.html"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+                    <li><a href="./changerule.html"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+
+            <header class="top-bar">
+                <div class="top-bar-left"> <button class="menu-toggle" id="menu-toggle"> <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Lập phiếu nhập sách</h1>
+                </div>
+                <div class="user-menu"> Chào, Admin <i class="fas fa-chevron-down"></i> </div>
+            </header>
+
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <h2>Danh sách sách nhập</h2>
+                    <button class="btn btn-primary btn-add-new" id="open-add-modal">
+                        <i class="fas fa-plus"></i> Thêm mới sách
+                    </button>
+                </div>
+
+                <div class="report-filter" style="justify-content: flex-start; margin-bottom: 1.5rem;">
+                    <label for="filter-ngay-nhap">Ngày nhập sách</label>
+                    <div class="date-input-wrapper">
+                        <input type="date" id="filter-ngay-nhap">
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã sách</th>
+                                <th>Tên sách</th>
+                                <th>Tác giả</th>
+                                <th>Số lượng</th>
+                                <th>Đơn giá nhập</th>
+                                <th>Thành tiền</th>
+                                <th>Tỷ lệ tính đơn giá bán</th>
+                                <th>Đơn giá bán</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>S001</td>
+                                <td>Truyện ngắn Nguyễn Nhật Ánh</td>
+                                <td>Nguyễn Nhật Ánh</td>
+                                <td>2</td>
+                                <td>10000</td>
+                                <td>20000</td>
+                                <td>1.05</td>
+                                <td>10500</td>
+                                <td> <i class="fas fa-pencil-alt action-icon open-edit-modal"></i> </td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- SỬA: Phần Tổng tiền và Nút chính -->
+                <div class="main-actions-footer">
+                    <div class="total-amount-display-table">
+                        Tổng tiền: 20000
+                    </div>
+                    <div class="main-action-buttons">
+                        <button type="button" class="btn btn-secondary" id="main-cancel-button">Hủy</button>
+                        <button type="button" class="btn btn-primary" id="main-save-button">Lưu</button>
+                        <button type="button" class="btn btn-print" id="main-print-button">In</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+    <!-- --- MODAL THÊM MỚI --- -->
+    <div class="modal-overlay" id="add-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Thêm sách nhập</h2> <button class="close-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="add-book-receipt-form">
+                <div class="modal-body">
+                    <div class="modal-form-grid">
+                        <div class="form-group"> <label for="add-ma-sach">Mã sách:</label> <input type="text"
+                                id="add-ma-sach" required> </div>
+                        <div class="form-group"> <label for="add-ten-sach">Sách:</label> <input type="text"
+                                id="add-ten-sach" readonly disabled> </div>
+                        <div class="form-group"> <label for="add-the-loai">Thể loại:</label> <input type="text"
+                                id="add-the-loai" readonly disabled> </div>
+                        <div class="form-group"> <label for="add-tac-gia">Tác giả:</label> <input type="text"
+                                id="add-tac-gia" readonly disabled> </div>
+                        <div class="form-group"> <label for="add-so-luong">Số lượng:</label> <input type="number"
+                                id="add-so-luong" required min="1"> </div>
+                        <div class="form-group"> <label for="add-don-gia-nhap">Đơn giá nhập:</label> <input type="text"
+                                id="add-don-gia-nhap" required inputmode="numeric" pattern="[0-9]*"> </div>
+                        <div class="form-group"> <label for="add-thanh-tien">Thành tiền:</label> <input type="text"
+                                id="add-thanh-tien" readonly disabled> </div>
+                        <div class="form-group"> <label for="add-ty-le-gia-ban">Tỷ lệ tính đơn giá bán:</label> <input
+                                type="text" id="add-ty-le-gia-ban" value="1.05" readonly disabled> </div>
+                        <div class="form-group"> <label for="add-don-gia-ban">Đơn giá bán:</label> <input type="text"
+                                id="add-don-gia-ban" readonly disabled> </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- --- MODAL SỬA --- -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Chỉnh sửa sách nhập</h2> <button class="close-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="edit-book-receipt-form">
+                <div class="modal-body">
+                    <div class="modal-form-grid">
+                        <div class="form-group"> <label for="edit-ma-sach">Mã sách:</label> <input type="text"
+                                id="edit-ma-sach" required> </div>
+                        <div class="form-group"> <label for="edit-ten-sach">Sách:</label> <input type="text"
+                                id="edit-ten-sach" readonly disabled> </div>
+                        <div class="form-group"> <label for="edit-the-loai">Thể loại:</label> <input type="text"
+                                id="edit-the-loai" readonly disabled> </div>
+                        <div class="form-group"> <label for="edit-tac-gia">Tác giả:</label> <input type="text"
+                                id="edit-tac-gia" readonly disabled> </div>
+                        <div class="form-group"> <label for="edit-so-luong">Số lượng:</label> <input type="number"
+                                id="edit-so-luong" required min="1"> </div>
+                        <div class="form-group"> <label for="edit-don-gia-nhap">Đơn giá nhập:</label> <input type="text"
+                                id="edit-don-gia-nhap" required inputmode="numeric" pattern="[0-9]*"> </div>
+                        <div class="form-group"> <label for="edit-thanh-tien">Thành tiền:</label> <input type="text"
+                                id="edit-thanh-tien" readonly disabled> </div>
+                        <div class="form-group"> <label for="edit-ty-le-gia-ban">Tỷ lệ tính đơn giá bán:</label> <input
+                                type="text" id="edit-ty-le-gia-ban" value="1.05" readonly disabled> </div>
+                        <div class="form-group"> <label for="edit-don-gia-ban">Đơn giá bán:</label> <input type="text"
+                                id="edit-don-gia-ban" readonly disabled> </div>
+                    </div>
+                </div>
+                <!-- SỬA: Bỏ nút In khỏi footer modal sửa -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="delete-button">Xóa sách</button>
+                    <div>
+                        <button type="button" class="btn btn-secondary close-modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                        <!-- <button type="button" class="btn btn-print" id="print-edit-button">In</button> -->
+                        <!-- Bỏ nút In -->
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // --- THÊM: Các hàm điều khiển Loader và Toast ---
+            const loader = document.getElementById('loader');
+            const toastContainer = document.getElementById('toast-container');
+            let currentEditingRow = null; // Biến lưu hàng đang sửa
+
+            function showLoader() { loader.style.display = 'flex'; }
+            function hideLoader() { loader.style.display = 'none'; }
+            
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.classList.add('toast', type);
+                toast.innerHTML = `
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i>
+                    <span class="toast-message">${message}</span>
+                `;
+                toastContainer.appendChild(toast);
+                setTimeout(() => { toast.classList.add('show'); }, 100);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    toast.addEventListener('transitionend', () => {
+                        if (toast.parentNode) { toast.parentNode.removeChild(toast); }
+                    });
+                }, 3000);
+            }
+
+            // SỬA: Hàm giả lập API call (có thể thất bại)
+            function simulateApiCall(callback) {
+                showLoader();
+                setTimeout(() => {
+                    hideLoader();
+                    const success = Math.random() > 0.2; // 80% thành công
+                    callback(success); 
+                }, 1500); 
+            }
+
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const container = document.querySelector('.dashboard-container');
+            if (menuToggle && sidebar && container) {
+                menuToggle.addEventListener('click', function () {
+                    if (window.innerWidth <= 992) { sidebar.classList.toggle('active'); }
+                    else { container.classList.toggle('sidebar-collapsed'); }
+                });
+            }
+
+            const addModal = document.getElementById('add-modal');
+            const editModal = document.getElementById('edit-modal');
+            const openAddModalBtn = document.getElementById('open-add-modal');
+            const openEditModalBtns = document.querySelectorAll('.open-edit-modal');
+            const mainCloseModalBtns = document.querySelectorAll('#add-modal .close-modal, #edit-modal .close-modal');
+
+            // THÊM: Lấy các nút chính
+            const mainCancelButton = document.getElementById('main-cancel-button');
+            const mainSaveButton = document.getElementById('main-save-button');
+            const mainPrintButton = document.getElementById('main-print-button');
+
+            function formatNumber(num) { if (num === null || num === undefined || isNaN(num)) return '0'; return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+            function parseFormattedNumber(str) { if (!str) return 0; return parseFloat(str.replace(/,/g, '')) || 0; }
+
+            function setupModalForm(modalId) {
+                const modal = document.getElementById(modalId); if (!modal) return;
+                const form = modal.querySelector('form');
+                const maSachInput = modal.querySelector('[id^="' + modalId.split('-')[0] + '-ma-sach"]');
+                const tenSachInput = modal.querySelector('[id^="' + modalId.split('-')[0] + '-ten-sach"]');
+                const theLoaiInput = modal.querySelector('[id^="' + modalId.split('-')[0] + '-the-loai"]');
+                const tacGiaInput = modal.querySelector('[id^="' + modalId.split('-')[0] + '-tac-gia"]');
+                const soLuongInput = modal.querySelector('[id^="' + modalId.split('-')[0] + '-so-luong"]');
+                const donGiaNhapInput = modal.querySelector('[id^="' + modalId.split('-')[0] + '-don-gia-nhap"]');
+                const thanhTienInput = modal.querySelector('[id^="' + modalId.split('-')[0] + '-thanh-tien"]');
+                const tyLeGiaBanInput = modal.querySelector('[id^="' + modalId.split('-')[0] + '-ty-le-gia-ban"]');
+                const donGiaBanInput = modal.querySelector('[id^="' + modalId.split('-')[0] + '-don-gia-ban"]');
+                const cancelButton = modal.querySelector('.btn-secondary.close-modal');
+                const printButton = modal.querySelector('.btn-print'); // Nút In trong modal (đã bị xóa khỏi HTML edit)
+                const deleteButton = modal.querySelector('.btn-danger');
+
+                function calculateModalTotals() {
+                    const soLuong = parseInt(soLuongInput.value) || 0;
+                    const donGiaNhap = parseFormattedNumber(donGiaNhapInput.value);
+                    const tyLe = parseFloat(tyLeGiaBanInput.value) || 1.05;
+                    const thanhTien = soLuong * donGiaNhap;
+                    const donGiaBan = Math.round(donGiaNhap * tyLe);
+                    thanhTienInput.value = formatNumber(thanhTien);
+                    donGiaBanInput.value = formatNumber(donGiaBan);
+                }
+
+                function resetForm() {
+                    maSachInput.value = ''; soLuongInput.value = ''; donGiaNhapInput.value = '';
+                    tenSachInput.value = ''; theLoaiInput.value = ''; tacGiaInput.value = ''; thanhTienInput.value = ''; donGiaBanInput.value = '';
+                    maSachInput.focus();
+                }
+
+                if (maSachInput) {
+                    maSachInput.addEventListener('blur', function () {
+                        const maSach = this.value.trim().toUpperCase(); maSachInput.value = maSach;
+                        let bookData = null;
+                        if (maSach === 'BOOK001') { bookData = { tenSach: 'Mắt biếc', theLoai: 'Truyện ngắn', tacGia: 'Nguyễn Nhật Ánh' }; }
+                        else if (maSach === 'ML001') { bookData = { tenSach: 'Machine Learning: The Basics', theLoai: 'Information Technology', tacGia: 'Alexander Jung' }; }
+                        else if (maSach === 'S001') { bookData = { tenSach: 'Truyện ngắn Nguyễn Nhật Ánh', theLoai: 'Truyện ngắn', tacGia: 'Nguyễn Nhật Ánh' }; }
+                        tenSachInput.value = bookData ? bookData.tenSach : '';
+                        theLoaiInput.value = bookData ? bookData.theLoai : '';
+                        tacGiaInput.value = bookData ? bookData.tacGia : '';
+                    });
+                }
+
+                if (soLuongInput) { soLuongInput.addEventListener('input', calculateModalTotals); }
+                if (donGiaNhapInput) {
+                    donGiaNhapInput.addEventListener('input', function (e) {
+                        let value = e.target.value.replace(/[^0-9]/g, ''); e.target.value = formatNumber(value); calculateModalTotals();
+                    });
+                    donGiaNhapInput.addEventListener('blur', calculateModalTotals);
+                }
+
+                if (cancelButton) { cancelButton.addEventListener('click', resetForm); }
+
+                if (form) {
+                    form.addEventListener('submit', function (event) {
+                        event.preventDefault();
+                        console.log(`Đã nhấn nút Lưu (${modalId})`);
+                        const data = { maSach: maSachInput.value, soLuong: parseInt(soLuongInput.value) || 0, donGiaNhap: parseFormattedNumber(donGiaNhapInput.value), thanhTien: parseFormattedNumber(thanhTienInput.value) };
+                        console.log("Dữ liệu gửi đi:", data);
+                        // THÊM: Logic cập nhật bảng chính ở đây (hoặc reload)
+                        // Ví dụ: addRowToTable(data); hoặc updateRowInTable(data);
+                        updateTableTotal(); // Cập nhật tổng tiền bảng
+                        modal.style.display = 'none'; resetForm();
+                    });
+                }
+
+                // XÓA: Nút In trong modal Sửa không còn
+                // if (printButton) { printButton.addEventListener('click', function() { ... }); } 
+                if (deleteButton) {
+                    deleteButton.addEventListener('click', function () {
+                        console.log(`Đã nhấn nút Xóa (${modalId})`);
+                        if (confirm(`Bạn có chắc chắn muốn xóa phiếu nhập sách ${maSachInput.value}?`)) {
+                            console.log("-> Xác nhận xóa");
+                            // THÊM: Logic xóa dòng khỏi bảng chính ở đây
+                            // Ví dụ: removeRowFromTable(maSachInput.value);
+                            updateTableTotal(); // Cập nhật tổng tiền bảng
+                            modal.style.display = 'none'; resetForm();
+                        } else { console.log("-> Hủy xóa"); }
+                    });
+                }
+            }
+
+            setupModalForm('add-modal');
+            setupModalForm('edit-modal');
+
+            function updateTableTotal() {
+                const table = document.querySelector('.data-table');
+                const totalDisplay = document.querySelector('.total-amount-display-table');
+                if (!table || !totalDisplay) return;
+                let total = 0;
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    // Bỏ qua hàng trống "&nbsp;"
+                    if (row.cells.length > 1 && row.cells[1].textContent.trim() !== '') {
+                        const thanhTienCell = row.cells[6];
+                        if (thanhTienCell) { total += parseFormattedNumber(thanhTienCell.textContent); }
+                    }
+                });
+                totalDisplay.textContent = `Tổng tiền: ${formatNumber(total)}`;
+            }
+            updateTableTotal();
+
+            if (openAddModalBtn && addModal) {
+                openAddModalBtn.addEventListener('click', () => {
+                    const addForm = document.getElementById('add-book-receipt-form');
+                    if (addForm) {
+                        const maSach = addForm.querySelector('#add-ma-sach'); const soLuong = addForm.querySelector('#add-so-luong'); const donGia = addForm.querySelector('#add-don-gia-nhap');
+                        maSach.value = ''; soLuong.value = ''; donGia.value = '';
+                        addForm.querySelector('#add-ten-sach').value = ''; addForm.querySelector('#add-the-loai').value = ''; addForm.querySelector('#add-tac-gia').value = ''; addForm.querySelector('#add-thanh-tien').value = ''; addForm.querySelector('#add-don-gia-ban').value = '';
+                    }
+                    addModal.style.display = 'flex';
+                    document.getElementById('add-ma-sach').focus();
+                });
+            }
+            if (openEditModalBtns.length > 0 && editModal) {
+                openEditModalBtns.forEach(btn => {
+                    btn.addEventListener('click', (event) => {
+                        const row = event.target.closest('tr'); if (!row) return;
+                        document.getElementById('edit-ma-sach').value = row.cells[1]?.textContent || '';
+                        document.getElementById('edit-ten-sach').value = row.cells[2]?.textContent || '';
+                        document.getElementById('edit-tac-gia').value = row.cells[3]?.textContent || '';
+                        document.getElementById('edit-so-luong').value = row.cells[4]?.textContent || '';
+                        document.getElementById('edit-don-gia-nhap').value = row.cells[5]?.textContent || '';
+                        document.getElementById('edit-thanh-tien').value = row.cells[6]?.textContent || '';
+                        document.getElementById('edit-ty-le-gia-ban').value = row.cells[7]?.textContent || '1.05';
+                        document.getElementById('edit-don-gia-ban').value = row.cells[8]?.textContent || '';
+                        editModal.style.display = 'flex';
+                        document.getElementById('edit-ma-sach').focus();
+                    });
+                });
+            }
+
+            mainCloseModalBtns.forEach(btn => { 
+                btn.addEventListener('click', (event) => { 
+                    event.target.closest('.modal-overlay').style.display = 'none';
+                    currentEditingRow = null; 
+                }); 
+            });
+            window.addEventListener('click', function (event) { 
+                if (event.target.matches('.modal-overlay')) {
+                    event.target.style.display = 'none';
+                    currentEditingRow = null; 
+                } 
+            });
+
+            // --- THÊM: Xử lý nút chính ---
+            if (mainCancelButton) {
+                mainCancelButton.addEventListener('click', () => {
+                    if(confirm('Bạn có chắc muốn hủy phiếu nhập này? Mọi thay đổi chưa lưu sẽ bị mất.')) {
+                        const tableBody = document.querySelector('#table-phieu-nhap tbody');
+                        if (tableBody) tableBody.innerHTML = '<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>'; 
+                        document.getElementById('filter-ngay-nhap').value = ''; 
+                        updateTableTotal(); 
+                        showToast('Đã hủy phiếu nhập', 'success');
+                    }
+                });
+            }
+            if (mainSaveButton) {
+                mainSaveButton.addEventListener('click', () => {
+                    simulateApiCall((success) => {
+                        if(success) {
+                            showToast('Lưu phiếu nhập chính thành công!', 'success');
+                            // Có thể reset form ở đây
+                            // mainCancelButton.click(); 
+                        } else {
+                            showToast('Lưu phiếu nhập chính thất bại!', 'error');
+                        }
+                    });
+                });
+            }
+            if (mainPrintButton) {
+                mainPrintButton.addEventListener('click', () => {
+                    showLoader();
+                    setTimeout(() => { // Giả lập chuẩn bị in
+                        hideLoader();
+                        alert("Chức năng 'In ra Word' đang được phát triển.");
+                    }, 500);
+                });
+            }
+
+        });
+    </script>
+
+</body>
+
+</html>

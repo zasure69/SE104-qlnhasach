@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "backup-db:ps": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backup_db.ps1",
+    "backup-db:sh": "bash scripts/backup_db.sh"
   },
   "keywords": [],
   "author": "",

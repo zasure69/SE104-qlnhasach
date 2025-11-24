@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Quản lý nhà sách</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* CSS Reset và Fonts */
+        :root {
+            --primary-color: #1EE4AC; /* Màu xanh mint chủ đạo */
+            --primary-hover: #1ac096; /* Màu khi hover */
+            --text-dark: #222;
+            --text-light: #555;
+            --border-color: #ddd;
+            --bg-light: #f0f2f5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        /* Container Đăng nhập */
+        .login-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+
+        /* Logo và Tiêu đề */
+        .logo {
+            margin-bottom: 1rem;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .logo h2 {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .login-container h1 {
+            font-size: 2rem;
+            color: var(--text-dark);
+            margin-bottom: 2rem;
+            font-weight: 700;
+        }
+
+        /* Nhóm Input */
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Icon bên trái (user, lock) */
+        .input-group > i.fas {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            font-size: 0.9rem;
+            z-index: 2; 
+        }
+
+        .input-group input {
+            width: 100%;
+            
+            /* === ĐÃ SỬA LẠI ĐỂ CÓ CHỖ CHO ICON BÊN TRONG ===
+              padding: 1rem (trên/dưới) và 3rem (trái/phải)
+            */
+            padding: 1rem 3rem; 
+
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            color: var(--text-dark);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(30, 228, 172, 0.2);
+        }
+
+        .input-group input::placeholder {
+            color: #aaa;
+        }
+
+        /* Icon mắt xem mật khẩu */
+        .toggle-password {
+            position: absolute;
+            
+            /* === ĐÃ SỬA LẠI ĐỂ NẰM BÊN TRONG === */
+            right: 1rem;
+            
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #aaa;
+            z-index: 2;
+        }
+        
+        /* Nút Đăng nhập */
+        .login-button {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 2rem;
+            }
+
+            .login-container h1 {
+                font-size: 1.8rem;
+                margin-bottom: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <form id="login-form">
+            <div class="logo">
+                <i class="fas fa-book-open"></i>
+                <h2>QUẢN LÝ NHÀ SÁCH</h2>
+            </div>
+            
+            <h1>ĐĂNG NHẬP</h1>
+
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="username" placeholder="Tên đăng nhập" required>
+            </div>
+
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="Mật khẩu" required>
+                <span class="toggle-password" id="togglePassword">
+                    <i class="fas fa-eye-slash"></i>
+                </span>
+            </div>
+
+            <button type="submit" class="login-button">ĐĂNG NHẬP</button>
+        </form>
+    </div>
+
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+        const toggleIcon = togglePassword.querySelector('i');
+
+        togglePassword.addEventListener('click', function (e) {
+            // Chuyển đổi type của input
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            
+            // Chuyển đổi icon
+            if (type === 'password') {
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        });
+    </script>
+
+</body>
+</html>

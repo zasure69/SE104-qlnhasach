@@ -318,17 +318,16 @@
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="/dashboard" class="active"><i class="fas fa-home"></i>Tổng quan</a></li>
-                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
-                    <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
-                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
-                    <li><a href="/dashboard/types"><i class="fas fa-tags"></i>QL Thể loại & Tác giả</a></li>
-                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
-                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
-                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
-                    <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
+                    <li><a href="/dashboard"><i class="fas fa-home"></i> Tổng quan</a></li>
+                    <li><a href="/dashboard/employees" ><i class="fas fa-users"></i>Nhân Viên</a></li>
+                    <li><a href="/dashboard/books"><i class="fas fa-book"></i>Sách</a></li>
+                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>Khách hàng</a></li> 
+                    <li><a href="/dashboard/types-authors"><i class="fas fa-tags"></i>Thể loại & Tác giả</a></li>
+                    <li><a href="/dashboard/books-import"><i class="fas fa-file-invoice"></i>Phiếu nhập sách</a></li>
+                    <li><a href="/dashboard/bills"><i class="fas fa-receipt"></i>Phiếu thu tiền</a></li>
+                    <li><a href="#" class="active"><i class="fas fa-search"></i> Tra cứu</a></li>
                     <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="/dashboard/changerule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
+                    <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
         </aside>
@@ -344,7 +343,7 @@
                 </div>
                 <div class="user-menu">
                     <span class="user-trigger">
-                        Chào, <strong>admin</strong> <i class="fas fa-chevron-down"></i>
+                        Chào, <strong><%= username %></strong> <i class="fas fa-chevron-down"></i>
                     </span>
 
                     <div class="dropdown-menu">
@@ -373,13 +372,37 @@
                         </form>
                         <div class="table-responsive">
                             <table class="data-table" id="customer-results-table"> 
-                                <thead> <tr> <th>STT</th> <th>Họ Tên</th> <th>Địa chỉ</th> <th>SĐT</th> <th>Tổng nợ</th> </tr> </thead>
+                                <thead> 
+                                    <tr> 
+                                        <th>STT</th> 
+                                        <th>Mã KH</th>  
+                                        <th>Họ Tên</th> 
+                                        <th>Ngày sinh</th> 
+                                        <th>Số điện thoại</th>
+                                        <th>Địa chỉ</th>  
+                                        <th>Tổng nợ</th> 
+                                    </tr> 
+                                </thead>
                                 <tbody>
-                                    <tr> <td>1</td> <td>Nguyễn Văn A</td> <td>30 Hoàng Việt</td> <td>0123456789</td> <td>3 000 000</td> </tr>
-                                    <!-- XÓA: Hàng trống -->
+                                    <% if (customers && customers.length > 0) { %>
+                                        <% customers.forEach((customer, index) => { %>
+                                            <tr>
+                                                <td><%= index + 1 %></td>
+                                                <td><%= customer.MaKhachHang %></td>
+                                                <td><%= customer.HoVaTen %></td>
+                                                <td><%= customer.NgaySinh %></td>
+                                                <td><%= customer.SoDienThoai %></td>
+                                                <td><%= customer.DiaChi %></td>
+                                                <td><%= customer.TongNo %></td>
+                                            </tr>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="7" style="text-align: center;">Không có khách hàng nào.</td>
+                                        </tr>
+                                    <% } %>
                                 </tbody>
                             </table>
-                             <!-- XÓA: div .empty-table-rows -->
                         </div>
                     </div>
 
@@ -434,15 +457,6 @@
                     });
                 }, 3000);
             }
-
-            function simulateApiCall(callback) {
-                showLoader();
-                setTimeout(() => {
-                    hideLoader();
-                    const success = Math.random() > 0.2; 
-                    callback(success); 
-                }, 1500); 
-            }
             // --- KẾT THÚC HÀM MỚI ---
 
             
@@ -473,39 +487,227 @@
                  });
              }
 
-             // --- SỬA: Xử lý Form Tìm kiếm ---
-             const customerSearchForm = document.getElementById('customer-search-form');
-             const bookSearchForm = document.getElementById('book-search-form');
-             
-             if(customerSearchForm){
-                 customerSearchForm.addEventListener('submit', function(event){ 
-                     event.preventDefault(); 
-                     console.log("Tìm kiếm Khách hàng..."); 
-                     simulateApiCall((success) => {
-                         if(success) {
-                             showToast('Tìm thấy 1 kết quả!', 'success');
-                             // TODO: Cập nhật bảng #customer-results-table
-                         } else {
-                             showToast('Không tìm thấy kết quả nào!', 'error');
-                         }
-                     });
-                 });
-             }
-             if(bookSearchForm){
-                 bookSearchForm.addEventListener('submit', function(event){ 
-                     event.preventDefault(); 
-                     console.log("Tìm kiếm Sách..."); 
-                     simulateApiCall((success) => {
-                         if(success) {
-                             showToast('Tìm thấy 1 kết quả!', 'success');
-                              // TODO: Cập nhật bảng #book-results-table
-                         } else {
-                             showToast('Không tìm thấy kết quả nào!', 'error');
-                         }
-                     });
-                 });
-             }
+             // --- HÀM LỌC BẢNG KHÁCH HÀNG (CLIENT-SIDE) ---
+            const customerSearchForm = document.getElementById('customer-search-form');
+            const customerTableBody = document.getElementById('customer-results-table').getElementsByTagName('tbody')[0];
+            const allCustomerRows = Array.from(customerTableBody.querySelectorAll('tr'));
+
+            customerSearchForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                showLoader();
+
+                // 1. Lấy giá trị tìm kiếm (chuyển về chữ thường để không phân biệt hoa/thường)
+                const hoTenQuery = document.getElementById('search-ho-ten').value.toLowerCase();
+                const sdtQuery = document.getElementById('search-sdt').value.toLowerCase();
+                const diaChiQuery = document.getElementById('search-dia-chi').value.toLowerCase();
+                const tongNoQuery = parseFloat(document.getElementById('search-tong-no').value) || 0;
+
+                let resultsFound = 0;
+                
+                // 2. Lặp qua TẤT CẢ các hàng
+                allCustomerRows.forEach(row => {
+                    // Lấy nội dung của từng ô (cell)
+                    const hoTenCell = (row.cells[2] ? row.cells[2].textContent : '').toLowerCase();
+                    const diaChiCell = (row.cells[3] ? row.cells[3].textContent : '').toLowerCase();
+                    const sdtCell = (row.cells[4] ? row.cells[4].textContent : '').toLowerCase();
+                    const tongNoCell = parseFloat(row.cells[5] ? row.cells[5].textContent.replace(/[^0-9]/g, '') : 0) || 0;
+
+                    // 3. Kiểm tra điều kiện
+                    const hoTenMatch = hoTenCell.includes(hoTenQuery);
+                    const sdtMatch = sdtCell.includes(sdtQuery);
+                    const diaChiMatch = diaChiCell.includes(diaChiQuery);
+                    const tongNoMatch = tongNoQuery === 0 || tongNoCell >= tongNoQuery;
+
+                    // 4. Ẩn/Hiện hàng
+                    if (hoTenMatch && sdtMatch && diaChiMatch && tongNoMatch) {
+                        resultsFound++; // 1. Tăng bộ đếm
+                        // 2. Cập nhật ô STT
+                        row.cells[0].textContent = resultsFound; 
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none'; // Ẩn
+                    }
+                });
+
+                // 5. Hiển thị thông báo nếu không có kết quả
+                // Xóa thông báo "không có" cũ
+                const existingNoResults = customerTableBody.querySelector('.no-results-row');
+                if (existingNoResults) existingNoResults.remove();
+
+                if (resultsFound === 0) {
+                    const noResultsRow = customerTableBody.insertRow();
+                    noResultsRow.classList.add('no-results-row');
+                    noResultsRow.innerHTML = `<td colspan="7" style="text-align: center;">Không tìm thấy kết quả nào.</td>`;
+                }
+                
+                hideLoader();
+                showToast(`Tìm thấy ${resultsFound} kết quả.`, 'success');
+            });
+
+            // --- HÀM LỌC BẢNG SÁCH (CLIENT-SIDE) ---
+            const bookSearchForm = document.getElementById('book-search-form');
+            const bookTableBody = document.getElementById('book-results-body');
+            const allBookRows = Array.from(bookTableBody.querySelectorAll('tr'));
+
+            bookSearchForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                showLoader();
+
+                const tenSachQuery = document.getElementById('search-ten-sach').value.toLowerCase();
+                const tacGiaQuery = document.getElementById('search-tac-gia').value.toLowerCase();
+                const theLoaiQuery = document.getElementById('search-the-loai').value.toLowerCase();
+                const soLuongQuery = parseInt(document.getElementById('search-so-luong-ton').value) || 0;
+
+                let resultsFound = 0;
+
+                allBookRows.forEach(row => {
+                    const tenSachCell = (row.cells[1] ? row.cells[1].textContent : '').toLowerCase();
+                    const theLoaiCell = (row.cells[2] ? row.cells[2].textContent : '').toLowerCase();
+                    const tacGiaCell = (row.cells[3] ? row.cells[3].textContent : '').toLowerCase();
+                    const soLuongCell = parseInt(row.cells[4] ? row.cells[4].textContent : 0) || 0;
+
+                    const tenSachMatch = tenSachCell.includes(tenSachQuery);
+                    const tacGiaMatch = tacGiaCell.includes(tacGiaQuery);
+                    const theLoaiMatch = theLoaiCell.includes(theLoaiQuery);
+                    const soLuongMatch = soLuongQuery === 0 || soLuongCell >= soLuongQuery;
+
+                    if (tenSachMatch && tacGiaMatch && theLoaiMatch && soLuongMatch) {
+                        row.style.display = '';
+                        resultsFound++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                const existingNoResults = bookTableBody.querySelector('.no-results-row');
+                if (existingNoResults) existingNoResults.remove();
+                
+                if (resultsFound === 0) {
+                    const noResultsRow = bookTableBody.insertRow();
+                    noResultsRow.classList.add('no-results-row');
+                    noResultsRow.innerHTML = `<td colspan="7" style="text-align: center;">Không tìm thấy kết quả nào.</td>`;
+                }
+                
+                hideLoader();
+                showToast(`Tìm thấy ${resultsFound} kết quả.`, 'success');
+            });
+
+            const logoutButton = document.getElementById('logout-button');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', async (event) => {
+                    event.preventDefault(); // Ngăn thẻ <a> nhảy trang
+                    
+                    try {
+                        // Gọi API /api/logout
+                        await fetch('/api/logout', { method: 'GET' });
+                        window.location.href = '/login';
+
+                    } catch (error) {
+                        console.error('Lỗi khi đăng xuất:', error);
+                        window.location.href = '/login';
+                    }
+                });
+            }
+
+
+            // //Server side search handlers
+            // // --- Hàm render kết quả Sách ---
+            // function renderBookResults(results) {
+            //     const tableBody = document.getElementById('book-results-table').getElementsByTagName('tbody')[0];
+            //     tableBody.innerHTML = ''; // Xóa kết quả cũ
+
+            //     if (results.length === 0) {
+            //         tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Không tìm thấy kết quả nào.</td></tr>';
+            //         return;
+            //     }
+
+            //     results.forEach((book, index) => {
+            //         const row = tableBody.insertRow();
+            //         row.innerHTML = `
+            //             <td>${index + 1}</td>
+            //             <td>${book.DauSach.TenSach}</td>
+            //             <td>${book.DauSach.TheLoai.TenTheLoai}</td>
+            //             <td>${book.DauSach.TacGia}</td>
+            //             <td>${book.SoLuongTon}</td>
+            //         `;
+            //     });
+            // }
+
+
+            // // --- SỬA: Xử lý Form Tìm kiếm Khách hàng (API thật) ---
+            // const customerSearchForm = document.getElementById('customer-search-form');
+            // if(customerSearchForm){
+            //     customerSearchForm.addEventListener('submit', async function(event){ 
+            //         event.preventDefault(); 
+            //         showLoader();
+
+            //         const data = {
+            //             hoTen: document.getElementById('search-ho-ten').value,
+            //             sdt: document.getElementById('search-sdt').value,
+            //             diaChi: document.getElementById('search-dia-chi').value,
+            //             tongNo: document.getElementById('search-tong-no').value
+            //         };
+
+            //         try {
+            //             const response = await fetch('/api/search/customers', {
+            //                 method: 'POST',
+            //                 headers: { 'Content-Type': 'application/json' },
+            //                 body: JSON.stringify(data)
+            //             });
+                        
+            //             hideLoader();
+            //             if (response.ok) {
+            //                 const results = await response.json();
+            //                 renderCustomerResults(results); // Render kết quả
+            //                 showToast(`Tìm thấy ${results.length} kết quả.`, 'success');
+            //             } else {
+            //                 showToast('Lỗi khi tìm kiếm!', 'error');
+            //             }
+            //         } catch (err) {
+            //             hideLoader();
+            //             showToast('Lỗi kết nối máy chủ.', 'error');
+            //         }
+            //     });
+            // }
+
+            // // --- SỬA: Xử lý Form Tìm kiếm Sách (API thật) ---
+            // const bookSearchForm = document.getElementById('book-search-form');
+            // if(bookSearchForm){
+            //     bookSearchForm.addEventListener('submit', async function(event){ 
+            //         event.preventDefault(); 
+            //         showLoader();
+
+            //         const data = {
+            //             tenSach: document.getElementById('search-ten-sach').value,
+            //             tacGia: document.getElementById('search-tac-gia').value,
+            //             theLoai: document.getElementById('search-the-loai').value,
+            //             soLuongTon: document.getElementById('search-so-luong-ton').value
+            //         };
+
+            //         try {
+            //             const response = await fetch('/api/search/books', {
+            //                 method: 'POST',
+            //                 headers: { 'Content-Type': 'application/json' },
+            //                 body: JSON.stringify(data)
+            //             });
+                        
+            //             hideLoader();
+            //             if (response.ok) {
+            //                 const results = await response.json();
+            //                 renderBookResults(results); // Render kết quả
+            //                 showToast(`Tìm thấy ${results.length} kết quả.`, 'success');
+            //             } else {
+            //                 showToast('Lỗi khi tìm kiếm!', 'error');
+            //             }
+            //         } catch (err) {
+            //             hideLoader();
+            //             showToast('Lỗi kết nối máy chủ.', 'error');
+            //         }
+            //     });
+            // }
+
         });
+
     </script>
 
 </body>

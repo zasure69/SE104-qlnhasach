@@ -368,17 +368,57 @@
             <div class="sidebar-header"> <i class="fas fa-book-open"></i> <h2>QUẢN LÝ NHÀ SÁCH</h2> </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="/dashboard" class="active"><i class="fas fa-home"></i>Tổng quan</a></li>
-                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
-                    <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
-                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
-                    <li><a href="/dashboard/types"><i class="fas fa-tags"></i>QL Thể loại & Tác giả</a></li>
-                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
-                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
-                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
-                    <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="/dashboard/changerule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
+            <li>
+              <a href="/dashboard"><i class="fas fa-home"></i> Tổng quan</a>
+            </li>
+            <li>
+              <a href="/dashboard/employees"
+                ><i class="fas fa-users"></i>QL Nhân Viên</a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/books"><i class="fas fa-book"></i>QL Sách</a>
+            </li>
+            <li>
+              <a href="#" class="active"
+                ><i class="fas fa-id-card"></i>QL Khách hàng</a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/types-authors"
+                ><i class="fas fa-tags"></i>QL Thể loại & Tác giả</a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/books-import"
+                ><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/bills"
+                ><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/bills"
+                ><i class="fas fa-receipt"></i>QL Hóa đơn</a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/search"
+                ><i class="fas fa-search"></i> Tra cứu</a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/report"
+                ><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/change-rule"
+                ><i class="fas fa-gavel"></i>Thay đổi quy định</a
+              >
+            </li>
                 </ul>
             </nav>
         </aside>
@@ -415,7 +455,7 @@
                 <!-- Tab Content -->
                 <div class="tab-content">
                     <!-- Tab Pane 1: Quản lý Đầu sách -->
-                    <div class="tab-pane active" id="tab-dau-sach">
+                    <div class="tab-pane" id="tab-dau-sach">
                         <div class="content-header">
                            <h2>Danh sách Đầu sách</h2> 
                            <button class="btn btn-primary" id="open-dausach-add-modal"> <i class="fas fa-plus"></i> Thêm mới Đầu sách </button>
@@ -424,18 +464,18 @@
                            <table class="data-table">
                                <thead>
                                    <tr>
-                                       <th>Mã Đầu sách</th> <th>Tên Sách</th> <th>Thể loại</th>
+                                       <th>Mã Đầu sách</th> <th>Tên Sách</th> <th>Mã Thể loại</th>
                                        <th>Tác giả</th> <th></th> 
                                    </tr>
                                </thead>
                                <tbody>
                                    <tr>
-                                       <td>DS001</td> <td>Mắt biếc</td> <td>Truyện ngắn</td>
+                                       <td>DS001</td> <td>Mắt biếc</td> <td>TL01</td>
                                        <td>Nguyễn Nhật Ánh</td>
                                        <td> <i class="fas fa-pencil-alt action-icon open-dausach-edit-modal"></i> </td>
                                    </tr>
                                    <tr>
-                                       <td>DS002</td> <td>Harry Potter và Hòn đá Phù thủy</td> <td>Tiểu thuyết</td>
+                                       <td>DS002</td> <td>Harry Potter và Hòn đá Phù thủy</td> <td>TL02</td>
                                        <td>J.K. Rowling</td>
                                        <td> <i class="fas fa-pencil-alt action-icon open-dausach-edit-modal"></i> </td>
                                    </tr>
@@ -444,7 +484,7 @@
                        </div>
                    </div>
                     <!-- Tab Pane 2: Quản lý Sách -->
-                    <div class="tab-pane" id="tab-sach">
+                    <div class="tab-pane active" id="tab-sach">
                         <div class="content-header">
                             <h2>Danh sách Sách</h2>
                             <button class="btn btn-primary" id="open-sach-add-modal"> <i class="fas fa-plus"></i> Thêm mới Sách </button>
@@ -454,106 +494,27 @@
                                 <thead>
                                     <tr>
                                         <th>STT</th> <th>Mã sách</th> <th>Tên sách</th> <th>Thể loại</th>
-                                        <th>Tác giả</th> <th>Nhà XB</th> <th>Năm XB</th> <th>Mô tả</th> <th>Số lượng tồn</th> <th></th> 
+                                        <th>Tác giả</th> <th>Nhà XB</th> <th>Năm XB</th> <th>Mô tả</th> <th></th> 
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <td>1</td> <td>S001</td> <td>Mắt biếc</td> <td>Truyện ngắn</td>
-                                        <td>Nguyễn Nhật Ánh</td> <td>Tuổi trẻ</td> <td>2024</td> <td>Mô tả sách...</td> <td>50</td>
+                                        <td>Nguyễn Nhật Ánh</td> <td>Tuổi trẻ</td> <td>2024</td> <td>Mô tả sách...</td>
                                         <td> <i class="fas fa-pencil-alt action-icon open-sach-edit-modal"></i> </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
+
+                    
+
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- --- MODALS CHO QUẢN LÝ ĐẦU SÁCH --- -->
-    <div class="modal-overlay" id="dausach-add-modal"> <!-- SỬA: Đổi ID -->
-        <div class="modal-content">
-            <div class="modal-header"> <h2>Thêm mới thông tin Đầu sách</h2> <button class="close-modal"><i class="fas fa-times"></i></button> </div>
-            <form id="add-dausach-form"> 
-                <div class="modal-body">
-                    <div class="modal-form-grid-single"> 
-                        <div class="form-group"> <label for="add-ten-sach-ds">Tên Sách</label> <input type="text" id="add-ten-sach-ds" required> </div>
-                        <div class="form-group"> 
-                            <label for="add-ma-the-loai-ds">Thể loại</label> 
-                            <select id="add-ma-the-loai-ds" required> 
-                                <option value="Truyện ngắn">Truyện ngắn</option> 
-                                <option value="Tiểu thuyết">Tiểu thuyết</option> 
-                                <option value="Kỹ năng sống">Kỹ năng sống</option> 
-                                <option value="Sách giáo khoa">Sách giáo khoa</option> 
-                            </select> 
-                        </div>
-                        <div class="form-group"> <label for="add-mo-ta-ds">Mô tả</label> <textarea id="add-mo-ta-ds" rows="3"></textarea> </div>
-                        <div class="form-group">
-                             <label>Tác giả</label>
-                             <div class="author-select-wrapper" id="add-author-wrapper">
-                                 <button type="button" class="author-select-btn open-author-select"><i class="fas fa-plus"></i> Chọn tác giả</button>
-                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer"> 
-                    <button type="button" class="btn btn-secondary close-modal">Hủy</button> 
-                    <button type="submit" class="btn btn-primary">Lưu</button> 
-                </div>
-            </form>
-        </div>
-    </div>
-     <div class="modal-overlay" id="dausach-edit-modal"> <!-- SỬA: Đổi ID -->
-        <div class="modal-content">
-            <div class="modal-header"> <h2>Chỉnh sửa thông tin Đầu sách</h2> <button class="close-modal"><i class="fas fa-times"></i></button> </div>
-            <form id="edit-dausach-form"> 
-                 <div class="modal-body">
-                    <div class="modal-form-grid-single"> 
-                        <div class="form-group"> <label for="edit-ma-ds">Mã Đầu sách</label> <input type="text" id="edit-ma-ds" readonly> </div>
-                        <div class="form-group"> <label for="edit-ten-sach-ds">Tên Sách</label> <input type="text" id="edit-ten-sach-ds" required> </div>
-                        <div class="form-group"> 
-                            <label for="edit-ma-the-loai-ds">Thể loại</label> 
-                            <select id="edit-ma-the-loai-ds" required> 
-                                <option value="Truyện ngắn">Truyện ngắn</option> 
-                                <option value="Tiểu thuyết">Tiểu thuyết</option> 
-                                <option value="Kỹ năng sống">Kỹ năng sống</option> 
-                                <option value="Sách giáo khoa">Sách giáo khoa</option> 
-                            </select> 
-                        </div>
-                        <div class="form-group"> <label for="edit-mo-ta-ds">Mô tả</label> <textarea id="edit-mo-ta-ds" rows="3"></textarea> </div>
-                        <div class="form-group">
-                             <label>Tác giả</label>
-                             <div class="author-select-wrapper" id="edit-author-wrapper">
-                                 <span class="author-tag" data-id="TG001">Nguyễn Nhật Ánh <span class="remove-tag">×</span></span>
-                                 <button type="button" class="author-select-btn open-author-select"><i class="fas fa-plus"></i> Chọn tác giả</button>
-                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" id="delete-dausach-button">Xóa đầu sách</button> 
-                    <div> <button type="button" class="btn btn-secondary close-modal">Hủy</button> <button type="submit" class="btn btn-primary">Lưu</button> </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div class="modal-overlay" id="author-select-modal">
-        <div class="modal-content">
-            <div class="modal-header"> <h2 id="author-modal-title">Chọn Tác giả</h2> <button class="close-modal"><i class="fas fa-times"></i></button> </div>
-            <div class="modal-body"> 
-                 <div class="form-group"> <input type="text" id="author-search-input" placeholder="Tìm kiếm tác giả..."> </div>
-                 <div class="checklist-container" id="author-checklist">
-                    <label> <input type="checkbox" value="Nguyễn Nhật Ánh" data-id="TG001"> Nguyễn Nhật Ánh </label>
-                    <label> <input type="checkbox" value="J.K. Rowling" data-id="TG002"> J.K. Rowling </label>
-                    <label> <input type="checkbox" value="Tác giả Mới" data-id="TG003"> Tác giả Mới </label>
-                 </div> 
-            </div>
-            <div class="modal-footer"> <button type="button" class="btn btn-secondary close-modal">Hủy</button> <button type="button" class="btn btn-primary" id="confirm-authors">Xác nhận</button> </div>
-        </div>
-    </div>
-    <!-- --- KẾT THÚC MODALS ĐẦU SÁCH --- -->
 
     <!-- --- MODALS CHO QUẢN LÝ SÁCH --- -->
     <div class="modal-overlay" id="sach-add-modal"> <!-- SỬA: Đổi ID -->
@@ -565,56 +526,12 @@
             <form id="add-book-form">
                 <div class="modal-body">
                     <div class="modal-form-grid">
-                        <div class="form-group"> <label for="add-ma-dau-sach">Mã đầu sách</label> 
-                            <select id="add-ma-dau-sach" required> 
-                                <option value="DS001">DS001</option> 
-                                <option value="DS001">DS002</option> 
-                                <option value="DS001">DS003</option> 
-                            </select>  
-                        </div>
-                        <div class="form-group"> <label for="add-ten-sach">Tên sách</label> <input type="text" id="add-ten-sach" readonly> </div>
-                        <div class="form-group"> <label for="add-tac-gia">Tác giả</label> <input type="text" id="add-tac-gia" readonly> </div>
-                        <div class="form-group"> 
-                            <label for="add-the-loai">Thể loại</label> 
-                            <input type="text" id="add-the-loai" readonly>
-                        </div>
+                        <div class="form-group"> <label for="add-ten-sach">Tên sách</label> <input type="text" id="add-ten-sach" placeholder="Mắt biếc"> </div>
+                        <div class="form-group"> <label for="add-tac-gia">Tác giả</label> <input type="text" id="add-tac-gia" placeholder="Nguyễn Nhật Ánh"> </div>
+                        <div class="form-group"> <label for="add-the-loai">Thể loại</label> <select id="add-the-loai"> <option value="Truyện ngắn">Truyện ngắn</option> <option value="Tiểu thuyết">Tiểu thuyết</option> <option value="Kỹ năng sống">Kỹ năng sống</option> <option value="Sách giáo khoa">Sách giáo khoa</option> </select> </div>
                         <div class="form-group"> <label for="add-nxb">Nhà XB</label> <input type="text" id="add-nxb" placeholder="Tuổi trẻ"> </div>
-                        <div class="form-group"> 
-                            <label for="add-nam-xb">Năm XB</label>
-                            <input type="number" id="add-nam-xb" placeholder="Năm XB" min="1890" max="2025"> 
-                            <!-- <select id="add-nam-xb" required> 
-                                <option value="2025">2025</option> 
-                                <option value="2024">2024</option> 
-                                <option value="2023">2023</option> 
-                                <option value="2022">2022</option>
-                                <option value="2021">2021</option>
-                                <option value="2020">2020</option>
-                                <option value="2019">2019</option>
-                                <option value="2018">2018</option>
-                                <option value="2017">2017</option>
-                                <option value="2016">2016</option>
-                                <option value="2015">2015</option>
-                                <option value="2014">2014</option>
-                                <option value="2013">2013</option>
-                                <option value="2012">2012</option>
-                                <option value="2011">2011</option> 
-                                <option value="2010">2010</option> 
-                                <option value="2009">2009</option> 
-                                <option value="2008">2008</option>
-                                <option value="2007">2007</option>
-                                <option value="2006">2006</option>
-                                <option value="2005">2005</option>
-                                <option value="2004">2004</option>
-                                <option value="2003">2003</option>
-                                <option value="2002">2002</option>
-                                <option value="2001">2001</option>
-                                <option value="2000">2000</option>
-                                <option value="1999">1999</option>
-                                <option value="1998">1998</option>
-                            </select>  -->
-                        </div>
+                        <div class="form-group"> <label for="add-nam-xb">Năm XB</label> <select id="add-nam-xb"> <option value="2025">2025</option> <option value="2024">2024</option> <option value="2023">2023</option> <option value="2022">2022</option> </select> </div>
                         <div class="form-group"> <label for="add-mo-ta">Mô tả</label> <input type="text" id="add-mo-ta" placeholder="Mô tả ngắn..."> </div>
-                        <div class="form-group"> <label for="add-so-luong-ton">Số lượng tồn</label> <input type="number" min="0" id="add-so-luong-ton" placeholder="Số lượng tồn"> </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -639,7 +556,6 @@
                         <div class="form-group"> <label for="edit-nxb">Nhà XB</label> <input type="text" id="edit-nxb" value="Tuổi trẻ"> </div>
                         <div class="form-group"> <label for="edit-nam-xb">Năm XB</label> <select id="edit-nam-xb"> <option value="2025">2025</option> <option value="2024" selected>2024</option> <option value="2023">2023</option> <option value="2022">2022</option> </select> </div>
                         <div class="form-group"> <label for="edit-mo-ta">Mô tả</label> <input type="text" id="edit-mo-ta" value="Mô tả sách..."> </div>
-                        <div class="form-group"> <label for="edit-so-luong-ton">Số lượng tồn</label> <input type="text" id="edit-so-luong-ton" value="50"> </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -652,7 +568,73 @@
     <!-- --- KẾT THÚC MODALS SÁCH --- -->
 
 
-    
+    <!-- --- MODALS CHO QUẢN LÝ ĐẦU SÁCH --- -->
+    <div class="modal-overlay" id="dausach-add-modal"> <!-- SỬA: Đổi ID -->
+        <div class="modal-content">
+            <div class="modal-header"> <h2>Thêm mới thông tin Đầu sách</h2> <button class="close-modal"><i class="fas fa-times"></i></button> </div>
+            <form id="add-dausach-form"> 
+                <div class="modal-body">
+                    <div class="modal-form-grid-single"> 
+                        <div class="form-group"> <label for="add-ma-ds">Mã Đầu sách:</label> <input type="text" id="add-ma-ds" required> </div>
+                        <div class="form-group"> <label for="add-ten-sach-ds">Tên Sách:</label> <input type="text" id="add-ten-sach-ds" required> </div>
+                        <div class="form-group"> <label for="add-ma-the-loai-ds">Mã Thể loại:</label> <input type="text" id="add-ma-the-loai-ds" required> </div>
+                        <div class="form-group"> <label for="add-mo-ta-ds">Mô tả:</label> <textarea id="add-mo-ta-ds" rows="3"></textarea> </div>
+                        <div class="form-group">
+                             <label>Tác giả:</label>
+                             <div class="author-select-wrapper" id="add-author-wrapper">
+                                 <button type="button" class="author-select-btn open-author-select"><i class="fas fa-plus"></i> Chọn tác giả</button>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer"> 
+                    <button type="button" class="btn btn-secondary close-modal">Hủy</button> 
+                    <button type="submit" class="btn btn-primary">Lưu</button> 
+                </div>
+            </form>
+        </div>
+    </div>
+     <div class="modal-overlay" id="dausach-edit-modal"> <!-- SỬA: Đổi ID -->
+        <div class="modal-content">
+            <div class="modal-header"> <h2>Chỉnh sửa thông tin Đầu sách</h2> <button class="close-modal"><i class="fas fa-times"></i></button> </div>
+            <form id="edit-dausach-form"> 
+                 <div class="modal-body">
+                    <div class="modal-form-grid-single"> 
+                        <div class="form-group"> <label for="edit-ma-ds">Mã Đầu sách:</label> <input type="text" id="edit-ma-ds" readonly disabled> </div>
+                        <div class="form-group"> <label for="edit-ten-sach-ds">Tên Sách:</label> <input type="text" id="edit-ten-sach-ds" required> </div>
+                        <div class="form-group"> <label for="edit-ma-the-loai-ds">Mã Thể loại:</label> <input type="text" id="edit-ma-the-loai-ds" required> </div>
+                        <div class="form-group"> <label for="edit-mo-ta-ds">Mô tả:</label> <textarea id="edit-mo-ta-ds" rows="3"></textarea> </div>
+                        <div class="form-group">
+                             <label>Tác giả:</label>
+                             <div class="author-select-wrapper" id="edit-author-wrapper">
+                                 <span class="author-tag" data-id="TG001">Nguyễn Nhật Ánh <span class="remove-tag">×</span></span>
+                                 <button type="button" class="author-select-btn open-author-select"><i class="fas fa-plus"></i> Chọn tác giả</button>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="delete-dausach-button">Xóa</button> 
+                    <div> <button type="button" class="btn btn-secondary close-modal">Hủy</button> <button type="submit" class="btn btn-primary">Lưu</button> </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal-overlay" id="author-select-modal">
+        <div class="modal-content">
+            <div class="modal-header"> <h2 id="author-modal-title">Chọn Tác giả</h2> <button class="close-modal"><i class="fas fa-times"></i></button> </div>
+            <div class="modal-body"> 
+                 <div class="form-group"> <input type="text" id="author-search-input" placeholder="Tìm kiếm tác giả..."> </div>
+                 <div class="checklist-container" id="author-checklist">
+                    <label> <input type="checkbox" value="Nguyễn Nhật Ánh" data-id="TG001"> Nguyễn Nhật Ánh </label>
+                    <label> <input type="checkbox" value="J.K. Rowling" data-id="TG002"> J.K. Rowling </label>
+                    <label> <input type="checkbox" value="Tác giả Mới" data-id="TG003"> Tác giả Mới </label>
+                 </div> 
+            </div>
+            <div class="modal-footer"> <button type="button" class="btn btn-secondary close-modal">Hủy</button> <button type="button" class="btn btn-primary" id="confirm-authors">Xác nhận</button> </div>
+        </div>
+    </div>
+    <!-- --- KẾT THÚC MODALS ĐẦU SÁCH --- -->
 
 
     <script>
@@ -722,7 +704,7 @@
                  });
              }
 
-            // --- Xử lý Modals SÁCH (từ books.html) ---
+            // --- Xử lý Modals SÁCH (từ books.ejs) ---
             const sachAddModal = document.getElementById('sach-add-modal');
             const sachEditModal = document.getElementById('sach-edit-modal');
             const openSachAddBtn = document.getElementById('open-sach-add-modal');
@@ -786,7 +768,7 @@
             });
 
 
-            // --- Xử lý Modals ĐẦU SÁCH (từ quan-ly-dau-sach.html) ---
+            // --- Xử lý Modals ĐẦU SÁCH (từ quan-ly-dau-sach.ejs) ---
             const dausachAddModal = document.getElementById('dausach-add-modal');
             const dausachEditModal = document.getElementById('dausach-edit-modal');
             const openDausachAddBtn = document.getElementById('open-dausach-add-modal');
