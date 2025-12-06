@@ -341,15 +341,19 @@
                                     </tr> 
                                 </thead>
                                 <tbody>
-                                    <tr> 
-                                        <td>1</td> 
-                                        <td>KH001</td> <!-- Dữ liệu có vẻ nhầm, nên là tên thể loại? -->
-                                        <td>1000</td> 
-                                        <td>300 000</td> 
-                                        <td>10%</td> 
-                                    </tr>
-                                     <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
-                                     <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+                                    <% if (bcdoanhthu && bcdoanhthu.length > 0) { %>
+                                        <% bcdoanhthu.forEach((bcdoanhthu, index) => { %>
+                                            <tr data-id="<%= bcdoanhthu.TenThamSo %>"">
+                                                <td><%= index + 1 %></td>
+                                                <td><%= bcdoanhthu. %></td>
+                                                <td><%= bcdoanhthu.GiaTri %></td>
+                                            </tr>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="4" style="text-align: center;">Không có tham số nào.</td>
+                                        </tr>
+                                    <% } %>
                                 </tbody>
                             </table>
                              <div class="empty-table-rows"></div>
