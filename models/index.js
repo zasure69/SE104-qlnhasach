@@ -62,6 +62,15 @@ PhieuNhapSach.belongsToMany(Sach, { through: CT_PNS, foreignKey: 'MaPhieuNhap' }
 Sach.belongsToMany(HoaDon, { through: CT_HD, foreignKey: 'MaSach' });
 HoaDon.belongsToMany(Sach, { through: CT_HD, foreignKey: 'MaHoaDon' });
 
+//9. HoaDon <-> CT_HD
+HoaDon.hasMany(CT_HD, { foreignKey: 'MaHoaDon' });
+CT_HD.belongsTo(HoaDon, { foreignKey: 'MaHoaDon' });
+
+//10. Sach <-> Ct_HD 
+Sach.hasMany(CT_HD, { foreignKey: 'MaSach' });
+CT_HD.belongsTo(Sach, { foreignKey: 'MaSach' });
+
+
 
 // Export tất cả models và sequelize instance
 module.exports = {

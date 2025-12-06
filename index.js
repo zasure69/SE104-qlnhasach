@@ -60,7 +60,11 @@ const employeesRoutes = require('./routes/employeesRoutes');
 app.use('/api/employees', employeesRoutes);
 
 const changeruleRoutes = require('./routes/changeruleRoutes');
-app.use('/api/change-rules', changeruleRoutes);
+
+const reportRoutes = require("./routes/reportRoutes");
+app.use("/api/reports", reportRoutes);
+
+
 
 // --- Khởi động Server và Đồng bộ Database ---
 
@@ -86,5 +90,15 @@ const startServer = async () => {
   }
 };
 
+
+
 // Gọi hàm để bắt đầu
 startServer();
+
+
+
+
+
+
+
+

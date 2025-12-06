@@ -200,16 +200,6 @@
             margin-top: 0; /* Xóa margin top */
             border-top: none; /* Xóa border top */
         }
-
-        /* --- CSS NHÃN BẢNG KẾT QUẢ --- */
-        .table-caption {
-            font-size: 1.1rem;         /* Cỡ chữ vừa phải */
-            font-weight: 700;          /* In đậm */
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;     /* Cách bảng một chút xíu thôi (khoảng 8px) */
-            text-transform: uppercase; /* Chữ in hoa */
-            letter-spacing: 0.05rem;   /* Dãn chữ nhẹ cho thoáng */
-        }
         /* --- THÊM: CSS CHO LOADER VÀ TOAST --- */
         .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.7); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .loader-overlay.show { display: flex; }
@@ -320,11 +310,10 @@
                         <div class="report-filter">
                              <label for="month-ton">Tháng Năm</label>
                              <div class="date-input-wrapper">
-                                 <input type="month" id="month-ton" value="1999-01"> <!-- Giá trị mẫu YYYY-MM -->
+                                 <input type="month" id="month-ton" value="2025-01"> <!-- Giá trị mẫu YYYY-MM -->
                              </div>
                         </div>
                         <div class="table-responsive">
-                            <h3 class="table-caption">Chi tiết báo cáo</h3>
                             <table class="data-table" id="inventory-report-table"> 
                                 <thead> 
                                     <tr> 
@@ -360,11 +349,10 @@
                          <div class="report-filter">
                              <label for="month-cong-no">Tháng Năm</label>
                              <div class="date-input-wrapper">
-                                 <input type="month" id="month-cong-no" value="1999-01">
+                                 <input type="month" id="month-cong-no" value="2025-01">
                              </div>
                         </div>
                         <div class="table-responsive">
-                            <h3 class="table-caption">Chi tiết báo cáo</h3>
                             <table class="data-table" id="debt-report-table"> 
                                 <thead> 
                                     <tr> 
@@ -399,14 +387,14 @@
                          <div class="report-filter">
                              <label for="month-doanh-thu">Tháng Năm</label>
                              <div class="date-input-wrapper">
-                                 <input type="month" id="month-doanh-thu" value="1999-01">
+                                 <input type="month" id="month-doanh-thu" value="2025-01">
                              </div>
                         </div>
+                        <!-- Phần tóm tắt doanh thu -->
+                        <div class="report-summary">
+                            Tổng doanh thu: 2000000 
+                        </div>
                         <div class="table-responsive">
-                            <h3 class="table-caption">Chi tiết báo cáo</h3>
-                            <div class="report-summary">
-                                Tổng doanh thu: 2000000 
-                            </div>
                             <table class="data-table" id="revenue-report-table"> 
                                 <thead> 
                                     <tr> 
