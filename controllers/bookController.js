@@ -781,11 +781,15 @@ const deleteSach = async (req, res) => {
     if (!sach) {
       return res.status(404).json({ error: "Không tìm thấy Sách" });
     }
-    console.log("Ready to run sach.destroy!");
+
+    // Xóa các bản ghi liên quan trước khi xóa sách
+    await db.CT_PNS.destroy({ where: { MaSach: maSach } });
+    await db.CT_HD.destroy({ where: { MaSach: maSach } });
+
     await sach.destroy();
     return res.status(200).json({ message: "Xóa sách thành công!" });
   } catch (err) {
-    console.log("[bookController] deleteSach error", err);
+    console.error("[bookController] deleteSach error", err);
     return res.status(500).json({ error: "Lỗi server nội bộ" });
   }
 };

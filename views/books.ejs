@@ -1386,7 +1386,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const row = e.target.closest('tr');
             if(!row) return;
             
-            const maDS = row.dataset.id;
+            const maSach = row.dataset.id;
             const tenSach = row.cells[2].textContent;
             
             if(!confirm(`Bạn có chắc chắn muốn xóa sách: ${tenSach}?`)) return;
@@ -1550,8 +1550,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- THỂ LOẠI: XÓA ---
     document.querySelectorAll('.delete-theloai-icon').forEach(btn => {
         btn.addEventListener('click', async (e) => {
-            const maTheLoai = document.getElementById('edit-ma-the-loai').value;
-            const tenTheLoai = document.getElementById('edit-ten-the-loai').value;
+            const row = e.target.closest('tr');
+            if(!row) return;
+            
+            const maTheLoai = row.dataset.id;
+            const tenTheLoai = row.cells[2].textContent;
             
             if(!confirm(`Bạn có chắc chắn muốn xóa thể loại: ${tenTheLoai}?`)) return;
             
@@ -1564,10 +1567,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
                 hideLoader();
                 
+                console.log('[DEBUG] Response:', response.status, data);
                 if(response.ok) {
                     showToast(data.message || 'Xóa thành công!');
-                    editTheLoaiModal.style.display = 'none';
-                    location.reload();
+                    row.remove();
                 } else {
                     showToast(data.error || 'Có lỗi xảy ra!', 'error');
                 }
@@ -1681,8 +1684,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- TÁC GIẢ: XÓA ---
     document.querySelectorAll('.delete-tacgia-icon').forEach(btn => {
         btn.addEventListener('click', async (e) => {
-            const maTacGia = document.getElementById('edit-ma-tac-gia').value;
-            const hoTen = document.getElementById('edit-ho-ten-tg').value;
+            const row = e.target.closest('tr');
+            if(!row) return;
+            
+            const maTacGia = row.dataset.id;
+            const hoTen = row.cells[2].textContent;
             
             if(!confirm(`Bạn có chắc chắn muốn xóa tác giả: ${hoTen}?`)) return;
             
@@ -1695,10 +1701,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
                 hideLoader();
                 
+                console.log('[DEBUG] Response:', response.status, data);
                 if(response.ok) {
                     showToast(data.message || 'Xóa thành công!');
-                    editTacGiaModal.style.display = 'none';
-                    location.reload();
+                    row.remove();
                 } else {
                     showToast(data.error || 'Có lỗi xảy ra!', 'error');
                 }
