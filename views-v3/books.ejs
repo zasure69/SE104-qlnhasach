@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SỬA: Tiêu đề -->
+    <title>Quản lý Sách & Đầu sách</title>
+    
+    <!-- Link Font Awesome để có icon --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* * --- PHẦN CSS --- 
+         */
+
+        :root {
+            --primary-color: #2c3e50; 
+            --secondary-color: #3498db; 
+            --green-accent: #1EE4AC; 
+            --green-accent-hover: #1ac096;
+            --red-accent: #e74c3c; 
+            --red-accent-hover: #c0392b;
+            --light-bg: #f0f4f8;
+            --white-bg: #ffffff;
+            --text-dark: #222;
+            --text-light: #555;
+            --text-white: #ecf0f1;
+            --border-color: #e0e0e0;
+            --disabled-bg: #e9ecef;
+            /* THÊM: CSS cho Tab */
+            --tab-inactive-bg: #e9ecef;
+            --tab-inactive-text: #6c757d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+        }
+
+        /* --- Layout chính --- */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+            transition: grid-template-columns 0.3s ease-in-out;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease-in-out;
+            overflow-x: hidden; 
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        .sidebar-header i { font-size: 3rem; margin-bottom: 0.5rem; }
+        .sidebar-header h2 { font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .sidebar-nav ul { list-style: none; }
+        .sidebar-nav li { margin-bottom: 0.5rem; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; border-radius: 8px; text-decoration: none; color: var(--text-white); font-weight: 500; transition: background-color 0.2s ease; }
+        .sidebar-nav a i { width: 20px; text-align: center; }
+        .sidebar-nav a:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .sidebar-nav a.active { background-color: var(--secondary-color); color: white; }
+
+        /* --- Nội dung chính --- */
+        .main-content {
+            background-color: var(--light-bg);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        /* --- Thanh Header --- */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: var(--white-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+        .top-bar-left { display: flex; align-items: center; gap: 1rem; }
+        .top-bar-left h1 { font-size: 1.75rem; font-weight: 700; margin: 0; }
+        .user-menu {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-light);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .user-menu .user-trigger {
+            cursor: pointer;
+            display: inline-block; /* Giúp dễ click hơn */
+        }
+
+        .user-menu .dropdown-menu {
+            display: none; /* Ẩn ban đầu */
+            position: absolute;
+            top: 100%; /* Hiển thị ngay bên dưới */
+            right: 0;
+            background-color: var(--white-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            min-width: 150px; /* Độ rộng tối thiểu */
+            z-index: 1000;
+            overflow: hidden; /* Để bo góc */
+        }
+
+        /* Hiển thị menu khi di chuột vào .user-menu */
+        .user-menu:hover .dropdown-menu {
+            display: block;
+        }
+
+        .user-menu .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .user-menu .dropdown-menu a:hover {
+            background-color: var(--light-bg);
+            color: var(--red-accent, #e74c3c); /* Dùng màu đỏ cho logout */
+        }
+
+        .user-menu .dropdown-menu a i {
+            width: 16px;
+            text-align: center;
+            color: var(--text-light);
+            transition: color 0.2s ease;
+        }
+
+        .user-menu .dropdown-menu a:hover i {
+            color: var(--red-accent, #e74c3c);
+        }
+        .menu-toggle { font-size: 1.5rem; background: none; border: none; color: var(--text-dark); cursor: pointer; }
+
+        /* --- Vùng nội dung (Bảng) --- */
+        .content-wrapper {
+            /* SỬA: Xóa padding để tab chiếm full */
+            padding: 0; 
+            background-color: var(--white-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden; /* Giữ bo góc */
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- THÊM: CSS CHO TABS --- */
+        .tab-nav { display: flex; background-color: var(--light-bg); border-bottom: 1px solid var(--border-color); }
+        .tab-button { 
+            padding: 1rem 1.5rem; 
+            font-size: 1rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            border: none; 
+            background-color: transparent; 
+            color: var(--tab-inactive-text); 
+            border-bottom: 3px solid transparent; 
+            border-top-left-radius: 8px; 
+            border-top-right-radius: 8px;
+            transition: color 0.2s ease, background-color 0.2s ease, border-bottom-color 0.2s ease; 
+        }
+        .tab-button.active { 
+            color: var(--secondary-color); 
+            border-bottom-color: var(--secondary-color); 
+            background-color: var(--white-bg); 
+        }
+        .tab-button:hover:not(.active) { color: var(--text-dark); }
+        .tab-content { padding: 1.5rem; }
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* --- KẾT THÚC CSS TABS --- */
+
+
+        /* --- Các loại nút --- */
+        .btn {
+            padding: 0.75rem 1.25rem; border: none; border-radius: 8px; font-size: 0.9rem;
+            font-weight: 700; text-transform: uppercase; cursor: pointer; transition: all 0.2s ease;
+        }
+        .btn-primary { background-color: var(--green-accent); color: white; }
+        .btn-primary:hover { background-color: var(--green-accent-hover); box-shadow: 0 4px 8px rgba(30, 228, 172, 0.3); }
+        .btn-secondary { background-color: #f0f0f0; color: var(--text-light); }
+        .btn-secondary:hover { background-color: #e0e0e0; }
+        .btn-danger { background-color: var(--red-accent); color: white; }
+        .btn-danger:hover { background-color: var(--red-accent-hover); }
+
+        /* --- Bảng --- */
+        .table-responsive { overflow-x: auto; }
+        .data-table { /* Đổi tên class chung */
+            width: 100%; border-collapse: collapse; min-width: 800px; 
+        }
+        .data-table th,
+        .data-table td {
+            padding: 0.85rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem; vertical-align: middle;
+        }
+        .data-table thead th { background-color: #f9f9f9; font-weight: 600; color: var(--text-light); }
+        .data-table tbody tr:hover { background-color: #f5f5f5; }
+        .action-icon { color: var(--secondary-color); cursor: pointer; font-size: 1rem; }
+        .action-icon:hover { color: #2980b9; }
+
+        /* --- Modal (Cửa sổ Pop-up) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center;
+            align-items: center; z-index: 1000; padding: 1rem; animation: fadeIn 0.3s ease;
+        }
+        .modal-content {
+            background-color: var(--white-bg); border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%; max-width: 700px; animation: slideIn 0.3s ease;
+            display: flex; flex-direction: column;
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color);
+        }
+        .modal-header h2 { font-size: 1.3rem; font-weight: 700; }
+        .close-modal { font-size: 1.5rem; color: var(--text-light); cursor: pointer; background: none; border: none; }
+        .modal-body { padding: 1.5rem; flex-grow: 1; }
+        .modal-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+        /* Modal 1 cột (cho Đầu sách) */
+        .modal-form-grid-single { display: grid; grid-template-columns: 1fr; gap: 1.25rem; } 
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .form-group label { font-weight: 600; font-size: 0.9rem; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 0.75rem; border: 1px solid var(--border-color);
+            border-radius: 6px; font-size: 0.9rem; font-family: inherit;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--secondary-color); box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        .form-group input:disabled { background-color: var(--disabled-bg); }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+
+        .modal-footer {
+            display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1.25rem 1.5rem;
+            border-top: 1px solid var(--border-color); background-color: #f9f9f9;
+            border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;
+        }
+        .modal-footer .btn { flex-grow: 1; text-align: center; font-size: 0.9rem; }
+        /* Nút Xóa (cho Sách) */
+        #sach-edit-modal .modal-footer { justify-content: space-between; }
+        #sach-edit-modal .modal-footer > div { display: flex; gap: 0.75rem; flex-grow: 1; justify-content: flex-end; }
+        #sach-edit-modal .modal-footer > div .btn { flex-grow: 1; }
+        /* Nút Xóa (cho Đầu Sách) */
+        #dausach-edit-modal .modal-footer { justify-content: space-between; }
+        #dausach-edit-modal .modal-footer > div { display: flex; gap: 0.75rem; flex-grow: 1; justify-content: flex-end; }
+        #dausach-edit-modal .modal-footer > div .btn { flex-grow: 1; }
+
+        /* --- CSS CHO MODAL ĐẦU SÁCH --- */
+        #dausach-add-modal .modal-content, #dausach-edit-modal .modal-content { max-width: 600px; }
+        .author-select-wrapper {
+             border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem;
+             min-height: 100px; background-color: #f8f9fa; display: flex;
+             flex-wrap: wrap; gap: 0.5rem; align-items: flex-start;
+        }
+        .author-tag {
+            display: inline-flex; align-items: center; background-color: var(--secondary-color);
+            color: white; padding: 0.25rem 0.5rem; border-radius: 4px;
+            font-size: 0.9rem; font-weight: 500;
+        }
+        .author-tag .remove-tag { margin-left: 0.5rem; font-size: 0.8rem; cursor: pointer; font-weight: bold; }
+        .author-select-btn {
+             background: none; border: 1px dashed var(--secondary-color); color: var(--secondary-color);
+             border-radius: 4px; padding: 0.25rem 0.5rem; cursor: pointer; font-size: 0.9rem;
+        }
+         #author-select-modal .modal-content { max-width: 450px; max-height: 80vh; z-index: 1001; /* Nằm trên modal cha */ }
+         #author-select-modal .modal-body { max-height: calc(80vh - 150px); overflow-y: auto; }
+         .checklist-container label { display: flex; align-items: center; padding: 0.5rem 0; cursor: pointer; }
+         .checklist-container input[type="checkbox"] { margin-right: 0.75rem; width: 18px; height: 18px; }
+         #author-select-modal .modal-footer .btn { flex-grow: 1; }
+        /* --- KẾT THÚC CSS MODAL ĐẦU SÁCH --- */
+
+        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.7); display: none; justify-content: center; align-items: center; z-index: 2000; }
+
+        .loader-overlay.show { display: flex; }
+
+        .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--secondary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 2001; display: flex; flex-direction: column; gap: 0.5rem; }
+
+        .toast { background-color: var(--white-bg); padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 0.75rem; opacity: 0; transform: translateX(100%); transition: all 0.3s ease; border-left: 5px solid; }
+
+        .toast.show { opacity: 1; transform: translateX(0); }
+
+        .toast.success { border-left-color: var(--green-accent); }
+
+        .toast.success .toast-icon { color: var(--green-accent); }
+
+        .toast.error { border-left-color: var(--red-accent); }
+
+        .toast.error .toast-icon { color: var(--red-accent); }
+
+        .toast-message { font-size: 0.9rem; font-weight: 500; color: var(--text-dark); }
+
+        /* --- Responsive Design --- */
+        @media (min-width: 992.01px) {
+            .dashboard-container.sidebar-collapsed { grid-template-columns: 0 1fr; }
+            .dashboard-container.sidebar-collapsed .sidebar { width: 0; padding-left: 0; padding-right: 0; transform: translateX(-250px); }
+        }
+        @media (max-width: 992px) {
+            .dashboard-container { grid-template-columns: 1fr; }
+            .sidebar { position: fixed; left: -260px; top: 0; height: 100vh; z-index: 900; }
+            .sidebar.active { left: 0; }
+            .main-content { padding: 1rem; }
+            .top-bar { padding: 1rem; }
+            .menu-toggle { display: block; }
+            .tab-nav { overflow-x: auto; }
+        }
+        @media (max-width: 768px) {
+            .modal-form-grid { grid-template-columns: 1fr; }
+            .top-bar { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .user-menu { align-self: flex-end; }
+            .content-wrapper { border-radius: 8px; }
+            .content-header { flex-direction: column; align-items: stretch; gap: 1rem; }
+            .btn-add-new { width: 100%; text-align: center; }
+            .modal-footer { flex-direction: column; align-items: stretch; }
+            #sach-edit-modal .modal-footer, #dausach-edit-modal .modal-footer { justify-content: flex-start; }
+            #sach-edit-modal .modal-footer > div, #dausach-edit-modal .modal-footer > div { flex-direction: column; }
+            .modal-footer .btn, #sach-edit-modal .modal-footer > div .btn, #dausach-edit-modal .modal-footer > div .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- THÊM: Loader và Toast Container -->
+    <div class="loader-overlay" id="loader">
+
+        <div class="loader"></div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+    <!-- KẾT THÚC THÊM MỚI -->
+
+    <div class="dashboard-container">
+        
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header"> <i class="fas fa-book-open"></i> <h2>QUẢN LÝ NHÀ SÁCH</h2> </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="/dashboard" class="active"><i class="fas fa-home"></i>Tổng quan</a></li>
+                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
+                    <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
+                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
+                    <li><a href="/dashboard/types"><i class="fas fa-tags"></i>QL Thể loại & Tác giả</a></li>
+                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
+                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
+                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
+                    <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
+                    <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+                    <li><a href="/dashboard/changerule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="menu-toggle" id="menu-toggle"> <i class="fas fa-bars"></i> </button>
+                    <!-- SỬA: Đổi tiêu đề -->
+                    <h1>Quản lý Sách</h1>
+                </div>
+                <div class="user-menu">
+                    <span class="user-trigger">
+                        Chào, <strong>admin</strong> <i class="fas fa-chevron-down"></i>
+                    </span>
+
+                    <div class="dropdown-menu">
+                        <a href="#" id="logout-button">
+                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- SỬA: Thêm cấu trúc Tab -->
+            <div class="content-wrapper">
+                <!-- Tab Navigation -->
+                <nav class="tab-nav">
+                    <button class="tab-button active" data-target="#tab-dau-sach">Quản lý Đầu sách</button>
+                    <button class="tab-button" data-target="#tab-sach">Quản lý Sách</button>
+                </nav>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Tab Pane 1: Quản lý Đầu sách -->
+                    <div class="tab-pane active" id="tab-dau-sach">
+                        <div class="content-header">
+                           <h2>Danh sách Đầu sách</h2> 
+                           <button class="btn btn-primary" id="open-dausach-add-modal"> <i class="fas fa-plus"></i> Thêm mới Đầu sách </button>
+                       </div>
+                       <div class="table-responsive">
+                           <table class="data-table">
+                               <thead>
+                                   <tr>
+                                       <th>Mã Đầu sách</th> <th>Tên Sách</th> <th>Thể loại</th>
+                                       <th>Tác giả</th> <th></th> 
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   <tr>
+                                       <td>DS001</td> <td>Mắt biếc</td> <td>Truyện ngắn</td>
+                                       <td>Nguyễn Nhật Ánh</td>
+                                       <td> <i class="fas fa-pencil-alt action-icon open-dausach-edit-modal"></i> </td>
+                                   </tr>
+                                   <tr>
+                                       <td>DS002</td> <td>Harry Potter và Hòn đá Phù thủy</td> <td>Tiểu thuyết</td>
+                                       <td>J.K. Rowling</td>
+                                       <td> <i class="fas fa-pencil-alt action-icon open-dausach-edit-modal"></i> </td>
+                                   </tr>
+                               </tbody>
+                           </table>
+                       </div>
+                   </div>
+                    <!-- Tab Pane 2: Quản lý Sách -->
+                    <div class="tab-pane" id="tab-sach">
+                        <div class="content-header">
+                            <h2>Danh sách Sách</h2>
+                            <button class="btn btn-primary" id="open-sach-add-modal"> <i class="fas fa-plus"></i> Thêm mới Sách </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table"> <!-- Sửa class -->
+                                <thead>
+                                    <tr>
+                                        <th>STT</th> <th>Mã sách</th> <th>Tên sách</th> <th>Thể loại</th>
+                                        <th>Tác giả</th> <th>Nhà XB</th> <th>Năm XB</th> <th>Mô tả</th> <th>Số lượng tồn</th> <th></th> 
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td> <td>S001</td> <td>Mắt biếc</td> <td>Truyện ngắn</td>
+                                        <td>Nguyễn Nhật Ánh</td> <td>Tuổi trẻ</td> <td>2024</td> <td>Mô tả sách...</td> <td>50</td>
+                                        <td> <i class="fas fa-pencil-alt action-icon open-sach-edit-modal"></i> </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- --- MODALS CHO QUẢN LÝ ĐẦU SÁCH --- -->
+    <div class="modal-overlay" id="dausach-add-modal"> <!-- SỬA: Đổi ID -->
+        <div class="modal-content">
+            <div class="modal-header"> <h2>Thêm mới thông tin Đầu sách</h2> <button class="close-modal"><i class="fas fa-times"></i></button> </div>
+            <form id="add-dausach-form"> 
+                <div class="modal-body">
+                    <div class="modal-form-grid-single"> 
+                        <div class="form-group"> <label for="add-ten-sach-ds">Tên Sách</label> <input type="text" id="add-ten-sach-ds" required> </div>
+                        <div class="form-group"> 
+                            <label for="add-ten-the-loai-ds">Thể loại</label> 
+                            <select id="add-ten-the-loai-ds" required> 
+                                <option value="Truyện ngắn">Truyện ngắn</option> 
+                                <option value="Tiểu thuyết">Tiểu thuyết</option> 
+                                <option value="Kỹ năng sống">Kỹ năng sống</option> 
+                                <option value="Sách giáo khoa">Sách giáo khoa</option> 
+                                <!-- <option value="">-- Chọn thể loại --</option>
+                                <% types.forEach(type => { %>
+                                <option value="<%= type.MaTheLoai %>"><%= type.TenTheLoai %></option>
+                                <% }) %> -->
+                            </select> 
+                        </div>
+                        <div class="form-group"> <label for="add-mo-ta-ds">Mô tả</label> <textarea id="add-mo-ta-ds" rows="3"></textarea> </div>
+                        <div class="form-group">
+                             <label>Tác giả</label>
+                             <div class="author-select-wrapper" id="add-author-wrapper">
+                                 <button type="button" class="author-select-btn open-author-select"><i class="fas fa-plus"></i> Chọn tác giả</button>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer"> 
+                    <button type="button" class="btn btn-secondary close-modal">Hủy</button> 
+                    <button type="submit" class="btn btn-primary">Lưu</button> 
+                </div>
+            </form>
+        </div>
+    </div>
+     <div class="modal-overlay" id="dausach-edit-modal"> <!-- SỬA: Đổi ID -->
+        <div class="modal-content">
+            <div class="modal-header"> <h2>Chỉnh sửa thông tin Đầu sách</h2> <button class="close-modal"><i class="fas fa-times"></i></button> </div>
+            <form id="edit-dausach-form"> 
+                 <div class="modal-body">
+                    <div class="modal-form-grid-single"> 
+                        <div class="form-group"> <label for="edit-ma-ds">Mã Đầu sách</label> <input type="text" id="edit-ma-ds" readonly> </div>
+                        <div class="form-group"> <label for="edit-ten-sach-ds">Tên Sách</label> <input type="text" id="edit-ten-sach-ds" required> </div>
+                        <div class="form-group"> 
+                            <label for="edit-ma-the-loai-ds">Thể loại</label> 
+                            <select id="edit-ma-the-loai-ds" required> 
+                                <option value="Truyện ngắn">Truyện ngắn</option> 
+                                <option value="Tiểu thuyết">Tiểu thuyết</option> 
+                                <option value="Kỹ năng sống">Kỹ năng sống</option> 
+                                <option value="Sách giáo khoa">Sách giáo khoa</option> 
+                            </select> 
+                        </div>
+                        <div class="form-group"> <label for="edit-mo-ta-ds">Mô tả</label> <textarea id="edit-mo-ta-ds" rows="3"></textarea> </div>
+                        <div class="form-group">
+                             <label>Tác giả</label>
+                             <div class="author-select-wrapper" id="edit-author-wrapper">
+                                 <span class="author-tag" data-id="TG001">Nguyễn Nhật Ánh <span class="remove-tag">×</span></span>
+                                 <button type="button" class="author-select-btn open-author-select"><i class="fas fa-plus"></i> Chọn tác giả</button>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="delete-dausach-button">Xóa đầu sách</button> 
+                    <div> <button type="button" class="btn btn-secondary close-modal">Hủy</button> <button type="submit" class="btn btn-primary">Lưu</button> </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal-overlay" id="author-select-modal">
+        <div class="modal-content">
+            <div class="modal-header"> <h2 id="author-modal-title">Chọn Tác giả</h2> <button class="close-modal"><i class="fas fa-times"></i></button> </div>
+            <div class="modal-body"> 
+                 <div class="form-group"> <input type="text" id="author-search-input" placeholder="Tìm kiếm tác giả..."> </div>
+                 <div class="checklist-container" id="author-checklist">
+                    <label> <input type="checkbox" value="Nguyễn Nhật Ánh" data-id="TG001"> Nguyễn Nhật Ánh </label>
+                    <label> <input type="checkbox" value="J.K. Rowling" data-id="TG002"> J.K. Rowling </label>
+                    <label> <input type="checkbox" value="Tác giả Mới" data-id="TG003"> Tác giả Mới </label>
+                 </div> 
+            </div>
+            <div class="modal-footer"> <button type="button" class="btn btn-secondary close-modal">Hủy</button> <button type="button" class="btn btn-primary" id="confirm-authors">Xác nhận</button> </div>
+        </div>
+    </div>
+    <!-- --- KẾT THÚC MODALS ĐẦU SÁCH --- -->
+
+    <!-- --- MODALS CHO QUẢN LÝ SÁCH --- -->
+    <div class="modal-overlay" id="sach-add-modal"> <!-- SỬA: Đổi ID -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Thêm mới thông tin Sách</h2>
+                <button class="close-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="add-book-form">
+                <div class="modal-body">
+                    <div class="modal-form-grid">
+                        <div class="form-group"> <label for="add-ma-dau-sach">Mã đầu sách</label> 
+                            <select id="add-ma-dau-sach" required> 
+                                <option value="DS001">DS001</option> 
+                                <option value="DS001">DS002</option> 
+                                <option value="DS001">DS003</option> 
+                            </select>  
+                        </div>
+                        <div class="form-group"> <label for="add-ten-sach">Tên sách</label> <input type="text" id="add-ten-sach" readonly> </div>
+                        <div class="form-group"> <label for="add-tac-gia">Tác giả</label> <input type="text" id="add-tac-gia" readonly> </div>
+                        <div class="form-group"> 
+                            <label for="add-the-loai">Thể loại</label> 
+                            <input type="text" id="add-the-loai" readonly>
+                        </div>
+                        <div class="form-group"> <label for="add-nxb">Nhà XB</label> <input type="text" id="add-nxb" placeholder="Tuổi trẻ"> </div>
+                        <div class="form-group"> 
+                            <label for="add-nam-xb">Năm XB</label>
+                            <input type="number" id="add-nam-xb" placeholder="Năm XB" min="1890" max="2025"> 
+                            <!-- <select id="add-nam-xb" required> 
+                                <option value="2025">2025</option> 
+                                <option value="2024">2024</option> 
+                                <option value="2023">2023</option> 
+                                <option value="2022">2022</option>
+                                <option value="2021">2021</option>
+                                <option value="2020">2020</option>
+                                <option value="2019">2019</option>
+                                <option value="2018">2018</option>
+                                <option value="2017">2017</option>
+                                <option value="2016">2016</option>
+                                <option value="2015">2015</option>
+                                <option value="2014">2014</option>
+                                <option value="2013">2013</option>
+                                <option value="2012">2012</option>
+                                <option value="2011">2011</option> 
+                                <option value="2010">2010</option> 
+                                <option value="2009">2009</option> 
+                                <option value="2008">2008</option>
+                                <option value="2007">2007</option>
+                                <option value="2006">2006</option>
+                                <option value="2005">2005</option>
+                                <option value="2004">2004</option>
+                                <option value="2003">2003</option>
+                                <option value="2002">2002</option>
+                                <option value="2001">2001</option>
+                                <option value="2000">2000</option>
+                                <option value="1999">1999</option>
+                                <option value="1998">1998</option>
+                            </select>  -->
+                        </div>
+                        <div class="form-group"> <label for="add-mo-ta">Mô tả</label> <input type="text" id="add-mo-ta" placeholder="Mô tả ngắn..."> </div>
+                        <div class="form-group"> <label for="add-so-luong-ton">Số lượng tồn</label> <input type="number" min="0" id="add-so-luong-ton" placeholder="Số lượng tồn"> </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal-overlay" id="sach-edit-modal"> <!-- SỬA: Đổi ID -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Chỉnh sửa thông tin Sách</h2>
+                <button class="close-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="edit-book-form">
+                <div class="modal-body">
+                    <div class="modal-form-grid">
+                        <div class="form-group"> <label for="edit-ten-sach">Tên sách</label> <input type="text" id="edit-ten-sach" value="Mắt biếc"> </div>
+                        <div class="form-group"> <label for="edit-tac-gia">Tác giả</label> <input type="text" id="edit-tac-gia" value="Nguyễn Nhật Ánh"> </div>
+                        <div class="form-group"> <label for="edit-the-loai">Thể loại</label> <select id="edit-the-loai"> <option value="Truyện ngắn" selected>Truyện ngắn</option> <option value="Tiểu thuyết">Tiểu thuyết</option> <option value="Kỹ năng sống">Kỹ năng sống</option> <option value="Sách giáo khoa">Sách giáo khoa</option> </select> </div>
+                        <div class="form-group"> <label for="edit-nxb">Nhà XB</label> <input type="text" id="edit-nxb" value="Tuổi trẻ"> </div>
+                        <div class="form-group"> <label for="edit-nam-xb">Năm XB</label> <select id="edit-nam-xb"> <option value="2025">2025</option> <option value="2024" selected>2024</option> <option value="2023">2023</option> <option value="2022">2022</option> </select> </div>
+                        <div class="form-group"> <label for="edit-mo-ta">Mô tả</label> <input type="text" id="edit-mo-ta" value="Mô tả sách..."> </div>
+                        <div class="form-group"> <label for="edit-so-luong-ton">Số lượng tồn</label> <input type="text" id="edit-so-luong-ton" value="50"> </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger">Xóa sách</button>
+                    <div> <button type="button" class="btn btn-secondary close-modal">Hủy</button> <button type="submit" class="btn btn-primary">Lưu</button> </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- --- KẾT THÚC MODALS SÁCH --- -->
+
+
+    
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // --- THÊM: Các hàm điều khiển Loader và Toast ---
+            const loader = document.getElementById('loader');
+            const toastContainer = document.getElementById('toast-container');
+            let currentEditingRow = null; // Biến lưu hàng đang sửa
+
+            function showLoader() { loader.style.display = 'flex'; }
+            function hideLoader() { loader.style.display = 'none'; }
+            
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.classList.add('toast', type);
+                toast.innerHTML = `
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i>
+                    <span class="toast-message">${message}</span>
+                `;
+                toastContainer.appendChild(toast);
+                setTimeout(() => { toast.classList.add('show'); }, 100);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    toast.addEventListener('transitionend', () => {
+                        if (toast.parentNode) { toast.parentNode.removeChild(toast); }
+                    });
+                }, 3000);
+            }
+
+            async function callApi(method, url, payload) {
+                showLoader();
+                try {
+                    const response = await fetch(url, {
+                        method,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: payload ? JSON.stringify(payload) : undefined
+                    });
+                    const data = await response.json().catch(() => ({ }));
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Thao tác thất bại');
+                    }
+                    return data;
+                } finally {
+                    hideLoader();
+                }
+            }
+
+            // function simulateApiCall(callback) {
+            //     showLoader();
+            //     setTimeout(() => {
+            //         hideLoader();
+            //         callback(true);
+            //     }, 800);
+            // }
+            
+            // --- Xử lý Sidebar ---
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const container = document.querySelector('.dashboard-container'); 
+            if (menuToggle && sidebar && container) {
+                menuToggle.addEventListener('click', function() {
+                    if (window.innerWidth <= 992) { sidebar.classList.toggle('active'); } 
+                    else { container.classList.toggle('sidebar-collapsed'); }
+                });
+            }
+
+            // --- Xử lý Chuyển Tab ---
+             const tabButtons = document.querySelectorAll('.tab-button');
+             const tabPanes = document.querySelectorAll('.tab-pane');
+             if (tabButtons.length > 0 && tabPanes.length > 0) {
+                 tabButtons.forEach(button => {
+                     button.addEventListener('click', function() {
+                         const targetId = this.dataset.target; 
+                         const targetPane = document.querySelector(targetId);
+                         if (targetPane) {
+                             tabButtons.forEach(btn => btn.classList.remove('active'));
+                             tabPanes.forEach(pane => pane.classList.remove('active'));
+                             this.classList.add('active');
+                             targetPane.classList.add('active');
+                         }
+                     });
+                 });
+             }
+
+            // --- Xử lý Modals SÁCH (từ books.html) ---
+            const sachAddModal = document.getElementById('sach-add-modal');
+            const sachEditModal = document.getElementById('sach-edit-modal');
+            const openSachAddBtn = document.getElementById('open-sach-add-modal');
+            const openSachEditBtns = document.querySelectorAll('.open-sach-edit-modal');
+            const sachCloseBtns = document.querySelectorAll('#sach-add-modal .close-modal, #sach-edit-modal .close-modal');
+            const addSachForm = document.getElementById('add-book-form');
+            const editSachForm = document.getElementById('edit-book-form');
+            const deleteSachBtn = document.getElementById('delete-sach-button');
+
+            if (openSachAddBtn) {
+                openSachAddBtn.addEventListener('click', () => { sachAddModal.style.display = 'flex'; });
+            }
+            openSachEditBtns.forEach(btn => {
+                btn.addEventListener('click', () => { sachEditModal.style.display = 'flex'; });
+            });
+            sachCloseBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => { e.target.closest('.modal-overlay').style.display = 'none'; });
+            });
+
+            // SỬA: Thêm/Sửa/Xóa Sách với Loader/Toast
+            if(addSachForm) addSachForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                // simulateApiCall((success) => {
+                //     if(success) {
+                //         // Logic thêm hàng mới vào #table-sach
+                //         sachAddModal.style.display = 'none';
+                //         showToast('Thêm sách thành công!', 'success');
+                //     } else {
+                //         showToast('Thêm sách thất bại!', 'error');
+                //     }
+                // });
+            });
+            
+            if(editSachForm) editSachForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                // simulateApiCall((success) => {
+                //     if(success) {
+                //         // Logic cập nhật currentEditingRow
+                //         sachEditModal.style.display = 'none';
+                //         showToast('Cập nhật sách thành công!', 'success');
+                //         currentEditingRow = null;
+                //     } else {
+                //         showToast('Cập nhật thất bại!', 'error');
+                //     }
+                // });
+            });
+            
+            if(deleteSachBtn) deleteSachBtn.addEventListener('click', () => {
+                if(confirm('Bạn có chắc muốn xóa sách này?')) {
+                    // simulateApiCall((success) => {
+                    //     if(success) {
+                    //         if(currentEditingRow) currentEditingRow.remove();
+                    //         sachEditModal.style.display = 'none';
+                    //         showToast('Xóa sách thành công!', 'success');
+                    //         currentEditingRow = null;
+                    //     } else {
+                    //         showToast('Xóa thất bại!', 'error');
+                    //     }
+                    // });
+                }
+            });
+
+
+            // --- Xử lý Modals ĐẦU SÁCH (từ quan-ly-dau-sach.html) ---
+            const dausachAddModal = document.getElementById('dausach-add-modal');
+            const dausachEditModal = document.getElementById('dausach-edit-modal');
+            const openDausachAddBtn = document.getElementById('open-dausach-add-modal');
+            const openDausachEditBtns = document.querySelectorAll('.open-dausach-edit-modal');
+            const dausachCloseBtns = document.querySelectorAll('#dausach-add-modal .close-modal, #dausach-edit-modal .close-modal');
+            const addDausachForm = document.getElementById('add-dausach-form');
+            const editDausachForm = document.getElementById('edit-dausach-form');
+            const deleteDausachBtn = document.getElementById('delete-dausach-button');
+
+            if (openDausachAddBtn) {
+                openDausachAddBtn.addEventListener('click', () => { 
+                    addDausachForm.reset();
+                    // Xóa tag tác giả cũ
+                    addDausachForm.querySelectorAll('.author-tag').forEach(tag => tag.remove());
+                    dausachAddModal.style.display = 'flex'; 
+                });
+            }
+            openDausachEditBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => { 
+                    currentEditingRow = e.target.closest('tr');
+                    // TODO: Lấy dữ liệu từ currentEditingRow điền vào form #edit-dausach-form
+                    // (Bao gồm cả việc render các author-tag)
+                    dausachEditModal.style.display = 'flex'; 
+                });
+            });
+            dausachCloseBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => { 
+                    e.target.closest('.modal-overlay').style.display = 'none'; 
+                    currentEditingRow = null;
+                });
+            });
+            
+             // SỬA: Thêm/Sửa/Xóa Đầu Sách với Loader/Toast
+            function collectAuthorIds(wrapper) {
+                return Array.from(wrapper.querySelectorAll('.author-tag'))
+                    .map(tag => tag.dataset.id)
+                    .filter(Boolean);
+            }
+
+            if(addDausachForm) addDausachForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const payload = {
+                    TenSach: document.getElementById('add-ten-sach-ds').value.trim(),
+                    TenTheLoai: document.getElementById('add-ten-the-loai-ds').value,
+                    MoTa: document.getElementById('add-mo-ta-ds').value.trim() || null,
+                    tacGiaIds: collectAuthorIds(document.getElementById('add-author-wrapper'))
+                };
+
+                if (!payload.TenSach) {
+                    showToast('Vui lòng nhập tên sách', 'error');
+                    return;
+                }
+                if (!payload.TenTheLoai) {
+                    showToast('Vui lòng chọn thể loại', 'error');
+                    return;
+                }
+
+                try {
+                    const data = await callApi('POST', '/api/books/dausach', payload);
+                    showToast(data.message || 'Thêm đầu sách thành công!', 'success');
+                    dausachAddModal.style.display = 'none';
+                    // Tải lại danh sách để hiển thị bản ghi mới từ server
+                    window.location.reload();
+                } catch (err) {
+                    showToast(err.message || 'Thêm đầu sách thất bại!', 'error');
+                }
+            });
+            
+            if(editDausachForm) editDausachForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                // simulateApiCall((success) => {
+                //     if(success) {
+                //         // Logic cập nhật currentEditingRow
+                //         dausachEditModal.style.display = 'none';
+                //         showToast('Cập nhật đầu sách thành công!', 'success');
+                //         currentEditingRow = null;
+                //     } else {
+                //         showToast('Cập nhật thất bại!', 'error');
+                //     }
+                // });
+            });
+            
+            if(deleteDausachBtn) deleteDausachBtn.addEventListener('click', () => {
+                if(confirm('Bạn có chắc muốn xóa đầu sách này?')) {
+                    // simulateApiCall((success) => {
+                    //     if(success) {
+                    //         if(currentEditingRow) currentEditingRow.remove();
+                    //         dausachEditModal.style.display = 'none';
+                    //         showToast('Xóa đầu sách thành công!', 'success');
+                    //         currentEditingRow = null;
+                    //     } else {
+                    //         showToast('Xóa thất bại!', 'error');
+                    //     }
+                    // });
+                }
+            });
+
+            
+
+            // --- Logic Modal Chọn Tác giả (Chung cho cả hai) ---
+            const authorModal = document.getElementById('author-select-modal');
+            const openAuthorSelectBtns = document.querySelectorAll('.open-author-select'); // Sửa class
+            const closeAuthorModalBtns = document.querySelectorAll('#author-select-modal .close-modal');
+            const confirmAuthorsBtn = document.getElementById('confirm-authors');
+            const authorChecklist = document.getElementById('author-checklist');
+            let currentAuthorWrapper = null; 
+
+            openAuthorSelectBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    currentAuthorWrapper = e.target.closest('.author-select-wrapper'); 
+                    const selectedIds = [];
+                    currentAuthorWrapper.querySelectorAll('.author-tag').forEach(tag => {
+                        selectedIds.push(tag.dataset.id);
+                    });
+                    authorChecklist.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                        checkbox.checked = selectedIds.includes(checkbox.dataset.id);
+                    });
+                    authorModal.style.display = 'flex';
+                });
+            });
+            
+            closeAuthorModalBtns.forEach(btn => {
+                 btn.addEventListener('click', () => { authorModal.style.display = 'none'; });
+            });
+            
+            confirmAuthorsBtn.addEventListener('click', () => {
+                if (!currentAuthorWrapper) return;
+                currentAuthorWrapper.querySelectorAll('.author-tag').forEach(tag => tag.remove());
+                const selectedCheckboxes = authorChecklist.querySelectorAll('input[type="checkbox"]:checked');
+                selectedCheckboxes.forEach(checkbox => {
+                    const tagHTML = `
+                        <span class="author-tag" data-id="${checkbox.dataset.id}">
+                            ${checkbox.value}
+                            <span class="remove-tag" data-id="${checkbox.dataset.id}">×</span>
+                        </span>
+                    `;
+                    currentAuthorWrapper.querySelector('.author-select-btn').insertAdjacentHTML('beforebegin', tagHTML);
+                });
+                authorModal.style.display = 'none';
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-tag')) {
+                    e.target.closest('.author-tag').remove();
+                }
+            });
+
+            // --- Đóng modal khi click ra ngoài ---
+            window.addEventListener('click', function(event) {
+                if (event.target.matches('.modal-overlay')) { 
+                    event.target.style.display = 'none'; 
+                }
+            });
+            
+        });
+    </script>
+</body>
+</html>

@@ -213,10 +213,22 @@
             margin-bottom: 2rem; 
             padding-bottom: 1.5rem; 
             border-bottom: 1px solid var(--border-color); }
-        #customer-search-form { grid-template-columns: repeat(5, 1fr); }
-        #customer-search-form .search-button-group { grid-column: 5 / 6; }
-        #book-search-form { grid-template-columns: repeat(5, 1fr); }
-        #book-search-form .search-button-group { grid-column: 5 / 6; }
+        #customer-search-form { display: grid;
+            /* Chia làm 4 cột: 3 cột cho input, 1 cột cho nút */
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 1.25rem; 
+            align-items: end; 
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        #book-search-form { grid-template-columns: repeat(4, 1fr); 
+            gap: 1.25rem; 
+            align-items: end; 
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+            margin-bottom: 1rem; 
+        }
         .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
         .form-group label { font-weight: 600; font-size: 0.9rem; color: var(--text-light); }
         .form-group input, .form-group select { 
@@ -257,6 +269,110 @@
         .data-table thead th { background-color: #f9f9f9; font-weight: 600; color: var(--text-light); }
         .data-table tbody tr:hover { background-color: #f5f5f5; }
         /* SỬA: Xóa 2 dòng tbody tr:last-child và .empty-table-rows */
+
+        /* --- CSS CHO INPUT CÓ TOÁN TỬ (MỚI) --- */
+        .input-group {
+            display: flex;
+            align-items: stretch; /* Kéo giãn chiều cao cho bằng nhau */
+        }
+        
+        .input-group select.operator-select {
+            width: 7rem; /* Độ rộng cố định cho ô chọn dấu */
+            padding: 0 0.5rem;
+            background-color: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-right: none; /* Bỏ viền phải để nối liền với input */
+            border-top-left-radius: 6px;
+            border-bottom-left-radius: 6px;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .input-group input {
+            border-top-left-radius: 0 !important;
+            border-bottom-left-radius: 0 !important;
+            flex-grow: 1; 
+            
+            /* --- THÊM MỚI --- */
+            min-width: 4rem;      /* Đặt độ rộng tối thiểu (khoảng 64px) để số luôn hiện rõ */
+            padding-left: 0.75rem; /* Tăng khoảng cách lề trái cho thoáng */
+            padding-right: 0.5rem;
+        }
+
+        .input-group select:focus,
+        .input-group input:focus {
+            z-index: 2; /* Đưa phần tử đang focus lên trên để thấy rõ viền */
+            position: relative;
+        }
+
+        /* --- CSS CHO RANGE INPUT (MỚI) --- */
+        .input-group .range-separator {
+            display: none; /* Mặc định ẩn */
+            align-items: center;
+            padding: 0 0.5rem;
+            background-color: #f8f9fa;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-light);
+            font-weight: bold;
+        }
+
+        .input-group input.input-2 {
+            display: none; /* Mặc định ẩn */
+            border-left: none; 
+        }
+
+        /* Khi hiển thị dạng khoảng (Class 'mode-range' sẽ được thêm bằng JS) */
+        .input-group.mode-range .range-separator {
+            display: flex;
+        }
+        .input-group.mode-range input.input-2 {
+            display: block;
+        }
+        
+        /* Chỉnh lại bo góc khi hiện 2 ô input */
+        .input-group.mode-range input:first-of-type {
+            border-right: none;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        /* --- CSS ĐƯA TỔNG NỢ XUỐNG HÀNG --- */
+        #fg-sl-ton, #fg-tong-no {
+            grid-column: 1 / 4; /* Bắt đầu cột 1, kết thúc ở vạch 4 (tức là chiếm cột 1,2,3) */
+            grid-row: 2;        /* Ép xuống hàng thứ 2 */
+        }
+        
+        /* Xóa max-width cũ đi để nó tự động giãn bằng 3 cột trên */
+        #fg-sl-ton .input-group, #fg-tong-no .input-group {
+            max-width: none; 
+        }
+
+        /* 2. Nút tìm kiếm: Nằm ở hàng 1, cột cuối cùng (cột 4) */
+        #book-search-form .search-button-group, #customer-search-form .search-button-group {
+            grid-column: 4 / 5; /* Nằm ở cột 4 */
+            grid-row: 1;        /* Ép lên hàng 1 */
+        }
+        
+        /* Chỉnh lại nút cho đẹp (chiều cao bằng ô input) */
+        #book-search-form .search-button-group .btn, #customer-search-form .search-button-group .btn {
+            width: 100%;
+            padding: 0.75rem;
+        }
+
+        /* --- CSS NHÃN BẢNG KẾT QUẢ --- */
+        .table-caption {
+            font-size: 1.1rem;         /* Cỡ chữ vừa phải */
+            font-weight: 700;          /* In đậm */
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;     /* Cách bảng một chút xíu thôi (khoảng 8px) */
+            text-transform: uppercase; /* Chữ in hoa */
+            letter-spacing: 0.05rem;   /* Dãn chữ nhẹ cho thoáng */
+        }
 
         /* --- THÊM: CSS CHO LOADER VÀ TOAST --- */
         .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.7); display: none; justify-content: center; align-items: center; z-index: 2000; }
@@ -318,7 +434,7 @@
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="/dashboard" class="active"><i class="fas fa-home"></i>Tổng quan</a></li>
+                    <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
                     <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
                     <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
                     <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
@@ -326,7 +442,7 @@
                     <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
                     <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
                     <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
-                    <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
+                    <li><a href="/dashboard/search" class="active"><i class="fas fa-search"></i> Tra cứu</a></li>
                     <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
                     <li><a href="/dashboard/changerule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
@@ -368,10 +484,26 @@
                             <div class="form-group"> <label for="search-ho-ten">Họ Tên</label> <input type="text" id="search-ho-ten"> </div>
                             <div class="form-group"> <label for="search-sdt">SĐT</label> <input type="tel" id="search-sdt"> </div>
                             <div class="form-group"> <label for="search-dia-chi">Địa chỉ</label> <input type="text" id="search-dia-chi"> </div>
-                            <div class="form-group"> <label for="search-tong-no">Tổng nợ</label> <input type="text" id="search-tong-no"> </div>
+                            <div class="form-group" id="fg-tong-no"> 
+                                <label>Tổng nợ</label> 
+                                <div class="input-group" id="group-tong-no">
+                                    <select class="operator-select" id="op-tong-no" onchange="toggleRange('group-tong-no', this.value)">
+                                        <option value="=">=</option>
+                                        <option value="between">Khoảng</option> <option value=">">></option>
+                                        <option value=">=">≥</option>
+                                        <option value="<"><</option>
+                                        <option value="<=">≤</option>
+                                    </select>
+                                    
+                                    <input type="number" id="search-tong-no-from">
+                                    <span class="range-separator">-</span>
+                                    <input type="number" id="search-tong-no-to" class="input-2"> 
+                                </div>
+                            </div>
                             <div class="search-button-group"> <button type="submit" class="btn btn-primary">Tìm kiếm</button> </div>
                         </form>
                         <div class="table-responsive">
+                            <h3 class="table-caption">Kết quả tìm kiếm</h3>
                             <table class="data-table" id="customer-results-table"> 
                                 <thead> <tr> <th>STT</th> <th>Họ Tên</th> <th>Địa chỉ</th> <th>SĐT</th> <th>Tổng nợ</th> </tr> </thead>
                                 <tbody>
@@ -388,10 +520,26 @@
                             <div class="form-group"> <label for="search-ten-sach">Tên sách</label> <input type="text" id="search-ten-sach"> </div>
                             <div class="form-group"> <label for="search-tac-gia">Tác giả</label> <input type="text" id="search-tac-gia"> </div>
                             <div class="form-group"> <label for="search-the-loai">Thể loại</label> <input type="text" id="search-the-loai"> </div>
-                            <div class="form-group"> <label for="search-so-luong-ton">Số lượng tồn</label> <input type="number" id="search-so-luong-ton"> </div>
+                            <div class="form-group" id="fg-sl-ton"> 
+                                <label>Số lượng tồn</label> 
+                                <div class="input-group" id="group-sl-ton">
+                                    <select class="operator-select" id="op-sl-ton" onchange="toggleRange('group-sl-ton', this.value)">
+                                        <option value="=">=</option>
+                                        <option value="between">Khoảng</option> <option value=">">></option>
+                                        <option value=">=">≥</option>
+                                        <option value="<"><</option>
+                                        <option value="<=">≤</option>
+                                    </select>
+                                    
+                                    <input type="number" id="search-sl-ton-from">
+                                    <span class="range-separator">-</span>
+                                    <input type="number" id="search-sl-ton-to" class="input-2"> 
+                                </div>
+                            </div>
                             <div class="search-button-group"> <button type="submit" class="btn btn-primary">Tìm kiếm</button> </div>
                         </form>
                         <div class="table-responsive">
+                            <h3 class="table-caption">Kết quả tìm kiếm</h3>
                             <table class="data-table" id="book-results-table"> 
                                 <thead> <tr> <th>STT</th> <th>Tên sách</th> <th>Thể loại</th> <th>Tác giả</th> <th>Số lượng tồn</th> </tr> </thead>
                                 <tbody>
@@ -473,38 +621,71 @@
                  });
              }
 
-             // --- SỬA: Xử lý Form Tìm kiếm ---
-             const customerSearchForm = document.getElementById('customer-search-form');
-             const bookSearchForm = document.getElementById('book-search-form');
-             
-             if(customerSearchForm){
-                 customerSearchForm.addEventListener('submit', function(event){ 
-                     event.preventDefault(); 
-                     console.log("Tìm kiếm Khách hàng..."); 
-                     simulateApiCall((success) => {
-                         if(success) {
-                             showToast('Tìm thấy 1 kết quả!', 'success');
-                             // TODO: Cập nhật bảng #customer-results-table
-                         } else {
-                             showToast('Không tìm thấy kết quả nào!', 'error');
-                         }
-                     });
-                 });
-             }
-             if(bookSearchForm){
-                 bookSearchForm.addEventListener('submit', function(event){ 
-                     event.preventDefault(); 
-                     console.log("Tìm kiếm Sách..."); 
-                     simulateApiCall((success) => {
-                         if(success) {
-                             showToast('Tìm thấy 1 kết quả!', 'success');
-                              // TODO: Cập nhật bảng #book-results-table
-                         } else {
-                             showToast('Không tìm thấy kết quả nào!', 'error');
-                         }
-                     });
-                 });
-             }
+             // Hàm bật/tắt chế độ nhập khoảng
+            window.toggleRange = function(groupId, value) {
+                const group = document.getElementById(groupId);
+                const input1 = group.querySelector('input:first-of-type');
+                
+                if (value === 'between') {
+                    // Bật chế độ range
+                    group.classList.add('mode-range');
+                } else {
+                    // Tắt chế độ range
+                    group.classList.remove('mode-range');
+                }
+            }
+
+             // Xử lý Tìm kiếm KHÁCH HÀNG
+            const customerSearchForm = document.getElementById('customer-search-form');
+            if(customerSearchForm){
+                customerSearchForm.addEventListener('submit', function(event){ 
+                    event.preventDefault(); 
+                    
+                    const operator = document.getElementById('op-tong-no').value;
+                    const valFrom = document.getElementById('search-tong-no-from').value;
+                    const valTo = document.getElementById('search-tong-no-to').value;
+                    
+                    let logMsg = `Tìm Khách hàng: Tổng nợ `;
+                    
+                    if(operator === 'between') {
+                        logMsg += `từ ${valFrom} đến ${valTo}`;
+                    } else {
+                        logMsg += `${operator} ${valFrom}`;
+                    }
+                    
+                    console.log(logMsg);
+                    
+                    simulateApiCall((success) => {
+                        if(success) showToast('Đã tìm thấy dữ liệu!', 'success');
+                    });
+                });
+            }
+
+            // Xử lý Tìm kiếm SÁCH
+            const bookSearchForm = document.getElementById('book-search-form');
+            if(bookSearchForm){
+                bookSearchForm.addEventListener('submit', function(event){ 
+                    event.preventDefault(); 
+                    
+                    const operator = document.getElementById('op-sl-ton').value;
+                    const valFrom = document.getElementById('search-sl-ton-from').value;
+                    const valTo = document.getElementById('search-sl-ton-to').value;
+
+                    let logMsg = `Tìm Sách: SL Tồn `;
+                    
+                    if(operator === 'between') {
+                        logMsg += `từ ${valFrom} đến ${valTo}`;
+                    } else {
+                        logMsg += `${operator} ${valFrom}`;
+                    }
+
+                    console.log(logMsg);
+
+                    simulateApiCall((success) => {
+                        if(success) showToast('Đã tìm thấy dữ liệu!', 'success');
+                    });
+                });
+            }
         });
     </script>
 

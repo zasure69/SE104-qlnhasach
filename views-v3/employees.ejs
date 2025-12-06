@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DS Khách hàng - Quản lý</title>
+    <title>DS Nhân viên - Quản lý</title>
     
     <!-- Link Font Awesome để có icon --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -55,8 +55,8 @@
             padding: 1.5rem;
             display: flex;
             flex-direction: column;
-            transition: all 0.3s ease-in-out; 
-            overflow-x: hidden; 
+            transition: all 0.3s ease-in-out; /* SỬA */
+            overflow-x: hidden; /* SỬA */
         }
 
         .sidebar-header {
@@ -129,16 +129,17 @@
             margin-bottom: 1.5rem;
         }
         
-        .top-bar-left { /* THÊM */
+        /* SỬA: Thêm top-bar-left */
+        .top-bar-left {
             display: flex;
             align-items: center;
             gap: 1rem;
         }
         
-        .top-bar-left h1 { /* SỬA: Chuyển h1 vào left */
+        .top-bar-left h1 { /* SỬA: Bỏ h1 khỏi top-bar trực tiếp */
             font-size: 1.75rem;
             font-weight: 700;
-            margin: 0; /* THÊM */
+            margin: 0;
         }
 
         .user-menu {
@@ -223,12 +224,11 @@
             margin-bottom: 1.5rem;
         }
         
-        /* THÊM: Sửa h2 trong content-header */
+        /* THÊM */
         .content-header h2 {
             font-size: 1.5rem;
             font-weight: 700;
         }
-
 
         /* --- Các loại nút --- */
         .btn {
@@ -267,37 +267,19 @@
             background-color: var(--red-accent-hover);
         }
 
-        .btn-warning {
-            background-color: #f39c12; /* Màu cam */
-            color: white;
-        }
-        .btn-warning:hover {
-            background-color: #d35400;
-        }
-
-        #btn-custom-reset {
-            background-color: #6c757d; /* Màu xám đậm chuẩn UI */
-            color: #ffffff;            /* Chữ màu trắng */
-        }
-
-        #btn-custom-reset:hover {
-            background-color: #5a6268; /* Màu hover đậm hơn chút */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Thêm bóng đổ nhẹ khi di chuột */
-        }
-
         /* --- Bảng --- */
         .table-responsive {
             overflow-x: auto;
         }
 
-        .data-table { 
+        .employee-table {
             width: 100%;
             border-collapse: collapse;
             min-width: 800px; 
         }
 
-        .data-table th,
-        .data-table td {
+        .employee-table th,
+        .employee-table td {
             padding: 0.85rem 1rem;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
@@ -305,13 +287,13 @@
             vertical-align: middle;
         }
 
-        .data-table thead th {
+        .employee-table thead th {
             background-color: #f9f9f9;
             font-weight: 600;
             color: var(--text-light);
         }
 
-        .data-table tbody tr:hover {
+        .employee-table tbody tr:hover {
             background-color: #f5f5f5;
         }
 
@@ -322,19 +304,6 @@
         }
         .action-icon:hover {
             color: #2980b9;
-        }
-
-        /* Hiệu ứng cho icon xóa ở bảng */
-        .action-icon.delete-icon:hover {
-            color: #c0392b !important; /* Đỏ đậm hơn khi hover */
-            transform: scale(1.2); /* Phóng to nhẹ */
-            transition: all 0.2s;
-        }
-
-        .action-icon.open-edit-modal:hover {
-            color: #2980b9; /* Màu xanh dương khi hover */
-            transform: scale(1.2); /* Phóng to nhẹ */
-            transition: all 0.2s;
         }
 
 
@@ -379,7 +348,7 @@
         }
 
         .close-modal {
-            font-size: 1.5rem;
+            font-size: 1.5rem; /* SỬA: Tăng kích thước */
             color: var(--text-light);
             cursor: pointer;
             background: none;
@@ -393,7 +362,7 @@
 
         .modal-form-grid { 
             display: grid;
-            grid-template-columns: 1fr 1fr; 
+            grid-template-columns: 1fr 1fr;
             gap: 1.25rem;
         }
 
@@ -408,8 +377,13 @@
             font-size: 0.9rem;
         }
 
+        /* Wrapper cho input date có icon lịch */
         .date-input-wrapper {
             position: relative;
+        }
+        /* THÊM: Căn icon lịch cho input modal */
+        .modal-form-grid .date-input-wrapper input[type="date"] {
+             padding: 0.75rem;
         }
         .date-input-wrapper .calendar-icon {
             position: absolute;
@@ -419,58 +393,42 @@
             color: var(--text-light);
             pointer-events: none; 
         }
-        
+
         .form-group input,
-        .form-group select, 
-        .form-group textarea { 
+        .form-group select {
             width: 100%;
             padding: 0.75rem;
             border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 0.9rem;
-            font-family: inherit; 
-        }
-        .form-group textarea {
-            min-height: 80px; 
-            resize: vertical; 
         }
         .form-group input:focus,
-        .form-group select:focus, 
-        .form-group textarea:focus {
+        .form-group select:focus {
             outline: none;
             border-color: var(--secondary-color);
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-        }
-
-        /* --- CSS CHO INPUT KHÔNG ĐƯỢC NHẬP (Disabled & Readonly) --- */
-        .form-group input:disabled,
-        .form-group select:disabled,
-        .form-group textarea:disabled,
-        .form-group input:read-only, 
-        .form-group textarea:read-only {
-            background-color: var(--disabled-bg); /* Màu nền xám (#e9ecef) */
-            color: #6c757d;                       /* Màu chữ xám đậm cho cảm giác "chìm" đi */
-            cursor: not-allowed;                  /* Đổi con trỏ chuột để báo hiệu */
-            border-color: #d6d8db;                /* Viền nhạt hơn chút */
-        }
-
-        /* Tinh chỉnh riêng cho Read-only (vẫn cho phép bôi đen copy nhưng không sửa) */
-        .form-group input:read-only,
-        .form-group textarea:read-only {
-            cursor: default; /* Con trỏ chuột bình thường */
-        }
-
-        .form-group label.required::after {
-            content: "*";               /* Thêm dấu sao */
-            color: var(--red-accent);    /* Màu đỏ (lấy từ biến màu đỏ của bạn) */
-            font-weight: bold;           /* In đậm */
-            margin-left: 4px;            /* Cách ra một chút cho đẹp */
         }
         
         /* THÊM: Input disabled */
         .form-group input:disabled {
             background-color: var(--disabled-bg);
             cursor: not-allowed;
+        }
+
+        /* Wrapper cho input password có icon */
+        .password-wrapper {
+            position: relative;
+        }
+        .password-wrapper input {
+            padding-right: 2.5rem; 
+        }
+        .toggle-password {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            cursor: pointer;
         }
 
         .modal-footer {
@@ -483,7 +441,7 @@
             border-bottom-left-radius: 12px;
             border-bottom-right-radius: 12px;
         }
-        
+
         .modal-footer .btn {
             flex-grow: 1; 
             text-align: center;
@@ -560,11 +518,12 @@
             .sidebar.active {
                 left: 0; 
             }
-
-            .menu-toggle {
-                 display: block; 
-            }
             
+             /* SỬA: Hiển thị nút menu */
+            .menu-toggle {
+                display: block;
+            }
+
             .main-content {
                 padding: 1rem;
             }
@@ -574,7 +533,7 @@
         }
         
         @media (max-width: 768px) {
-             .modal-form-grid { 
+            .modal-form-grid { 
                 grid-template-columns: 1fr;
             }
 
@@ -615,20 +574,21 @@
                 flex-direction: column;
                 gap: 0.75rem;
             }
-             .modal-footer .btn {
+            .modal-footer .btn {
+                width: 100%;
+                /* SỬA: Bỏ flex-grow */
                 flex-grow: 0; 
-                width: 100%; 
-                font-size: 0.9rem; 
-             }
-              #edit-modal .modal-footer > div .btn {
-                 flex-grow: 0; 
-             }
+                font-size: 0.9rem;
+            }
+            #edit-modal .modal-footer > div .btn {
+                flex-grow: 0;
+            }
         }
 
     </style>
 </head>
 <body>
-
+    
     <!-- THÊM: Loader và Toast Container -->
     <div class="loader-overlay" id="loader">
         <div class="loader"></div>
@@ -645,10 +605,11 @@
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
+                    <li><a href="/dashboard" class="active"><i class="fas fa-home"></i>Tổng quan</a></li>
                     <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
                     <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
-                    <li><a href="/dashboard/customers" class="active"><i class="fas fa-id-card"></i>QL Khách hàng</a></li>
+                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
+                    <li><a href="/dashboard/types"><i class="fas fa-tags"></i>QL Thể loại & Tác giả</a></li>
                     <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
                     <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
                     <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
@@ -662,12 +623,12 @@
         <main class="main-content">
             
             <header class="top-bar">
-                <!-- SỬA: Bọc header bằng div -->
+                <!-- SỬA: Bọc div -->
                 <div class="top-bar-left">
                     <button class="menu-toggle" id="menu-toggle">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <h1>Quản lý Khách hàng</h1> 
+                    <h1>Quản lý Nhân viên</h1>
                 </div>
                 <div class="user-menu">
                     <span class="user-trigger">
@@ -684,51 +645,55 @@
 
             <div class="content-wrapper">
                 <div class="content-header">
-                    <h2>Danh sách Khách hàng</h2>
-                    <button class="btn btn-primary btn-add-new" id="open-add-modal"> 
-                        <i class="fas fa-plus"></i> Thêm mới Khách hàng
+                    <h2>Danh sách Nhân viên</h2>
+                    <button class="btn btn-primary btn-add-new" id="open-add-modal">
+                        <i class="fas fa-plus"></i> Thêm mới Nhân viên
                     </button>
                 </div>
 
                 <div class="table-responsive">
-                    <table class="data-table" id="customer-table"> <!-- THÊM ID -->
+                    <table class="employee-table" id="employee-table"> <!-- THÊM ID -->
                         <thead>
                             <tr>
                                 <th>STT</th>
-                                <th>Mã KH</th> 
+                                <th>Mã NV</th>
                                 <th>Họ Tên</th>
                                 <th>Ngày sinh</th>
                                 <th>Số điện thoại</th>
-                                <th>Giới tính</th>
-                                <th>Địa chỉ</th>
+                                <th>Chức vụ</th>
+                                <th>Username</th>
+                                <th>Password</th>
+                                <th>Ngày nhận việc</th>
                                 <th></th> 
                             </tr>
                         </thead>
                         <tbody>
-                            <tr data-id="KH01"> <!-- THÊM data-id -->
+                            <tr data-id="NV01"> <!-- THÊM data-id -->
                                 <td>1</td>
-                                <td>KH01</td>
+                                <td>NV01</td>
                                 <td>Nguyễn Văn A</td>
                                 <td>01/01/1990</td>
                                 <td>0123456789</td>
-                                <td>Nam</td>
-                                <td>Số 1, Mạc Đĩnh Chi</td>
+                                <td>NV Bán hàng</td>
+                                <td>anv90</td>
+                                <td>123456</td>
+                                <td>01/01/2025</td>
                                 <td>
                                     <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
-                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
                                 </td>
                             </tr>
-                             <tr data-id="KH02"> <!-- THÊM data-id -->
+                            <tr data-id="NV02"> <!-- THÊM data-id -->
                                 <td>2</td>
-                                <td>KH02</td>
+                                <td>NV02</td>
                                 <td>Trần Thị B</td>
-                                <td>15/05/1995</td>
+                                <td>05/10/1995</td>
                                 <td>0987654321</td>
-                                <td>Nữ</td>
-                                <td>Số 2, Lê Lợi</td>
+                                <td>NV Kho</td>
+                                <td>btt95</td>
+                                <td>******</td>
+                                <td>15/03/2024</td>
                                 <td>
                                     <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
-                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
                                 </td>
                             </tr>
                         </tbody>
@@ -739,46 +704,59 @@
     </div>
 
 
-    <!-- --- MODAL THÊM MỚI KHÁCH HÀNG --- -->
+    <!-- --- MODAL THÊM MỚI NHÂN VIÊN --- -->
     <div class="modal-overlay" id="add-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Thêm mới thông tin Khách hàng</h2>
+                <h2>Thêm mới thông tin Nhân viên</h2>
                 <button class="close-modal"><i class="fas fa-times"></i></button>
             </div>
-            <form id="add-kh-form"> 
+            <form id="add-employee-form">
                 <div class="modal-body">
-                    <div class="modal-form-grid"> 
+                    <div class="modal-form-grid">
                         <div class="form-group">
-                            <label for="add-ho-ten-kh" class="required">Họ Tên</label>
-                            <input type="text" id="add-ho-ten-kh" placeholder="Nguyễn Văn An" required> <!-- THÊM required -->
-                        </div>
-                         <div class="form-group">
-                            <label for="add-ngay-sinh-kh" class="required">Ngày sinh</label>
+                            <label for="add-ngay-nhan-viec">Ngày nhận việc</label>
                             <div class="date-input-wrapper">
-                                <input type="date" id="add-ngay-sinh-kh">
+                                <input type="date" id="add-ngay-nhan-viec" value="2025-01-01" required>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="add-gioi-tinh-kh" class="required">Giới tính</label>
-                            <select id="add-gioi-tinh-kh">
-                                <option value="Nam">Nam</option>
-                                <option value="Nữ">Nữ</option>
-                                <option value="Khác">Khác</option>
-                            </select>
+                            <label for="add-ho-ten">Họ Tên</label>
+                            <input type="text" id="add-ho-ten" placeholder="Nguyễn Văn An" required>
                         </div>
                         <div class="form-group">
-                            <label for="add-sdt-kh" class="required">Số điện thoại</label>
-                            <input type="number" id="add-sdt-kh" placeholder="0123456789">
+                            <label for="add-ngay-sinh">Ngày sinh</label>
+                            <div class="date-input-wrapper">
+                                <input type="date" id="add-ngay-sinh" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-sdt">Số điện thoại</label>
+                            <input type="tel" id="add-sdt" placeholder="0123456789">
+                        </div>
+                        <div class="form-group">
+                            <label for="add-username">Tên đăng nhập</label>
+                            <input type="text" id="add-username" placeholder="anvnv" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-password">Mật khẩu</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="add-password" placeholder="******" required>
+                                <span class="toggle-password"><i class="fas fa-eye-slash"></i></span>
+                            </div>
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
-                            <label for="add-dia-chi-kh" class="required">Địa chỉ</label>
-                            <textarea id="add-dia-chi-kh" placeholder="Số nhà, đường, phường/xã,..."></textarea>
+                             <label for="add-chuc-vu">Chức vụ</label>
+                             <select id="add-chuc-vu">
+                                 <option value="NV Bán hàng">NV Bán hàng</option>
+                                 <option value="NV Kho">NV Kho</option>
+                                 <option value="Quản lý">Quản lý</option>
+                             </select>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="btn-custom-reset">Thêm mới</button>
+                    <button type="button" class="btn btn-secondary close-modal">Hủy</button>
                     <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
             </form>
@@ -786,47 +764,63 @@
     </div>
 
 
-    <!-- --- MODAL CHỈNH SỬA KHÁCH HÀNG --- -->
+    <!-- --- MODAL CHỈNH SỬA NHÂN VIÊN --- -->
     <div class="modal-overlay" id="edit-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Chỉnh sửa thông tin Khách hàng</h2>
+                <h2>Chỉnh sửa thông tin Nhân viên</h2>
                 <button class="close-modal"><i class="fas fa-times"></i></button>
             </div>
-            <form id="edit-kh-form">
+            <form id="edit-employee-form">
                 <div class="modal-body">
-                     <div class="modal-form-grid"> 
+                    <div class="modal-form-grid">
                         <div class="form-group">
-                            <label for="edit-ho-ten-kh">Họ Tên</label>
-                            <input type="text" id="edit-ho-ten-kh" value="Nguyễn Văn An" required> <!-- THÊM required -->
-                        </div>
-                         <div class="form-group">
-                            <label for="edit-ngay-sinh-kh">Ngày sinh</label>
+                            <label for="edit-ngay-nhan-viec">Ngày nhận việc</label>
                             <div class="date-input-wrapper">
-                                <input type="date" id="edit-ngay-sinh-kh" value="1990-01-01">
+                                <input type="date" id="edit-ngay-nhan-viec" value="2025-01-01" required>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="edit-gioi-tinh-kh">Giới tính</label>
-                            <select id="edit-gioi-tinh-kh">
-                                <option value="Nam" selected>Nam</option>
-                                <option value="Nữ">Nữ</option>
-                                <option value="Khác">Khác</option>
-                            </select>
+                            <label for="edit-ho-ten">Họ Tên</label>
+                            <input type="text" id="edit-ho-ten" value="Nguyễn Văn An" required>
                         </div>
                         <div class="form-group">
-                            <label for="edit-sdt-kh">Số điện thoại</label>
-                            <input type="number" id="edit-sdt-kh" value="0123456789">
+                            <label for="edit-ngay-sinh">Ngày sinh</label>
+                            <div class="date-input-wrapper">
+                                <input type="date" id="edit-ngay-sinh" value="1990-01-01" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-sdt">Số điện thoại</label>
+                            <input type="tel" id="edit-sdt" value="0123456789">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-username">Tên đăng nhập</label>
+                            <input type="text" id="edit-username" value="anvnv" required readonly> <!-- SỬA: Khóa Username -->
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-password">Mật khẩu (Để trống nếu không đổi)</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="edit-password" placeholder="******">
+                                <span class="toggle-password"><i class="fas fa-eye-slash"></i></span>
+                            </div>
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
-                            <label for="edit-dia-chi-kh">Địa chỉ</label>
-                            <textarea id="edit-dia-chi-kh">Số 1, Mạc Đĩnh Chi</textarea>
+                             <label for="edit-chuc-vu">Chức vụ</label>
+                             <select id="edit-chuc-vu">
+                                 <option value="NV Bán hàng" selected>NV Bán hàng</option>
+                                 <option value="NV Kho">NV Kho</option>
+                                 <option value="Quản lý">Quản lý</option>
+                             </select>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-warning" id="btn-reset-edit">Đặt lại</button>
-                    <button type="submit" class="btn btn-primary">Lưu</button>
+                    <button type="button" class="btn btn-danger" id="delete-employee-button">Xóa nhân viên</button>
+                    <div>
+                        <button type="button" class="btn btn-secondary close-modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -836,18 +830,21 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             
-            // --- 1. CÁC HÀM TIỆN ÍCH (LOADER, TOAST) ---
+            // --- THÊM: Các hàm điều khiển Loader và Toast ---
             const loader = document.getElementById('loader');
             const toastContainer = document.getElementById('toast-container');
             let currentEditingRow = null; 
-    
+
             function showLoader() { loader.style.display = 'flex'; }
             function hideLoader() { loader.style.display = 'none'; }
             
             function showToast(message, type = 'success') {
                 const toast = document.createElement('div');
                 toast.classList.add('toast', type);
-                toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i><span class="toast-message">${message}</span>`;
+                toast.innerHTML = `
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i>
+                    <span class="toast-message">${message}</span>
+                `;
                 toastContainer.appendChild(toast);
                 setTimeout(() => { toast.classList.add('show'); }, 100);
                 setTimeout(() => {
@@ -857,260 +854,179 @@
                     });
                 }, 3000);
             }
-    
+
             function simulateApiCall(callback) {
                 showLoader();
                 setTimeout(() => {
                     hideLoader();
-                    const success = Math.random() > 0.1; // 90% thành công
+                    const success = Math.random() > 0.2; 
                     callback(success); 
-                }, 1000); 
+                }, 1500); 
             }
-    
-            // --- 2. XỬ LÝ SIDEBAR & RESPONSIVE ---
+            // --- KẾT THÚC HÀM MỚI ---
+
+            
+            // --- Xử lý Responsive Sidebar ---
             const menuToggle = document.getElementById('menu-toggle');
             const sidebar = document.getElementById('sidebar');
             const container = document.querySelector('.dashboard-container'); 
-    
+
             if (menuToggle && sidebar && container) {
                 menuToggle.addEventListener('click', function() {
-                    if (window.innerWidth <= 992) { sidebar.classList.toggle('active'); } 
-                    else { container.classList.toggle('sidebar-collapsed'); }
-                });
-            }
-    
-            // --- 3. HÀM LOGIC CỐT LÕI (SMART MODAL) ---
-            
-            // Hàm lấy dữ liệu từ Form (snapshot)
-            function getFormData(form) {
-                const data = {};
-                const inputs = form.querySelectorAll('input, select, textarea');
-                inputs.forEach(input => {
-                    if(input.type !== 'submit' && input.type !== 'button') {
-                        data[input.id] = input.value;
+                    if (window.innerWidth <= 992) {
+                        sidebar.classList.toggle('active');
+                    } else {
+                        container.classList.toggle('sidebar-collapsed');
                     }
                 });
-                return data;
             }
-    
-            // Hàm khôi phục dữ liệu Form
-            function restoreFormData(form, data) {
-                for (const [key, value] of Object.entries(data)) {
-                    const input = form.querySelector(`#${key}`);
-                    if (input) input.value = value;
-                }
+
+            // --- Xử lý Mở/Đóng Modal ---
+            const addModal = document.getElementById('add-modal');
+            const editModal = document.getElementById('edit-modal');
+            
+            const openAddModalBtn = document.getElementById('open-add-modal');
+            const openEditModalBtns = document.querySelectorAll('.open-edit-modal');
+            const closeModalBtns = document.querySelectorAll('.close-modal');
+
+            if (openAddModalBtn && addModal) {
+                openAddModalBtn.addEventListener('click', function() {
+                    document.getElementById('add-employee-form').reset(); // Reset form
+                    addModal.style.display = 'flex';
+                });
             }
-    
-            // Hàm Setup Modal Thông minh (Dùng chung cho Sửa/Xóa/Reset)
-            function setupSmartModal(config) {
-                const addBtn = document.getElementById(config.addBtnId);
-                const addModal = document.getElementById(config.addModalId);
-                
-                const editModal = document.getElementById(config.editModalId);
-                const editForm = document.getElementById(config.formId);
-                const editBtns = document.querySelectorAll(config.editBtnClass);
-                
-                const resetBtn = document.getElementById(config.resetBtnId);
-                const table = document.querySelector(config.tableSelector);
-                
-                let originalFormData = {}; // Biến lưu snapshot dữ liệu gốc
-    
-                // A. Mở Modal Thêm mới
-                if (addBtn && addModal) {
-                    addBtn.addEventListener('click', () => {
-                        if(config.addFormId) {
-                            document.getElementById(config.addFormId).reset();
-                        }
-                        addModal.style.display = 'flex';
+
+            // SỬA: Mở modal Chỉnh sửa
+            if (openEditModalBtns.length > 0 && editModal) {
+                openEditModalBtns.forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        currentEditingRow = e.target.closest('tr');
+                        if(!currentEditingRow) return;
+                        
+                        // Giả lập lấy dữ liệu từ hàng
+                        document.getElementById('edit-ho-ten').value = currentEditingRow.cells[2].textContent;
+                        document.getElementById('edit-ngay-sinh').value = '1990-01-01'; // Cần chuyển đổi
+                        document.getElementById('edit-sdt').value = currentEditingRow.cells[4].textContent;
+                        document.getElementById('edit-chuc-vu').value = currentEditingRow.cells[5].textContent;
+                        document.getElementById('edit-username').value = currentEditingRow.cells[6].textContent;
+                        document.getElementById('edit-ngay-nhan-viec').value = '2025-01-01'; // Cần chuyển đổi
+                        document.getElementById('edit-password').value = ''; // Luôn trống
+                        
+                        editModal.style.display = 'flex';
                     });
+                });
+            }
+
+            closeModalBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    btn.closest('.modal-overlay').style.display = 'none';
+                    currentEditingRow = null; // Reset
+                });
+            });
+            window.addEventListener('click', function(event) {
+                if (event.target.classList.contains('modal-overlay')) {
+                    event.target.style.display = 'none';
+                    currentEditingRow = null; // Reset
                 }
-    
-                // B. Mở Modal Sửa (Điền dữ liệu & Lưu snapshot)
-                if (editBtns.length > 0 && editModal) {
-                    editBtns.forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            currentEditingRow = e.target.closest('tr');
-                            if(!currentEditingRow) return;
-    
-                            // --- LOGIC ĐIỀN DỮ LIỆU VÀO FORM ---
-                            // Cấu trúc bảng: STT(0), Mã(1), Tên(2), Ngày sinh(3), SĐT(4), Giới tính(5), Địa chỉ(6)
-                            const cells = currentEditingRow.cells;
-                            document.getElementById('edit-ho-ten-kh').value = cells[2].textContent;
-                            // Giả lập ngày sinh (vì hiển thị là dd/mm/yyyy nhưng input date cần yyyy-mm-dd)
-                            document.getElementById('edit-ngay-sinh-kh').value = '1990-01-01'; 
-                            document.getElementById('edit-sdt-kh').value = cells[4].textContent;
-                            document.getElementById('edit-gioi-tinh-kh').value = cells[5].textContent;
-                            document.getElementById('edit-dia-chi-kh').value = cells[6].textContent;
-    
-                            // SAU KHI điền xong, lưu lại trạng thái gốc
-                            setTimeout(() => {
-                                 if(editForm) originalFormData = getFormData(editForm);
-                            }, 50); 
-                            
-                            editModal.style.display = 'flex';
-                        });
-                    });
-                }
-    
-                // C. Xử lý nút ĐẶT LẠI (Thông minh)
-                if (resetBtn && editForm) {
-                    resetBtn.addEventListener('click', () => {
-                        const currentData = getFormData(editForm);
-                        // So sánh dữ liệu hiện tại với bản gốc
-                        const isChanged = JSON.stringify(currentData) !== JSON.stringify(originalFormData);
-    
-                        if (!isChanged) {
-                            showToast('Chưa có thay đổi nào để đặt lại!', 'error');
-                            return;
-                        }
-    
-                        if (confirm("Dữ liệu đã thay đổi. Bạn có muốn LƯU LẠI không?\n\n- OK: Lưu thay đổi.\n- Cancel: Khôi phục lại dữ liệu gốc.")) {
-                            editForm.requestSubmit(); // Submit form
+            });
+            
+            // --- SỬA: Xử lý Form Submit với Loader/Toast ---
+            const addEmployeeForm = document.getElementById('add-employee-form');
+            if (addEmployeeForm) {
+                addEmployeeForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    simulateApiCall((success) => {
+                        if (success) {
+                            // Logic thêm hàng (giả lập)
+                            const table = document.getElementById('employee-table').getElementsByTagName('tbody')[0];
+                            const newRow = table.insertRow();
+                            newRow.innerHTML = `
+                                <td>${table.rows.length}</td>
+                                <td>NV${String(table.rows.length).padStart(2, '0')}</td>
+                                <td>${document.getElementById('add-ho-ten').value}</td>
+                                <td>${document.getElementById('add-ngay-sinh').value}</td>
+                                <td>${document.getElementById('add-sdt').value}</td>
+                                <td>${document.getElementById('add-chuc-vu').value}</td>
+                                <td>${document.getElementById('add-username').value}</td>
+                                <td>******</td>
+                                <td>${document.getElementById('add-ngay-nhan-viec').value}</td>
+                                <td> <i class="fas fa-pencil-alt action-icon open-edit-modal"></i> </td>
+                            `;
+                            addModal.style.display = 'none';
+                            showToast('Thêm nhân viên thành công!', 'success');
                         } else {
-                            restoreFormData(editForm, originalFormData); // Reset form về gốc
-                            showToast('Đã khôi phục dữ liệu gốc!', 'success');
+                            showToast('Thêm thất bại! Lỗi máy chủ.', 'error');
                         }
                     });
-                }
-    
-                // D. Xử lý nút XÓA (Icon thùng rác ở bảng)
-                if (table) {
-                    table.addEventListener('click', (e) => {
-                        // Bắt sự kiện click vào icon xóa
-                        if (e.target.classList.contains('delete-icon') || e.target.closest('.delete-icon')) {
-                            const row = e.target.closest('tr');
-                            const itemName = row.cells[2].textContent; // Lấy tên KH (cột 3)
-                            
-                            if (confirm(`Bạn có chắc chắn muốn XÓA khách hàng: ${itemName}?`)) {
-                                simulateApiCall((success) => {
-                                    if (success) {
-                                        row.remove();
-                                        showToast('Đã xóa khách hàng thành công!', 'success');
-                                    } else {
-                                        showToast('Lỗi! Không thể xóa (có thể do ràng buộc dữ liệu).', 'error');
-                                    }
-                                });
-                            }
+                });
+            }
+
+            const editEmployeeForm = document.getElementById('edit-employee-form');
+            if (editEmployeeForm) {
+                editEmployeeForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    simulateApiCall((success) => {
+                        if(success) {
+                             if(currentEditingRow) {
+                                // Logic cập nhật hàng (giả lập)
+                                currentEditingRow.cells[2].textContent = document.getElementById('edit-ho-ten').value;
+                                currentEditingRow.cells[3].textContent = document.getElementById('edit-ngay-sinh').value;
+                                currentEditingRow.cells[4].textContent = document.getElementById('edit-sdt').value;
+                                currentEditingRow.cells[5].textContent = document.getElementById('edit-chuc-vu').value;
+                                currentEditingRow.cells[8].textContent = document.getElementById('edit-ngay-nhan-viec').value;
+                             }
+                             editModal.style.display = 'none';
+                             showToast('Cập nhật nhân viên thành công!', 'success');
+                             currentEditingRow = null;
+                        } else {
+                            showToast('Cập nhật thất bại!', 'error');
                         }
                     });
-                }
-    
-                // E. Xử lý Submit Form Sửa
-                if (editForm) {
-                    editForm.addEventListener('submit', (e) => {
-                        e.preventDefault();
+                });
+            }
+            
+            const deleteEmployeeBtn = document.getElementById('delete-employee-button');
+            if(deleteEmployeeBtn) {
+                deleteEmployeeBtn.addEventListener('click', () => {
+                    if (confirm('Bạn có chắc chắn muốn xóa nhân viên này?')) {
                         simulateApiCall((success) => {
-                            if (success) {
+                            if(success) {
                                 if(currentEditingRow) {
-                                    // Cập nhật lại giao diện bảng (Giả lập)
-                                    currentEditingRow.cells[2].textContent = document.getElementById('edit-ho-ten-kh').value;
-                                    currentEditingRow.cells[4].textContent = document.getElementById('edit-sdt-kh').value;
-                                    currentEditingRow.cells[5].textContent = document.getElementById('edit-gioi-tinh-kh').value;
-                                    currentEditingRow.cells[6].textContent = document.getElementById('edit-dia-chi-kh').value;
+                                    currentEditingRow.remove();
                                 }
                                 editModal.style.display = 'none';
-                                showToast(`Cập nhật thông tin thành công!`);
-                            }
-                        });
-                    });
-                }
-            }
-    
-            // --- 4. GỌI HÀM SETUP CHO KHÁCH HÀNG ---
-            setupSmartModal({
-                addBtnId: 'open-add-modal',
-                addModalId: 'add-modal',
-                addFormId: 'add-kh-form',
-                editModalId: 'edit-modal',
-                formId: 'edit-kh-form',
-                editBtnClass: '.open-edit-modal',
-                resetBtnId: 'btn-reset-edit',      // ID nút Đặt lại
-                tableSelector: '#customer-table',  // ID bảng khách hàng
-                typeName: 'Khách hàng'
-            });
-    
-    
-            // --- 5. XỬ LÝ NÚT "THÊM MỚI" (CUSTOM RESET) Ở MODAL THÊM ---
-            // Logic: Nút "Thêm mới" màu xám.
-            // - Nếu có dữ liệu: Hỏi Lưu hay Reset. Reset thì xóa trắng, KHÔNG đóng modal.
-            // - Nếu chưa có dữ liệu: Reset, KHÔNG đóng modal.
-            
-            const btnCustomReset = document.getElementById('btn-custom-reset');
-            const addKhForm = document.getElementById('add-kh-form');
-            
-            if (btnCustomReset && addKhForm) {
-                btnCustomReset.addEventListener('click', () => {
-                    // Kiểm tra xem form có dữ liệu không (check tên KH)
-                    const hasData = document.getElementById('add-ho-ten-kh').value.trim() !== '';
-    
-                    if (hasData) {
-                        // Nếu có dữ liệu -> Hỏi
-                        if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU Khách hàng này trước khi làm mới không?\n\n- OK: Lưu khách hàng này.\n- Cancel: Xóa trắng để nhập khách hàng khác.')) {
-                            // Chọn OK -> Lưu
-                            if (addKhForm.checkValidity()) {
-                                addKhForm.requestSubmit(); 
+                                showToast('Xóa nhân viên thành công!', 'success');
+                                currentEditingRow = null;
                             } else {
-                                addKhForm.reportValidity();
+                                showToast('Xóa thất bại! Không thể xóa quản lý.', 'error');
                             }
-                        } else {
-                            // Chọn Cancel -> Chỉ Reset form, KHÔNG ĐÓNG modal
-                            addKhForm.reset();
-                            showToast('Đã làm mới form!', 'info');
-                        }
-                    } else {
-                        // Nếu chưa nhập gì -> Chỉ Reset cho chắc chắn
-                        addKhForm.reset();
-                        showToast('Form đã sẵn sàng nhập mới.', 'info');
-                    }
-                });
-    
-                // Xử lý sự kiện Submit Form Thêm
-                addKhForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    
-                    const formData = {
-                        HoTen: document.getElementById('add-ho-ten-kh').value.trim(),
-                        NgaySinh: document.getElementById('add-ngay-sinh-kh').value,
-                        GioiTinh: document.getElementById('add-gioi-tinh-kh').value,
-                        SDT: document.getElementById('add-sdt-kh').value,
-                        DiaChi: document.getElementById('add-dia-chi-kh').value.trim()
-                    };
-
-                    showLoader();
-                    try {
-                        const response = await fetch('/api/customers/createCustomers', { // ✅ Sửa đường dẫn
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(formData)
                         });
-                        
-                        const data = await response.json();
-                        hideLoader();
-                        
-                        if(response.ok) {
-                            showToast('Thêm khách hàng thành công!');
-                            document.getElementById('add-modal').style.display = 'none';
-                            location.reload();
-                        } else {
-                            showToast(data.error || 'Có lỗi xảy ra!', 'error');
-                        }
-                    } catch(error) {
-                        hideLoader();
-                        console.error('Error:', error);
-                        showToast('Lỗi kết nối server!', 'error');
                     }
                 });
             }
-    
-            // --- 6. CÁC TIỆN ÍCH KHÁC (Close modal) ---
-            const closeModalBtns = document.querySelectorAll('.close-modal');
-            closeModalBtns.forEach(btn => {
-                btn.addEventListener('click', (e) => { e.target.closest('.modal-overlay').style.display = 'none'; });
-            });
-            window.addEventListener('click', (e) => {
-                if (e.target.classList.contains('modal-overlay')) e.target.style.display = 'none';
-            });
-    
+
+
+             // --- Xử lý Ẩn/Hiện Mật khẩu ---
+            const togglePasswordBtns = document.querySelectorAll('.toggle-password');
+            if (togglePasswordBtns.length > 0) {
+                togglePasswordBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const icon = this.querySelector('i');
+                        // SỬA: Tìm input chính xác hơn
+                        const passwordInput = this.closest('.password-wrapper').querySelector('input'); 
+                        if (passwordInput.type === 'password') {
+                            passwordInput.type = 'text';
+                            icon.classList.remove('fa-eye-slash');
+                            icon.classList.add('fa-eye');
+                        } else {
+                            passwordInput.type = 'password';
+                            icon.classList.remove('fa-eye');
+                            icon.classList.add('fa-eye-slash');
+                        }
+                    });
+                });
+            }
+
         });
     </script>
 

@@ -95,8 +95,8 @@
         width: 100%;
 
         /* === ĐÃ SỬA LẠI ĐỂ CÓ CHỖ CHO ICON BÊN TRONG ===
-              padding: 1rem (trên/dưới) và 3rem (trái/phải)
-            */
+                padding: 1rem (trên/dưới) và 3rem (trái/phải)
+                */
         padding: 1rem 3rem;
 
         border: 1px solid var(--border-color);
@@ -195,6 +195,10 @@
         </div>
 
         <button type="submit" class="login-button">ĐĂNG NHẬP</button>
+        <p
+          id="login-error"
+          style="color: #e74c3c; margin-top: 1rem; display: none"
+        ></p>
       </form>
     </div>
 
@@ -202,12 +206,17 @@
       const togglePassword = document.querySelector("#togglePassword");
       const password = document.querySelector("#password");
       const toggleIcon = togglePassword.querySelector("i");
+      const loginForm = document.querySelector("#login-form");
+      const usernameInput = document.querySelector("#username");
+      const errorBox = document.querySelector("#login-error");
 
       togglePassword.addEventListener("click", function (e) {
+        // Chuyển đổi type của input
         const type =
           password.getAttribute("type") === "password" ? "text" : "password";
         password.setAttribute("type", type);
 
+        // Chuyển đổi icon
         if (type === "password") {
           toggleIcon.classList.remove("fa-eye");
           toggleIcon.classList.add("fa-eye-slash");
@@ -217,40 +226,36 @@
         }
       });
 
-      // XỬ LÝ ĐĂNG NHẬP
-      const loginForm = document.getElementById("login-form");
-
-      loginForm.addEventListener("submit", async function (e) {
-        e.preventDefault();
-
-        const username = document.getElementById("username").value.trim();
-        const password = document.getElementById("password").value;
-
-        if (!username || !password) {
-          alert("Vui lòng nhập đầy đủ thông tin!");
-          return;
-        }
+      loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        errorBox.style.display = "none";
+        errorBox.textContent = "";
 
         try {
-          const response = await fetch("/login", {
+          const response = await fetch("/api/login", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ username, password }),
+            body: JSON.stringify({
+              username: usernameInput.value.trim(),
+              password: password.value,
+            }),
           });
 
-          const data = await response.json();
-
-          if (response.ok) {
-            // Đăng nhập thành công
-            window.location.href = "/dashboard";
-          } else {
-            alert(data.message || "Tên đăng nhập hoặc mật khẩu không đúng!");
+          if (!response.ok) {
+            const data = await response
+              .json()
+              .catch(() => ({ error: "Đăng nhập thất bại" }));
+            errorBox.textContent = data.error || "Đăng nhập thất bại";
+            errorBox.style.display = "block";
+            return;
           }
-        } catch (error) {
-          console.error("Lỗi đăng nhập:", error);
-          alert("Lỗi kết nối server!");
+
+          window.location.href = "/dashboard";
+        } catch (err) {
+          errorBox.textContent = "Không thể kết nối máy chủ";
+          errorBox.style.display = "block";
         }
       });
     </script>

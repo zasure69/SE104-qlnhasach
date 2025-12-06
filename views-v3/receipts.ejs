@@ -285,24 +285,6 @@
             min-width: auto;
         }
 
-        .btn-warning {
-            background-color: #f39c12; /* Màu cam */
-            color: white;
-        }
-        .btn-warning:hover {
-            background-color: #d35400;
-        }
-
-        #btn-custom-reset {
-            background-color: #6c757d; /* Màu xám đậm chuẩn UI */
-            color: #ffffff;            /* Chữ màu trắng */
-        }
-
-        #btn-custom-reset:hover {
-            background-color: #5a6268; /* Màu hover đậm hơn chút */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Thêm bóng đổ nhẹ khi di chuột */
-        }
-
         /* Table */
         .table-responsive {
             overflow-x: auto;
@@ -333,7 +315,6 @@
         .data-table tbody tr:hover {
             background-color: #f5f5f5;
         }
-        
 
         /* SỬA: Style cho icon hành động */
         .action-icon {
@@ -483,44 +464,6 @@
         .form-group input:disabled {
             background-color: var(--disabled-bg);
             color: #777;
-        }
-
-        /* --- CSS CHO INPUT KHÔNG ĐƯỢC NHẬP (Disabled & Readonly) --- */
-        .form-group input:disabled,
-        .form-group select:disabled,
-        .form-group textarea:disabled,
-        .form-group input:read-only, 
-        .form-group textarea:read-only {
-            background-color: var(--disabled-bg); /* Màu nền xám (#e9ecef) */
-            color: #6c757d;                       /* Màu chữ xám đậm cho cảm giác "chìm" đi */
-            cursor: not-allowed;                  /* Đổi con trỏ chuột để báo hiệu */
-            border-color: #d6d8db;                /* Viền nhạt hơn chút */
-        }
-
-        /* Tinh chỉnh riêng cho Read-only (vẫn cho phép bôi đen copy nhưng không sửa) */
-        .form-group input:read-only,
-        .form-group textarea:read-only {
-            cursor: default; /* Con trỏ chuột bình thường */
-        }
-
-        .form-group label.required::after {
-            content: "*";               /* Thêm dấu sao */
-            color: var(--red-accent);    /* Màu đỏ (lấy từ biến màu đỏ của bạn) */
-            font-weight: bold;           /* In đậm */
-            margin-left: 4px;            /* Cách ra một chút cho đẹp */
-        }
-
-        /* Hiệu ứng cho icon xóa ở bảng */
-        .action-icon.delete-icon:hover {
-            color: #c0392b !important; /* Đỏ đậm hơn khi hover */
-            transform: scale(1.2); /* Phóng to nhẹ */
-            transition: all 0.2s;
-        }
-
-        .action-icon.open-edit-modal:hover {
-            color: #2980b9; /* Màu xanh dương khi hover */
-            transform: scale(1.2); /* Phóng to nhẹ */
-            transition: all 0.2s;
         }
 
         /* Modal Footer (Standardized) */
@@ -755,16 +698,17 @@
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
+                    <li><a href="/dashboard" class="active"><i class="fas fa-home"></i>Tổng quan</a></li>
                     <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
                     <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
                     <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
+                    <li><a href="/dashboard/types"><i class="fas fa-tags"></i>QL Thể loại & Tác giả</a></li>
                     <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
-                    <li><a href="/dashboard/receipts" class="active"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
+                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
                     <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
                     <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
                     <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="/dashboard/changerule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li>
+                    <li><a href="/dashboard/changerule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
         </aside>
@@ -816,13 +760,12 @@
                                 <td>500.000</td>
                                 <td>
                                     
-                                    <i class="fas fa-pencil-alt action-icon open-edit-modal" data-id="PT001"
+                                    <i class="fas fa-pencil-alt action-icon view-detail-btn" data-id="PT001"
                                         title="Sửa"></i>
                                     
                                     <button class="btn btn-sm btn-print ml-2"
                                         onclick="alert('Chức năng in hóa đơn HD001')"> <i class="fas fa-print"></i>
                                     </button>
-                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
                                 </td>
                             </tr>
                             <tr>
@@ -832,12 +775,11 @@
                                 <td>25/11/2025</td>
                                 <td>1.200.000</td>
                                 <td>
-                                    <i class="fas fa-pencil-alt action-icon open-edit-modal" data-id="PT002"
+                                    <i class="fas fa-pencil-alt action-icon view-detail-btn" data-id="PT002"
                                         title="Sửa"></i>
                                     <button class="btn btn-sm btn-print ml-2"
                                         onclick="alert('Chức năng in hóa đơn HD001')"> <i class="fas fa-print"></i>
                                     </button>
-                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
                                 </td>
                             </tr>
                         </tbody>
@@ -859,10 +801,10 @@
                     <div class="modal-form-grid">
                         <!-- <div class="form-group"> <label>Mã Phiếu:</label> <input type="text" value="Tự động" disabled>
                         </div> -->
-                        <div class="form-group"> <label class="required">Ngày Thu</label>
+                        <div class="form-group"> <label>Ngày Thu</label>
                             <div class="date-input-wrapper"> <input type="date" id="add-ngay-thu" required> </div>
                         </div>
-                        <div class="form-group"> <label class="required">Mã Khách Hàng</label> <input type="text" id="add-ma-kh"
+                        <div class="form-group"> <label>Mã Khách Hàng</label> <input type="text" id="add-ma-kh"
                                 placeholder="Nhập Mã KH..." required> </div>
                         <div class="form-group"> <label>Họ Tên</label> <input type="text" id="add-ten-kh" readonly>
                         </div>
@@ -872,12 +814,12 @@
                         </div>
                         <div class="form-group"> <label>Email</label> <input type="text" id="add-email" readonly>
                         </div>
-                        <div class="form-group"> <label class="required">Số Tiền Thu</label> <input type="text" id="add-so-tien"
+                        <div class="form-group"> <label>Số Tiền Thu</label> <input type="text" id="add-so-tien"
                                 required inputmode="numeric"> </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="btn-custom-reset">Thêm mới</button>
+                    <button type="button" class="btn btn-secondary close-modal">HỦY</button>
                     <button type="submit" class="btn btn-primary">LƯU</button>
                 </div>
             </form>
@@ -894,26 +836,31 @@
             <form id="edit-receipt-form">
                 <div class="modal-body">
                     <div class="modal-form-grid">
-                        <div class="form-group"> <label class="required">Ngày Thu</label>
+                        <div class="form-group"> <label>Mã Phiếu</label> <input type="text" id="edit-ma-phieu"
+                            readonly> </div>
+                        <div class="form-group"> <label>Ngày Thu</label>
                             <div class="date-input-wrapper"> <input type="date" id="edit-ngay-thu" required></div>
                         </div>
-                        <div class="form-group"> <label class="required">Mã Khách Hàng</label> <input type="text" id="edit-ma-kh"
+                        <div class="form-group"> <label>Mã Khách Hàng</label> <input type="text" id="edit-ma-kh"
                                 required> </div>
                         <div class="form-group"> <label>Họ Tên</label> <input type="text" id="edit-ten-kh" readonly>
                         </div>
                         <div class="form-group"> <label>Địa Chỉ</label> <input type="text" id="edit-dia-chi" readonly>
                         </div>
-                        <div class="form-group"> <label>Số Điện Thoại</label> <input type="number" id="edit-sdt"
+                        <div class="form-group"> <label>Số Điện Thoại</label> <input type="text" id="edit-sdt"
                             readonly> </div>
                         <div class="form-group"> <label>Email</label> <input type="text" id="edit-email" readonly>
                         </div>
-                        <div class="form-group"> <label class="required">Số Tiền Thu</label> <input type="number" id="edit-so-tien"
+                        <div class="form-group"> <label>Số Tiền Thu</label> <input type="text" id="edit-so-tien"
                                 required inputmode="numeric"> </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-warning" id="btn-reset-edit">Đặt lại</button>
-                    <button type="submit" class="btn btn-primary">LƯU</button>
+                    <button type="button" class="btn btn-danger" id="btn-delete-receipt">XÓA PHIẾU THU</button>
+                    <div>
+                        <button type="button" class="btn btn-secondary close-modal">HỦY</button>
+                        <button type="submit" class="btn btn-primary">LƯU</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -921,14 +868,11 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            
-            // --- 1. CÁC HÀM TIỆN ÍCH (Loader, Toast, Format) ---
+            // Utilities
             const loader = document.getElementById('loader');
             const toastContainer = document.getElementById('toast-container');
-            
             function showLoader() { loader.style.display = 'flex'; }
             function hideLoader() { loader.style.display = 'none'; }
-            
             function showToast(message, type = 'success') {
                 const toast = document.createElement('div');
                 toast.classList.add('toast', type);
@@ -937,20 +881,10 @@
                 setTimeout(() => { toast.classList.add('show'); }, 100);
                 setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
             }
-
-            function simulateApiCall(callback) {
-                showLoader();
-                setTimeout(() => {
-                    hideLoader();
-                    callback(true);
-                }, 1000);
-            }
-
             function formatNumber(num) { if (!num) return ''; return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
-            function parseNumber(str) { if (!str) return 0; return parseFloat(str.replace(/\/dashboard/g, '')) || 0; }
+            function parseNumber(str) { if (!str) return 0; return parseFloat(str.replace(/\./g, '')) || 0; }
 
-
-            // --- 2. SIDEBAR ---
+            // Sidebar
             const menuToggle = document.getElementById('menu-toggle');
             const sidebar = document.getElementById('sidebar');
             const container = document.querySelector('.dashboard-container');
@@ -959,8 +893,7 @@
                 else container.classList.toggle('sidebar-collapsed');
             });
 
-
-            // --- 3. AUTO-FILL LOGIC (MOCK DATA) ---
+            // Auto-fill Logic
             function findCustomer(maKH) {
                 const customers = {
                     'KH01': { name: 'Nguyễn Văn A', address: '30 Hoàng Việt', phone: '0123456789', email: 'nva@example.com' },
@@ -970,7 +903,6 @@
             }
 
             ['add', 'edit'].forEach(prefix => {
-                // Auto-fill thông tin khách hàng
                 const maKhInput = document.getElementById(`${prefix}-ma-kh`);
                 if (maKhInput) {
                     maKhInput.addEventListener('blur', function () {
@@ -981,173 +913,72 @@
                             document.getElementById(`${prefix}-sdt`).value = customer.phone;
                             document.getElementById(`${prefix}-email`).value = customer.email;
                         } else {
-                            // Xóa nếu không tìm thấy
-                            ['ten-kh', 'dia-chi', 'sdt', 'email'].forEach(field => {
-                                document.getElementById(`${prefix}-${field}`).value = '';
-                            });
+                            document.getElementById(`${prefix}-ten-kh`).value = '';
+                            document.getElementById(`${prefix}-dia-chi`).value = '';
+                            document.getElementById(`${prefix}-sdt`).value = '';
+                            document.getElementById(`${prefix}-email`).value = '';
                         }
                     });
                 }
 
-                // Format số tiền khi nhập
+                // Format Currency Input
                 const amountInput = document.getElementById(`${prefix}-so-tien`);
                 if (amountInput) {
                     amountInput.addEventListener('input', function () {
-                        // Chỉ giữ lại số
-                        const val = this.value.replace(/[^0-9]/g, '');
-                        this.value = val ? formatNumber(val) : '';
+                        const val = parseNumber(this.value);
+                        this.value = formatNumber(val);
                     });
                 }
             });
 
-
-            // --- 4. LOGIC NÚT "THÊM MỚI" (SMART RESET) - MODAL ADD ---
-            const btnResetAdd = document.getElementById('btn-custom-reset');
-            const addForm = document.getElementById('add-receipt-form');
+            // Modal Handling
             const addModal = document.getElementById('add-modal');
-
-            if(btnResetAdd && addForm) {
-                btnResetAdd.addEventListener('click', () => {
-                    // Kiểm tra xem đã nhập gì chưa (Check mã KH hoặc số tiền)
-                    const hasData = document.getElementById('add-ma-kh').value.trim() !== '' || 
-                                    document.getElementById('add-so-tien').value.trim() !== '';
-
-                    if (hasData) {
-                        if (confirm('Bạn đang nhập dở phiếu thu. Bạn có muốn LƯU phiếu này không?\n\n- OK: Lưu phiếu.\n- Cancel: Xóa trắng để nhập phiếu khác.')) {
-                            // Chọn OK -> Gọi submit form (Lưu)
-                            addForm.requestSubmit();
-                        } else {
-                            // Chọn Cancel -> Reset form, KHÔNG ĐÓNG MODAL
-                            resetAddForm();
-                            showToast('Đã làm mới form!', 'info');
-                        }
-                    } else {
-                        // Chưa nhập gì -> Reset
-                        resetAddForm();
-                    }
-                });
-            }
-
-            function resetAddForm() {
-                addForm.reset();
-                document.getElementById('add-ngay-thu').valueAsDate = new Date();
-            }
-
-
-            // --- 5. LOGIC NÚT "ĐẶT LẠI" (SMART RESTORE) - MODAL EDIT ---
-            const btnResetEdit = document.getElementById('btn-reset-edit');
-            let originalEditState = null; // Biến lưu snapshot
-
-            // Hàm lấy dữ liệu hiện tại để so sánh/lưu trữ
-            function getEditState() {
-                return {
-                    ngayThu: document.getElementById('edit-ngay-thu').value,
-                    maKH: document.getElementById('edit-ma-kh').value,
-                    soTien: document.getElementById('edit-so-tien').value
-                };
-            }
-
-            if(btnResetEdit) {
-                btnResetEdit.addEventListener('click', () => {
-                    if(!originalEditState) return;
-
-                    // 1. Kiểm tra thay đổi
-                    const currentState = getEditState();
-                    const isChanged = JSON.stringify(currentState) !== JSON.stringify(originalEditState);
-
-                    if (!isChanged) {
-                        showToast('Chưa có thay đổi nào để đặt lại!', 'error');
-                        return;
-                    }
-
-                    // 2. Hỏi xác nhận
-                    if (confirm("Dữ liệu đã thay đổi. Bạn có muốn LƯU LẠI không?\n\n- OK (Yes): Lưu thay đổi.\n- Cancel (No): Khôi phục lại dữ liệu gốc.")) {
-                        // Chọn Yes -> Lưu
-                        document.getElementById('edit-receipt-form').requestSubmit();
-                    } else {
-                        // Chọn No -> Khôi phục
-                        document.getElementById('edit-ngay-thu').value = originalEditState.ngayThu;
-                        document.getElementById('edit-ma-kh').value = originalEditState.maKH;
-                        document.getElementById('edit-so-tien').value = originalEditState.soTien;
-                        
-                        // Trigger blur để load lại thông tin khách hàng tương ứng với mã KH cũ
-                        document.getElementById('edit-ma-kh').dispatchEvent(new Event('blur'));
-
-                        showToast('Đã khôi phục dữ liệu gốc!', 'success');
-                    }
-                });
-            }
-
-
-            // --- 6. LOGIC ICON XÓA (NGOÀI BẢNG DANH SÁCH) ---
-            const receiptTable = document.getElementById('receipt-table');
-            if (receiptTable) {
-                receiptTable.addEventListener('click', function(e) {
-                    // Kiểm tra click vào icon xóa
-                    if (e.target.classList.contains('delete-icon') || e.target.closest('.delete-icon')) {
-                        const row = e.target.closest('tr');
-                        const maPhieu = row.cells[1].textContent; // Cột 2 là Mã Phiếu
-                        
-                        if(confirm(`Bạn có chắc chắn muốn XÓA vĩnh viễn phiếu thu ${maPhieu}?`)) {
-                            simulateApiCall((success) => {
-                                if(success) {
-                                    row.remove();
-                                    showToast(`Đã xóa phiếu thu ${maPhieu} thành công!`, 'success');
-                                }
-                            });
-                        }
-                    }
-                });
-            }
-
-
-            // --- 7. XỬ LÝ MỞ/ĐÓNG MODAL ---
-            
-            // Mở Modal Thêm
+            const editModal = document.getElementById('edit-modal');
             const openAddBtn = document.getElementById('open-add-modal');
+
             if (openAddBtn) {
                 openAddBtn.addEventListener('click', () => {
-                    resetAddForm(); // Luôn sạch sẽ khi mở
+                    document.getElementById('add-receipt-form').reset();
+                    document.getElementById('add-ngay-thu').valueAsDate = new Date();
                     addModal.style.display = 'flex';
                 });
             }
 
-            // Mở Modal Sửa (Giả lập load dữ liệu)
-            const openEditBtns = document.querySelectorAll('.open-edit-modal');
-            const editModal = document.getElementById('edit-modal');
-            
-            openEditBtns.forEach(btn => {
+            const viewDetailBtns = document.querySelectorAll('.view-detail-btn');
+            viewDetailBtns.forEach(btn => {
                 btn.addEventListener('click', function () {
                     const id = this.dataset.id;
                     // Mock Load Data
-                    // (Lưu ý: Bạn nên thay bằng dữ liệu thực từ dòng được click hoặc API)
+                    document.getElementById('edit-ma-phieu').value = id;
                     document.getElementById('edit-ngay-thu').value = '2025-11-24';
                     document.getElementById('edit-ma-kh').value = 'KH01';
+                    // Trigger blur to fill info
+                    const event = new Event('blur');
+                    document.getElementById('edit-ma-kh').dispatchEvent(event);
                     document.getElementById('edit-so-tien').value = '500.000';
-                    
-                    // Trigger blur để fill thông tin
-                    document.getElementById('edit-ma-kh').dispatchEvent(new Event('blur'));
-
-                    // LƯU SNAPSHOT (Sau khi dữ liệu đã load xong)
-                    setTimeout(() => {
-                        originalEditState = getEditState();
-                    }, 100);
 
                     editModal.style.display = 'flex';
                 });
             });
 
-            // Đóng Modal
             const closeBtns = document.querySelectorAll('.close-modal');
             closeBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    if(addModal) addModal.style.display = 'none';
-                    if(editModal) editModal.style.display = 'none';
+                    addModal.style.display = 'none';
+                    editModal.style.display = 'none';
                 });
             });
 
+            // Actions
+            function simulateApiCall(callback) {
+                showLoader();
+                setTimeout(() => {
+                    hideLoader();
+                    callback(true);
+                }, 1000);
+            }
 
-            // --- 8. SUBMIT FORM (LƯU) ---
+            const addForm = document.getElementById('add-receipt-form');
             if (addForm) {
                 addForm.addEventListener('submit', (e) => {
                     e.preventDefault();
@@ -1163,9 +994,21 @@
                 editForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     simulateApiCall((success) => {
-                        showToast('Cập nhật phiếu thu thành công!');
+                        showToast('Cập nhật thành công!');
                         editModal.style.display = 'none';
                     });
+                });
+            }
+
+            const deleteBtn = document.getElementById('btn-delete-receipt');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => {
+                    if (confirm('Bạn có chắc muốn xóa phiếu này?')) {
+                        simulateApiCall((success) => {
+                            showToast('Đã xóa phiếu thu!');
+                            editModal.style.display = 'none';
+                        });
+                    }
                 });
             }
 

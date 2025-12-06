@@ -267,24 +267,6 @@
             background-color: var(--red-accent-hover);
         }
 
-        .btn-warning {
-            background-color: #f39c12; /* Màu cam */
-            color: white;
-        }
-        .btn-warning:hover {
-            background-color: #d35400;
-        }
-
-        #btn-custom-reset {
-            background-color: #6c757d; /* Màu xám đậm chuẩn UI */
-            color: #ffffff;            /* Chữ màu trắng */
-        }
-
-        #btn-custom-reset:hover {
-            background-color: #5a6268; /* Màu hover đậm hơn chút */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Thêm bóng đổ nhẹ khi di chuột */
-        }
-
         /* --- Bảng --- */
         .table-responsive {
             overflow-x: auto;
@@ -322,19 +304,6 @@
         }
         .action-icon:hover {
             color: #2980b9;
-        }
-
-        /* Hiệu ứng cho icon xóa ở bảng */
-        .action-icon.delete-icon:hover {
-            color: #c0392b !important; /* Đỏ đậm hơn khi hover */
-            transform: scale(1.2); /* Phóng to nhẹ */
-            transition: all 0.2s;
-        }
-
-        .action-icon.open-edit-modal:hover {
-            color: #2980b9; /* Màu xanh dương khi hover */
-            transform: scale(1.2); /* Phóng to nhẹ */
-            transition: all 0.2s;
         }
 
 
@@ -440,31 +409,6 @@
             outline: none;
             border-color: var(--secondary-color);
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-        }
-
-        /* --- CSS CHO INPUT KHÔNG ĐƯỢC NHẬP (Disabled & Readonly) --- */
-        .form-group input:disabled,
-        .form-group select:disabled,
-        .form-group textarea:disabled,
-        .form-group input:read-only, 
-        .form-group textarea:read-only {
-            background-color: var(--disabled-bg); /* Màu nền xám (#e9ecef) */
-            color: #6c757d;                       /* Màu chữ xám đậm cho cảm giác "chìm" đi */
-            cursor: not-allowed;                  /* Đổi con trỏ chuột để báo hiệu */
-            border-color: #d6d8db;                /* Viền nhạt hơn chút */
-        }
-
-        /* Tinh chỉnh riêng cho Read-only (vẫn cho phép bôi đen copy nhưng không sửa) */
-        .form-group input:read-only,
-        .form-group textarea:read-only {
-            cursor: default; /* Con trỏ chuột bình thường */
-        }
-
-        .form-group label.required::after {
-            content: "*";               /* Thêm dấu sao */
-            color: var(--red-accent);    /* Màu đỏ (lấy từ biến màu đỏ của bạn) */
-            font-weight: bold;           /* In đậm */
-            margin-left: 4px;            /* Cách ra một chút cho đẹp */
         }
         
         /* THÊM: Input disabled */
@@ -645,10 +589,11 @@
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
+                    <li><a href="/dashboard" class="active"><i class="fas fa-home"></i>Tổng quan</a></li>
                     <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
                     <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
-                    <li><a href="/dashboard/customers" class="active"><i class="fas fa-id-card"></i>QL Khách hàng</a></li>
+                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
+                    <li><a href="/dashboard/types"><i class="fas fa-tags"></i>QL Thể loại & Tác giả</a></li>
                     <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
                     <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
                     <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
@@ -715,7 +660,6 @@
                                 <td>Số 1, Mạc Đĩnh Chi</td>
                                 <td>
                                     <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
-                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
                                 </td>
                             </tr>
                              <tr data-id="KH02"> <!-- THÊM data-id -->
@@ -728,7 +672,6 @@
                                 <td>Số 2, Lê Lợi</td>
                                 <td>
                                     <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
-                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
                                 </td>
                             </tr>
                         </tbody>
@@ -750,17 +693,17 @@
                 <div class="modal-body">
                     <div class="modal-form-grid"> 
                         <div class="form-group">
-                            <label for="add-ho-ten-kh" class="required">Họ Tên</label>
+                            <label for="add-ho-ten-kh">Họ Tên</label>
                             <input type="text" id="add-ho-ten-kh" placeholder="Nguyễn Văn An" required> <!-- THÊM required -->
                         </div>
                          <div class="form-group">
-                            <label for="add-ngay-sinh-kh" class="required">Ngày sinh</label>
+                            <label for="add-ngay-sinh-kh">Ngày sinh</label>
                             <div class="date-input-wrapper">
                                 <input type="date" id="add-ngay-sinh-kh">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="add-gioi-tinh-kh" class="required">Giới tính</label>
+                            <label for="add-gioi-tinh-kh">Giới tính</label>
                             <select id="add-gioi-tinh-kh">
                                 <option value="Nam">Nam</option>
                                 <option value="Nữ">Nữ</option>
@@ -768,17 +711,17 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="add-sdt-kh" class="required">Số điện thoại</label>
-                            <input type="number" id="add-sdt-kh" placeholder="0123456789">
+                            <label for="add-sdt-kh">Số điện thoại</label>
+                            <input type="tel" id="add-sdt-kh" placeholder="0123456789">
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
-                            <label for="add-dia-chi-kh" class="required">Địa chỉ</label>
+                            <label for="add-dia-chi-kh">Địa chỉ</label>
                             <textarea id="add-dia-chi-kh" placeholder="Số nhà, đường, phường/xã,..."></textarea>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="btn-custom-reset">Thêm mới</button>
+                    <button type="button" class="btn btn-secondary close-modal">Hủy</button>
                     <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
             </form>
@@ -816,7 +759,7 @@
                         </div>
                         <div class="form-group">
                             <label for="edit-sdt-kh">Số điện thoại</label>
-                            <input type="number" id="edit-sdt-kh" value="0123456789">
+                            <input type="tel" id="edit-sdt-kh" value="0123456789">
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
                             <label for="edit-dia-chi-kh">Địa chỉ</label>
@@ -825,8 +768,11 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-warning" id="btn-reset-edit">Đặt lại</button>
-                    <button type="submit" class="btn btn-primary">Lưu</button>
+                    <button type="button" class="btn btn-danger" id="delete-kh-button">Xóa khách hàng</button> 
+                    <div>
+                        <button type="button" class="btn btn-secondary close-modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -835,19 +781,22 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            
-            // --- 1. CÁC HÀM TIỆN ÍCH (LOADER, TOAST) ---
+
+            // --- THÊM: Các hàm điều khiển Loader và Toast ---
             const loader = document.getElementById('loader');
             const toastContainer = document.getElementById('toast-container');
             let currentEditingRow = null; 
-    
+
             function showLoader() { loader.style.display = 'flex'; }
             function hideLoader() { loader.style.display = 'none'; }
             
             function showToast(message, type = 'success') {
                 const toast = document.createElement('div');
                 toast.classList.add('toast', type);
-                toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i><span class="toast-message">${message}</span>`;
+                toast.innerHTML = `
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i>
+                    <span class="toast-message">${message}</span>
+                `;
                 toastContainer.appendChild(toast);
                 setTimeout(() => { toast.classList.add('show'); }, 100);
                 setTimeout(() => {
@@ -857,260 +806,152 @@
                     });
                 }, 3000);
             }
-    
+
             function simulateApiCall(callback) {
                 showLoader();
                 setTimeout(() => {
                     hideLoader();
-                    const success = Math.random() > 0.1; // 90% thành công
+                    const success = Math.random() > 0.2; 
                     callback(success); 
-                }, 1000); 
+                }, 1500); 
             }
-    
-            // --- 2. XỬ LÝ SIDEBAR & RESPONSIVE ---
+            // --- KẾT THÚC HÀM MỚI ---
+            
+            // --- Xử lý Responsive Sidebar ---
             const menuToggle = document.getElementById('menu-toggle');
             const sidebar = document.getElementById('sidebar');
             const container = document.querySelector('.dashboard-container'); 
-    
+
             if (menuToggle && sidebar && container) {
                 menuToggle.addEventListener('click', function() {
-                    if (window.innerWidth <= 992) { sidebar.classList.toggle('active'); } 
-                    else { container.classList.toggle('sidebar-collapsed'); }
-                });
-            }
-    
-            // --- 3. HÀM LOGIC CỐT LÕI (SMART MODAL) ---
-            
-            // Hàm lấy dữ liệu từ Form (snapshot)
-            function getFormData(form) {
-                const data = {};
-                const inputs = form.querySelectorAll('input, select, textarea');
-                inputs.forEach(input => {
-                    if(input.type !== 'submit' && input.type !== 'button') {
-                        data[input.id] = input.value;
+                    if (window.innerWidth <= 992) {
+                        sidebar.classList.toggle('active');
+                    } else {
+                        container.classList.toggle('sidebar-collapsed');
                     }
                 });
-                return data;
             }
-    
-            // Hàm khôi phục dữ liệu Form
-            function restoreFormData(form, data) {
-                for (const [key, value] of Object.entries(data)) {
-                    const input = form.querySelector(`#${key}`);
-                    if (input) input.value = value;
-                }
+
+            // --- Xử lý Mở/Đóng Modal ---
+            const addModal = document.getElementById('add-modal');
+            const editModal = document.getElementById('edit-modal');
+            
+            const openAddModalBtn = document.getElementById('open-add-modal');
+            const openEditModalBtns = document.querySelectorAll('.open-edit-modal');
+            const closeModalBtns = document.querySelectorAll('.close-modal');
+
+            if (openAddModalBtn && addModal) {
+                openAddModalBtn.addEventListener('click', function() {
+                    document.getElementById('add-kh-form').reset(); // Reset form khi mở
+                    addModal.style.display = 'flex';
+                });
             }
-    
-            // Hàm Setup Modal Thông minh (Dùng chung cho Sửa/Xóa/Reset)
-            function setupSmartModal(config) {
-                const addBtn = document.getElementById(config.addBtnId);
-                const addModal = document.getElementById(config.addModalId);
-                
-                const editModal = document.getElementById(config.editModalId);
-                const editForm = document.getElementById(config.formId);
-                const editBtns = document.querySelectorAll(config.editBtnClass);
-                
-                const resetBtn = document.getElementById(config.resetBtnId);
-                const table = document.querySelector(config.tableSelector);
-                
-                let originalFormData = {}; // Biến lưu snapshot dữ liệu gốc
-    
-                // A. Mở Modal Thêm mới
-                if (addBtn && addModal) {
-                    addBtn.addEventListener('click', () => {
-                        if(config.addFormId) {
-                            document.getElementById(config.addFormId).reset();
-                        }
-                        addModal.style.display = 'flex';
+
+            if (openEditModalBtns.length > 0 && editModal) {
+                openEditModalBtns.forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        currentEditingRow = e.target.closest('tr');
+                        if (!currentEditingRow) return;
+
+                        // Giả lập lấy dữ liệu từ hàng (bạn cần điều chỉnh index cột nếu bảng thay đổi)
+                        document.getElementById('edit-ho-ten-kh').value = currentEditingRow.cells[2].textContent;
+                        document.getElementById('edit-ngay-sinh-kh').value = '1990-01-01'; // Cần chuyển đổi định dạng ngày
+                        document.getElementById('edit-gioi-tinh-kh').value = currentEditingRow.cells[5].textContent;
+                        document.getElementById('edit-sdt-kh').value = currentEditingRow.cells[4].textContent;
+                        document.getElementById('edit-dia-chi-kh').value = currentEditingRow.cells[6].textContent;
+                        
+                        editModal.style.display = 'flex';
                     });
+                });
+            }
+
+            closeModalBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    btn.closest('.modal-overlay').style.display = 'none';
+                    currentEditingRow = null; // Reset
+                });
+            });
+
+            window.addEventListener('click', function(event) {
+                if (event.target.classList.contains('modal-overlay')) {
+                    event.target.style.display = 'none';
+                    currentEditingRow = null; // Reset
                 }
-    
-                // B. Mở Modal Sửa (Điền dữ liệu & Lưu snapshot)
-                if (editBtns.length > 0 && editModal) {
-                    editBtns.forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            currentEditingRow = e.target.closest('tr');
-                            if(!currentEditingRow) return;
-    
-                            // --- LOGIC ĐIỀN DỮ LIỆU VÀO FORM ---
-                            // Cấu trúc bảng: STT(0), Mã(1), Tên(2), Ngày sinh(3), SĐT(4), Giới tính(5), Địa chỉ(6)
-                            const cells = currentEditingRow.cells;
-                            document.getElementById('edit-ho-ten-kh').value = cells[2].textContent;
-                            // Giả lập ngày sinh (vì hiển thị là dd/mm/yyyy nhưng input date cần yyyy-mm-dd)
-                            document.getElementById('edit-ngay-sinh-kh').value = '1990-01-01'; 
-                            document.getElementById('edit-sdt-kh').value = cells[4].textContent;
-                            document.getElementById('edit-gioi-tinh-kh').value = cells[5].textContent;
-                            document.getElementById('edit-dia-chi-kh').value = cells[6].textContent;
-    
-                            // SAU KHI điền xong, lưu lại trạng thái gốc
-                            setTimeout(() => {
-                                 if(editForm) originalFormData = getFormData(editForm);
-                            }, 50); 
-                            
-                            editModal.style.display = 'flex';
-                        });
-                    });
-                }
-    
-                // C. Xử lý nút ĐẶT LẠI (Thông minh)
-                if (resetBtn && editForm) {
-                    resetBtn.addEventListener('click', () => {
-                        const currentData = getFormData(editForm);
-                        // So sánh dữ liệu hiện tại với bản gốc
-                        const isChanged = JSON.stringify(currentData) !== JSON.stringify(originalFormData);
-    
-                        if (!isChanged) {
-                            showToast('Chưa có thay đổi nào để đặt lại!', 'error');
-                            return;
-                        }
-    
-                        if (confirm("Dữ liệu đã thay đổi. Bạn có muốn LƯU LẠI không?\n\n- OK: Lưu thay đổi.\n- Cancel: Khôi phục lại dữ liệu gốc.")) {
-                            editForm.requestSubmit(); // Submit form
+            });
+
+            // --- SỬA: Xử lý Form Submit với Loader/Toast ---
+            const addKhForm = document.getElementById('add-kh-form');
+            if (addKhForm) {
+                addKhForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    simulateApiCall((success) => {
+                        if (success) {
+                            // Giả lập thêm hàng vào bảng
+                            const table = document.getElementById('customer-table').getElementsByTagName('tbody')[0];
+                            const newRow = table.insertRow();
+                            newRow.innerHTML = `
+                                <td>${table.rows.length}</td>
+                                <td>KH${String(table.rows.length).padStart(2, '0')}</td>
+                                <td>${document.getElementById('add-ho-ten-kh').value}</td>
+                                <td>${document.getElementById('add-ngay-sinh-kh').value}</td>
+                                <td>${document.getElementById('add-sdt-kh').value}</td>
+                                <td>${document.getElementById('add-gioi-tinh-kh').value}</td>
+                                <td>${document.getElementById('add-dia-chi-kh').value}</td>
+                                <td> <i class="fas fa-pencil-alt action-icon open-edit-modal"></i> </td>
+                            `;
+                            addModal.style.display = 'none';
+                            showToast('Thêm khách hàng thành công!', 'success');
                         } else {
-                            restoreFormData(editForm, originalFormData); // Reset form về gốc
-                            showToast('Đã khôi phục dữ liệu gốc!', 'success');
+                            showToast('Thêm khách hàng thất bại! Lỗi máy chủ.', 'error');
                         }
                     });
-                }
-    
-                // D. Xử lý nút XÓA (Icon thùng rác ở bảng)
-                if (table) {
-                    table.addEventListener('click', (e) => {
-                        // Bắt sự kiện click vào icon xóa
-                        if (e.target.classList.contains('delete-icon') || e.target.closest('.delete-icon')) {
-                            const row = e.target.closest('tr');
-                            const itemName = row.cells[2].textContent; // Lấy tên KH (cột 3)
-                            
-                            if (confirm(`Bạn có chắc chắn muốn XÓA khách hàng: ${itemName}?`)) {
-                                simulateApiCall((success) => {
-                                    if (success) {
-                                        row.remove();
-                                        showToast('Đã xóa khách hàng thành công!', 'success');
-                                    } else {
-                                        showToast('Lỗi! Không thể xóa (có thể do ràng buộc dữ liệu).', 'error');
-                                    }
-                                });
+                });
+            }
+
+            const editKhForm = document.getElementById('edit-kh-form');
+            if (editKhForm) {
+                editKhForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    simulateApiCall((success) => {
+                        if (success) {
+                            if (currentEditingRow) {
+                                // Giả lập cập nhật hàng
+                                currentEditingRow.cells[2].textContent = document.getElementById('edit-ho-ten-kh').value;
+                                currentEditingRow.cells[3].textContent = document.getElementById('edit-ngay-sinh-kh').value;
+                                currentEditingRow.cells[4].textContent = document.getElementById('edit-sdt-kh').value;
+                                currentEditingRow.cells[5].textContent = document.getElementById('edit-gioi-tinh-kh').value;
+                                currentEditingRow.cells[6].textContent = document.getElementById('edit-dia-chi-kh').value;
                             }
+                            editModal.style.display = 'none';
+                            showToast('Cập nhật khách hàng thành công!', 'success');
+                            currentEditingRow = null;
+                        } else {
+                            showToast('Cập nhật thất bại!', 'error');
                         }
                     });
-                }
-    
-                // E. Xử lý Submit Form Sửa
-                if (editForm) {
-                    editForm.addEventListener('submit', (e) => {
-                        e.preventDefault();
+                });
+            }
+
+            const deleteKhBtn = document.getElementById('delete-kh-button');
+            if (deleteKhBtn) {
+                deleteKhBtn.addEventListener('click', function() {
+                    if (confirm('Bạn có chắc chắn muốn xóa khách hàng này?')) {
                         simulateApiCall((success) => {
                             if (success) {
-                                if(currentEditingRow) {
-                                    // Cập nhật lại giao diện bảng (Giả lập)
-                                    currentEditingRow.cells[2].textContent = document.getElementById('edit-ho-ten-kh').value;
-                                    currentEditingRow.cells[4].textContent = document.getElementById('edit-sdt-kh').value;
-                                    currentEditingRow.cells[5].textContent = document.getElementById('edit-gioi-tinh-kh').value;
-                                    currentEditingRow.cells[6].textContent = document.getElementById('edit-dia-chi-kh').value;
+                                if (currentEditingRow) {
+                                    currentEditingRow.remove();
                                 }
                                 editModal.style.display = 'none';
-                                showToast(`Cập nhật thông tin thành công!`);
-                            }
-                        });
-                    });
-                }
-            }
-    
-            // --- 4. GỌI HÀM SETUP CHO KHÁCH HÀNG ---
-            setupSmartModal({
-                addBtnId: 'open-add-modal',
-                addModalId: 'add-modal',
-                addFormId: 'add-kh-form',
-                editModalId: 'edit-modal',
-                formId: 'edit-kh-form',
-                editBtnClass: '.open-edit-modal',
-                resetBtnId: 'btn-reset-edit',      // ID nút Đặt lại
-                tableSelector: '#customer-table',  // ID bảng khách hàng
-                typeName: 'Khách hàng'
-            });
-    
-    
-            // --- 5. XỬ LÝ NÚT "THÊM MỚI" (CUSTOM RESET) Ở MODAL THÊM ---
-            // Logic: Nút "Thêm mới" màu xám.
-            // - Nếu có dữ liệu: Hỏi Lưu hay Reset. Reset thì xóa trắng, KHÔNG đóng modal.
-            // - Nếu chưa có dữ liệu: Reset, KHÔNG đóng modal.
-            
-            const btnCustomReset = document.getElementById('btn-custom-reset');
-            const addKhForm = document.getElementById('add-kh-form');
-            
-            if (btnCustomReset && addKhForm) {
-                btnCustomReset.addEventListener('click', () => {
-                    // Kiểm tra xem form có dữ liệu không (check tên KH)
-                    const hasData = document.getElementById('add-ho-ten-kh').value.trim() !== '';
-    
-                    if (hasData) {
-                        // Nếu có dữ liệu -> Hỏi
-                        if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU Khách hàng này trước khi làm mới không?\n\n- OK: Lưu khách hàng này.\n- Cancel: Xóa trắng để nhập khách hàng khác.')) {
-                            // Chọn OK -> Lưu
-                            if (addKhForm.checkValidity()) {
-                                addKhForm.requestSubmit(); 
+                                showToast('Xóa khách hàng thành công!', 'success');
+                                currentEditingRow = null;
                             } else {
-                                addKhForm.reportValidity();
+                                showToast('Xóa thất bại! Khách hàng có thể đang có hóa đơn.', 'error');
                             }
-                        } else {
-                            // Chọn Cancel -> Chỉ Reset form, KHÔNG ĐÓNG modal
-                            addKhForm.reset();
-                            showToast('Đã làm mới form!', 'info');
-                        }
-                    } else {
-                        // Nếu chưa nhập gì -> Chỉ Reset cho chắc chắn
-                        addKhForm.reset();
-                        showToast('Form đã sẵn sàng nhập mới.', 'info');
-                    }
-                });
-    
-                // Xử lý sự kiện Submit Form Thêm
-                addKhForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    
-                    const formData = {
-                        HoTen: document.getElementById('add-ho-ten-kh').value.trim(),
-                        NgaySinh: document.getElementById('add-ngay-sinh-kh').value,
-                        GioiTinh: document.getElementById('add-gioi-tinh-kh').value,
-                        SDT: document.getElementById('add-sdt-kh').value,
-                        DiaChi: document.getElementById('add-dia-chi-kh').value.trim()
-                    };
-
-                    showLoader();
-                    try {
-                        const response = await fetch('/api/customers/createCustomers', { // ✅ Sửa đường dẫn
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(formData)
                         });
-                        
-                        const data = await response.json();
-                        hideLoader();
-                        
-                        if(response.ok) {
-                            showToast('Thêm khách hàng thành công!');
-                            document.getElementById('add-modal').style.display = 'none';
-                            location.reload();
-                        } else {
-                            showToast(data.error || 'Có lỗi xảy ra!', 'error');
-                        }
-                    } catch(error) {
-                        hideLoader();
-                        console.error('Error:', error);
-                        showToast('Lỗi kết nối server!', 'error');
                     }
                 });
             }
-    
-            // --- 6. CÁC TIỆN ÍCH KHÁC (Close modal) ---
-            const closeModalBtns = document.querySelectorAll('.close-modal');
-            closeModalBtns.forEach(btn => {
-                btn.addEventListener('click', (e) => { e.target.closest('.modal-overlay').style.display = 'none'; });
-            });
-            window.addEventListener('click', (e) => {
-                if (e.target.classList.contains('modal-overlay')) e.target.style.display = 'none';
-            });
-    
+
         });
     </script>
 
