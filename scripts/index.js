@@ -50,11 +50,8 @@ app.use(authenticateToken); // Áp dụng middleware xác thực cho các route 
 const dashboardRoutes = require("./routes/dashboardRoutes");
 app.use("/dashboard", dashboardRoutes);
 
-const billRoutes = require('./routes/billRoutes');
-app.use('/api/bill', billRoutes);
-
-const customersRoutes = require('./routes/customersRoutes');
-app.use('/api/customers', customersRoutes);
+const customersRoutes = require("./routes/customersRoutes");
+app.use("/api/customers", customersRoutes);
 
 const searchRoutes = require("./routes/searchRoutes");
 app.use("/api/search", searchRoutes);
@@ -66,15 +63,9 @@ app.use("/api/employees", employeesRoutes);
 const changeruleRoutes = require("./routes/changeruleRoutes");
 app.use("/api/change-rules", changeruleRoutes);
 
-const reportRoutes = require("./routes/reportRoutes");
-app.use("/api/reports", reportRoutes);
-
 // Routes for book management (API)
 const booksRoutes = require("./routes/booksRoutes");
 app.use("/api/books", booksRoutes);
-
-const receiptsRoute = require('./routes/receiptsRoutes');
-app.use('/api/receipts', receiptsRoute);
 
 // --- Khởi động Server và Đồng bộ Database ---
 
@@ -99,8 +90,6 @@ const startServer = async () => {
     console.error("Lỗi không thể khởi động server:", err);
   }
 };
-
-
 
 // Gọi hàm để bắt đầu
 startServer();

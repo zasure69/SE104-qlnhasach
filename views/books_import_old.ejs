@@ -6,10 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý phiếu nhập sách</title>
 
+    <!-- Link Font Awesome để có icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* * --- PHẦN CSS --- */
+        /* * --- PHẦN CSS --- 
+         */
+
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
@@ -40,7 +43,7 @@
             color: var(--text-dark);
         }
 
-        /* Layout */
+        /* --- Layout chính --- */
         .dashboard-container {
             display: grid;
             grid-template-columns: 250px 1fr;
@@ -48,6 +51,7 @@
             transition: grid-template-columns 0.3s ease-in-out;
         }
 
+        /* --- Sidebar --- */
         .sidebar {
             background-color: var(--primary-color);
             color: var(--text-white);
@@ -109,12 +113,14 @@
             color: white;
         }
 
+        /* --- Nội dung chính --- */
         .main-content {
             background-color: var(--light-bg);
             padding: 1.5rem;
             overflow-y: auto;
         }
 
+        /* --- Thanh Header --- */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -165,6 +171,7 @@
             overflow: hidden; /* Để bo góc */
         }
 
+        /* Hiển thị menu khi di chuột vào .user-menu */
         .user-menu:hover .dropdown-menu {
             display: block;
         }
@@ -182,7 +189,7 @@
 
         .user-menu .dropdown-menu a:hover {
             background-color: var(--light-bg);
-            color: var(--red-accent, #e74c3c);
+            color: var(--red-accent, #e74c3c); /* Dùng màu đỏ cho logout */
         }
 
         .user-menu .dropdown-menu a i {
@@ -206,7 +213,7 @@
             line-height: 1;
         }
 
-        /* Content */
+        /* --- Vùng nội dung --- */
         .content-wrapper {
             padding: 1.5rem;
             background-color: var(--white-bg);
@@ -284,8 +291,19 @@
             min-width: auto;
         }
 
+        .btn-icon {
+            padding: 0.4rem;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: auto;
+        }
+
         .btn-warning {
-            background-color: #f39c12;
+            background-color: #f39c12; /* Màu cam */
             color: white;
         }
         .btn-warning:hover {
@@ -293,16 +311,16 @@
         }
 
         #btn-custom-reset {
-            background-color: #6c757d;
-            color: #ffffff;
+            background-color: #6c757d; /* Màu xám đậm chuẩn UI */
+            color: #ffffff;            /* Chữ màu trắng */
         }
 
         #btn-custom-reset:hover {
-            background-color: #5a6268;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            background-color: #5a6268; /* Màu hover đậm hơn chút */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Thêm bóng đổ nhẹ khi di chuột */
         }
 
-        /* Tables (Master) */
+        /* --- Bảng --- */
         .table-responsive {
             overflow-x: auto;
             margin-bottom: 1rem;
@@ -333,73 +351,48 @@
             background-color: #f5f5f5;
         }
 
+        /* --- CSS CHO INPUT TRONG BẢNG (INLINE EDIT) --- */
+        .table-input {
+            width: 100%;
+            border: 1px solid transparent; /* Ẩn viền khi không focus */
+            background-color: transparent;
+            text-align: center; /* Căn giữa số */
+            padding: 0.25rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        /* Khi click vào thì hiện viền và nền trắng */
+        .table-input:focus, .table-input:hover {
+            border-color: var(--secondary-color);
+            background-color: #fff;
+            outline: none;
+        }
+
+        /* Input số lượng thì nhỏ thôi */
+        .table-input.qty {
+            max-width: 70px;
+        }
+
         .action-icon {
             color: var(--secondary-color);
             cursor: pointer;
             font-size: 1rem;
         }
 
-        /* Detail Table Styles */
-        .detail-table-wrapper {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 1rem;
+        .action-icon.edit-row-icon {
+            color: var(--secondary-color);
+            margin-right: 12px;
+            transition: transform 0.2s;
         }
-
-        .detail-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .detail-table thead tr {
-            background-color: #f1f5f9;
-            width: 100%;
-        }
-
-        .detail-table th {
-            padding: 1rem;
-            font-size: 0.85rem;
-            text-align: left;
-            font-weight: 600;
-            color: var(--primary-color);
-            white-space: nowrap;
-        }
-        
-        .detail-table th:last-child {
-            text-align: center;
-        }
-
-        .detail-table td {
-            padding: 1rem;
-            border-top: 1px solid var(--border-color);
-            font-size: 0.9rem;
-        }
-
-        /* Icon Styles */
-        .action-icon.delete-icon:hover, .action-icon.delete-row-icon:hover {
-            color: #c0392b !important;
-            transform: scale(1.2);
-            transition: all 0.2s;
-        }
-
-        .action-icon.open-edit-modal:hover,
         .action-icon.edit-row-icon:hover {
             color: #2980b9;
             transform: scale(1.2);
-            transition: all 0.2s;
-        }
-        
-        .edit-row-icon {
-            margin-right: 10px;
-            cursor: pointer;
-        }
-        
-        .delete-row-icon {
-            cursor: pointer;
         }
 
-        /* Modal Styles */
+        /* --- Modal (Lớn) --- */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -420,8 +413,8 @@
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             width: 100%;
-            max-width: 1000px; /* Tăng rộng lên chút để chứa thêm cột */
-            max-height: 90vh;
+            max-width: 900px; /* Modal rộng hơn để chứa bảng chi tiết */
+            max-height: 90vh; /* Giới hạn chiều cao */
             display: flex;
             flex-direction: column;
             animation: slideIn 0.3s ease;
@@ -435,35 +428,21 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        .modal-header h2 {
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .close-modal, .close-modal-item {
+        .close-modal {
             font-size: 1.5rem;
             color: var(--text-light);
             cursor: pointer;
             background: none;
             border: none;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .close-modal-item:hover {
-            color: var(--red-accent);
-            transform: scale(1.1);
         }
 
         .modal-body {
             padding: 1.5rem;
             flex-grow: 1;
-            overflow-y: auto;
+            overflow-y: auto; /* Cho phép cuộn nội dung modal */
         }
 
-        /* Sections & Grids */
+        /* Wrapper cho từng khối */
         .section-wrapper {
             margin-bottom: 1.5rem;
             padding-bottom: 1.5rem;
@@ -476,6 +455,7 @@
             padding-bottom: 0;
         }
 
+        /* Style chung cho Tiêu đề (Label nằm trên) */
         .section-header-title {
             font-size: 1.1rem;
             font-weight: 700;
@@ -486,21 +466,23 @@
 
         /* --- GRID LAYOUTS --- */
 
+        /* 1. Grid cho Thông tin chung (2 cột hoặc 3 cột) */
         .grid-general {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr; 
             gap: 1.5rem;
         }
 
-        /* SỬA: Grid cho Thêm Sách (Cần thêm chỗ cho Đơn giá bán) */
+        /* 2. Grid cho Thêm Sách (4 ô input + 1 nút) */
         .grid-add-book {
             display: grid;
-            /* Tỷ lệ mới: Mã(1.2) Tên(1.5) SL(0.8) GiáNhap(1) GiáBan(1) Nút(Auto) */
-            grid-template-columns: 1.2fr 1.5fr 0.8fr 1fr 1fr auto; 
+            /* Tỷ lệ: Mã(1.2) Tên(2) SL(0.8) Giá(1.2) Nút(Auto) */
+            grid-template-columns: 1.2fr 2fr 0.8fr 1.2fr auto; 
             gap: 1rem;
-            align-items: end;
+            align-items: end; /* Căn đáy để Nút ngang hàng với ô Input */
         }
 
+        /* 3. Grid cho Tổng tiền (Căn phải) */
         .grid-summary {
             display: flex;
             justify-content: flex-end;
@@ -520,13 +502,7 @@
             color: var(--secondary-color);
         }
 
-        /* Form Elements */
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-
+        /* Cập nhật style Label input cho đậm và đẹp hơn */
         .form-group label {
             font-weight: 700;
             font-size: 0.95rem;
@@ -535,49 +511,23 @@
             display: block;
         }
 
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 0.6rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.9rem;
+        /* Responsive */
+        @media (max-width: 992px) {
+            .grid-general, .grid-add-book {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 576px) {
+            .grid-general, .grid-add-book {
+                grid-template-columns: 1fr;
+            }
         }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-        }
-
-        .form-group input:disabled, .form-group input:read-only {
-            background-color: var(--disabled-bg);
-            color: #6c757d;
-            cursor: not-allowed;
-            border-color: #d6d8db;
-        }
-        
-        .form-group input:read-only { cursor: default; }
-
-        .form-group label.required::after {
-            content: "*";
-            color: var(--red-accent);
-            font-weight: bold;
-            margin-left: 4px;
-        }
-
-        .modal-form-grid .date-input-wrapper {
-            display: block;
-            position: relative;
-        }
-        .modal-form-grid .date-input-wrapper input[type="date"] {
-            width: 100%;
-        }
-
-        /* Footer */
+        /* --- CẬP NHẬT CSS FOOTER ĐỂ NÚT DÀN ĐỀU --- */
         .modal-footer {
             display: flex;
             justify-content: space-between;
-            gap: 1.5rem;
+            gap: 1.5rem; /* Khoảng cách giữa 2 nút */
             padding: 1.25rem 1.5rem;
             border-top: 1px solid var(--border-color);
             background-color: #fff;
@@ -585,11 +535,12 @@
             border-bottom-right-radius: 12px;
         }
 
+        /* Quan trọng: flex: 1 giúp nút tự động giãn đầy không gian */
         .modal-footer .btn {
-            flex: 1;
-            width: 100%;
+            flex: 1;        /* Chia đều không gian (50% - 50%) */
+            width: 100%;    /* Ép chiều rộng bung ra */
             display: flex;
-            justify-content: center;
+            justify-content: center; /* Căn giữa chữ */
             align-items: center;
             font-size: 1rem;
             font-weight: 700;
@@ -597,6 +548,7 @@
             text-transform: uppercase;
         }
 
+        /* Nếu bạn vẫn giữ cấu trúc lồng nhau trong modal Sửa (có div bao quanh), thêm cái này để chắc chắn */
         #edit-modal .modal-footer > div {
             flex: 1;
             display: flex;
@@ -604,18 +556,204 @@
             width: 100%;
         }
 
+        /* #add-modal .modal-footer .btn-secondary,
+        #edit-modal .modal-footer .btn-secondary { 
+            background-color: transparent; 
+            color: #6c757d; 
+            border: none;
+            box-shadow: none;
+        }
+        
+        #add-modal .modal-footer .btn-secondary:hover,
+        #edit-modal .modal-footer .btn-secondary:hover { 
+            background-color: #e2e6ea; 
+            color: #343a40;
+        } */
+
+        /* Nút Lưu (dạng solid) */
         #add-modal .modal-footer .btn-primary,
-        #edit-modal .modal-footer .btn-primary {
-            background-color: var(--green-accent);
-            color: white;
+        #edit-modal .modal-footer .btn-primary { 
+            background-color: var(--green-accent); 
+            color: white; 
             box-shadow: 0 4px 6px rgba(30, 228, 172, 0.2);
         }
         #add-modal .modal-footer .btn-primary:hover,
-        #edit-modal .modal-footer .btn-primary:hover {
-            background-color: var(--green-accent-hover);
+        #edit-modal .modal-footer .btn-primary:hover { 
+            background-color: var(--green-accent-hover); 
         }
 
-        /* Loader & Toast */
+        #edit-modal .modal-footer {
+            justify-content: space-between;
+            /* Căn đều 2 bên */
+            gap: 1rem;
+        }
+        /* Nút Xóa chiếm 50% */
+        #edit-modal .modal-footer>.btn-danger {
+            flex: 1;
+            /* Chiếm 1 phần (tương đương 50% nếu nhóm kia cũng là 1) */
+            margin-right: 1rem;
+            /* Khoảng cách với nhóm nút phải */
+        }
+
+        /* Nhóm nút Hủy và Lưu chiếm 50% còn lại */
+        #edit-modal .modal-footer>div {
+            flex: 1;
+            /* Chiếm 1 phần còn lại (50%) */
+            display: flex;
+            gap: 1rem;
+            /* Khoảng cách giữa Hủy và Lưu */
+        }
+
+        /* Nút con trong nhóm Hủy/Lưu chia đều không gian */
+        #edit-modal .modal-footer>div .btn {
+            flex: 1;
+            /* Mỗi nút chiếm 50% của nhóm cha (tức 25% tổng) */
+            width: 100%;
+        }
+        /* Modal Thêm Mới: 2 nút chia đều 50-50 */
+        #add-modal .modal-footer .btn {
+            flex: 1;
+        }
+
+        /* --- STYLE CHO NÚT ĐÓNG MODAL NHỎ --- */
+        .close-modal-item {
+            font-size: 1.5rem;       /* Kích thước icon to rõ */
+            color: var(--text-light); /* Màu xám nhạt */
+            background: none;         /* Xóa nền xám mặc định */
+            border: none;             /* Xóa viền đen mặc định */
+            cursor: pointer;          /* Con trỏ bàn tay */
+            padding: 0;               /* Bỏ đệm để icon gọn hơn */
+            display: flex;            /* Căn giữa icon */
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+        }
+
+
+        /* --- Form Styles --- */
+        .form-section {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 1rem;
+        }
+        .form-section h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        /* --- CSS CHO INPUT KHÔNG ĐƯỢC NHẬP (Disabled & Readonly) --- */
+        .form-group input:disabled,
+        .form-group select:disabled,
+        .form-group textarea:disabled,
+        .form-group input:read-only, 
+        .form-group textarea:read-only {
+            background-color: var(--disabled-bg); /* Màu nền xám (#e9ecef) */
+            color: #6c757d;                       /* Màu chữ xám đậm cho cảm giác "chìm" đi */
+            cursor: not-allowed;                  /* Đổi con trỏ chuột để báo hiệu */
+            border-color: #d6d8db;                /* Viền nhạt hơn chút */
+        }
+
+        /* Tinh chỉnh riêng cho Read-only (vẫn cho phép bôi đen copy nhưng không sửa) */
+        .form-group input:read-only,
+        .form-group textarea:read-only {
+            cursor: default; /* Con trỏ chuột bình thường */
+        }
+
+        .form-group label.required::after, .summary-label.required::after {
+            content: "*";               /* Thêm dấu sao */
+            color: var(--red-accent);    /* Màu đỏ (lấy từ biến màu đỏ của bạn) */
+            font-weight: bold;           /* In đậm */
+            margin-left: 4px;            /* Cách ra một chút cho đẹp */
+        }
+
+        /* Hiệu ứng cho icon xóa ở bảng */
+        .action-icon.delete-icon:hover {
+            color: #c0392b !important; /* Đỏ đậm hơn khi hover */
+            transform: scale(1.2); /* Phóng to nhẹ */
+            transition: all 0.2s;
+        }
+
+        .action-icon.open-edit-modal:hover {
+            color: #2980b9; /* Màu xanh dương khi hover */
+            transform: scale(1.2); /* Phóng to nhẹ */
+            transition: all 0.2s;
+        }
+        
+        .modal-form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 cột cho thông tin chung */
+            gap: 1rem;
+        }
+        
+        .add-book-area {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1fr auto; /* Layout cho dòng nhập sách */
+            gap: 0.75rem;
+            align-items: end;
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input:disabled {
+            background-color: var(--disabled-bg);
+            color: #777;
+        }
+
+        /* Custom Table trong modal */
+        .detail-table-wrapper {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .detail-table th {
+            background-color: #f1f5f9;
+            padding: 0.75rem;
+            font-size: 0.85rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        .detail-table td {
+            padding: 0.75rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+        .detail-table tfoot td {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(-30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+
+        /* Loader & Toast CSS */
         .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.7); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .loader-overlay.show { display: flex; }
         .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--secondary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
@@ -627,21 +765,22 @@
         .toast.success .toast-icon { color: var(--green-accent); }
         .toast.error { border-left-color: var(--red-accent); }
         .toast.error .toast-icon { color: var(--red-accent); }
-        .toast-message { font-size: 0.9rem; font-weight: 500; color: var(--text-dark); }
+        .toast-message {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideIn { from { transform: translateY(-30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-
+        /* Responsive */
         @media (max-width: 992px) {
             .dashboard-container { grid-template-columns: 1fr; }
             .sidebar { position: fixed; left: -260px; top: 0; height: 100vh; z-index: 1050; }
             .sidebar.active { left: 0; }
             .menu-toggle { display: block; }
-            .grid-general, .grid-add-book { grid-template-columns: 1fr 1fr; }
         }
         @media (max-width: 768px) {
-            .grid-general, .grid-add-book { grid-template-columns: 1fr; }
-            .modal-footer, #edit-modal .modal-footer > div { flex-direction: column; }
+            .add-book-area { grid-template-columns: 1fr; } /* Xếp chồng form nhập sách */
+            .modal-form-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -661,7 +800,7 @@
                     <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
                     <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
                     <li><a href="/dashboard/types"><i class="fas fa-tags"></i>QL Thể loại & Tác giả</a></li>
-                    <li><a href="#" class="active"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
+                    <li><a href="/dashboard/books_import" class="active"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
                     <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
                     <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
                     <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
@@ -693,6 +832,7 @@
                     <button class="btn btn-primary btn-add-new" id="open-add-modal"> <i class="fas fa-plus"></i> LẬP PHIẾU NHẬP SÁCH </button>
                 </div>
 
+                <!-- Bảng Master: Chỉ hiện thông tin chung -->
                 <div class="table-responsive">
                     <table class="data-table" id="master-table">
                         <thead>
@@ -701,7 +841,7 @@
                                 <th>Mã Phiếu</th>
                                 <th>Ngày Nhập</th>
                                 <th>Tổng Tiền</th>
-                                <th></th> 
+                                <th></th> <!-- Cột Action -->
                             </tr>
                         </thead>
                         <tbody>
@@ -742,6 +882,9 @@
         </main>
     </div>
 
+    <!-- --- MODAL THÊM MỚI / CHỈNH SỬA (Dùng chung cấu trúc, khác ID) --- -->
+    
+    <!-- Modal Thêm Mới -->
     <div class="modal-overlay" id="add-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -784,10 +927,6 @@
                             <label class="required">Đơn Giá Nhập:</label> 
                             <input type="text" id="add-input-don-gia" placeholder="0"> 
                         </div>
-                        <div class="form-group"> 
-                            <label class="required">Đơn Giá Bán:</label> 
-                            <input type="text" id="add-input-don-gia-ban" placeholder="0"> 
-                        </div>
                         <div class="form-group">
                             <button type="button" class="btn btn-primary" id="btn-add-to-list" style="width: 100%; white-space: nowrap;"> 
                                 <i class="fas fa-plus"></i> Thêm 
@@ -806,8 +945,8 @@
                                     <th>Mã Sách</th>
                                     <th>Tên Sách</th>
                                     <th>Số Lượng</th>
-                                    <th>Đơn Giá Nhập</th>
-                                    <th>Đơn Giá Bán</th> <th>Thành Tiền</th>
+                                    <th>Đơn Giá</th>
+                                    <th>Thành Tiền</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -829,6 +968,7 @@
         </div>
     </div>
 
+    <!-- Modal Chỉnh Sửa dòng (Có nút xóa) -->
     <div class="modal-overlay" id="edit-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -874,10 +1014,6 @@
                             <label class="required">Đơn Giá Nhập:</label> 
                             <input type="text" id="edit-input-don-gia"> 
                         </div>
-                        <div class="form-group"> 
-                            <label class="required">Đơn Giá Bán:</label> 
-                            <input type="text" id="edit-input-don-gia-ban"> 
-                        </div>
                         <div class="form-group">
                             <button type="button" class="btn btn-primary" id="btn-add-to-list-edit" style="width: 100%; white-space: nowrap;"> 
                                 <i class="fas fa-plus"></i> Thêm 
@@ -896,8 +1032,8 @@
                                     <th>Mã Sách</th>
                                     <th>Tên Sách</th>
                                     <th>Số Lượng</th>
-                                    <th>Đơn Giá Nhập</th>
-                                    <th>Đơn Giá Bán</th> <th>Thành Tiền</th>
+                                    <th>Đơn Giá</th>
+                                    <th>Thành Tiền</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -920,35 +1056,30 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="line-item-modal" style="z-index: 2200;"> 
-        <div class="modal-content" style="max-width: 450px;">
-            <div class="modal-header">
-                <h2 style="font-size: 1.1rem;">Cập nhật dòng sách</h2>
-                <button class="close-modal-item"><i class="fas fa-times"></i></button>
+    <div class="modal-overlay" id="line-item-modal" style="z-index: 1100;"> <div class="modal-content" style="max-width: 450px;">
+        <div class="modal-header">
+            <h2 style="font-size: 1.1rem;">Cập nhật dòng sách</h2>
+            <button class="close-modal-item"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Tên Sách:</label>
+                <input type="text" id="item-edit-name" disabled style="background-color: #e9ecef; font-weight: bold;">
             </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Tên Sách:</label>
-                    <input type="text" id="item-edit-name" disabled style="background-color: #e9ecef; font-weight: bold;">
-                </div>
-                <div class="form-group" style="margin-top: 1rem;">
-                    <label class="required">Số Lượng:</label>
-                    <input type="number" id="item-edit-qty" min="1" style="font-weight: bold; color: var(--secondary-color);">
-                </div>
-                <div class="form-group" style="margin-top: 1rem;">
-                    <label class="required">Đơn Giá Nhập:</label>
-                    <input type="text" id="item-edit-price" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="font-weight: bold;">
-                </div>
-                <div class="form-group" style="margin-top: 1rem;">
-                    <label class="required">Đơn Giá Bán:</label>
-                    <input type="text" id="item-edit-sell-price" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="font-weight: bold;">
-                </div>
+            <div class="form-group" style="margin-top: 1rem;">
+                <label class="required">Số Lượng:</label>
+                <input type="number" id="item-edit-qty" min="1" style="font-weight: bold; color: var(--secondary-color);">
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary close-modal-item">Hủy</button>
-                <button type="button" class="btn btn-primary" id="btn-save-line-item">Cập nhật</button>
+            <div class="form-group" style="margin-top: 1rem;">
+                <label class="required">Đơn Giá:</label>
+                <input type="text" id="item-edit-price" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="font-weight: bold;">
             </div>
         </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-warning" id="btn-reset-line-item" style="flex: 1; margin-right: 1rem;">Đặt lại</button>
+            <button type="button" class="btn btn-primary" id="btn-save-line-item">Cập nhật</button>
+        </div>
+    </div>
     </div>
 
     <script>
@@ -960,7 +1091,8 @@
             
             // Biến dùng cho việc sửa dòng
             let currentRowToEdit = null;
-            let currentTableId = null; 
+            let currentTableId = null;
+            let originalLineItemData = {}; 
             
             // Biến snapshot
             let originalEditState = null;
@@ -977,10 +1109,10 @@
             }
             function simulateApiCall(callback) { showLoader(); setTimeout(() => { hideLoader(); callback(true); }, 500); }
             function formatNumber(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
-            function parseNumber(str) { if (!str) return 0; return parseFloat(str.toString().replace(/\./g, '')) || 0; }
+            function parseNumber(str) { if (!str) return 0; return parseFloat(str.toString().replace(/\/dashboard/g, '')) || 0; }
 
 
-            // --- 2. HÀM XỬ LÝ BẢNG ---
+            // --- 2. HÀM XỬ LÝ BẢNG (Đưa ra Global Window để gọi từ onclick) ---
 
             // Hàm tính tổng tiền
             window.updateTotal = function(tableId, totalId) {
@@ -992,7 +1124,7 @@
                 if (totalEl) totalEl.textContent = formatNumber(total);
             }
 
-            // Hàm MỞ Modal Sửa Dòng (Được gọi khi bấm bút chì)
+            // Hàm MỞ Modal Sửa Dòng
             window.openItemEditModal = function(element, tableId) {
                 const row = element.closest('tr');
                 currentRowToEdit = row;
@@ -1002,22 +1134,27 @@
                 const name = row.querySelector('.name-cell').textContent;
                 const qty = row.querySelector('.qty-cell').textContent;
                 const priceRaw = row.querySelector('.price-cell').dataset.raw;
-                const sellPriceRaw = row.querySelector('.sell-price-cell').dataset.raw; // Lấy giá bán
 
-                // Điền vào Modal nhỏ
+                // Điền vào Modal
                 document.getElementById('item-edit-name').value = name;
                 document.getElementById('item-edit-qty').value = qty;
                 document.getElementById('item-edit-price').value = formatNumber(priceRaw); 
-                document.getElementById('item-edit-sell-price').value = formatNumber(sellPriceRaw); // Điền giá bán
 
-                // Hiện Modal nhỏ
+                // --- MỚI: LƯU LẠI GIÁ TRỊ GỐC ĐỂ DÙNG CHO NÚT ĐẶT LẠI ---
+                originalLineItemData = {
+                    qty: qty,
+                    price: formatNumber(priceRaw)
+                };
+
+                // Hiện Modal
                 document.getElementById('line-item-modal').style.display = 'flex';
             };
 
-            // Hàm XÓA Dòng
+            // Hàm XÓA Dòng (Được gọi khi bấm thùng rác)
             window.deleteItemRow = function(element, tableId, totalId) {
                 element.closest('tr').remove();
                 
+                // Cập nhật lại STT
                 const rows = document.querySelectorAll(`#${tableId} tbody tr`);
                 rows.forEach((row, index) => {
                     row.querySelector('.stt-cell').textContent = index + 1;
@@ -1038,7 +1175,7 @@
                     <td class="name-cell">${data.tenSach}</td>
                     <td class="qty-cell text-center">${data.soLuong}</td>
                     <td class="price-cell text-right" data-raw="${data.donGia}">${formatNumber(data.donGia)}</td>
-                    <td class="sell-price-cell text-right" data-raw="${data.donGiaBan}">${formatNumber(data.donGiaBan)}</td> <td class="total-cell text-right" data-value="${thanhTien}">${formatNumber(thanhTien)}</td>
+                    <td class="total-cell text-right" data-value="${thanhTien}">${formatNumber(thanhTien)}</td>
                     <td class="text-center">
                         <i class="fas fa-pencil-alt action-icon edit-row-icon" 
                            onclick="openItemEditModal(this, '${tableId}')"
@@ -1062,22 +1199,16 @@
 
                     const newQty = parseInt(document.getElementById('item-edit-qty').value);
                     const newPrice = parseNumber(document.getElementById('item-edit-price').value);
-                    const newSellPrice = parseNumber(document.getElementById('item-edit-sell-price').value); // Lấy giá bán mới
 
                     if (newQty <= 0) { alert("Số lượng phải lớn hơn 0"); return; }
 
                     // Cập nhật lại dòng trong bảng
                     currentRowToEdit.querySelector('.qty-cell').textContent = newQty;
-                    
                     const priceCell = currentRowToEdit.querySelector('.price-cell');
                     priceCell.textContent = formatNumber(newPrice);
                     priceCell.dataset.raw = newPrice;
 
-                    const sellPriceCell = currentRowToEdit.querySelector('.sell-price-cell');
-                    sellPriceCell.textContent = formatNumber(newSellPrice);
-                    sellPriceCell.dataset.raw = newSellPrice;
-
-                    const newTotal = newQty * newPrice; // Thành tiền tính theo giá nhập
+                    const newTotal = newQty * newPrice;
                     const totalCell = currentRowToEdit.querySelector('.total-cell');
                     totalCell.textContent = formatNumber(newTotal);
                     totalCell.dataset.value = newTotal;
@@ -1093,6 +1224,22 @@
                 });
             }
 
+            // --- XỬ LÝ NÚT "ĐẶT LẠI" TRONG MODAL DÒNG ---
+            const btnResetLineItem = document.getElementById('btn-reset-line-item');
+            
+            if (btnResetLineItem) {
+                btnResetLineItem.addEventListener('click', () => {
+                    if (originalLineItemData) {
+                        // Khôi phục lại giá trị trên ô input
+                        document.getElementById('item-edit-qty').value = originalLineItemData.qty;
+                        document.getElementById('item-edit-price').value = originalLineItemData.price;
+                        
+                        // (Tùy chọn) Focus lại vào ô số lượng
+                        document.getElementById('item-edit-qty').focus();
+                    }
+                });
+            }
+
             // Đóng modal nhỏ
             document.querySelectorAll('.close-modal-item').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -1101,23 +1248,21 @@
                 });
             });
             
-            // Format input giá
-            ['item-edit-price', 'item-edit-sell-price'].forEach(id => {
-                const el = document.getElementById(id);
-                if(el) {
-                    el.addEventListener('input', function() {
-                        const val = this.value.replace(/[^0-9]/g, '');
-                        this.value = val ? formatNumber(val) : '';
-                    });
-                }
-            });
+            // Format input giá modal nhỏ
+            const itemEditPrice = document.getElementById('item-edit-price');
+            if(itemEditPrice) {
+                itemEditPrice.addEventListener('input', function() {
+                    const val = this.value.replace(/[^0-9]/g, '');
+                    this.value = val ? formatNumber(val) : '';
+                });
+            }
 
 
             // --- 4. DATA GIẢ LẬP & LOGIC FORM ---
             function findBookInfo(maSach) {
                 const books = {
-                    'S001': { name: 'Mắt biếc', price: 80000, sellPrice: 105000 }, 
-                    'S002': { name: 'Harry Potter', price: 150000, sellPrice: 220000 }
+                    'S001': { name: 'Mắt biếc', price: 80000 }, 
+                    'S002': { name: 'Harry Potter', price: 150000 }
                 };
                 return books[maSach.toUpperCase()] || null;
             }
@@ -1126,7 +1271,6 @@
                 const maSachInput = document.getElementById(`${prefix}-input-ma-sach`);
                 const tenSachInput = document.getElementById(`${prefix}-input-ten-sach`);
                 const donGiaInput = document.getElementById(`${prefix}-input-don-gia`);
-                const donGiaBanInput = document.getElementById(`${prefix}-input-don-gia-ban`);
 
                 if(maSachInput && tenSachInput){
                     maSachInput.addEventListener('blur', function() {
@@ -1134,20 +1278,12 @@
                         if (book) {
                             tenSachInput.value = book.name;
                             if(donGiaInput && !donGiaInput.value) donGiaInput.value = formatNumber(book.price);
-                            if(donGiaBanInput && !donGiaBanInput.value) donGiaBanInput.value = formatNumber(book.sellPrice); // Auto-fill giá bán
                         }
                     });
                 }
                 
-                // Format input khi nhập
                 if(donGiaInput) {
                     donGiaInput.addEventListener('input', function() {
-                        const val = this.value.replace(/[^0-9]/g, '');
-                        this.value = val ? formatNumber(val) : '';
-                    });
-                }
-                if(donGiaBanInput) {
-                    donGiaBanInput.addEventListener('input', function() {
                         const val = this.value.replace(/[^0-9]/g, '');
                         this.value = val ? formatNumber(val) : '';
                     });
@@ -1170,8 +1306,7 @@
                             maSach: maSachInput.value, 
                             tenSach: tenSachInput.value, 
                             soLuong: parseInt(soLuongInput.value), 
-                            donGia: parseNumber(donGiaInput.value),
-                            donGiaBan: parseNumber(donGiaBanInput.value) // Lấy giá bán
+                            donGia: parseNumber(donGiaInput.value)
                         });
 
                         // Reset
@@ -1179,7 +1314,6 @@
                         tenSachInput.value = '';
                         soLuongInput.value = '1';
                         donGiaInput.value = '';
-                        donGiaBanInput.value = '';
                         maSachInput.focus();
                     });
                 }
@@ -1219,9 +1353,9 @@
                     const tbody = document.querySelector('#edit-detail-table tbody');
                     tbody.innerHTML = '';
                     
-                    // Thêm dòng mẫu (Có thêm donGiaBan)
+                    // Thêm dòng mẫu (Quan trọng: Gọi hàm để sinh HTML chuẩn có onclick)
                     addRowToDetailTable('edit-detail-table', 'edit-total-amount', {
-                        maSach: 'S001', tenSach: 'Mắt biếc', soLuong: 50, donGia: 80000, donGiaBan: 105000
+                        maSach: 'S001', tenSach: 'Mắt biếc', soLuong: 50, donGia: 75000
                     });
 
                     setTimeout(() => { originalEditState = getEditState(); }, 100);
@@ -1249,8 +1383,6 @@
             function resetAddForm() {
                 document.getElementById('add-ma-nv').value = '';
                 document.getElementById('add-ngay-nhap').valueAsDate = new Date();
-                document.getElementById('add-input-ma-sach').value = '';
-                document.getElementById('add-input-ten-sach').value = '';
                 document.querySelector('#add-detail-table tbody').innerHTML = '';
                 document.getElementById('add-total-amount').textContent = '0';
             }
@@ -1306,5 +1438,6 @@
 
         });
     </script>
+
 </body>
 </html>

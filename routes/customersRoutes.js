@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 const customerController = require('../controllers/customerController');
 
-// POST /api/customers/ 
+// GET /api/customers/getCustomers
+router.get('/getCustomers', customerController.getCustomers);
+
+// POST /api/customers/createCustomers
 router.post('/createCustomers', customerController.createCustomer);
 
 // PATCH /api/customers/updateCustomers/:maKH 

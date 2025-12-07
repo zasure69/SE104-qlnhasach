@@ -142,6 +142,58 @@
             font-weight: 500;
             color: var(--text-light);
             cursor: pointer;
+            position: relative;
+        }
+
+        .user-menu .user-trigger {
+            cursor: pointer;
+            display: inline-block; /* Giúp dễ click hơn */
+        }
+
+        .user-menu .dropdown-menu {
+            display: none; /* Ẩn ban đầu */
+            position: absolute;
+            top: 100%; /* Hiển thị ngay bên dưới */
+            right: 0;
+            background-color: var(--white-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            min-width: 150px; /* Độ rộng tối thiểu */
+            z-index: 1000;
+            overflow: hidden; /* Để bo góc */
+        }
+
+        /* Hiển thị menu khi di chuột vào .user-menu */
+        .user-menu:hover .dropdown-menu {
+            display: block;
+        }
+
+        .user-menu .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .user-menu .dropdown-menu a:hover {
+            background-color: var(--light-bg);
+            color: var(--red-accent, #e74c3c); /* Dùng màu đỏ cho logout */
+        }
+
+        .user-menu .dropdown-menu a i {
+            width: 16px;
+            text-align: center;
+            color: var(--text-light);
+            transition: color 0.2s ease;
+        }
+
+        .user-menu .dropdown-menu a:hover i {
+            color: var(--red-accent, #e74c3c);
         }
 
         .menu-toggle {
@@ -637,16 +689,17 @@
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="./dashboard.html"><i class="fas fa-home"></i> Tổng quan</a></li>
-                    <li><a href="./employees.html"><i class="fas fa-users"></i>Nhân Viên</a></li>
-                    <li><a href="./books.html"><i class="fas fa-book"></i>Sách</a></li>
-                    <li><a href="./customers.html"><i class="fas fa-id-card"></i>Khách hàng</a></li> 
-                    <li><a href="./types.html"  class="active"><i class="fas fa-tags"></i>Thể loại</a></li>
-                    <li><a href="./books_import.html"><i class="fas fa-file-invoice"></i>Phiếu nhập sách</a></li>
-                    <li><a href="./bills.html"><i class="fas fa-receipt"></i>Phiếu thu tiền</a></li>
-                    <li><a href="./search.html"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="./report.html"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="./changerule.html"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
+                    <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
+                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
+                    <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
+                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
+                    <li><a href="/dashboard/types" class="active"><i class="fas fa-tags"></i>QL Thể loại & Tác giả</a></li>
+                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
+                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
+                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
+                    <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
+                    <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+                    <li><a href="/dashboard/changerule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
         </aside>
@@ -658,7 +711,17 @@
                     <button class="menu-toggle" id="menu-toggle"> <i class="fas fa-bars"></i> </button>
                     <h1>Quản lý Thể loại & Tác giả</h1>
                 </div>
-                <div class="user-menu"> Chào, Admin <i class="fas fa-chevron-down"></i> </div>
+                <div class="user-menu">
+                    <span class="user-trigger">
+                        Chào, <strong>admin</strong> <i class="fas fa-chevron-down"></i>
+                    </span>
+
+                    <div class="dropdown-menu">
+                        <a href="#" id="logout-button">
+                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
             </header>
 
             <div class="content-wrapper">
@@ -813,11 +876,11 @@
             <form id="add-tacgia-form">
                 <div class="modal-body">
                     <div class="modal-form-grid">
-                        <div class="form-group"> <label for="add-ma-tg">Mã Tác giả:</label> <input type="text"
+                        <div class="form-group"> <label for="add-ma-tg">Mã Tác giả</label> <input type="text"
                                 id="add-ma-tg" required> </div>
-                        <div class="form-group"> <label for="add-ho-ten">Họ Tên:</label> <input type="text"
+                        <div class="form-group"> <label for="add-ho-ten">Họ Tên</label> <input type="text"
                                 id="add-ho-ten" required> </div>
-                        <div class="form-group"> <label for="add-nam-sinh">Năm Sinh:</label> <input type="number"
+                        <div class="form-group"> <label for="add-nam-sinh">Năm Sinh</label> <input type="number"
                                 id="add-nam-sinh"> </div>
                     </div>
                 </div>
@@ -836,16 +899,16 @@
             <form id="edit-tacgia-form">
                 <div class="modal-body">
                     <div class="modal-form-grid">
-                        <div class="form-group"> <label for="edit-ma-tg">Mã Tác giả:</label> <input type="text"
-                                id="edit-ma-tg" readonly disabled> </div>
-                        <div class="form-group"> <label for="edit-ho-ten">Họ Tên:</label> <input type="text"
+                        <div class="form-group"> <label for="edit-ma-tg">Mã Tác giả</label> <input type="text"
+                                id="edit-ma-tg" readonly> </div>
+                        <div class="form-group"> <label for="edit-ho-ten">Họ Tên</label> <input type="text"
                                 id="edit-ho-ten" required> </div>
-                        <div class="form-group"> <label for="edit-nam-sinh">Năm Sinh:</label> <input type="number"
+                        <div class="form-group"> <label for="edit-nam-sinh">Năm Sinh</label> <input type="number"
                                 id="edit-nam-sinh"> </div>
                     </div>
                 </div>
                 <div class="modal-footer edit-modal-footer">
-                    <button type="button" class="btn btn-danger" id="delete-tacgia-button">Xóa</button>
+                    <button type="button" class="btn btn-danger" id="delete-tacgia-button">Xóa Tác giả</button>
                     <div>
                         <button type="button" class="btn btn-secondary close-modal">Hủy</button>
                         <button type="submit" class="btn btn-primary">Lưu</button>

@@ -1,26 +1,30 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db");
 
-const DauSach = sequelize.define('DauSach', {
-  MaDauSach: {
-    type: DataTypes.STRING(15),
-    primaryKey: true,
-    allowNull: false
+// Model ĐẦU SÁCH -> bảng DAUSACH
+const DauSach = sequelize.define(
+  "DauSach",
+  {
+    MaDauSach: {
+      type: DataTypes.STRING(15),
+      primaryKey: true,
+      allowNull: false,
+    },
+    TenSach: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    MaTheLoai: {
+      type: DataTypes.STRING(10),
+    },
+    MoTa: {
+      type: DataTypes.STRING(1000),
+    },
   },
-  MaTheLoai: { // Foreign Key
-    type: DataTypes.STRING(10), 
-    allowNull: true
-  },
-  TenSach: {
-    type: DataTypes.STRING(50),
-    allowNull: false
-  },
-  MoTa: {
-    type: DataTypes.TEXT
+  {
+    tableName: "DAUSACH",
+    timestamps: false,
   }
-}, {
-  tableName: 'DAUSACH',
-  timestamps: false
-});
+);
 
 module.exports = DauSach;

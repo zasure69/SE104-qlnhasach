@@ -526,7 +526,7 @@
                                 <thead>
                                     <tr>
                                         <th>STT</th> <th>Mã sách</th> <th>Tên sách</th> <th>Thể loại</th>
-                                        <th>Tác giả</th> <th>Nhà XB</th> <th>Năm XB</th> <th>SL Tồn</th> <th></th> 
+                                        <th>Tác giả</th> <th>Nhà XB</th> <th>Năm XB</th> <th>Mô tả</th> <th>SL Tồn</th> <th></th> 
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -540,6 +540,7 @@
                                             <td><%= book.TacGia || '' %></td>
                                             <td><%= book.NhaXB || '' %></td>
                                             <td><%= book.NamXB || '' %></td>
+                                            <td><%= book.MoTa || '' %></td>
                                             <td><%= book.SoLuongTon || 0 %></td>
                                             <td>
                                                 <i class="fas fa-pencil-alt action-icon open-sach-edit-modal"></i>
@@ -561,7 +562,7 @@
                         </div>
                         <div class="table-responsive">
                             <table class="data-table" id="table-the-loai"> 
-                                <thead> <tr> <th>STT</th> <th>Mã Thể loại</th> <th>Tên thể loại</th> <th>Mô tả</th> <th></th> </tr> </thead>
+                                <thead> <tr> <th>STT</th> <th>Mã Thể loại</th> <th>Tên thể loại</th> <th></th> </tr> </thead>
                                 <tbody>
                                     <% if (types && types.length > 0) { %>
                                         <% types.forEach((type, index) => { %>
@@ -569,7 +570,6 @@
                                             <td><%= index + 1 %></td>
                                             <td><%= type.MaTheLoai %></td>
                                             <td><%= type.TenTheLoai %></td>
-                                            <td><%= type.MoTa || '' %></td>
                                             <td>
                                                 <i class="fas fa-pencil-alt action-icon open-theloai-edit-modal"></i>
                                                 <i class="fas fa-trash action-icon delete-icon delete-theloai-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
@@ -725,65 +725,64 @@
     <!-- --- KẾT THÚC MODALS ĐẦU SÁCH --- -->
 
     <!-- --- MODALS CHO QUẢN LÝ SÁCH --- -->
-    <div class="modal-overlay" id="sach-add-modal">
+    <div class="modal-overlay" id="sach-add-modal"> <!-- SỬA: Đổi ID -->
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Thêm mới thông tin Sách</h2>
                 <button class="close-modal"><i class="fas fa-times"></i></button>
             </div>
-            <form id="add-sach-form">
+            <form id="add-book-form">
                 <div class="modal-body">
                     <div class="modal-form-grid">
-                        <div class="form-group"> 
-                            <label for="add-ma-dau-sach-s" class="required">Đầu sách</label> 
-                            <select id="add-ma-dau-sach-s" required> 
-                                <option value="">-- Chọn đầu sách --</option>
-                                <% dauSachs.forEach(ds => { %>
-                                    <option value="<%= ds.MaDauSach %>"><%= ds.TenSach %></option>
-                                <% }); %>
+                        <div class="form-group"> <label for="add-ma-dau-sach" class="required">Mã đầu sách</label> 
+                            <select id="add-ma-dau-sach" required> 
+                                <option value="DS001">DS001</option> 
+                                <option value="DS001">DS002</option> 
+                                <option value="DS001">DS003</option> 
                             </select>  
                         </div>
-                        <div class="form-group"> <label for="add-ten-sach-s">Tên sách</label> <input type="text" id="add-ten-sach-s" readonly> </div>
-                        <div class="form-group"> <label for="add-tac-gia-s">Tác giả</label> <input type="text" id="add-tac-gia-s" readonly> </div>
+                        <div class="form-group"> <label for="add-ten-sach">Tên sách</label> <input type="text" id="add-ten-sach" readonly> </div>
+                        <div class="form-group"> <label for="add-tac-gia">Tác giả</label> <input type="text" id="add-tac-gia" readonly> </div>
                         <div class="form-group"> 
-                            <label for="add-the-loai-s">Thể loại</label> 
-                            <input type="text" id="add-the-loai-s" readonly>
-                        </div>  
-                        <div class="form-group"> <label for="add-nxb-s">Nhà XB</label> <input type="text" id="add-nxb-s" placeholder="Tuổi trẻ"> </div>
-                        <div class="form-group"> 
-                            <label for="add-nam-xb-s">Năm XB</label>
-                            <input type="number" id="add-nam-xb-s" placeholder="Năm XB" min="1890" max="2030"> 
+                            <label for="add-the-loai">Thể loại</label> 
+                            <input type="text" id="add-the-loai" readonly>
                         </div>
-                        <div class="form-group"> <label for="add-so-luong-ton-s" class="required">Số lượng tồn</label> <input type="number" min="0" id="add-so-luong-ton-s" placeholder="0" required> </div>
+                        <div class="form-group"> <label for="add-nxb">Nhà XB</label> <input type="text" id="add-nxb" placeholder="Tuổi trẻ"> </div>
+                        <div class="form-group"> 
+                            <label for="add-nam-xb">Năm XB</label>
+                            <input type="number" id="add-nam-xb" placeholder="Năm XB" min="1890" max="2025"> 
+                        </div>
+                        <div class="form-group"> <label for="add-mo-ta">Mô tả</label> <input type="text" id="add-mo-ta" placeholder="Mô tả ngắn..."> </div>
+                        <div class="form-group"> <label for="add-so-luong-ton">Số lượng tồn</label> <input type="number" min="0" id="add-so-luong-ton" placeholder="Số lượng tồn"> </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary close-modal">Hủy</button>
+                    <button type="button" class="btn btn-secondary" id="btn-custom-sach">Thêm mới</button>
                     <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
             </form>
         </div>
     </div>
-    <div class="modal-overlay" id="sach-edit-modal">
+    <div class="modal-overlay" id="sach-edit-modal"> <!-- SỬA: Đổi ID -->
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Chỉnh sửa thông tin Sách</h2>
                 <button class="close-modal"><i class="fas fa-times"></i></button>
             </div>
-            <form id="edit-sach-form">
-                <input type="hidden" id="edit-ma-sach-s">
+            <form id="edit-book-form">
                 <div class="modal-body">
                     <div class="modal-form-grid">
-                        <div class="form-group"> <label for="edit-ten-sach-s">Tên sách</label> <input type="text" id="edit-ten-sach-s" readonly> </div>
-                        <div class="form-group"> <label for="edit-tac-gia-s">Tác giả</label> <input type="text" id="edit-tac-gia-s" readonly> </div>
-                        <div class="form-group"> <label for="edit-the-loai-s">Thể loại</label> <input type="text" id="edit-the-loai-s" readonly> </div>
-                        <div class="form-group"> <label for="edit-nxb-s">Nhà XB</label> <input type="text" id="edit-nxb-s"> </div>
-                        <div class="form-group"> <label for="edit-nam-xb-s">Năm XB</label> <input type="number" id="edit-nam-xb-s" min="1890" max="2030"> </div>
-                        <div class="form-group"> <label for="edit-so-luong-ton-s">Số lượng tồn</label> <input type="number" min="0" id="edit-so-luong-ton-s"> </div>
+                        <div class="form-group"> <label for="edit-ten-sach">Tên sách</label> <input type="text" id="edit-ten-sach" value="Mắt biếc"> </div>
+                        <div class="form-group"> <label for="edit-tac-gia">Tác giả</label> <input type="text" id="edit-tac-gia" value="Nguyễn Nhật Ánh"> </div>
+                        <div class="form-group"> <label for="edit-the-loai">Thể loại</label> <select id="edit-the-loai"> <option value="Truyện ngắn" selected>Truyện ngắn</option> <option value="Tiểu thuyết">Tiểu thuyết</option> <option value="Kỹ năng sống">Kỹ năng sống</option> <option value="Sách giáo khoa">Sách giáo khoa</option> </select> </div>
+                        <div class="form-group"> <label for="edit-nxb">Nhà XB</label> <input type="text" id="edit-nxb" value="Tuổi trẻ"> </div>
+                        <div class="form-group"> <label for="edit-nam-xb">Năm XB</label> <select id="edit-nam-xb"> <option value="2025">2025</option> <option value="2024" selected>2024</option> <option value="2023">2023</option> <option value="2022">2022</option> </select> </div>
+                        <div class="form-group"> <label for="edit-mo-ta">Mô tả</label> <input type="text" id="edit-mo-ta" value="Mô tả sách..."> </div>
+                        <div class="form-group"> <label for="edit-so-luong-ton">Số lượng tồn</label> <input type="text" id="edit-so-luong-ton" value="50"> </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger delete-sach-icon">Xóa sách</button>
+                    <button type="button" class="btn btn-danger">Xóa sách</button>
                     <div> <button type="button" class="btn btn-secondary close-modal">Hủy</button> <button type="submit" class="btn btn-primary">Lưu</button> </div>
                 </div>
             </form>
@@ -810,15 +809,14 @@
         <div class="modal-content">
             <div class="modal-header"> <h2>Chỉnh sửa Thể loại</h2> <button class="close-modal"><i class="fas fa-times"></i></button> </div>
             <form id="edit-the-loai-form">
-                <input type="hidden" id="edit-ma-the-loai">
                 <div class="modal-body">
                     <div class="modal-form-grid-single">
-                        <div class="form-group"> <label class="required">Tên thể loại</label> <input type="text" id="edit-ten-the-loai" required> </div>
+                        <div class="form-group"> <label>Tên thể loại</label> <input type="text" id="edit-ten-the-loai" required> </div>
                         <div class="form-group"> <label>Mô tả</label> <textarea id="edit-mo-ta-tl"></textarea> </div>
                     </div>
                 </div>
                 <div class="modal-footer edit-modal-footer"> 
-                    <button type="button" class="btn btn-danger delete-theloai-icon">Xóa thể loại</button> 
+                    <button type="button" class="btn btn-danger" id="delete-theloai-button">Xóa thể loại</button> 
                     <div> <button type="button" class="btn btn-secondary close-modal">Hủy</button> <button type="submit" class="btn btn-primary">Lưu</button> </div>
                 </div>
             </form>
@@ -832,14 +830,14 @@
             <form id="add-tacgia-form"> 
                 <div class="modal-body">
                     <div class="modal-form-grid-single"> 
-                        <div class="form-group"> <label class="required">Họ Tên</label> <input type="text" id="add-ho-ten-tg" required> </div>
-                        <div class="form-group"> <label>Năm sinh</label> <input type="number" id="add-nam-sinh-tg" min="1800" max="2025"> </div>
+                        <div class="form-group"> <label class="required">Mã Tác giả</label> <input type="text" id="add-ma-tg" required> </div>
+                        <div class="form-group"> <label class="required">Họ Tên</label> <input type="text" id="add-ho-ten" required> </div>
+                        <div class="form-group"> <label class="required">Năm Sinh</label> <input type="number" id="add-nam-sinh"> </div>
                     </div>
                 </div>
                 <div class="modal-footer"> 
-                    <button type="button" class="btn btn-secondary close-modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary">Lưu</button> 
-                </div>
+                    <button type="button" class="btn btn-secondary" id="btn-custom-tacgia">Thêm mới</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button> </div>
             </form>
         </div>
     </div>
@@ -847,20 +845,173 @@
         <div class="modal-content">
             <div class="modal-header"> <h2>Chỉnh sửa Tác giả</h2> <button class="close-modal"><i class="fas fa-times"></i></button> </div>
             <form id="edit-tacgia-form"> 
-                <input type="hidden" id="edit-ma-tac-gia">
                 <div class="modal-body">
                     <div class="modal-form-grid-single"> 
-                        <div class="form-group"> <label class="required">Họ Tên</label> <input type="text" id="edit-ho-ten-tg" required> </div>
-                        <div class="form-group"> <label>Năm sinh</label> <input type="number" id="edit-nam-sinh-tg" min="1800" max="2025"> </div>
+                        <div class="form-group"> <label>Mã Tác giả</label> <input type="text" id="edit-ma-tg" readonly disabled> </div>
+                        <div class="form-group"> <label>Họ Tên</label> <input type="text" id="edit-ho-ten" required> </div>
+                        <div class="form-group"> <label>Năm Sinh</label> <input type="number" id="edit-nam-sinh"> </div>
                     </div>
                 </div>
                 <div class="modal-footer edit-modal-footer"> 
-                    <button type="button" class="btn btn-danger delete-tacgia-icon">Xóa tác giả</button> 
+                    <button type="button" class="btn btn-secondary" id="btn-custom">Thêm mới</button>
                     <div> <button type="button" class="btn btn-secondary close-modal">Hủy</button> <button type="submit" class="btn btn-primary">Lưu</button> </div>
                 </div>
             </form>
         </div>
     </div>
+
+<!-- Modal Thêm/Sửa Đầu Sách -->
+<div class="modal fade" id="dauSachModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dauSachModalLabel">Thêm Đầu Sách</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="dauSachForm">
+          <input type="hidden" id="dauSachId" name="MaDauSach">
+          
+          <div class="mb-3">
+            <label for="tenSach" class="form-label">Tên Sách <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="tenSach" name="TenSach" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="tenTheLoai" class="form-label">Tên Thể Loại <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="tenTheLoai" name="TenTheLoai" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="tacGiaIds" class="form-label">Tác Giả <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="tacGiaIds" name="tacGiaIds" placeholder="Nhập tên tác giả" required>
+            <small class="text-muted">Nhập tên tác giả (nếu chưa có sẽ tự động thêm mới)</small>
+          </div>
+          
+          <div class="mb-3">
+            <label for="moTa" class="form-label">Mô Tả</label>
+            <textarea class="form-control" id="moTa" name="MoTa" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-primary" onclick="saveDauSach()">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Xác Nhận Xóa -->
+<div class="modal fade" id="deleteDauSachModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Xác Nhận Xóa</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Bạn có chắc chắn muốn xóa đầu sách này?</p>
+        <input type="hidden" id="deleteDauSachId">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-danger" onclick="confirmDeleteDauSach()">Xóa</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Thêm đầu sách mới
+function openAddDauSachModal() {
+  document.getElementById('dauSachForm').reset();
+  document.getElementById('dauSachId').value = '';
+  document.getElementById('dauSachModalLabel').textContent = 'Thêm Đầu Sách';
+  new bootstrap.Modal(document.getElementById('dauSachModal')).show();
+}
+
+// Sửa đầu sách
+function openEditDauSachModal(dauSach) {
+  document.getElementById('dauSachId').value = dauSach.MaDauSach;
+  document.getElementById('tenSach').value = dauSach.TenSach;
+  document.getElementById('tenTheLoai').value = dauSach.TenTheLoai || '';
+  document.getElementById('tacGiaIds').value = dauSach.TacGiaNames || '';
+  document.getElementById('moTa').value = dauSach.MoTa || '';
+  document.getElementById('dauSachModalLabel').textContent = 'Sửa Đầu Sách';
+  new bootstrap.Modal(document.getElementById('dauSachModal')).show();
+}
+
+// Lưu đầu sách (thêm/sửa)
+async function saveDauSach() {
+  const maDauSach = document.getElementById('dauSachId').value;
+  const formData = {
+    TenSach: document.getElementById('tenSach').value.trim(),
+    TenTheLoai: document.getElementById('tenTheLoai').value.trim(),
+    tacGiaIds: [document.getElementById('tacGiaIds').value.trim()],
+    MoTa: document.getElementById('moTa').value.trim()
+  };
+
+  if (!formData.TenSach || !formData.TenTheLoai || !formData.tacGiaIds[0]) {
+    alert('Vui lòng nhập đầy đủ thông tin bắt buộc!');
+    return;
+  }
+
+  try {
+    const url = maDauSach ? `/dausach/${maDauSach}` : '/dausach';
+    const method = maDauSach ? 'PUT' : 'POST';
+    
+    const response = await fetch(url, {
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+
+    const data = await response.json();
+    
+    if (response.ok) {
+      alert(data.message || 'Lưu đầu sách thành công!');
+      bootstrap.Modal.getInstance(document.getElementById('dauSachModal')).hide();
+      location.reload();
+    } else {
+      alert(data.error || 'Có lỗi xảy ra!');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Lỗi kết nối server!');
+  }
+}
+
+// Mở modal xác nhận xóa
+function openDeleteDauSachModal(maDauSach) {
+  document.getElementById('deleteDauSachId').value = maDauSach;
+  new bootstrap.Modal(document.getElementById('deleteDauSachModal')).show();
+}
+
+// Xác nhận xóa
+async function confirmDeleteDauSach() {
+  const maDauSach = document.getElementById('deleteDauSachId').value;
+  
+  try {
+    const response = await fetch(`/dausach/${maDauSach}`, {
+      method: 'DELETE'
+    });
+
+    const data = await response.json();
+    
+    if (response.ok) {
+      alert(data.message || 'Xóa đầu sách thành công!');
+      bootstrap.Modal.getInstance(document.getElementById('deleteDauSachModal')).hide();
+      location.reload();
+    } else {
+      alert(data.error || 'Có lỗi xảy ra!');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Lỗi kết nối server!');
+  }
+}
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -868,9 +1019,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const loader = document.getElementById('loader');
     const toastContainer = document.getElementById('toast-container');
     let currentEditingRow = null;
-    
-    // Lấy danh sách tác giả từ server-side data
-    const allAuthors = "<%- JSON.stringify(authors) %>";
     
     function showLoader() { if(loader) loader.style.display = 'flex'; }
     function hideLoader() { if(loader) loader.style.display = 'none'; }
@@ -987,15 +1135,10 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const editWrapper = document.getElementById('edit-author-wrapper');
             editWrapper.querySelectorAll('.author-tag').forEach(tag => tag.remove());
-            const authorNames = cells[4].textContent.split(',').map(a => a.trim()).filter(Boolean);
-            
-            // Map tên tác giả với ID từ danh sách allAuthors
-            authorNames.forEach(authorName => {
+            const authors = cells[4].textContent.split(',').map(a => a.trim());
+            authors.forEach(authorName => {
                 if(authorName) {
-                    // Tìm ID tương ứng với tên tác giả
-                    const author = allAuthors.find(a => a.HoTen.trim() === authorName);
-                    const authorId = author ? author.MaTacGia : '';
-                    const tagHTML = `<span class="author-tag" data-id="${authorId}">${authorName}<span class="remove-tag">×</span></span>`;
+                    const tagHTML = `<span class="author-tag" data-id="">${authorName}<span class="remove-tag">×</span></span>`;
                     editWrapper.querySelector('.author-select-btn').insertAdjacentHTML('beforebegin', tagHTML);
                 }
             });
@@ -1015,16 +1158,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 MoTa: document.getElementById('edit-mo-ta-ds').value.trim()
             };
 
-            console.log('[CLIENT] Form data collected:', formData);
-            console.log('[CLIENT] Author IDs:', formData.tacGiaIds);
-
             if (!formData.tacGiaIds || formData.tacGiaIds.length === 0) {
-                console.error('[CLIENT] No authors selected!');
                 showToast('Vui lòng chọn ít nhất một tác giả!', 'error');
                 return;
             }
 
-            console.log(`[CLIENT] Calling PATCH /api/books/updateDauSach/${maDS} with:`, JSON.stringify(formData, null, 2));
+            console.log(`[DEBUG] Calling PATCH /api/books/updateDauSach/${maDS} with:`, formData);
             showLoader();
             try {
                 const response = await fetch(`/api/books/updateDauSach/${maDS}`, {
@@ -1035,8 +1174,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
                 hideLoader();
                 
-                console.log('[CLIENT] Response status:', response.status);
-                console.log('[CLIENT] Response data:', data);
+                console.log('[DEBUG] Response:', response.status, data);
                 if(response.ok) {
                     showToast(data.message || 'Cập nhật thành công!');
                     editDauSachModal.style.display = 'none';
@@ -1046,7 +1184,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } catch(error) {
                 hideLoader();
-                console.error('[CLIENT ERROR] updateDauSach:', error);
+                console.error('[ERROR] updateDauSach:', error);
                 showToast('Lỗi kết nối server!', 'error');
             }
         });
@@ -1082,482 +1220,6 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch(error) {
                 hideLoader();
                 console.error('[ERROR] deleteDauSach:', error);
-                showToast('Lỗi kết nối server!', 'error');
-            }
-        });
-    });
-
-    // --- SÁCH: THÊM MỚI ---
-    const addSachBtn = document.getElementById('open-sach-add-modal');
-    const addSachModal = document.getElementById('sach-add-modal');
-    const addSachForm = document.getElementById('add-sach-form');
-    const addMaDauSachSelect = document.getElementById('add-ma-dau-sach-s');
-
-    if(addSachBtn && addSachModal) {
-        addSachBtn.addEventListener('click', () => {
-            if(addSachForm) addSachForm.reset();
-            document.getElementById('add-ten-sach-s').value = '';
-            document.getElementById('add-tac-gia-s').value = '';
-            document.getElementById('add-the-loai-s').value = '';
-            addSachModal.style.display = 'flex';
-        });
-    }
-
-    // Auto-fill thông tin khi chọn Đầu sách trong modal thêm
-    if(addMaDauSachSelect) {
-        addMaDauSachSelect.addEventListener('change', async (e) => {
-            const maDauSach = e.target.value;
-            if(!maDauSach) {
-                document.getElementById('add-ten-sach-s').value = '';
-                document.getElementById('add-tac-gia-s').value = '';
-                document.getElementById('add-the-loai-s').value = '';
-                return;
-            }
-
-            showLoader();
-            try {
-                const response = await fetch(`/api/books/getDauSach/${maDauSach}`);
-                const data = await response.json();
-                hideLoader();
-
-                if(response.ok && data.dauSach) {
-                    const ds = data.dauSach;
-                    document.getElementById('add-ten-sach-s').value = ds.TenSach || '';
-                    document.getElementById('add-tac-gia-s').value = ds.TacGia || '';
-                    document.getElementById('add-the-loai-s').value = ds.TenTheLoai || '';
-                }
-            } catch(error) {
-                hideLoader();
-                console.error('[ERROR] getDauSach:', error);
-            }
-        });
-    }
-
-    if(addSachForm) {
-        addSachForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = {
-                MaDauSach: document.getElementById('add-ma-dau-sach-s').value.trim(),
-                NhaXB: document.getElementById('add-nxb-s').value.trim(),
-                NamXB: document.getElementById('add-nam-xb-s').value.trim(),
-                SoLuongTon: document.getElementById('add-so-luong-ton-s').value.trim()
-            };
-
-            console.log('[DEBUG] Calling POST /api/books/createSach with:', formData);
-            showLoader();
-            try {
-                const response = await fetch('/api/books/createSach', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-                const data = await response.json();
-                hideLoader();
-                
-                console.log('[DEBUG] Response:', response.status, data);
-                if(response.ok) {
-                    showToast(data.message || 'Thêm sách thành công!');
-                    addSachModal.style.display = 'none';
-                    location.reload();
-                } else {
-                    showToast(data.error || 'Có lỗi xảy ra!', 'error');
-                }
-            } catch(error) {
-                hideLoader();
-                console.error('[ERROR] createSach:', error);
-                showToast('Lỗi kết nối server!', 'error');
-            }
-        });
-    }
-
-    // --- SÁCH: CHỈNH SỬA ---
-    const editSachModal = document.getElementById('sach-edit-modal');
-    const editSachForm = document.getElementById('edit-sach-form');
-
-    document.querySelectorAll('.open-sach-edit-modal').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const row = e.target.closest('tr');
-            if(!row) return;
-            
-            const cells = row.cells;
-            document.getElementById('edit-ma-sach-s').value = cells[1].textContent;
-            document.getElementById('edit-ten-sach-s').value = cells[2].textContent;
-            document.getElementById('edit-tac-gia-s').value = cells[4].textContent;
-            document.getElementById('edit-the-loai-s').value = cells[3].textContent;
-            document.getElementById('edit-nxb-s').value = cells[5].textContent;
-            document.getElementById('edit-nam-xb-s').value = cells[6].textContent;
-            document.getElementById('edit-so-luong-ton-s').value = cells[7].textContent;
-            
-            editSachModal.style.display = 'flex';
-        });
-    });
-
-    if(editSachForm) {
-        editSachForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const maSach = document.getElementById('edit-ma-sach-s').value;
-            const formData = {
-                NhaXB: document.getElementById('edit-nxb-s').value.trim(),
-                NamXB: document.getElementById('edit-nam-xb-s').value.trim(),
-                SoLuongTon: document.getElementById('edit-so-luong-ton-s').value.trim()
-            };
-
-            console.log(`[DEBUG] Calling PATCH /api/books/updateSach/${maSach} with:`, formData);
-            showLoader();
-            try {
-                const response = await fetch(`/api/books/updateSach/${maSach}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-                const data = await response.json();
-                hideLoader();
-                
-                console.log('[DEBUG] Response:', response.status, data);
-                if(response.ok) {
-                    showToast(data.message || 'Cập nhật thành công!');
-                    editSachModal.style.display = 'none';
-                    location.reload();
-                } else {
-                    showToast(data.error || 'Có lỗi xảy ra!', 'error');
-                }
-            } catch(error) {
-                hideLoader();
-                console.error('[ERROR] updateSach:', error);
-                showToast('Lỗi kết nối server!', 'error');
-            }
-        });
-    }
-    document.querySelectorAll('.delete-sach-icon').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            const row = e.target.closest('tr');
-            if(!row) return;
-            
-            const maSach = row.dataset.id;
-            const tenSach = row.cells[2].textContent;
-            
-            if(!confirm(`Bạn có chắc chắn muốn xóa sách: ${tenSach}?`)) return;
-            
-            console.log(`[DEBUG] Calling DELETE /api/books/deleteSach/${maSach}`);
-            showLoader();
-            try {
-                const response = await fetch(`/api/books/deleteSach/${maSach}`, {
-                    method: 'DELETE'
-                });
-                const data = await response.json();
-                hideLoader();
-                
-                console.log('[DEBUG] Response:', response.status, data);
-                if(response.ok) {
-                    showToast(data.message || 'Xóa thành công!');
-                    row.remove();
-                } else {
-                    showToast(data.error || 'Có lỗi xảy ra!', 'error');
-                }
-            } catch(error) {
-                hideLoader();
-                console.error('[ERROR] deleteSach:', error);
-                showToast('Lỗi kết nối server!', 'error');
-            }
-        });
-    });
-
-    // --- SÁCH: XÓA ---
-    // document.querySelectorAll('.delete-sach-icon').forEach(btn => {
-    //     btn.addEventListener('click', async (e) => {
-    //         const maSach = document.getElementById('edit-ma-sach-s').value;
-    //         const tenSach = document.getElementById('edit-ten-sach-s').value;
-            
-    //         if(!confirm(`Bạn có chắc chắn muốn xóa sách: ${tenSach}?`)) return;
-            
-    //         console.log(`[DEBUG] Calling DELETE /api/books/deleteSach/${maSach}`);
-    //         showLoader();
-    //         try {
-    //             const response = await fetch(`/api/books/deleteSach/${maSach}`, {
-    //                 method: 'DELETE'
-    //             });
-    //             const data = await response.json();
-    //             hideLoader();
-                
-    //             console.log('[DEBUG] Response:', response.status, data);
-    //             if(response.ok) {
-    //                 showToast(data.message || 'Xóa thành công!');
-    //                 editSachModal.style.display = 'none';
-    //                 location.reload();
-    //             } else {
-    //                 showToast(data.error || 'Có lỗi xảy ra!', 'error');
-    //             }
-    //         } catch(error) {
-    //             hideLoader();
-    //             console.error('[ERROR] deleteSach:', error);
-    //             showToast('Lỗi kết nối server!', 'error');
-    //         }
-    //     });
-    // });
-
-    // --- THỂ LOẠI: THÊM MỚI ---
-    const addTheLoaiBtn = document.getElementById('open-theloai-add-modal');
-    const addTheLoaiModal = document.getElementById('theloai-add-modal');
-    const addTheLoaiForm = document.getElementById('add-the-loai-form');
-
-    if(addTheLoaiBtn && addTheLoaiModal) {
-        addTheLoaiBtn.addEventListener('click', () => {
-            if(addTheLoaiForm) addTheLoaiForm.reset();
-            addTheLoaiModal.style.display = 'flex';
-        });
-    }
-
-    if(addTheLoaiForm) {
-        addTheLoaiForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = {
-                TenTheLoai: document.getElementById('add-ten-the-loai').value.trim(),
-                MoTa: document.getElementById('add-mo-ta-tl').value.trim()
-            };
-
-            console.log('[DEBUG] Calling POST /api/books/types/create with:', formData);
-            showLoader();
-            try {
-                const response = await fetch('/api/books/types/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-                const data = await response.json();
-                hideLoader();
-                
-                if(response.ok) {
-                    showToast(data.message || 'Thêm thể loại thành công!');
-                    addTheLoaiModal.style.display = 'none';
-                    location.reload();
-                } else {
-                    showToast(data.error || 'Có lỗi xảy ra!', 'error');
-                }
-            } catch(error) {
-                hideLoader();
-                console.error('[ERROR] createTheLoai:', error);
-                showToast('Lỗi kết nối server!', 'error');
-            }
-        });
-    }
-
-    // --- THỂ LOẠI: CHỈNH SỬA ---
-    const editTheLoaiModal = document.getElementById('theloai-edit-modal');
-    const editTheLoaiForm = document.getElementById('edit-the-loai-form');
-
-    document.querySelectorAll('.open-theloai-edit-modal').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const row = e.target.closest('tr');
-            if(!row) return;
-            
-            const cells = row.cells;
-            document.getElementById('edit-ma-the-loai').value = cells[1].textContent;
-            document.getElementById('edit-ten-the-loai').value = cells[2].textContent;
-            document.getElementById('edit-mo-ta-tl').value = cells[3].textContent;
-            
-            editTheLoaiModal.style.display = 'flex';
-        });
-    });
-
-    if(editTheLoaiForm) {
-        editTheLoaiForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const maTheLoai = document.getElementById('edit-ma-the-loai').value;
-            const formData = {
-                TenTheLoai: document.getElementById('edit-ten-the-loai').value.trim(),
-                MoTa: document.getElementById('edit-mo-ta-tl').value.trim()
-            };
-
-            console.log(`[DEBUG] Calling PATCH /api/books/types/update/${maTheLoai} with:`, formData);
-            showLoader();
-            try {
-                const response = await fetch(`/api/books/types/update/${maTheLoai}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-                const data = await response.json();
-                hideLoader();
-                
-                if(response.ok) {
-                    showToast(data.message || 'Cập nhật thành công!');
-                    editTheLoaiModal.style.display = 'none';
-                    location.reload();
-                } else {
-                    showToast(data.error || 'Có lỗi xảy ra!', 'error');
-                }
-            } catch(error) {
-                hideLoader();
-                console.error('[ERROR] updateTheLoai:', error);
-                showToast('Lỗi kết nối server!', 'error');
-            }
-        });
-    }
-
-    // --- THỂ LOẠI: XÓA ---
-    document.querySelectorAll('.delete-theloai-icon').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            const row = e.target.closest('tr');
-            if(!row) return;
-            
-            const maTheLoai = row.dataset.id;
-            const tenTheLoai = row.cells[2].textContent;
-            
-            if(!confirm(`Bạn có chắc chắn muốn xóa thể loại: ${tenTheLoai}?`)) return;
-            
-            console.log(`[DEBUG] Calling DELETE /api/books/types/delete/${maTheLoai}`);
-            showLoader();
-            try {
-                const response = await fetch(`/api/books/types/delete/${maTheLoai}`, {
-                    method: 'DELETE'
-                });
-                const data = await response.json();
-                hideLoader();
-                
-                console.log('[DEBUG] Response:', response.status, data);
-                if(response.ok) {
-                    showToast(data.message || 'Xóa thành công!');
-                    row.remove();
-                } else {
-                    showToast(data.error || 'Có lỗi xảy ra!', 'error');
-                }
-            } catch(error) {
-                hideLoader();
-                console.error('[ERROR] deleteTheLoai:', error);
-                showToast('Lỗi kết nối server!', 'error');
-            }
-        });
-    });
-
-    // --- TÁC GIẢ: THÊM MỚI ---
-    const addTacGiaBtn = document.getElementById('open-tacgia-add-modal');
-    const addTacGiaModal = document.getElementById('tacgia-add-modal');
-    const addTacGiaForm = document.getElementById('add-tacgia-form');
-
-    if(addTacGiaBtn && addTacGiaModal) {
-        addTacGiaBtn.addEventListener('click', () => {
-            if(addTacGiaForm) addTacGiaForm.reset();
-            addTacGiaModal.style.display = 'flex';
-        });
-    }
-
-    if(addTacGiaForm) {
-        addTacGiaForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = {
-                HoTen: document.getElementById('add-ho-ten-tg').value.trim(),
-                NamSinh: document.getElementById('add-nam-sinh-tg').value.trim()
-            };
-
-            console.log('[DEBUG] Calling POST /api/books/authors/create with:', formData);
-            showLoader();
-            try {
-                const response = await fetch('/api/books/authors/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-                const data = await response.json();
-                hideLoader();
-                
-                if(response.ok) {
-                    showToast(data.message || 'Thêm tác giả thành công!');
-                    addTacGiaModal.style.display = 'none';
-                    location.reload();
-                } else {
-                    showToast(data.error || 'Có lỗi xảy ra!', 'error');
-                }
-            } catch(error) {
-                hideLoader();
-                console.error('[ERROR] createTacGia:', error);
-                showToast('Lỗi kết nối server!', 'error');
-            }
-        });
-    }
-
-    // --- TÁC GIẢ: CHỈNH SỬA ---
-    const editTacGiaModal = document.getElementById('tacgia-edit-modal');
-    const editTacGiaForm = document.getElementById('edit-tacgia-form');
-
-    document.querySelectorAll('.open-tacgia-edit-modal').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const row = e.target.closest('tr');
-            if(!row) return;
-            
-            const cells = row.cells;
-            document.getElementById('edit-ma-tac-gia').value = cells[1].textContent;
-            document.getElementById('edit-ho-ten-tg').value = cells[2].textContent;
-            document.getElementById('edit-nam-sinh-tg').value = cells[3].textContent;
-            
-            editTacGiaModal.style.display = 'flex';
-        });
-    });
-
-    if(editTacGiaForm) {
-        editTacGiaForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const maTacGia = document.getElementById('edit-ma-tac-gia').value;
-            const formData = {
-                HoTen: document.getElementById('edit-ho-ten-tg').value.trim(),
-                NamSinh: document.getElementById('edit-nam-sinh-tg').value.trim()
-            };
-
-            console.log(`[DEBUG] Calling PATCH /api/books/authors/update/${maTacGia} with:`, formData);
-            showLoader();
-            try {
-                const response = await fetch(`/api/books/authors/update/${maTacGia}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-                const data = await response.json();
-                hideLoader();
-                
-                if(response.ok) {
-                    showToast(data.message || 'Cập nhật thành công!');
-                    editTacGiaModal.style.display = 'none';
-                    location.reload();
-                } else {
-                    showToast(data.error || 'Có lỗi xảy ra!', 'error');
-                }
-            } catch(error) {
-                hideLoader();
-                console.error('[ERROR] updateTacGia:', error);
-                showToast('Lỗi kết nối server!', 'error');
-            }
-        });
-    }
-
-    // --- TÁC GIẢ: XÓA ---
-    document.querySelectorAll('.delete-tacgia-icon').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            const row = e.target.closest('tr');
-            if(!row) return;
-            
-            const maTacGia = row.dataset.id;
-            const hoTen = row.cells[2].textContent;
-            
-            if(!confirm(`Bạn có chắc chắn muốn xóa tác giả: ${hoTen}?`)) return;
-            
-            console.log(`[DEBUG] Calling DELETE /api/books/authors/delete/${maTacGia}`);
-            showLoader();
-            try {
-                const response = await fetch(`/api/books/authors/delete/${maTacGia}`, {
-                    method: 'DELETE'
-                });
-                const data = await response.json();
-                hideLoader();
-                
-                console.log('[DEBUG] Response:', response.status, data);
-                if(response.ok) {
-                    showToast(data.message || 'Xóa thành công!');
-                    row.remove();
-                } else {
-                    showToast(data.error || 'Có lỗi xảy ra!', 'error');
-                }
-            } catch(error) {
-                hideLoader();
-                console.error('[ERROR] deleteTacGia:', error);
                 showToast('Lỗi kết nối server!', 'error');
             }
         });
