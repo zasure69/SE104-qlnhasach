@@ -109,6 +109,33 @@ const getUserInfo = (req) => {
     }
   };
 
+  const getBillsPage = async (req, res) => {
+    try {
+        const userInfo = getUserInfo(req);
+
+        // 1. Lấy danh sách hóa đơn, JOIN với Khách hàng (bước này thay thế billController.index)
+        const bills = await db.HoaDon.findAll({
+            include: [{ 
+                model: db.KhachHang, 
+                as: 'KhachHang',
+                attributes: ['HoVaTen'] // Lấy tên khách hàng
+            }],
+            order: [['NgayLapHoaDon', 'DESC']]
+        });
+        
+        // 2. Render trang bills.ejs và truyền dữ liệu
+        res.render('bills', {
+            ...userInfo,
+            currentActivePage: 'bills', // Thiết lập active page
+            bills: bills // Truyền dữ liệu hóa đơn
+        });
+        
+    } catch (err) {
+        console.error('Lỗi render trang hóa đơn:', err);
+        res.status(500).send('Lỗi Server: ' + err.message);
+    }
+};
+
   const getChangeRulePage = async (req, res) => {
     try {
       const userInfo = getUserInfo(req);
@@ -259,6 +286,34 @@ const getReportPage = async (req, res) => {
     }
   };
 
+  const getReceiptsPage = async (req, res) => {
+    try {
+        const userInfo = getUserInfo(req);
+        
+        // 1. Lấy danh sách phiếu thu, JOIN với Khách hàng
+        const receipts = await db.PhieuThuTien.findAll({
+            // PhieuThuTien.belongsTo(KhachHang) đã được thiết lập trong index.js
+            include: [{ 
+                model: db.KhachHang, 
+                as: 'KhachHang', // Đảm bảo alias này khớp với mối quan hệ đã định nghĩa
+                attributes: ['HoVaTen', 'TongNo'] // Lấy tên và nợ của khách hàng
+            }],
+            order: [['NgayThuTien', 'DESC'], ['MaPhieuThu', 'DESC']] // Sắp xếp theo ngày mới nhất
+        });
+        
+        // 2. Render trang receipts.ejs và truyền dữ liệu
+        res.render('receipts', {
+            ...userInfo,
+            currentActivePage: 'receipts', // Thiết lập active page cho menu
+            receipts: receipts // Truyền dữ liệu Phiếu Thu Tiền
+        });
+        
+    } catch (err) {
+        console.error('Lỗi render trang phiếu thu tiền:', err);
+        res.status(500).send('Lỗi Server: ' + err.message);
+    }
+};
+
   // Xuất tất cả các hàm
 module.exports = {
     getDashboardPage,
@@ -266,5 +321,7 @@ module.exports = {
     getCustomersPage,
     getSearchPage,
     getChangeRulePage,
+    getBillsPage,
+    getReceiptsPage
     getReportPage 
   };

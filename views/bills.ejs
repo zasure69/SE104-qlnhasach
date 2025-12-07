@@ -674,16 +674,16 @@
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
-                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
-                    <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
-                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
-                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
-                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
-                    <li><a href="/dashboard/bills" class="active"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
-                    <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="/dashboard/changerule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
+                    <li><a href="./dashboard.html"><i class="fas fa-home"></i>Tổng quan</a></li>
+                    <li><a href="./employees.html"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
+                    <li><a href="./books.html" ><i class="fas fa-book"></i>QL Sách</a></li>
+                    <li><a href="./customers.html"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
+                    <li><a href="./books_import.html"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
+                    <li><a href="./receipts.html"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
+                    <li><a href="./bills.html" class="active"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
+                    <li><a href="./search.html"><i class="fas fa-search"></i> Tra cứu</a></li>
+                    <li><a href="./report.html"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+                    <li><a href="./changerule.html"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
         </aside>
@@ -727,36 +727,23 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>HD001</td>
-                                <td>Nguyễn Văn A</td>
-                                <td>22/11/2025</td>
-                                <td>125.000</td>
-                                <td>
-                                    <button class="btn btn-sm btn-secondary view-detail-btn" data-id="HD001"> <i
+                            <% bills.forEach((bill, index) => { %>
+                                <tr data-id="<%= bill.MaHoaDon %>">
+                                    <td><%= index + 1 %></td>
+                                    <td><%= bill.MaHoaDon %></td>
+                                    <td><%= bill.KhachHang.HoVaTen %></td>
+                                    <td><%= new Date(bill.NgayLapHoaDon).toLocaleDateString('vi-VN') %></td>
+                                    <td class="text-right"><%= new Intl.NumberFormat('vi-VN').format(bill.TongTien) %></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-secondary view-detail-btn" data-id=<%= bill.MaHoaDon %>> <i
                                             class="fas fa-eye"></i> Chi tiết </button>
-                                    <button class="btn btn-sm btn-print ml-2"
-                                        onclick="alert('Chức năng in hóa đơn HD001')"> <i class="fas fa-print"></i>
-                                    </button>
-                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>HD002</td>
-                                <td>Trần Thị B</td>
-                                <td>23/11/2025</td>
-                                <td>340.000</td>
-                                <td>
-                                    <button class="btn btn-sm btn-secondary view-detail-btn" data-id="HD002"> <i
-                                            class="fas fa-eye"></i> Chi tiết </button>
-                                    <button class="btn btn-sm btn-print ml-2"
-                                        onclick="alert('Chức năng in hóa đơn HD002')"> <i class="fas fa-print"></i>
-                                    </button>
-                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
-                                </td>
-                            </tr>
+                                        <button class="btn btn-sm btn-print ml-2"
+                                            onclick="alert('Chức năng in hóa đơn <%= bill.MaHoaDon %>')"> <i class="fas fa-print"></i>
+                                        </button>
+                                        <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                                    </td>
+                                </tr>
+                            <% }); %>
                         </tbody>
                     </table>
                 </div>
@@ -1008,7 +995,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            
             // --- 1. BIẾN TOÀN CỤC & TIỆN ÍCH ---
             const loader = document.getElementById('loader');
             const toastContainer = document.getElementById('toast-container');
@@ -1020,7 +1006,33 @@
             
             // Biến dùng cho việc sửa hóa đơn (snapshot)
             let originalEditState = null;
+            let lastBillMaHD = null; 
 
+            // Gọi API để lấy Mã Hóa Đơn cuối cùng từ Server
+            function fetchLastMaHD() {
+                return fetch('/api/bill/lastMaHD')
+                    .then(response => response.json())
+                    .then(data => {
+                        lastBillMaHD = data.lastMaHD;
+                        console.log('Mã Hóa Đơn cuối cùng đã được tải:', lastBillMaHD);
+                    })
+                    .catch(error => {
+                        console.error('Lỗi khi tải Mã Hóa Đơn cuối cùng:', error);
+                        showToast('Lỗi: Không thể lấy Mã Hóa Đơn cuối cùng.', 'error');
+                    });
+            }
+
+
+            function updateBillTotal(totalAmountId, amountDifference) {
+                const totalInput = document.getElementById(totalAmountId);
+                const currentTotal = parseNumber(totalInput.dataset.rawValue); 
+                const newTotal = currentTotal + amountDifference; 
+                totalInput.dataset.rawValue = newTotal; 
+                totalInput.textContent = formatNumber(newTotal)
+                showToast(totalInput.dataset.rawValue)
+                const prefix = totalAmountId.split('-')[0]; 
+                calculateRemaining(prefix);
+            }
             function showLoader() { loader.style.display = 'flex'; }
             function hideLoader() { loader.style.display = 'none'; }
             function showToast(message, type = 'success') {
@@ -1032,8 +1044,20 @@
                 setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
             }
             function simulateApiCall(callback) { showLoader(); setTimeout(() => { hideLoader(); callback(true); }, 500); }
-            function formatNumber(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
-            function parseNumber(str) { if (!str) return 0; return parseFloat(str.toString().replace(/\/dashboard/g, '')) || 0; }
+            function formatNumber(num) {
+                if (num === null || num === undefined) {
+                    return '0';
+                }
+                const numberValue = parseFloat(num);
+                if (isNaN(numberValue)) {
+                    return '0';
+                }
+                const formattedString = new Intl.NumberFormat('vi-VN', {
+                    maximumFractionDigits: 2, 
+                }).format(numberValue);
+                return formattedString;
+            }
+            function parseNumber(str) { if (!str) return 0; return parseFloat(str.toString().replace(/\./g, '')) || 0; }
 
 
             // --- 2. CÁC HÀM XỬ LÝ BẢNG (CORE LOGIC) ---
@@ -1116,7 +1140,7 @@
                     <td class="stt-cell text-center">${tbody.rows.length}</td>
                     <td>${data.maSach}</td>
                     <td class="name-cell">${data.tenSach}</td>
-                    <td class="cat-cell">${data.cat}</td>
+                    <td class="cat-cell">${data.theLoai}</td>
                     <td class="qty-cell text-center">${data.soLuong}</td>
                     <td class="price-cell text-right" data-raw="${data.donGia}">${formatNumber(data.donGia)}</td>
                     <td class="row-total text-right" data-value="${thanhTien}">${formatNumber(thanhTien)}</td>
@@ -1200,34 +1224,102 @@
 
 
             // --- 4. DATA GIẢ LẬP & LOGIC FORM ---
-            function findCustomer(maKH) {
-                const customers = { 'KH01': 'Nguyễn Văn A', 'KH02': 'Trần Thị B' };
-                return customers[maKH.toUpperCase()] || '';
+            async function findCustomer(maKH) {
+                if (!maKH || typeof maKH !== 'string') {
+                    // Trả về đối tượng rỗng an toàn nếu Mã KH rỗng
+                    return { HoVaTen: '', TongNo: 0, isValid: false };
+                }
+                
+                // Loại bỏ khoảng trắng và chuyển thành chữ hoa nếu cần
+                const cleanMaKH = maKH.trim(); 
+
+                try {
+                    // GỌI API: Sử dụng endpoint /api/bill/customer/:id (đã có trong billRoutes.js)
+                    const response = await fetch(`/api/bill/customer/${cleanMaKH}`);
+                    
+                    if (!response.ok) {
+                        // Xử lý lỗi 404 (Không tìm thấy) hoặc 500 (Server Error)
+                        console.error(`Lỗi tìm khách hàng ${cleanMaKH}: ${response.status}`);
+                        return { 
+                            HoVaTen: 'Mã KH không tồn tại', 
+                            TongNo: 0, 
+                            isValid: false 
+                        }; 
+                    }
+
+                    const data = await response.json();
+                    // Trả về dữ liệu khách hàng (HoVaTen, TongNo)
+                    return { 
+                        HoVaTen: data.HoVaTen, 
+                        // TongNo từ DB là chuỗi, giữ nguyên hoặc chuyển đổi tại chỗ sử dụng
+                        TongNo: data.TongNo, 
+                        isValid: true 
+                    };
+
+                } catch (error) {
+                    console.error("Lỗi kết nối mạng khi tìm khách hàng:", error);
+                    return { HoVaTen: 'Lỗi kết nối', TongNo: 0, isValid: false }; // Lỗi mạng/server
+                }
             }
-            function findBookInfo(maSach) {
-                const books = {
-                    'S001': { name: 'Mắt biếc', cat: 'Truyện ngắn', price: 105000 },
-                    'S002': { name: 'Harry Potter', cat: 'Tiểu thuyết', price: 250000 }
-                };
-                return books[maSach.toUpperCase()] || null;
+            async function findBookInfo(maSach) {
+                if (!maSach || typeof maSach !== 'string') return null;
+                
+                try {
+                    // Gọi API /api/bill/book/:id
+                    const response = await fetch(`/api/bill/book/${maSach.trim()}`);
+                    
+                    if (!response.ok) {
+                        return null; // Không tìm thấy sách hoặc lỗi server
+                    }
+                    // Trả về object { name, cat, price, stock }
+                    return await response.json(); 
+                } catch (error) {
+                    console.error("Lỗi kết nối khi tìm sách:", error);
+                    return null;
+                }
             }
 
             ['add', 'edit'].forEach(prefix => {
                 const maKhInput = document.getElementById(`${prefix}-ma-kh`);
                 if (maKhInput) {
-                    maKhInput.addEventListener('blur', function () {
-                        document.getElementById(`${prefix}-ten-kh`).value = findCustomer(this.value);
+                    maKhInput.addEventListener('blur', async function () {
+                        const maKhachHang = this.value;
+        
+                        // *** DÙNG 'await' ĐỂ ĐỢI KẾT QUẢ TỪ SERVER ***
+                        const customerInfo = await findCustomer(maKhachHang);
+                        
+                        // --- XỬ LÝ VÀ HIỂN THỊ KẾT QUẢ ---
+                        const tenKhInput = document.getElementById(`${prefix}-ten-kh`);
+
+                        if (tenKhInput) {
+                            // Hiển thị tên (đã được fetch hoặc thông báo lỗi)
+                            tenKhInput.value = customerInfo.HoVaTen;
+                        }
                     });
                 }
 
                 const maSachInput = document.getElementById(`${prefix}-input-ma-sach`);
                 if (maSachInput) {
-                    maSachInput.addEventListener('blur', function () {
-                        const book = findBookInfo(this.value);
+                    // *** THÊM 'async' VÀO HÀM XỬ LÝ SỰ KIỆN ***
+                    maSachInput.addEventListener('blur', async function () { 
+                        
+                        const maSach = this.value;
+                        // *** DÙNG 'await' ĐỂ ĐỢI KẾT QUẢ TỪ SERVER ***
+                        const book = await findBookInfo(maSach); 
+
+                        // Lấy các input để dễ xử lý
+                        const tenSachInput = document.getElementById(`${prefix}-input-ten-sach`);
+                        const theLoaiInput = document.getElementById(`${prefix}-input-the-loai`);
+                        const donGiaInput = document.getElementById(`${prefix}-input-don-gia`);
+
                         if (book) {
-                            document.getElementById(`${prefix}-input-ten-sach`).value = book.name;
-                            document.getElementById(`${prefix}-input-the-loai`).value = book.cat;
-                            document.getElementById(`${prefix}-input-don-gia`).value = formatNumber(book.price);
+                            if (tenSachInput) tenSachInput.value = book.name;
+                            if (theLoaiInput) theLoaiInput.value = book.cat;
+                            if (donGiaInput) donGiaInput.value = formatNumber(book.price); 
+                        } else {
+                            if (tenSachInput) tenSachInput.value = 'Mã sách không hợp lệ!';
+                            if (theLoaiInput) theLoaiInput.value = '';
+                            if (donGiaInput) donGiaInput.value = formatNumber(0);
                         }
                     });
                 }
@@ -1247,19 +1339,64 @@
                         const theLoaiInput = document.getElementById(`${prefix}-input-the-loai`);
                         const soLuongInput = document.getElementById(`${prefix}-input-so-luong`);
                         const donGiaInput = document.getElementById(`${prefix}-input-don-gia`);
+                        const detailTable = document.getElementById(`${prefix}-detail-table`);
+                        const amountTable = `${prefix}-total-amount`;
                         
-                        if (!maSachInput.value || !tenSachInput.value) {
+                        if (!maSachInput.value || !tenSachInput.value || !theLoaiInput.value) {
                             showToast('Vui lòng nhập sách!', 'error');
                             return;
                         }
+                        
+                        let found = false
 
-                        addRowToDetailTable(`${prefix}-detail-table`, `${prefix}-total-amount`, {
-                            maSach: maSachInput.value, 
-                            tenSach: tenSachInput.value, 
-                            cat: theLoaiInput.value,
-                            soLuong: parseInt(soLuongInput.value), 
-                            donGia: parseNumber(donGiaInput.value)
-                        });
+                        for (let i = 1; i < detailTable.rows.length; i++) {
+                            const row = detailTable.rows[i];
+                            
+                            // Đảm bảo hàng có đủ cột và Mã sách ở cột đầu tiên (index 0)
+                            if (row.cells.length > 0) { 
+                                const cellMaSach = row.cells[1]; 
+                                if (cellMaSach.textContent.trim() === maSachInput.value) {
+                                    found = true;
+                                    
+                                    // Logic CẬP NHẬT (đã fix lỗi tổng tiền)
+                                    const soLuongCell = row.cells[4]; 
+                                    const donGiaCell = row.cells[5];
+                                    const thanhTienCell = row.cells[6]; 
+                                    
+                                    const soLuongCu = parseInt(soLuongCell.textContent.trim());
+                                    const thanhTienCu = parseNumber(thanhTienCell.textContent.trim()); 
+                                    const donGia = parseNumber(donGiaCell.textContent.trim());
+
+                                    const soLuongMoi = parseInt(soLuongInput.value);
+                                    
+                                    const soLuongTong = soLuongCu + soLuongMoi;
+                                    const thanhTienMoi = soLuongTong * donGia;
+                                    
+                                    const difference = thanhTienMoi - thanhTienCu; // Tính chênh lệch
+                                    
+                                    soLuongCell.textContent = soLuongTong; 
+                                    thanhTienCell.textContent = formatNumber(thanhTienMoi); 
+                                    thanhTienCell.dataset.value = thanhTienMoi;
+                                    
+                                    // Cập nhật tổng tiền hóa đơn (dùng hàm đã tạo ở bước trước)
+                                    updateBillTotal(amountTable, difference);
+                                    
+                                    showToast(`Đã cộng dồn sách ${maSachInput.value}. Số lượng: ${soLuongTong}`, 'success');
+                                    
+                                    break; 
+                                }
+                            }
+                        }
+                        
+                        if (!found) {
+                            addRowToDetailTable(`${prefix}-detail-table`, `${prefix}-total-amount`, {
+                                maSach: maSachInput.value, 
+                                tenSach: tenSachInput.value, 
+                                theLoai: theLoaiInput.value,
+                                soLuong: parseInt(soLuongInput.value), 
+                                donGia: parseNumber(donGiaInput.value)
+                            });
+                        }
 
                         // Reset
                         maSachInput.value = '';
@@ -1276,13 +1413,16 @@
             // --- 5. QUẢN LÝ MODAL CHÍNH ---
             const addModal = document.getElementById('add-modal');
             const editModal = document.getElementById('edit-modal');
-
+            
             // Mở Modal Thêm
             const openAddBtn = document.getElementById('open-add-modal');
             if(openAddBtn) {
                 openAddBtn.addEventListener('click', () => {
-                    resetAddForm();
-                    addModal.style.display = 'flex';
+                    fetchLastMaHD().then(() => {
+                        resetAddForm();
+                        addModal.style.display = 'flex';
+                        const maHDMoi = generateMaHD(lastBillMaHD);
+                    });
                 });
             }
 
@@ -1290,25 +1430,92 @@
             const viewDetailBtns = document.querySelectorAll('.view-detail-btn');
             viewDetailBtns.forEach(btn => {
                 btn.addEventListener('click', function () {
-                    const id = this.dataset.id;
-                    document.getElementById('edit-ma-hd').value = id;
-                    document.getElementById('edit-ngay-lap').value = '2025-11-22';
-                    document.getElementById('edit-ma-kh').value = 'KH01';
-                    document.getElementById('edit-ten-kh').value = 'Nguyễn Văn A';
+                    // const id = this.dataset.id;
+                    // document.getElementById('edit-ma-hd').value = id;
+                    // document.getElementById('edit-ngay-lap').value = '2025-11-22';
+                    // document.getElementById('edit-ma-kh').value = 'KH01';
+                    // document.getElementById('edit-ten-kh').value = 'Nguyễn Văn A';
 
-                    const tbody = document.querySelector('#edit-detail-table tbody');
-                    tbody.innerHTML = '';
+                    // const tbody = document.querySelector('#edit-detail-table tbody');
+                    // tbody.innerHTML = '';
                     
-                    addRowToDetailTable('edit-detail-table', 'edit-total-amount', {
-                        maSach: 'S001', tenSach: 'Mắt biếc', cat: 'Truyện ngắn', soLuong: 2, donGia: 105000
-                    });
+                    // addRowToDetailTable('edit-detail-table', 'edit-total-amount', {
+                    //     maSach: 'S001', tenSach: 'Mắt biếc', cat: 'Truyện ngắn', soLuong: 2, donGia: 105000
+                    // });
 
-                    document.getElementById('edit-amount-paid').value = '100.000';
-                    updateTotal('edit-detail-table', 'edit-total-amount');
+                    // document.getElementById('edit-amount-paid').value = '100.000';
+                    // updateTotal('edit-detail-table', 'edit-total-amount');
 
-                    // Lưu snapshot cho nút Đặt lại
-                    setTimeout(() => { originalEditState = getEditState(); }, 100);
-                    editModal.style.display = 'flex';
+                    // // Lưu snapshot cho nút Đặt lại
+                    // setTimeout(() => { originalEditState = getEditState(); }, 100);
+                    // editModal.style.display = 'flex';
+                    const maHd = this.dataset.id;
+        
+                    showLoader(); // Bắt đầu hiển thị loader
+                    
+                    // SỬA LỖI URL: Sử dụng endpoint chính xác từ billRoutes.js
+                    fetch(`/api/bill/detail/${maHd}`) 
+                        .then(response => {
+                            if (!response.ok) {
+                                // Xử lý lỗi 404 hoặc 500 từ server
+                                throw new Error('Không tìm thấy hóa đơn hoặc lỗi máy chủ.');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            hideLoader();
+                            
+                            // Trích xuất dữ liệu Master và Detail theo cấu trúc JSON của Controller
+                            const masterBill = data.HoaDon;
+                            const detailLines = data.Details;
+
+                            // --- 1. Đổ dữ liệu HÓA ĐƠN (HOADON) vào các trường Master ---
+                            document.getElementById('edit-ma-hd').value = masterBill.MaHoaDon;
+                            
+                            // Định dạng ngày: Lấy phần YYYY-MM-DD
+                            document.getElementById('edit-ngay-lap').value = masterBill.NgayLapHoaDon.split('T')[0];
+                            
+                            // Lấy thông tin Khách hàng từ Object KhachHang được join
+                            document.getElementById('edit-ma-kh').value = masterBill.MaKhachHang;
+                            // Truy cập tên khách hàng qua mối quan hệ Sequelize (masterBill.KhachHang.HoVaTen)
+                            document.getElementById('edit-ten-kh').value = masterBill.KhachHang.HoVaTen; 
+
+                            // --- 2. Đổ dữ liệu CHI TIẾT HÓA ĐƠN (CT_HD) vào bảng ---
+                            const tbody = document.querySelector('#edit-detail-table tbody');
+                            tbody.innerHTML = ''; // Xóa sạch các dòng chi tiết giả lập/cũ
+
+                            detailLines.forEach(item => {
+                                // Tên sách được lồng 3 cấp: CT_HD -> Sach -> DauSach
+                                const tenSach = item.Sach.DauSach.TenSach; 
+                                const tenTheLoai = item.Sach.DauSach.TheLoai?.TenTheLoai || 'Chưa phân loại';
+
+                                // Gọi hàm thêm dòng chi tiết đã được định nghĩa trong file của bạn
+                                addRowToDetailTable('edit-detail-table', 'edit-total-amount', {
+                                    maSach: item.MaSach,
+                                    tenSach: tenSach,
+                                    theLoai: tenTheLoai, 
+                                    soLuong: item.SoLuongBan, 
+                                    donGia: item.DonGiaBan
+                                });
+                            });
+                            
+                            // --- 3. Cập nhật Tổng tiền, Số tiền trả, Còn lại ---
+                            // Cần đảm bảo các hàm parseNumber và formatNumber đã được định nghĩa
+                            document.getElementById('edit-amount-paid').value = formatNumber(masterBill.SoTienTra || 0);
+                            
+                            // Tính toán lại tổng tiền và tiền nợ/dư
+                            updateTotal('edit-detail-table', 'edit-total-amount'); 
+                            
+                            setTimeout(() => { originalEditState = getEditState(); }, 100);
+                            // --- 4. Hiển thị Modal ---
+                            editModal.style.display = 'flex'; // Hoặc phương thức mở Modal (ví dụ: $(editModal).modal('show'))
+                        })
+                        .catch(error => {
+                            hideLoader();
+                            // Hiển thị thông báo lỗi cho người dùng
+                            showToast(`Lỗi tải chi tiết: ${error.message}`, 'error');
+                            console.error("Lỗi khi tải chi tiết hóa đơn:", error);
+                        });
                 });
             });
 
@@ -1364,13 +1571,196 @@
                     }
                 });
             }
+            function generateMaHD(lastMaHD) {
+                if (!lastMaHD) return 'HD001'; // Bắt đầu nếu chưa có hóa đơn nào
 
+                // 1. Lấy phần số (ví dụ: '123' từ 'HD123')
+                const lastNumberStr = lastMaHD.replace('HD', '');
+                const lastNumber = parseInt(lastNumberStr);
+
+                // 2. Tính số tiếp theo
+                const nextNumber = lastNumber + 1;
+                
+                // 3. Áp dụng quy tắc định dạng
+                let newMaHD;
+                if (nextNumber % 100 === 0) {
+                    // Nếu chia hết cho 100 (ví dụ: 100, 200)
+                    // Dùng số đó (cần đảm bảo 3 chữ số nếu dưới 1000)
+                    newMaHD = nextNumber.toString().padStart(3, '0');
+                } else {
+                    // Nếu không chia hết cho 100 (ví dụ: 101, 199)
+                    // Lấy số dư và định dạng thành 3 chữ số
+                    const remainder = nextNumber % 100;
+                    // Padding: 1 -> '001', 99 -> '099', 101 -> '101'
+                    newMaHD = nextNumber.toString().padStart(3, '0');
+                }
+
+                return `HD${newMaHD}`;
+            }
             // Lưu & Đóng
             document.getElementById('btn-save-add').addEventListener('click', () => {
-                simulateApiCall(() => { addModal.style.display = 'none'; showToast('Thêm thành công!'); });
-            });
+                const MaHD = generateMaHD(lastBillMaHD); 
+                const addModal = document.getElementById('addModal'); // Giả định ID của Modal thêm mới
+
+                // Lấy dữ liệu từ các trường input
+                const maKhachHang = document.getElementById('add-ma-kh').value.trim();
+                const tongTien = parseNumber(document.getElementById('add-total-amount').dataset.rawValue);
+                const soTienTra = parseNumber(document.getElementById('add-amount-paid').value); // Giả định ID input
+                
+                // Tính toán ConLai
+                const conLai = parseNumber(tongTien - soTienTra); 
+                showToast(conLai);
+                
+                // 2. Thu thập Chi tiết Sách (CT_HD)
+                const detailTable = document.getElementById('add-detail-table');
+                const detailBooks = [];
+                
+                // Giả sử: [1: Mã Sách] [4: Số Lượng] [5: Đơn Giá] [6: Thành Tiền]
+                for (let i = 1; i < detailTable.rows.length; i++) {
+                    const row = detailTable.rows[i];
+                    
+                    if (row.cells.length >= 7) {
+                        const maSach = row.cells[1].textContent.trim();
+                        const soLuongBan = parseInt(row.cells[4].textContent.trim());
+                        const donGiaBan = parseNumber(row.cells[5].textContent.trim());
+                        const thanhTien = parseNumber(row.cells[6].textContent.trim());
+
+                        if (maSach && soLuongBan > 0) {
+                            detailBooks.push({
+                                MaSach: maSach,
+                                SoLuongBan: soLuongBan,
+                                DonGiaBan: donGiaBan,
+                                ThanhTien: thanhTien
+                            });
+                        }
+                    }
+                }
+                
+                // Kiểm tra tính hợp lệ cơ bản
+                if (!maKhachHang || detailBooks.length === 0) {
+                    showToast('Vui lòng kiểm tra lại Khách hàng và chi tiết sách.', 'error');
+                    return;
+                }
+
+                // 3. Tạo đối tượng dữ liệu gửi lên Server
+                const newData = {
+                    MaHoaDon: MaHD, // Mã Hóa Đơn vừa được tạo tự động
+                    MaKhachHang: maKhachHang,
+                    TongTien: tongTien,
+                    SoTienTra: soTienTra,
+                    ConLai: conLai,
+                    Details: detailBooks 
+                };
+
+                console.log(newData)
+
+                // 4. GỌI API POST
+                fetch('/api/bill/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message && data.message.includes('thành công')) {
+                        showToast(`Thêm hóa đơn ${MaHD} thành công!`, 'success');
+                        // Cập nhật biến lastBillMaHD để lần sau tạo Mã mới chính xác hơn
+                        lastBillMaHD = MaHD; 
+                        
+                        // Tải lại bảng chính hoặc thêm dòng mới vào bảng master (tùy chọn)
+                        
+                        // Đóng Modal
+                        if (addModal) addModal.style.display = 'none';
+
+                    } else {
+                        showToast(`Thêm thất bại: ${data.message || 'Lỗi không xác định.'}`, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi API thêm mới:', error);
+                    showToast('Lỗi kết nối server khi lưu hóa đơn.', 'error');
+                });
+            })
             document.getElementById('btn-save-edit').addEventListener('click', () => {
-                simulateApiCall(() => { editModal.style.display = 'none'; showToast('Cập nhật thành công!'); });
+                // *** 1. KHAI BÁO CÁC BIẾN QUAN TRỌNG ***
+                // Bạn cần đảm bảo biến 'currentEditingMaHD' chứa Mã Hóa Đơn đang được chỉnh sửa.
+                // Biến này phải được thiết lập khi Modal được mở (ví dụ: khi nhấn nút 'Chỉnh sửa')
+                const MaHD = document.getElementById('edit-ma-hd').value; 
+                const editModal = document.getElementById('editModal'); // Giả định ID của Modal chỉnh sửa
+
+                // 2. Lấy dữ liệu từ các trường input
+                const maKhachHang = document.getElementById('edit-ma-kh').value;
+                showToast(maKhachHang);
+                const tongTien = parseNumber(document.getElementById('edit-total-amount').dataset.rawValue);
+                const soTienTra = parseNumber(document.getElementById('edit-amount-paid').value); // Giả định ID này
+                
+                // Tính toán ConLai
+                const conLai = parseNumber(tongTien-soTienTra); 
+                
+                // 3. Thu thập Chi tiết Sách (CT_HD)
+                const detailTable = document.getElementById('edit-detail-table');
+                const detailBooks = [];
+                
+                // Giả sử: [1: Mã Sách] [4: Số Lượng] [5: Đơn Giá] [6: Thành Tiền]
+                for (let i = 1; i < detailTable.rows.length; i++) {
+                    const row = detailTable.rows[i];
+                    
+                    if (row.cells.length >= 7) { 
+                        const maSach = row.cells[1].textContent.trim();
+                        const soLuongBan = parseInt(row.cells[4].textContent.trim());
+                        const donGiaBan = parseNumber(row.cells[5].textContent.trim());
+                        const thanhTien = parseNumber(row.cells[6].textContent.trim());
+                        
+                        // Chỉ thêm các mục hợp lệ
+                        if (maSach && soLuongBan > 0) {
+                            detailBooks.push({
+                                MaSach: maSach,
+                                SoLuongBan: soLuongBan,
+                                DonGiaBan: donGiaBan,
+                                ThanhTien: thanhTien
+                            });
+                        }
+                    }
+                }
+                
+                // Kiểm tra tính hợp lệ cơ bản
+                if (!MaHD || !maKhachHang || detailBooks.length === 0) {
+                    showToast('Vui lòng kiểm tra lại Mã hóa đơn, Khách hàng và chi tiết sách.', 'error');
+                    return;
+                }
+
+                // 4. Tạo đối tượng dữ liệu gửi lên Server
+                const updateData = {
+                    MaKhachHang: maKhachHang,
+                    TongTien: tongTien,
+                    SoTienTra: soTienTra,
+                    ConLai: conLai,
+                    Details: detailBooks // Mảng chi tiết hóa đơn
+                };
+
+                // 5. GỌI API PUT
+                fetch(`/api/bill/${MaHD}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message && data.message.includes('thành công')) {
+                        showToast('Cập nhật hóa đơn thành công!', 'success');
+                        
+                        // Sau khi thành công: Cập nhật lại DOM trên bảng master (nếu cần) và Đóng Modal
+                        if (editModal) editModal.style.display = 'none';
+
+                    } else {
+                        // Hiển thị lỗi từ server (Ví dụ: Lỗi Tồn kho, Lỗi Quy định Nợ)
+                        showToast(`Cập nhật thất bại: ${data.message || 'Lỗi không xác định.'}`, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi API cập nhật:', error);
+                    showToast('Lỗi kết nối server khi lưu hóa đơn.', 'error');
+                });
             });
 
             document.querySelectorAll('.close-modal').forEach(btn => {
