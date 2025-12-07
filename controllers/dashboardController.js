@@ -235,6 +235,30 @@ const getReportPage = async (req, res) => {
 };
 
 
+  const getReportPage = async (req, res) => {
+    try {
+      const userInfo = getUserInfo(req);
+  
+      // 1. Lấy tất cả quy định từ DB
+      const bcton = await db.BaoCaoTon.findAll({ raw: true });
+      const bccongno = await db.BaoCaoCongNo.findAll({ raw: true });
+      const bcdoanhthu = await db.BaoCaoDoanhThu.findAll({ raw: true });
+  
+      // 2. Render trang và gửi dữ liệu vào
+      res.render('changerule', { 
+          ...userInfo,
+          bccongno: bccongno,
+          bcton: bcton,
+          bcdoanhthu: bcdoanhthu
+           // Gửi object chứa các quy định
+      });
+  
+    } catch (err) {
+      console.error('Lỗi khi lấy dữ liệu quy định:', err);
+      res.status(500).send('Lỗi Server');
+    }
+  };
+
   // Xuất tất cả các hàm
 module.exports = {
     getDashboardPage,

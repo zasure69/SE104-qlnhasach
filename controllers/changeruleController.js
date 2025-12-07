@@ -13,7 +13,6 @@ const updateRule = async (req, res) => {
     try {
         // 3. Tìm tham số bằng khóa chính
         const rule = await db.ThamSo.findByPk(tenThamSo);
-
         if (!rule) {
             return res.status(404).json({ error: 'Không tìm thấy quy định.' });
         }

@@ -57,6 +57,27 @@ const createCustomer = async (req, res) => {
 };
 
 // =============================================================
+// HÀM LẤY DANH SÁCH KHÁCH HÀNG (READ - GET)
+// =============================================================
+const getCustomers = async (req, res) => {
+  try {
+    // 1. Lấy TẤT CẢ khách hàng từ database (Giữ nguyên logic Sequelize của bạn)
+    const allCustomers = await db.KhachHang.findAll({
+        raw: true // Lấy dữ liệu dạng JSON thuần
+    });
+
+    // 2. QUAN TRỌNG: trả về JSON
+    return res.status(200).json(allCustomers);
+
+} catch (err) {
+    console.error('Lỗi khi lấy dữ liệu khách hàng:', err);
+    // Trả về lỗi dạng JSON để frontend bắt được và hiện Toast lỗi
+    return res.status(500).json({ error: 'Lỗi Server' });
+}
+
+}
+
+// =============================================================
 // HÀM SỬA KHÁCH HÀNG (UPDATE - PATCH)
 // =============================================================
 const updateCustomer = async (req, res) => {
@@ -112,6 +133,7 @@ const deleteCustomer = async (req, res) => {
 
 module.exports = {
   createCustomer,
+  getCustomers,
   updateCustomer,
   deleteCustomer
 };

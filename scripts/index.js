@@ -63,9 +63,6 @@ app.use("/api/employees", employeesRoutes);
 const changeruleRoutes = require("./routes/changeruleRoutes");
 app.use("/api/change-rules", changeruleRoutes);
 
-const reportRoutes = require("./routes/reportRoutes");
-app.use("/api/reports", reportRoutes);
-
 // Routes for book management (API)
 const booksRoutes = require("./routes/booksRoutes");
 app.use("/api/books", booksRoutes);
@@ -93,8 +90,6 @@ const startServer = async () => {
     console.error("Lỗi không thể khởi động server:", err);
   }
 };
-
-
 
 // Gọi hàm để bắt đầu
 startServer();
