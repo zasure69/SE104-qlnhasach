@@ -572,7 +572,7 @@
                 </div>
                 <div class="user-menu">
                     <span class="user-trigger">
-                        Chào, <strong><%= username %></strong> <i class="fas fa-chevron-down"></i>
+                        Chào, <strong>admin</strong> <i class="fas fa-chevron-down"></i>
                     </span>
 
                     <div class="dropdown-menu">
@@ -595,7 +595,6 @@
                         <thead>
                             <!-- SỬA: Cập nhật cột -->
                             <tr>
-                                <th>STT</th>
                                 <th>Tham số</th>
                                 <th>Giá trị</th>
                                 <th></th> <!-- Cột Sửa -->
@@ -807,14 +806,14 @@
                         if (response.ok) {
                             if (currentEditingRow) {
                                 // Cập nhật giá trị mới vào bảng
-                                currentEditingRow.cells[2].textContent = result.rule.GiaTri;
+                                currentEditingRow.cells[1].textContent = newValue;
                             }
                             editModal.style.display = 'none'; // Đóng modal
                             showToast('Cập nhật quy định thành công!', 'success');
                             currentEditingRow = null; // Reset
                         } else {
                             // Nếu lỗi, không đóng modal
-                            showToast(`Cập nhật thất bại: ${result.error}`, 'error');
+                            showToast('Cập nhật thất bại! Vui lòng thử lại.', 'error');
                         }
                     } catch (err) {
                         hideLoader();

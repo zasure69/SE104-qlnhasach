@@ -1,37 +1,30 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db");
 
-// Ánh xạ tới bảng KHACHHANG [cite: 821, 770]
-const KhachHang = sequelize.define('KhachHang', {
-  MaKhachHang: {
-    type: DataTypes.STRING(15),
-    primaryKey: true,
-    allowNull: false
+// Model ĐẦU SÁCH -> bảng DAUSACH
+const DauSach = sequelize.define(
+  "DauSach",
+  {
+    MaDauSach: {
+      type: DataTypes.STRING(15),
+      primaryKey: true,
+      allowNull: false,
+    },
+    TenSach: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    MaTheLoai: {
+      type: DataTypes.STRING(10),
+    },
+    MoTa: {
+      type: DataTypes.STRING(1000),
+    },
   },
-  HoVaTen: {
-    type: DataTypes.STRING(50),
-    allowNull: false
-  },
-  GioiTinh: {
-    type: DataTypes.STRING(10)
-  },
-  NgaySinh: {
-    type: DataTypes.DATEONLY
-  },
-  SoDienThoai: {
-    type: DataTypes.STRING(15),
-    unique: true
-  },
-  DiaChi: {
-    type: DataTypes.STRING(255)
-  },
-  TongNo: {
-    type: DataTypes.DECIMAL(18, 2),
-    defaultValue: 0
+  {
+    tableName: "DAUSACH",
+    timestamps: false,
   }
-}, {
-  tableName: 'KHACHHANG',
-  timestamps: false
-});
+);
 
-module.exports = KhachHang;
+module.exports = DauSach;

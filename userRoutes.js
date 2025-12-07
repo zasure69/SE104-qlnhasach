@@ -8,6 +8,9 @@ router.get("/login", userController.getLoginPage);
 
 // Route để đăng nhập (xử lý POST)
 router.post("/login", userController.login);
+// Nếu dùng session
+req.session.user = user;
+return res.status(200).json({ message: "Đăng nhập thành công" });
 
 // Route để đăng xuất
 router.get("/logout", userController.logout);

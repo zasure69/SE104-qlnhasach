@@ -685,7 +685,7 @@
                 </div>
                 <div class="user-menu">
                     <span class="user-trigger">
-                        Chào, <strong><%= username %></strong> <i class="fas fa-chevron-down"></i>
+                        Chào, <strong>admin</strong> <i class="fas fa-chevron-down"></i>
                     </span>
 
                     <div class="dropdown-menu">
@@ -1273,7 +1273,9 @@
                             document.getElementById('add-modal').style.display = 'none';
                             fetchCustomers(); // Tải lại danh sách khách hàng
                         } else {
-                            showToast(`Thêm thất bại: ${result.error}`, 'error');
+                            // Chọn Cancel -> Chỉ Reset form, KHÔNG ĐÓNG modal
+                            addKhForm.reset();
+                            showToast('Đã làm mới form!', 'info');
                         }
                     } catch (err) {
                         hideLoader();

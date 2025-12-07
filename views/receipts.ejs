@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phiếu thu tiền</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* * --- PHẦN CSS (Tái sử dụng style chuẩn từ các file trước) --- */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --green-accent: #1EE4AC;
+            --green-accent-hover: #1ac096;
+            --red-accent: #e74c3c;
+            --red-accent-hover: #c0392b;
+            --blue-accent: #3498db;
+            --blue-accent-hover: #2980b9;
+            --light-bg: #f0f4f8;
+            --white-bg: #ffffff;
+            --text-dark: #222;
+            --text-light: #555;
+            --text-white: #ecf0f1;
+            --border-color: #e0e0e0;
+            --disabled-bg: #e9ecef;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+        }
+
+        /* Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+            transition: grid-template-columns 0.3s ease-in-out;
+        }
+
+        .sidebar {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease-in-out;
+            overflow-x: hidden;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .sidebar-header i {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-white);
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+
+        .sidebar-nav a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-nav a.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .main-content {
+            background-color: var(--light-bg);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: var(--white-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .top-bar-left h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .user-menu {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-light);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .user-menu .user-trigger {
+            cursor: pointer;
+            display: inline-block; /* Giúp dễ click hơn */
+        }
+
+        .user-menu .dropdown-menu {
+            display: none; /* Ẩn ban đầu */
+            position: absolute;
+            top: 100%; /* Hiển thị ngay bên dưới */
+            right: 0;
+            background-color: var(--white-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            min-width: 150px; /* Độ rộng tối thiểu */
+            z-index: 1000;
+            overflow: hidden; /* Để bo góc */
+        }
+
+        /* Hiển thị menu khi di chuột vào .user-menu */
+        .user-menu:hover .dropdown-menu {
+            display: block;
+        }
+
+        .user-menu .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .user-menu .dropdown-menu a:hover {
+            background-color: var(--light-bg);
+            color: var(--red-accent, #e74c3c); /* Dùng màu đỏ cho logout */
+        }
+
+        .user-menu .dropdown-menu a i {
+            width: 16px;
+            text-align: center;
+            color: var(--text-light);
+            transition: color 0.2s ease;
+        }
+
+        .user-menu .dropdown-menu a:hover i {
+            color: var(--red-accent, #e74c3c);
+        }
+
+        .menu-toggle {
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            cursor: pointer;
+            padding: 0.25rem;
+            line-height: 1;
+        }
+
+        /* Content */
+        .content-wrapper {
+            padding: 1.5rem;
+            background-color: var(--white-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .content-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+            min-width: 100px;
+        }
+
+        .btn-primary {
+            background-color: var(--green-accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--green-accent-hover);
+        }
+
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        .btn-danger {
+            background-color: var(--red-accent);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--red-accent-hover);
+        }
+
+        .btn-print {
+            background-color: var(--blue-accent);
+            color: white;
+        }
+
+        .btn-print:hover {
+            background-color: var(--blue-accent-hover);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            min-width: auto;
+        }
+
+        .btn-warning {
+            background-color: #f39c12; /* Màu cam */
+            color: white;
+        }
+        .btn-warning:hover {
+            background-color: #d35400;
+        }
+
+        #btn-custom-reset {
+            background-color: #6c757d; /* Màu xám đậm chuẩn UI */
+            color: #ffffff;            /* Chữ màu trắng */
+        }
+
+        #btn-custom-reset:hover {
+            background-color: #5a6268; /* Màu hover đậm hơn chút */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Thêm bóng đổ nhẹ khi di chuột */
+        }
+
+        /* Table */
+        .table-responsive {
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        .data-table thead th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+
+        /* SỬA: Style cho icon hành động */
+        .action-icon {
+            color: var(--secondary-color);
+            cursor: pointer;
+            font-size: 1rem;
+            margin-right: 0.75rem;
+            /* Tăng khoảng cách giữa các icon */
+            padding: 0.25rem;
+            /* Thêm vùng đệm để dễ click */
+            transition: color 0.2s;
+        }
+
+        .action-icon:hover {
+            color: var(--blue-accent-hover);
+        }
+
+        /* Filter */
+        .report-filter {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-filter label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .date-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .date-input-wrapper input[type="date"] {
+            padding: 0.6rem 0.75rem 0.6rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            min-width: 150px;
+        }
+
+        .date-input-wrapper input[type="date"]:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .date-input-wrapper .calendar-icon {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            pointer-events: none;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: var(--white-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 700px;
+            animation: slideIn 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .close-modal {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+        }
+
+        /* Modal Form */
+        .modal-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .form-group input:disabled {
+            background-color: var(--disabled-bg);
+            color: #777;
+        }
+
+        /* --- CSS CHO INPUT KHÔNG ĐƯỢC NHẬP (Disabled & Readonly) --- */
+        .form-group input:disabled,
+        .form-group select:disabled,
+        .form-group textarea:disabled,
+        .form-group input:read-only, 
+        .form-group textarea:read-only {
+            background-color: var(--disabled-bg); /* Màu nền xám (#e9ecef) */
+            color: #6c757d;                       /* Màu chữ xám đậm cho cảm giác "chìm" đi */
+            cursor: not-allowed;                  /* Đổi con trỏ chuột để báo hiệu */
+            border-color: #d6d8db;                /* Viền nhạt hơn chút */
+        }
+
+        /* Tinh chỉnh riêng cho Read-only (vẫn cho phép bôi đen copy nhưng không sửa) */
+        .form-group input:read-only,
+        .form-group textarea:read-only {
+            cursor: default; /* Con trỏ chuột bình thường */
+        }
+
+        .form-group label.required::after {
+            content: "*";               /* Thêm dấu sao */
+            color: var(--red-accent);    /* Màu đỏ (lấy từ biến màu đỏ của bạn) */
+            font-weight: bold;           /* In đậm */
+            margin-left: 4px;            /* Cách ra một chút cho đẹp */
+        }
+
+        /* Hiệu ứng cho icon xóa ở bảng */
+        .action-icon.delete-icon:hover {
+            color: #c0392b !important; /* Đỏ đậm hơn khi hover */
+            transform: scale(1.2); /* Phóng to nhẹ */
+            transition: all 0.2s;
+        }
+
+        .action-icon.open-edit-modal:hover {
+            color: #2980b9; /* Màu xanh dương khi hover */
+            transform: scale(1.2); /* Phóng to nhẹ */
+            transition: all 0.2s;
+        }
+
+        /* Modal Footer (Standardized) */
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            background-color: #fff;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+
+        .modal-footer .btn {
+            flex: 1;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 0.75rem 2rem;
+            text-transform: uppercase;
+            border-radius: 8px;
+        }
+
+        /* Ghost Button (Hủy) */
+        .modal-footer .btn-secondary {
+            background-color: transparent;
+            color: #6c757d;
+            border: none;
+            box-shadow: none;
+        }
+
+        .modal-footer .btn-secondary:hover {
+            background-color: #e2e6ea;
+            color: #343a40;
+        }
+
+        /* Primary Button (Lưu) */
+        .modal-footer .btn-primary {
+            background-color: var(--green-accent);
+            color: white;
+            box-shadow: 0 4px 6px rgba(30, 228, 172, 0.2);
+        }
+
+        .modal-footer .btn-primary:hover {
+            background-color: var(--green-accent-hover);
+        }
+
+        /* Footer Modal Sửa Layout */
+        #edit-modal .modal-footer {
+            justify-content: space-between;
+        }
+
+        #edit-modal .modal-footer>.btn-danger {
+            flex: 1;
+            margin-right: 1rem;
+        }
+
+        #edit-modal .modal-footer>div {
+            flex: 1;
+            display: flex;
+            gap: 1rem;
+        }
+
+        #edit-modal .modal-footer>div .btn {
+            flex: 1;
+            width: 100%;
+        }
+
+
+        /* Loader & Toast */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .loader-overlay.show {
+            display: flex;
+        }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 2001;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            background-color: var(--white-bg);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            border-left: 5px solid;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left-color: var(--green-accent);
+        }
+
+        .toast.success .toast-icon {
+            color: var(--green-accent);
+        }
+
+        .toast.error {
+            border-left-color: var(--red-accent);
+        }
+
+        .toast.error .toast-icon {
+            color: var(--red-accent);
+        }
+
+        .toast-message {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                height: 100vh;
+                z-index: 1050;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .receipt-form {
+                grid-template-columns: 1fr;
+            }
+
+            .top-bar {
+                gap: 0.5rem;
+            }
+
+            .top-bar-left h1 {
+                font-size: 1.25rem;
+            }
+
+            .user-menu {
+                font-size: 0.8rem;
+            }
+
+            .content-wrapper {
+                border-radius: 8px;
+                padding: 1rem;
+            }
+
+            .content-wrapper h1 {
+                font-size: 1.5rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .button-group .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="loader-overlay" id="loader">
+        <div class="loader"></div>
+    </div>
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header"> <i class="fas fa-book-open"></i>
+                <h2>QUẢN LÝ NHÀ SÁCH</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
+                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
+                    <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
+                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
+                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
+                    <li><a href="/dashboard/receipts" class="active"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
+                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
+                    <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
+                    <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+                    <li><a href="/dashboard/changerule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="top-bar-left"> <button class="menu-toggle" id="menu-toggle"> <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Quản lý Phiếu thu tiền</h1>
+                </div>
+                <div class="user-menu">
+                    <span class="user-trigger">
+                        Chào, <strong>admin</strong> <i class="fas fa-chevron-down"></i>
+                    </span>
+
+                    <div class="dropdown-menu">
+                        <a href="#" id="logout-button">
+                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <h2>Danh sách Phiếu thu tiền</h2>
+                    <button class="btn btn-primary btn-add-new" id="open-add-modal"> <i class="fas fa-plus"></i> LẬP
+                        PHIẾU THU TIỀN</button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table" id="receipt-table">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã Phiếu</th>
+                                <th>Khách Hàng</th>
+                                <th>Ngày Thu</th>
+                                <th>Số Tiền Thu</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>PT001</td>
+                                <td>Nguyễn Văn A</td>
+                                <td>24/11/2025</td>
+                                <td>500.000</td>
+                                <td>
+                                    
+                                    <i class="fas fa-pencil-alt action-icon open-edit-modal" data-id="PT001"
+                                        title="Sửa"></i>
+                                    
+                                    <button class="btn btn-sm btn-print ml-2"
+                                        onclick="alert('Chức năng in hóa đơn HD001')"> <i class="fas fa-print"></i>
+                                    </button>
+                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>PT002</td>
+                                <td>Trần Thị B</td>
+                                <td>25/11/2025</td>
+                                <td>1.200.000</td>
+                                <td>
+                                    <i class="fas fa-pencil-alt action-icon open-edit-modal" data-id="PT002"
+                                        title="Sửa"></i>
+                                    <button class="btn btn-sm btn-print ml-2"
+                                        onclick="alert('Chức năng in hóa đơn HD001')"> <i class="fas fa-print"></i>
+                                    </button>
+                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Thêm Mới -->
+    <div class="modal-overlay" id="add-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Lập Phiếu Thu Tiền</h2>
+                <button class="close-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="add-receipt-form">
+                <div class="modal-body">
+                    <div class="modal-form-grid">
+                        <!-- <div class="form-group"> <label>Mã Phiếu:</label> <input type="text" value="Tự động" disabled>
+                        </div> -->
+                        <div class="form-group"> <label class="required">Ngày Thu</label>
+                            <div class="date-input-wrapper"> <input type="date" id="add-ngay-thu" required> </div>
+                        </div>
+                        <div class="form-group"> <label class="required">Mã Khách Hàng</label> <input type="text" id="add-ma-kh"
+                                placeholder="Nhập Mã KH..." required> </div>
+                        <div class="form-group"> <label>Họ Tên</label> <input type="text" id="add-ten-kh" readonly>
+                        </div>
+                        <div class="form-group"> <label>Địa Chỉ</label> <input type="text" id="add-dia-chi" readonly>
+                        </div>
+                        <div class="form-group"> <label>Số Điện Thoại</label> <input type="text" id="add-sdt" readonly>
+                        </div>
+                        <div class="form-group"> <label>Email</label> <input type="text" id="add-email" readonly>
+                        </div>
+                        <div class="form-group"> <label class="required">Số Tiền Thu</label> <input type="text" id="add-so-tien"
+                                required inputmode="numeric"> </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-custom-reset">Thêm mới</button>
+                    <button type="submit" class="btn btn-primary">LƯU</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Chỉnh Sửa -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Chỉnh Sửa Phiếu Thu</h2>
+                <button class="close-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="edit-receipt-form">
+                <div class="modal-body">
+                    <div class="modal-form-grid">
+                        <div class="form-group"> <label class="required">Ngày Thu</label>
+                            <div class="date-input-wrapper"> <input type="date" id="edit-ngay-thu" required></div>
+                        </div>
+                        <div class="form-group"> <label class="required">Mã Khách Hàng</label> <input type="text" id="edit-ma-kh"
+                                required> </div>
+                        <div class="form-group"> <label>Họ Tên</label> <input type="text" id="edit-ten-kh" readonly>
+                        </div>
+                        <div class="form-group"> <label>Địa Chỉ</label> <input type="text" id="edit-dia-chi" readonly>
+                        </div>
+                        <div class="form-group"> <label>Số Điện Thoại</label> <input type="number" id="edit-sdt"
+                            readonly> </div>
+                        <div class="form-group"> <label>Email</label> <input type="text" id="edit-email" readonly>
+                        </div>
+                        <div class="form-group"> <label class="required">Số Tiền Thu</label> <input type="number" id="edit-so-tien"
+                                required inputmode="numeric"> </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" id="btn-reset-edit">Đặt lại</button>
+                    <button type="submit" class="btn btn-primary">LƯU</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            // --- 1. CÁC HÀM TIỆN ÍCH (Loader, Toast, Format) ---
+            const loader = document.getElementById('loader');
+            const toastContainer = document.getElementById('toast-container');
+            
+            function showLoader() { loader.style.display = 'flex'; }
+            function hideLoader() { loader.style.display = 'none'; }
+            
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.classList.add('toast', type);
+                toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i><span class="toast-message">${message}</span>`;
+                toastContainer.appendChild(toast);
+                setTimeout(() => { toast.classList.add('show'); }, 100);
+                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+            }
+
+            function simulateApiCall(callback) {
+                showLoader();
+                setTimeout(() => {
+                    hideLoader();
+                    callback(true);
+                }, 1000);
+            }
+
+            function formatNumber(num) { if (!num) return ''; return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+            function parseNumber(str) { if (!str) return 0; return parseFloat(str.replace(/\/dashboard/g, '')) || 0; }
+
+
+            // --- 2. SIDEBAR ---
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const container = document.querySelector('.dashboard-container');
+            if (menuToggle) menuToggle.addEventListener('click', () => {
+                if (window.innerWidth <= 992) sidebar.classList.toggle('active');
+                else container.classList.toggle('sidebar-collapsed');
+            });
+
+
+            // --- 3. AUTO-FILL LOGIC (MOCK DATA) ---
+            function findCustomer(maKH) {
+                const customers = {
+                    'KH01': { name: 'Nguyễn Văn A', address: '30 Hoàng Việt', phone: '0123456789', email: 'nva@example.com' },
+                    'KH02': { name: 'Trần Thị B', address: '2 Lê Lợi', phone: '0987654321', email: 'ttb@example.com' }
+                };
+                return customers[maKH.toUpperCase()] || null;
+            }
+
+            ['add', 'edit'].forEach(prefix => {
+                // Auto-fill thông tin khách hàng
+                const maKhInput = document.getElementById(`${prefix}-ma-kh`);
+                if (maKhInput) {
+                    maKhInput.addEventListener('blur', function () {
+                        const customer = findCustomer(this.value);
+                        if (customer) {
+                            document.getElementById(`${prefix}-ten-kh`).value = customer.name;
+                            document.getElementById(`${prefix}-dia-chi`).value = customer.address;
+                            document.getElementById(`${prefix}-sdt`).value = customer.phone;
+                            document.getElementById(`${prefix}-email`).value = customer.email;
+                        } else {
+                            // Xóa nếu không tìm thấy
+                            ['ten-kh', 'dia-chi', 'sdt', 'email'].forEach(field => {
+                                document.getElementById(`${prefix}-${field}`).value = '';
+                            });
+                        }
+                    });
+                }
+
+                // Format số tiền khi nhập
+                const amountInput = document.getElementById(`${prefix}-so-tien`);
+                if (amountInput) {
+                    amountInput.addEventListener('input', function () {
+                        // Chỉ giữ lại số
+                        const val = this.value.replace(/[^0-9]/g, '');
+                        this.value = val ? formatNumber(val) : '';
+                    });
+                }
+            });
+
+
+            // --- 4. LOGIC NÚT "THÊM MỚI" (SMART RESET) - MODAL ADD ---
+            const btnResetAdd = document.getElementById('btn-custom-reset');
+            const addForm = document.getElementById('add-receipt-form');
+            const addModal = document.getElementById('add-modal');
+
+            if(btnResetAdd && addForm) {
+                btnResetAdd.addEventListener('click', () => {
+                    // Kiểm tra xem đã nhập gì chưa (Check mã KH hoặc số tiền)
+                    const hasData = document.getElementById('add-ma-kh').value.trim() !== '' || 
+                                    document.getElementById('add-so-tien').value.trim() !== '';
+
+                    if (hasData) {
+                        if (confirm('Bạn đang nhập dở phiếu thu. Bạn có muốn LƯU phiếu này không?\n\n- OK: Lưu phiếu.\n- Cancel: Xóa trắng để nhập phiếu khác.')) {
+                            // Chọn OK -> Gọi submit form (Lưu)
+                            addForm.requestSubmit();
+                        } else {
+                            // Chọn Cancel -> Reset form, KHÔNG ĐÓNG MODAL
+                            resetAddForm();
+                            showToast('Đã làm mới form!', 'info');
+                        }
+                    } else {
+                        // Chưa nhập gì -> Reset
+                        resetAddForm();
+                    }
+                });
+            }
+
+            function resetAddForm() {
+                addForm.reset();
+                document.getElementById('add-ngay-thu').valueAsDate = new Date();
+            }
+
+
+            // --- 5. LOGIC NÚT "ĐẶT LẠI" (SMART RESTORE) - MODAL EDIT ---
+            const btnResetEdit = document.getElementById('btn-reset-edit');
+            let originalEditState = null; // Biến lưu snapshot
+
+            // Hàm lấy dữ liệu hiện tại để so sánh/lưu trữ
+            function getEditState() {
+                return {
+                    ngayThu: document.getElementById('edit-ngay-thu').value,
+                    maKH: document.getElementById('edit-ma-kh').value,
+                    soTien: document.getElementById('edit-so-tien').value
+                };
+            }
+
+            if(btnResetEdit) {
+                btnResetEdit.addEventListener('click', () => {
+                    if(!originalEditState) return;
+
+                    // 1. Kiểm tra thay đổi
+                    const currentState = getEditState();
+                    const isChanged = JSON.stringify(currentState) !== JSON.stringify(originalEditState);
+
+                    if (!isChanged) {
+                        showToast('Chưa có thay đổi nào để đặt lại!', 'error');
+                        return;
+                    }
+
+                    // 2. Hỏi xác nhận
+                    if (confirm("Dữ liệu đã thay đổi. Bạn có muốn LƯU LẠI không?\n\n- OK (Yes): Lưu thay đổi.\n- Cancel (No): Khôi phục lại dữ liệu gốc.")) {
+                        // Chọn Yes -> Lưu
+                        document.getElementById('edit-receipt-form').requestSubmit();
+                    } else {
+                        // Chọn No -> Khôi phục
+                        document.getElementById('edit-ngay-thu').value = originalEditState.ngayThu;
+                        document.getElementById('edit-ma-kh').value = originalEditState.maKH;
+                        document.getElementById('edit-so-tien').value = originalEditState.soTien;
+                        
+                        // Trigger blur để load lại thông tin khách hàng tương ứng với mã KH cũ
+                        document.getElementById('edit-ma-kh').dispatchEvent(new Event('blur'));
+
+                        showToast('Đã khôi phục dữ liệu gốc!', 'success');
+                    }
+                });
+            }
+
+
+            // --- 6. LOGIC ICON XÓA (NGOÀI BẢNG DANH SÁCH) ---
+            const receiptTable = document.getElementById('receipt-table');
+            if (receiptTable) {
+                receiptTable.addEventListener('click', function(e) {
+                    // Kiểm tra click vào icon xóa
+                    if (e.target.classList.contains('delete-icon') || e.target.closest('.delete-icon')) {
+                        const row = e.target.closest('tr');
+                        const maPhieu = row.cells[1].textContent; // Cột 2 là Mã Phiếu
+                        
+                        if(confirm(`Bạn có chắc chắn muốn XÓA vĩnh viễn phiếu thu ${maPhieu}?`)) {
+                            simulateApiCall((success) => {
+                                if(success) {
+                                    row.remove();
+                                    showToast(`Đã xóa phiếu thu ${maPhieu} thành công!`, 'success');
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+
+
+            // --- 7. XỬ LÝ MỞ/ĐÓNG MODAL ---
+            
+            // Mở Modal Thêm
+            const openAddBtn = document.getElementById('open-add-modal');
+            if (openAddBtn) {
+                openAddBtn.addEventListener('click', () => {
+                    resetAddForm(); // Luôn sạch sẽ khi mở
+                    addModal.style.display = 'flex';
+                });
+            }
+
+            // Mở Modal Sửa (Giả lập load dữ liệu)
+            const openEditBtns = document.querySelectorAll('.open-edit-modal');
+            const editModal = document.getElementById('edit-modal');
+            
+            openEditBtns.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const id = this.dataset.id;
+                    // Mock Load Data
+                    // (Lưu ý: Bạn nên thay bằng dữ liệu thực từ dòng được click hoặc API)
+                    document.getElementById('edit-ngay-thu').value = '2025-11-24';
+                    document.getElementById('edit-ma-kh').value = 'KH01';
+                    document.getElementById('edit-so-tien').value = '500.000';
+                    
+                    // Trigger blur để fill thông tin
+                    document.getElementById('edit-ma-kh').dispatchEvent(new Event('blur'));
+
+                    // LƯU SNAPSHOT (Sau khi dữ liệu đã load xong)
+                    setTimeout(() => {
+                        originalEditState = getEditState();
+                    }, 100);
+
+                    editModal.style.display = 'flex';
+                });
+            });
+
+            // Đóng Modal
+            const closeBtns = document.querySelectorAll('.close-modal');
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if(addModal) addModal.style.display = 'none';
+                    if(editModal) editModal.style.display = 'none';
+                });
+            });
+
+
+            // --- 8. SUBMIT FORM (LƯU) ---
+            if (addForm) {
+                addForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    simulateApiCall((success) => {
+                        showToast('Lập phiếu thu thành công!');
+                        addModal.style.display = 'none';
+                    });
+                });
+            }
+
+            const editForm = document.getElementById('edit-receipt-form');
+            if (editForm) {
+                editForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    simulateApiCall((success) => {
+                        showToast('Cập nhật phiếu thu thành công!');
+                        editModal.style.display = 'none';
+                    });
+                });
+            }
+
+        });
+    </script>
+
+</body>
+
+</html>
