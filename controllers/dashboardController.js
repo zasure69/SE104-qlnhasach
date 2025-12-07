@@ -127,6 +127,113 @@ const getUserInfo = (req) => {
       res.status(500).send('Lỗi Server');
     }
   };
+const getReportPage = async (req, res) => {
+    try {
+        const userInfo = getUserInfo(req);
+
+        /* ============================
+           1. BÁO CÁO TỒN KHO
+        ============================= */
+        const dataTon = await db.Sach.findAll({
+            include: [{ model: db.DauSach }]
+        });
+
+        const ton = dataTon.map(item => ({
+            MaSach: item.MaSach,
+            TenSach: item.DauSach?.TenSach,
+            SoLuongTon: item.SoLuongTon,
+            NamXB: item.NamXB,
+            NhaXB: item.NhaXB
+        }));
+
+        /* ============================
+           2. BÁO CÁO CÔNG NỢ
+        ============================= */
+        const listKH = await db.KhachHang.findAll({
+            include: [
+                { model: db.HoaDon },
+                { model: db.PhieuThuTien }
+            ]
+        });
+
+        const congno = listKH.map(kh => {
+            const tongHoaDon = kh.HoaDons.reduce(
+                (sum, hd) => sum + parseFloat(hd.ConLai || 0),
+                0
+            );
+
+            const tongThu = kh.PhieuThuTiens.reduce(
+                (sum, pt) => sum + parseFloat(pt.SoTienThu || 0),
+                0
+            );
+
+            return {
+                MaKhachHang: kh.MaKhachHang,
+                HoVaTen: kh.HoVaTen,
+                TongNo: tongHoaDon - tongThu
+            };
+        });
+
+        /* ============================
+           3. BÁO CÁO DOANH THU (tháng hiện tại)
+        ============================= */
+        const now = new Date();
+        const month = now.getMonth() + 1;
+        const year = now.getFullYear();
+
+        const listHD = await db.HoaDon.findAll({
+            where: {
+                NgayLapHoaDon: {
+                    [Op.between]: [
+                        `${year}-${month}-01`,
+                        `${year}-${month}-31`
+                    ]
+                }
+            },
+            include: [{
+                model: db.CT_HD,
+                include: [{
+                    model: db.Sach,
+                    include: [db.DauSach]
+                }]
+            }]
+        });
+
+        let totalRevenue = 0;
+        let revenueByCategory = {};
+
+        listHD.forEach(hd => {
+            hd.CT_HDs.forEach(ct => {
+                const tien = parseFloat(ct.ThanhTien || 0);
+
+                totalRevenue += tien;
+
+                const theLoai = ct.Sach?.DauSach?.MaTheLoai || "Chưa rõ";
+
+                if (!revenueByCategory[theLoai]) {
+                    revenueByCategory[theLoai] = 0;
+                }
+
+                revenueByCategory[theLoai] += tien;
+            });
+        });
+
+        /* ============================
+           RENDER TRANG + GỬI DATA
+        ============================= */
+        res.render("report", {
+            ...userInfo,
+            bcton: {},
+            bccongno: {}, 
+            bcdoanhthu: {}
+        });
+
+    } catch (err) {
+        console.error("Lỗi render trang báo cáo:", err);
+        res.status(500).send("Lỗi Server");
+    }
+};
+
 
   const getReportPage = async (req, res) => {
     try {
@@ -158,5 +265,6 @@ module.exports = {
     getEmployeesPage,
     getCustomersPage,
     getSearchPage,
-    getChangeRulePage
+    getChangeRulePage,
+    getReportPage 
   };
