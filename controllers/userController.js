@@ -71,7 +71,7 @@ const getLoginPage = (req, res) => {
 // =============================================================
 const registerEmployee = async (req, res) => {
   try {
-    const { username, password, hoTen, soDienThoai, chucVu, ngayNhanViec } = req.body;
+    const { username, password, hoTen, soDienThoai, chucVu, ngayNhanViec, ngaySinh } = req.body;
     const newMaNhanVien = await generateNewEmployeeId();
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -80,6 +80,7 @@ const registerEmployee = async (req, res) => {
     const newUser = await db.User.create({
       MaNhanVien: newMaNhanVien,
       HoTen: hoTen,
+      NgaySinh: ngaySinh,
       SoDienThoai: soDienThoai,
       ChucVu: chucVu,
       Username: username,
@@ -186,6 +187,21 @@ const updateEmployee = async (req, res) => {
 };
 
 // =============================================================
+// HÀM LẤY TẤT CẢ NHÂN VIÊN
+// =============================================================
+const getEmployees = async (req, res) => {
+  try {
+      const employees = await db.User.findAll({
+          raw: true // Lấy dữ liệu dạng JSON thuần
+      });
+      res.status(200).json(employees);
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Lỗi server nội bộ' });
+  }
+}
+
+// =============================================================
 // HÀM XÓA NHÂN VIÊN (DELETE)
 // =============================================================
 const deleteEmployee = async (req, res) => {
@@ -219,6 +235,7 @@ const logout = (req, res) => {
 
 module.exports = {
   getLoginPage,
+  getEmployees,
   registerEmployee,
   updateEmployee,
   deleteEmployee,

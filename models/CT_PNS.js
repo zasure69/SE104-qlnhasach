@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-// Ánh xạ tới bảng CT_PNS [cite: 818]
+// Ánh xạ tới bảng CT_PNS 
 const CT_PNS = sequelize.define('CT_PNS', {
   MaPhieuNhap: {
     type: DataTypes.STRING(20),
@@ -18,6 +18,10 @@ const CT_PNS = sequelize.define('CT_PNS', {
     allowNull: false
   },
   DonGiaNhap: {
+    type: DataTypes.DECIMAL(18, 2),
+    allowNull: false
+  },
+  DonGiaBan: {
     type: DataTypes.DECIMAL(18, 2),
     allowNull: false
   },

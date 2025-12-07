@@ -657,14 +657,14 @@
                 <ul>
                     <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
                     <li><a href="#" class="active"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
-                    <li><a href="./books.html" ><i class="fas fa-book"></i>QL Sách</a></li>
-                    <li><a href="./customers.html"><i class="fas fa-id-card"></i>QL Khách hàng</a></li>
-                    <li><a href="./books_import.html"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
-                    <li><a href="./receipts.html"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
-                    <li><a href="./bills.html"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
-                    <li><a href="./search.html"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="./report.html"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="./changerule.html"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
+                    <li><a href="/dashboard/books"><i class="fas fa-book"></i>QL Sách</a></li>
+                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li>
+                    <li><a href="/dashboard/books-import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
+                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
+                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
+                    <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
+                    <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+                    <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
         </aside>
@@ -835,8 +835,8 @@
                         <div class="form-group" style="grid-column: 1 / -1;">
                              <label for="add-chuc-vu" class="required">Chức vụ</label>
                              <select id="add-chuc-vu">
-                                 <option value="NV Bán hàng">Nhân viên</option>
-                                 <option value="NV Kho">Chủ cửa hàng</option>
+                                 <option value="Nhân viên">Nhân viên</option>
+                                 <option value="Chủ cửa hàng">Chủ cửa hàng</option>
                              </select>
                         </div>
                     </div>
@@ -912,7 +912,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             
-            // --- 1. CÁC HÀM TIỆN ÍCH (LOADER, TOAST) ---
+            // --- 1. CÁC HÀM TIỆN ÍCH (LOADER, TOAST, FETCH DATA) ---
             const loader = document.getElementById('loader');
             const toastContainer = document.getElementById('toast-container');
             let currentEditingRow = null; 
@@ -941,6 +941,64 @@
                     const success = Math.random() > 0.1; // 90% thành công
                     callback(success); 
                 }, 1000); 
+            }
+
+            async function fetchEmployees() {
+                try {
+                    const response = await fetch('/api/employees/getEmployees'); // Đổi lại đường dẫn API của bạn nếu khác
+                    if (!response.ok) throw new Error('Không thể tải dữ liệu');
+                    
+                    const employees = await response.json();
+                    const tbody = document.querySelector('#employee-table tbody');
+                    tbody.innerHTML = ''; // Xóa sạch dữ liệu cũ
+
+                    if (employees && employees.length > 0) {
+                        employees.forEach((employee, index) => {
+                            const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+                            
+                            // Xử lý ngày tháng (để hiện dd/mm/yyyy)
+                            const formattedNgaySinh = employee.NgaySinh ? new Date(employee.NgaySinh).toLocaleDateString('en-US', options) : '';
+                            const formattedNgayNhanViec = employee.NgayNhanViec ? new Date(employee.NgayNhanViec).toLocaleDateString('en-US', options) : '';
+                            
+                            // Xử lý ngày chuẩn (để lưu vào dataset cho nút Sửa)
+                            const rawNgaySinh = employee.NgaySinh ? new Date(employee.NgaySinh).toISOString().split('T')[0] : '';
+                            const rawNgayNhanViec = employee.NgayNhanViec ? new Date(employee.NgayNhanViec).toISOString().split('T')[0] : '';
+
+                            const tr = document.createElement('tr');
+                            tr.dataset.id = employee.MaNhanVien;
+                            tr.dataset.ngaySinh = rawNgaySinh;
+                            tr.dataset.ngayNhanViec = rawNgayNhanViec;
+
+                            // Nút Sửa/Xóa chỉ hiện nếu không phải admin (giống logic EJS của bạn)
+                            let actionButtons = '';
+                            if (employee.Username !== 'admin') {
+                                actionButtons = `
+                                    <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
+                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                                `;
+                            }
+
+                            tr.innerHTML = `
+                                <td>${index + 1}</td>
+                                <td>${employee.MaNhanVien}</td>
+                                <td>${employee.HoTen}</td>
+                                <td>${formattedNgaySinh}</td>
+                                <td>${employee.SoDienThoai}</td>
+                                <td>${employee.ChucVu}</td>
+                                <td>${employee.Username}</td>
+                                <td>******</td>
+                                <td>${formattedNgayNhanViec}</td>
+                                <td>${actionButtons}</td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Không có nhân viên nào.</td></tr>';
+                    }
+                } catch (error) {
+                    console.error("Lỗi tải nhân viên:", error);
+                    // showToast('Lỗi tải danh sách nhân viên', 'error');
+                }
             }
     
             // --- 2. XỬ LÝ SIDEBAR & RESPONSIVE ---
@@ -1001,34 +1059,34 @@
                     });
                 }
     
-                // B. Mở Modal Sửa (Điền dữ liệu & Lưu snapshot)
-                if (editBtns.length > 0 && editModal) {
-                    editBtns.forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            currentEditingRow = e.target.closest('tr');
-                            if(!currentEditingRow) return;
+                // // B. Mở Modal Sửa (Điền dữ liệu & Lưu snapshot)
+                // if (editBtns.length > 0 && editModal) {
+                //     editBtns.forEach(btn => {
+                //         btn.addEventListener('click', (e) => {
+                //             currentEditingRow = e.target.closest('tr');
+                //             if(!currentEditingRow) return;
     
-                            // --- LOGIC ĐIỀN DỮ LIỆU VÀO FORM (MAPPING) ---
-                            // Lưu ý: Cần mapping đúng thứ tự cột trong bảng của bạn
-                            const cells = currentEditingRow.cells;
-                            document.getElementById('edit-ho-ten').value = cells[2].textContent;
-                            // Giả lập ngày sinh (do format hiển thị khác value input)
-                            document.getElementById('edit-ngay-sinh').value = '1990-01-01'; 
-                            document.getElementById('edit-sdt').value = cells[4].textContent;
-                            document.getElementById('edit-chuc-vu').value = cells[5].textContent; // Value option phải khớp text
-                            document.getElementById('edit-username').value = cells[6].textContent;
-                            document.getElementById('edit-ngay-nhan-viec').value = '2025-01-01';
-                            document.getElementById('edit-password').value = ''; // Reset mật khẩu
+                //             // --- LOGIC ĐIỀN DỮ LIỆU VÀO FORM (MAPPING) ---
+                //             // Lưu ý: Cần mapping đúng thứ tự cột trong bảng của bạn
+                //             const cells = currentEditingRow.cells;
+                //             document.getElementById('edit-ho-ten').value = cells[2].textContent;
+                //             // Giả lập ngày sinh (do format hiển thị khác value input)
+                //             document.getElementById('edit-ngay-sinh').value = currentEditingRow.dataset.ngaySinh;
+                //             document.getElementById('edit-sdt').value = cells[4].textContent;
+                //             document.getElementById('edit-chuc-vu').value = cells[5].textContent; // Value option phải khớp text
+                //             document.getElementById('edit-username').value = cells[6].textContent;
+                //             document.getElementById('edit-ngay-nhan-viec').value = currentEditingRow.dataset.ngayNhanViec;
+                //             document.getElementById('edit-password').value = ''; // Reset mật khẩu
     
-                            // SAU KHI điền xong, lưu lại trạng thái gốc ngay lập tức
-                            setTimeout(() => {
-                                 if(editForm) originalFormData = getFormData(editForm);
-                            }, 50); 
+                //             // SAU KHI điền xong, lưu lại trạng thái gốc ngay lập tức
+                //             setTimeout(() => {
+                //                  if(editForm) originalFormData = getFormData(editForm);
+                //             }, 50); 
                             
-                            editModal.style.display = 'flex';
-                        });
-                    });
-                }
+                //             editModal.style.display = 'flex';
+                //         });
+                //     });
+                // }
     
                 // C. Xử lý nút ĐẶT LẠI (Thông minh)
                 if (resetBtn && editForm) {
@@ -1051,7 +1109,7 @@
                     });
                 }
     
-                // D. Xử lý nút XÓA (Icon thùng rác ở bảng)
+                // D. Xử lý nút XÓA (Icon thùng rác ở bảng) và nút CHỈNH SỬA
                 if (table) {
                     table.addEventListener('click', async (e) => {
                         // Bắt sự kiện click vào icon xóa hoặc nút chứa icon xóa
@@ -1091,6 +1149,32 @@
                                     showToast('Lỗi kết nối máy chủ.', 'error');
                                 }
                             }
+                        }
+
+                        if (e.target.classList.contains('open-edit-modal') || e.target.closest('.open-edit-modal')) {
+                            const btn  = e.target.closest('.open-edit-modal');
+                            currentEditingRow = btn.closest('tr');
+                            if(!currentEditingRow) return;
+                            
+                            // --- LOGIC ĐIỀN DỮ LIỆU VÀO FORM (MAPPING) ---
+                            // Lưu ý: Cần mapping đúng thứ tự cột trong bảng của bạn
+                            const cells = currentEditingRow.cells;
+                            document.getElementById('edit-ho-ten').value = cells[2].textContent;
+                            // Giả lập ngày sinh (do format hiển thị khác value input)
+                            document.getElementById('edit-ngay-sinh').value = currentEditingRow.dataset.ngaySinh;
+                            document.getElementById('edit-sdt').value = cells[4].textContent;
+                            document.getElementById('edit-chuc-vu').value = cells[5].textContent; // Value option phải khớp text
+                            document.getElementById('edit-username').value = cells[6].textContent;
+                            document.getElementById('edit-ngay-nhan-viec').value = currentEditingRow.dataset.ngayNhanViec;
+                            document.getElementById('edit-password').value = ''; // Reset mật khẩu
+    
+                            // SAU KHI điền xong, lưu lại trạng thái gốc ngay lập tức
+                            setTimeout(() => {
+                                 if(editForm) originalFormData = getFormData(editForm);
+                            }, 50); 
+                            
+                            editModal.style.display = 'flex';
+
                         }
                     });
                 }
@@ -1221,10 +1305,11 @@
                         hideLoader();
 
                         if (response.ok) {
-                            showToast('Thêm nhân viên thành công!', 'success');
-                            addModal.style.display = 'none';
+                            await showToast('Thêm nhân viên thành công!', 'success');
+                            document.getElementById('add-modal').style.display = 'none';
                             // Tải lại trang để xem nhân viên mới
-                            window.location.reload(); 
+                            //window.location.reload(); 
+                            fetchEmployees(); // tải lại danh sách nhân viên
                         } else {
                             showToast(`Thêm thất bại: ${result.error}`, 'error');
                         }
