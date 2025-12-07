@@ -8,6 +8,7 @@ const port = 3000;
 const userRoutes = require("./routes/userRoutes");
 const customerRoutes = require("./routes/customersRoutes");
 const booksRoutes = require("./routes/booksRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 // === MIDDLEWARE SETUP ===
 app.use(express.json());
@@ -37,6 +38,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", userRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/books", booksRoutes); // ✅ Prefix /api/books
+app.use("/dashboard", dashboardRoutes); // ✅ Dashboard routes
 
 // Trang chủ
 app.get("/", (req, res) => {

@@ -758,22 +758,7 @@ const updateSach = async (req, res) => {
     return res.status(500).json({ error: "Lỗi server nội bộ" });
   }
 };
-// const deleteDauSach = async (req, res) => {
-//   try {
-//     const maDS = req.params.maDS;
-//     const dauSach = await db.DauSach.findByPk(maDS);
-//     if (!dauSach) {
-//       return res.status(404).json({ error: "Không tìm thấy Đầu sách" });
-//     }
 
-//     await db.CT_TacGia.destroy({ where: { MaDauSach: maDS } });
-//     await dauSach.destroy();
-//     return res.status(200).json({ message: "Xóa đầu sách thành công!" });
-//   } catch (err) {
-//     console.error("[bookController] deleteDauSach error", err);
-//     return res.status(500).json({ error: "Lỗi server nội bộ" });
-//   }
-// };
 const deleteSach = async (req, res) => {
   try {
     const maSach = req.params.maSach;

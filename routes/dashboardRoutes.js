@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const dashboardController = require("../controllers/dashboardController");
 const bookController = require("../controllers/bookController");
+const importController = require("../controllers/importController");
 
 // GET /dashboard/ -> Trang tổng quan
 router.get("/", dashboardController.getDashboardPage);
@@ -12,5 +13,7 @@ router.get("/search", dashboardController.getSearchPage);
 router.get("/change-rule", dashboardController.getChangeRulePage);
 // Render books management page
 router.get("/books", bookController.getBooksPage);
+// Render import books page
+router.get("/books_import", importController.getImportPage);
 
 module.exports = router;
