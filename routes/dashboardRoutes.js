@@ -9,5 +9,7 @@ router.get('/employees', dashboardController.getEmployeesPage);
 router.get('/customers', dashboardController.getCustomersPage);
 router.get('/search', dashboardController.getSearchPage);
 router.get('/change-rule', dashboardController.getChangeRulePage);
+router.get('/bills', dashboardController.getBillsPage);
+router.get('/receipts', dashboardController.getReceiptsPage);
 
 module.exports = router;

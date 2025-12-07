@@ -21,6 +21,10 @@ const CT_PNS = sequelize.define('CT_PNS', {
     type: DataTypes.DECIMAL(18, 2),
     allowNull: false
   },
+  DonGiaBan: {
+    type: DataTypes.DECIMAL(18, 2),
+    allowNull: false
+  },
   ThanhTien: {
     type: DataTypes.DECIMAL(18, 2),
     allowNull: false

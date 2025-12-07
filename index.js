@@ -49,6 +49,9 @@ app.use(authenticateToken); // Áp dụng middleware xác thực cho các route 
 const dashboardRoutes = require('./routes/dashboardRoutes');
 app.use('/dashboard', dashboardRoutes);
 
+const billRoutes = require('./routes/billRoutes');
+app.use('/api/bill', billRoutes);
+
 const customersRoutes = require('./routes/customersRoutes');
 app.use('/api/customers', customersRoutes);
 
@@ -61,6 +64,9 @@ app.use('/api/employees', employeesRoutes);
 
 const changeruleRoutes = require('./routes/changeruleRoutes');
 app.use('/api/change-rules', changeruleRoutes);
+
+const receiptsRoute = require('./routes/receiptsRoutes');
+app.use('/api/receipts', receiptsRoute);
 
 // --- Khởi động Server và Đồng bộ Database ---
 
