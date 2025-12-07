@@ -13,6 +13,7 @@ router.get('/search', dashboardController.getSearchPage);
 router.get('/change-rule', dashboardController.getChangeRulePage);
 router.get('/bills', dashboardController.getBillsPage);
 router.get('/receipts', dashboardController.getReceiptsPage);
+router.get('/reports', dashboardController.getReportPage);
 // Render books management page
 router.get("/books", bookController.getBooksPage);
 // Render import books page
