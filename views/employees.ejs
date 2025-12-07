@@ -267,6 +267,24 @@
             background-color: var(--red-accent-hover);
         }
 
+        .btn-warning {
+            background-color: #f39c12; /* Màu cam */
+            color: white;
+        }
+        .btn-warning:hover {
+            background-color: #d35400;
+        }
+
+        #btn-custom-reset {
+            background-color: #6c757d; /* Màu xám đậm chuẩn UI */
+            color: #ffffff;            /* Chữ màu trắng */
+        }
+
+        #btn-custom-reset:hover {
+            background-color: #5a6268; /* Màu hover đậm hơn chút */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Thêm bóng đổ nhẹ khi di chuột */
+        }
+
         /* --- Bảng --- */
         .table-responsive {
             overflow-x: auto;
@@ -304,6 +322,19 @@
         }
         .action-icon:hover {
             color: #2980b9;
+        }
+
+        /* Hiệu ứng cho icon xóa ở bảng */
+        .action-icon.delete-icon:hover {
+            color: #c0392b !important; /* Đỏ đậm hơn khi hover */
+            transform: scale(1.2); /* Phóng to nhẹ */
+            transition: all 0.2s;
+        }
+
+        .action-icon.open-edit-modal:hover {
+            color: #2980b9; /* Màu xanh dương khi hover */
+            transform: scale(1.2); /* Phóng to nhẹ */
+            transition: all 0.2s;
         }
 
 
@@ -409,10 +440,29 @@
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
         }
         
-        /* THÊM: Input disabled */
-        .form-group input:disabled {
-            background-color: var(--disabled-bg);
-            cursor: not-allowed;
+        /* --- CSS CHO INPUT KHÔNG ĐƯỢC NHẬP (Disabled & Readonly) --- */
+        .form-group input:disabled,
+        .form-group select:disabled,
+        .form-group textarea:disabled,
+        .form-group input:read-only, 
+        .form-group textarea:read-only {
+            background-color: var(--disabled-bg); /* Màu nền xám (#e9ecef) */
+            color: #6c757d;                       /* Màu chữ xám đậm cho cảm giác "chìm" đi */
+            cursor: not-allowed;                  /* Đổi con trỏ chuột để báo hiệu */
+            border-color: #d6d8db;                /* Viền nhạt hơn chút */
+        }
+
+        /* Tinh chỉnh riêng cho Read-only (vẫn cho phép bôi đen copy nhưng không sửa) */
+        .form-group input:read-only,
+        .form-group textarea:read-only {
+            cursor: default; /* Con trỏ chuột bình thường */
+        }
+
+        .form-group label.required::after {
+            content: "*";               /* Thêm dấu sao */
+            color: var(--red-accent);    /* Màu đỏ (lấy từ biến màu đỏ của bạn) */
+            font-weight: bold;           /* In đậm */
+            margin-left: 4px;            /* Cách ra một chút cho đẹp */
         }
 
         /* Wrapper cho input password có icon */
@@ -605,16 +655,16 @@
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="/dashboard"><i class="fas fa-home"></i> Tổng quan</a></li>
-                    <li><a href="#" class="active"><i class="fas fa-users"></i>Nhân Viên</a></li>
-                    <li><a href="/dashboard/books"><i class="fas fa-book"></i>Sách</a></li>
-                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>Khách hàng</a></li> 
-                    <li><a href="/dashboard/types-authors"><i class="fas fa-tags"></i>Thể loại & Tác giả</a></li>
-                    <li><a href="/dashboard/books-import"><i class="fas fa-file-invoice"></i>Phiếu nhập sách</a></li>
-                    <li><a href="/dashboard/bills"><i class="fas fa-receipt"></i>Phiếu thu tiền</a></li>
+                    <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
+                    <li><a href="#" class="active"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
+                    <li><a href="/dashboard/books"><i class="fas fa-book"></i>QL Sách</a></li>
+                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li>
+                    <li><a href="/dashboard/books-import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
+                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
+                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
                     <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
                     <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li>
+                    <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
         </aside>
@@ -640,8 +690,6 @@
                         </a>
                     </div>
                 </div>
-
-                
             </header>
 
             <div class="content-wrapper">
@@ -653,7 +701,7 @@
                 </div>
 
                 <div class="table-responsive">
-                    <table class="employee-table" id="employee-table">
+                    <table class="employee-table" id="employee-table"> <!-- THÊM ID -->
                         <thead>
                             <tr>
                                 <th>STT</th>
@@ -695,6 +743,7 @@
                                             <%# Kiểm tra xem Username có phải là 'admin' không %>
                                             <% if (employee.Username !== 'admin') { %>
                                                 <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
+                                                <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
                                             <% } %>
                                         </td>
                                     </tr>
@@ -704,6 +753,36 @@
                                     <td colspan="10" style="text-align: center;">Không có nhân viên nào.</td>
                                 </tr>
                             <% } %>
+                            <!-- <tr data-id="NV01"> 
+                                <td>1</td>
+                                <td>NV01</td>
+                                <td>Nguyễn Văn A</td>
+                                <td>01/01/1990</td>
+                                <td>0123456789</td>
+                                <td>NV Bán hàng</td>
+                                <td>anv90</td>
+                                <td>123456</td>
+                                <td>01/01/2025</td>
+                                <td>
+                                    <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
+                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                                </td>
+                            </tr>
+                            <tr data-id="NV02"> 
+                                <td>2</td>
+                                <td>NV02</td>
+                                <td>Trần Thị B</td>
+                                <td>05/10/1995</td>
+                                <td>0987654321</td>
+                                <td>NV Kho</td>
+                                <td>btt95</td>
+                                <td>******</td>
+                                <td>15/03/2024</td>
+                                <td>
+                                    <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
+                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                                </td> -->
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -723,48 +802,47 @@
                 <div class="modal-body">
                     <div class="modal-form-grid">
                         <div class="form-group">
-                            <label for="add-ngay-nhan-viec">Ngày nhận việc</label>
+                            <label for="add-ngay-nhan-viec" class="required">Ngày nhận việc</label>
                             <div class="date-input-wrapper">
                                 <input type="date" id="add-ngay-nhan-viec" value="2025-01-01" required>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="add-ho-ten">Họ Tên</label>
+                            <label for="add-ho-ten" class="required">Họ Tên</label>
                             <input type="text" id="add-ho-ten" placeholder="Nguyễn Văn An" required>
                         </div>
                         <div class="form-group">
-                            <label for="add-ngay-sinh">Ngày sinh</label>
+                            <label for="add-ngay-sinh" class="required">Ngày sinh</label>
                             <div class="date-input-wrapper">
                                 <input type="date" id="add-ngay-sinh" required>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="add-sdt">Số điện thoại</label>
-                            <input type="tel" id="add-sdt" placeholder="0123456789">
+                            <label for="add-sdt" class="required">Số điện thoại</label>
+                            <input type="number" id="add-sdt" placeholder="0123456789">
                         </div>
                         <div class="form-group">
-                            <label for="add-username">Tên đăng nhập</label>
+                            <label for="add-username" class="required">Tên đăng nhập</label>
                             <input type="text" id="add-username" placeholder="anvnv" required>
                         </div>
                         <div class="form-group">
-                            <label for="add-password">Mật khẩu</label>
+                            <label for="add-password" class="required">Mật khẩu</label>
                             <div class="password-wrapper">
                                 <input type="password" id="add-password" placeholder="******" required>
                                 <span class="toggle-password"><i class="fas fa-eye-slash"></i></span>
                             </div>
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
-                             <label for="add-chuc-vu">Chức vụ</label>
+                             <label for="add-chuc-vu" class="required">Chức vụ</label>
                              <select id="add-chuc-vu">
-                                 <option value="NV Bán hàng">NV Bán hàng</option>
-                                 <option value="NV Kho">NV Kho</option>
-                                 <option value="Quản lý">Quản lý</option>
+                                 <option value="Nhân viên">Nhân viên</option>
+                                 <option value="Chủ cửa hàng">Chủ cửa hàng</option>
                              </select>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary close-modal">Hủy</button>
+                    <button type="button" class="btn btn-secondary" id="btn-custom-reset">Thêm mới</button>
                     <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
             </form>
@@ -800,11 +878,11 @@
                         </div>
                         <div class="form-group">
                             <label for="edit-sdt">Số điện thoại</label>
-                            <input type="tel" id="edit-sdt" value="0123456789">
+                            <input type="number" id="edit-sdt" value="0123456789">
                         </div>
                         <div class="form-group">
                             <label for="edit-username">Tên đăng nhập</label>
-                            <input type="text" id="edit-username" value="anvnv" required readonly disabled> <!-- SỬA: Khóa Username -->
+                            <input type="text" id="edit-username" value="anvnv" required readonly> <!-- SỬA: Khóa Username -->
                         </div>
                         <div class="form-group">
                             <label for="edit-password">Mật khẩu (Để trống nếu không đổi)</label>
@@ -816,19 +894,15 @@
                         <div class="form-group" style="grid-column: 1 / -1;">
                              <label for="edit-chuc-vu">Chức vụ</label>
                              <select id="edit-chuc-vu">
-                                 <option value="NV Bán hàng" selected>NV Bán hàng</option>
-                                 <option value="NV Kho">NV Kho</option>
-                                 <option value="Quản lý">Quản lý</option>
+                                 <option value="NV Bán hàng" selected>Nhân viên</option>
+                                 <option value="NV Kho">Chủ cửa hàng</option>
                              </select>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" id="delete-employee-button">Xóa nhân viên</button>
-                    <div>
-                        <button type="button" class="btn btn-secondary close-modal">Hủy</button>
-                        <button type="submit" class="btn btn-primary">Lưu</button>
-                    </div>
+                    <button type="button" class="btn btn-warning" id="btn-reset-edit">Đặt lại</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
             </form>
         </div>
@@ -838,21 +912,18 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             
-            // --- THÊM: Các hàm điều khiển Loader và Toast ---
+            // --- 1. CÁC HÀM TIỆN ÍCH (LOADER, TOAST, FETCH DATA) ---
             const loader = document.getElementById('loader');
             const toastContainer = document.getElementById('toast-container');
             let currentEditingRow = null; 
-
+    
             function showLoader() { loader.style.display = 'flex'; }
             function hideLoader() { loader.style.display = 'none'; }
             
             function showToast(message, type = 'success') {
                 const toast = document.createElement('div');
                 toast.classList.add('toast', type);
-                toast.innerHTML = `
-                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i>
-                    <span class="toast-message">${message}</span>
-                `;
+                toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i><span class="toast-message">${message}</span>`;
                 toastContainer.appendChild(toast);
                 setTimeout(() => { toast.classList.add('show'); }, 100);
                 setTimeout(() => {
@@ -862,118 +933,257 @@
                     });
                 }, 3000);
             }
-            // --- KẾT THÚC HÀM MỚI ---
+    
+            function simulateApiCall(callback) {
+                showLoader();
+                setTimeout(() => {
+                    hideLoader();
+                    const success = Math.random() > 0.1; // 90% thành công
+                    callback(success); 
+                }, 1000); 
+            }
 
-            
-            // --- Xử lý Responsive Sidebar ---
+            async function fetchEmployees() {
+                try {
+                    const response = await fetch('/api/employees/getEmployees'); // Đổi lại đường dẫn API của bạn nếu khác
+                    if (!response.ok) throw new Error('Không thể tải dữ liệu');
+                    
+                    const employees = await response.json();
+                    const tbody = document.querySelector('#employee-table tbody');
+                    tbody.innerHTML = ''; // Xóa sạch dữ liệu cũ
+
+                    if (employees && employees.length > 0) {
+                        employees.forEach((employee, index) => {
+                            const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+                            
+                            // Xử lý ngày tháng (để hiện dd/mm/yyyy)
+                            const formattedNgaySinh = employee.NgaySinh ? new Date(employee.NgaySinh).toLocaleDateString('en-US', options) : '';
+                            const formattedNgayNhanViec = employee.NgayNhanViec ? new Date(employee.NgayNhanViec).toLocaleDateString('en-US', options) : '';
+                            
+                            // Xử lý ngày chuẩn (để lưu vào dataset cho nút Sửa)
+                            const rawNgaySinh = employee.NgaySinh ? new Date(employee.NgaySinh).toISOString().split('T')[0] : '';
+                            const rawNgayNhanViec = employee.NgayNhanViec ? new Date(employee.NgayNhanViec).toISOString().split('T')[0] : '';
+
+                            const tr = document.createElement('tr');
+                            tr.dataset.id = employee.MaNhanVien;
+                            tr.dataset.ngaySinh = rawNgaySinh;
+                            tr.dataset.ngayNhanViec = rawNgayNhanViec;
+
+                            // Nút Sửa/Xóa chỉ hiện nếu không phải admin (giống logic EJS của bạn)
+                            let actionButtons = '';
+                            if (employee.Username !== 'admin') {
+                                actionButtons = `
+                                    <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
+                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                                `;
+                            }
+
+                            tr.innerHTML = `
+                                <td>${index + 1}</td>
+                                <td>${employee.MaNhanVien}</td>
+                                <td>${employee.HoTen}</td>
+                                <td>${formattedNgaySinh}</td>
+                                <td>${employee.SoDienThoai}</td>
+                                <td>${employee.ChucVu}</td>
+                                <td>${employee.Username}</td>
+                                <td>******</td>
+                                <td>${formattedNgayNhanViec}</td>
+                                <td>${actionButtons}</td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Không có nhân viên nào.</td></tr>';
+                    }
+                } catch (error) {
+                    console.error("Lỗi tải nhân viên:", error);
+                    // showToast('Lỗi tải danh sách nhân viên', 'error');
+                }
+            }
+    
+            // --- 2. XỬ LÝ SIDEBAR & RESPONSIVE ---
             const menuToggle = document.getElementById('menu-toggle');
             const sidebar = document.getElementById('sidebar');
             const container = document.querySelector('.dashboard-container'); 
-
+    
             if (menuToggle && sidebar && container) {
                 menuToggle.addEventListener('click', function() {
-                    if (window.innerWidth <= 992) {
-                        sidebar.classList.toggle('active');
-                    } else {
-                        container.classList.toggle('sidebar-collapsed');
+                    if (window.innerWidth <= 992) { sidebar.classList.toggle('active'); } 
+                    else { container.classList.toggle('sidebar-collapsed'); }
+                });
+            }
+    
+            // --- 3. HÀM LOGIC CỐT LÕI (SMART MODAL) ---
+            
+            // Hàm lấy dữ liệu từ Form (snapshot)
+            function getFormData(form) {
+                const data = {};
+                const inputs = form.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    if(input.type !== 'submit' && input.type !== 'button') {
+                        data[input.id] = input.value;
                     }
                 });
+                return data;
             }
-
-            // --- Xử lý Mở/Đóng Modal ---
-            const addModal = document.getElementById('add-modal');
-            const editModal = document.getElementById('edit-modal');
-            
-            const openAddModalBtn = document.getElementById('open-add-modal');
-            const openEditModalBtns = document.querySelectorAll('.open-edit-modal');
-            const closeModalBtns = document.querySelectorAll('.close-modal');
-
-            if (openAddModalBtn && addModal) {
-                openAddModalBtn.addEventListener('click', function() {
-                    document.getElementById('add-employee-form').reset(); // Reset form
-                    addModal.style.display = 'flex';
-                });
+    
+            // Hàm khôi phục dữ liệu Form
+            function restoreFormData(form, data) {
+                for (const [key, value] of Object.entries(data)) {
+                    const input = form.querySelector(`#${key}`);
+                    if (input) input.value = value;
+                }
             }
-
-            // --- SỬA: Gắn sự kiện cho các nút Sửa (vì giờ chúng được tạo động) ---
-            const tableBody = document.getElementById('employee-table').getElementsByTagName('tbody')[0];
-            tableBody.addEventListener('click', function(e) {
-                if (e.target.classList.contains('open-edit-modal')) {
-                    currentEditingRow = e.target.closest('tr');
-                    if (!currentEditingRow) return;
-                    
-                    // Lấy dữ liệu từ hàng
-                    document.getElementById('edit-ho-ten').value = currentEditingRow.cells[2].textContent;
-                    document.getElementById('edit-ngay-sinh').value = currentEditingRow.dataset.ngaySinh; 
-                    document.getElementById('edit-sdt').value = currentEditingRow.cells[4].textContent;
-                    document.getElementById('edit-chuc-vu').value = currentEditingRow.cells[5].textContent;
-                    document.getElementById('edit-username').value = currentEditingRow.cells[6].textContent;
-                    document.getElementById('edit-ngay-nhan-viec').value = currentEditingRow.dataset.ngayNhanViec;
-                    document.getElementById('edit-password').value = ''; 
-                    
-                    editModal.style.display = 'flex';
-                }
-            });
-
-            closeModalBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    btn.closest('.modal-overlay').style.display = 'none';
-                    currentEditingRow = null; // Reset
-                });
-            });
-            window.addEventListener('click', function(event) {
-                if (event.target.classList.contains('modal-overlay')) {
-                    event.target.style.display = 'none';
-                    currentEditingRow = null; // Reset
-                }
-            });
-            
-            // --- SỬA: Xử lý Form Submit với Loader/Toast ---
-            const addEmployeeForm = document.getElementById('add-employee-form');
-            if (addEmployeeForm) {
-                addEmployeeForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    showLoader();
-                    const data = {
-                        hoTen: document.getElementById('add-ho-ten').value,
-                        ngaySinh: document.getElementById('add-ngay-sinh').value,
-                        soDienThoai: document.getElementById('add-sdt').value,
-                        chucVu: document.getElementById('add-chuc-vu').value,
-                        username: document.getElementById('add-username').value,
-                        password: document.getElementById('add-password').value,
-                        ngayNhanViec: document.getElementById('add-ngay-nhan-viec').value,
-                    };
-                    try {
-                        // --- SỬA: GỌI API 'register' ---
-                        const response = await fetch('/api/employees/registerEmployee', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(data)
-                        });
-
-                        const result = await response.json();
-                        hideLoader();
-
-                        if (response.ok) {
-                            showToast('Thêm nhân viên thành công!', 'success');
-                            addModal.style.display = 'none';
-                            // Tải lại trang để xem nhân viên mới
-                            window.location.reload(); 
-                        } else {
-                            showToast(`Thêm thất bại: ${result.error}`, 'error');
+    
+            // Hàm Setup Modal Thông minh (Dùng chung cho Sửa/Xóa/Reset)
+            function setupSmartModal(config) {
+                const addBtn = document.getElementById(config.addBtnId);
+                const addModal = document.getElementById(config.addModalId);
+                
+                const editModal = document.getElementById(config.editModalId);
+                const editForm = document.getElementById(config.formId);
+                const editBtns = document.querySelectorAll(config.editBtnClass);
+                
+                const resetBtn = document.getElementById(config.resetBtnId);
+                const table = document.querySelector(config.tableSelector);
+                
+                let originalFormData = {}; // Biến lưu snapshot dữ liệu gốc
+    
+                // A. Mở Modal Thêm mới
+                if (addBtn && addModal) {
+                    addBtn.addEventListener('click', () => {
+                        if(config.addFormId) {
+                            document.getElementById(config.addFormId).reset();
                         }
-                    } catch (err) {
-                        hideLoader();
-                        showToast('Lỗi kết nối máy chủ.', 'error');
-                    }
-                });
-            }
+                        addModal.style.display = 'flex';
+                    });
+                }
+    
+                // // B. Mở Modal Sửa (Điền dữ liệu & Lưu snapshot)
+                // if (editBtns.length > 0 && editModal) {
+                //     editBtns.forEach(btn => {
+                //         btn.addEventListener('click', (e) => {
+                //             currentEditingRow = e.target.closest('tr');
+                //             if(!currentEditingRow) return;
+    
+                //             // --- LOGIC ĐIỀN DỮ LIỆU VÀO FORM (MAPPING) ---
+                //             // Lưu ý: Cần mapping đúng thứ tự cột trong bảng của bạn
+                //             const cells = currentEditingRow.cells;
+                //             document.getElementById('edit-ho-ten').value = cells[2].textContent;
+                //             // Giả lập ngày sinh (do format hiển thị khác value input)
+                //             document.getElementById('edit-ngay-sinh').value = currentEditingRow.dataset.ngaySinh;
+                //             document.getElementById('edit-sdt').value = cells[4].textContent;
+                //             document.getElementById('edit-chuc-vu').value = cells[5].textContent; // Value option phải khớp text
+                //             document.getElementById('edit-username').value = cells[6].textContent;
+                //             document.getElementById('edit-ngay-nhan-viec').value = currentEditingRow.dataset.ngayNhanViec;
+                //             document.getElementById('edit-password').value = ''; // Reset mật khẩu
+    
+                //             // SAU KHI điền xong, lưu lại trạng thái gốc ngay lập tức
+                //             setTimeout(() => {
+                //                  if(editForm) originalFormData = getFormData(editForm);
+                //             }, 50); 
+                            
+                //             editModal.style.display = 'flex';
+                //         });
+                //     });
+                // }
+    
+                // C. Xử lý nút ĐẶT LẠI (Thông minh)
+                if (resetBtn && editForm) {
+                    resetBtn.addEventListener('click', () => {
+                        const currentData = getFormData(editForm);
+                        // So sánh dữ liệu hiện tại với bản gốc
+                        const isChanged = JSON.stringify(currentData) !== JSON.stringify(originalFormData);
+    
+                        if (!isChanged) {
+                            showToast('Chưa có thay đổi nào để đặt lại!', 'error');
+                            return;
+                        }
+    
+                        if (confirm("Dữ liệu đã thay đổi. Bạn có muốn LƯU LẠI không?\n\n- OK: Lưu thay đổi.\n- Cancel: Khôi phục lại dữ liệu gốc.")) {
+                            editForm.requestSubmit(); // Submit form
+                        } else {
+                            restoreFormData(editForm, originalFormData); // Reset form
+                            showToast('Đã khôi phục dữ liệu gốc!', 'success');
+                        }
+                    });
+                }
+    
+                // D. Xử lý nút XÓA (Icon thùng rác ở bảng) và nút CHỈNH SỬA
+                if (table) {
+                    table.addEventListener('click', async (e) => {
+                        // Bắt sự kiện click vào icon xóa hoặc nút chứa icon xóa
+                        if (e.target.classList.contains('delete-icon') || e.target.closest('.delete-icon')) {
+                            const row = e.target.closest('tr');
+                            const itemName = row.cells[2].textContent; // Lấy tên nhân viên (cột 3)
+                            const maNV = row.cells[1].textContent; // Lấy mã nhân viên (cột 2)
+                            
+                            if (confirm(`Bạn có chắc chắn muốn XÓA nhân viên: ${itemName}?`)) {
+                                showLoader();
+                                try {
+                                    console.log('Xóa nhân viên:', row);
+                                    // --- SỬA: GỌI API 'delete' ---
+                                    const response = await fetch(`/api/employees/deleteEmployee/${maNV}`, {
+                                        method: 'DELETE'
+                                    });
+                                    const result = await response.json();
+                                    hideLoader();
+                                    console.log('Kết quả xóa:', result);
+                                    
+                                    if(response.ok) {
+                                        row.remove();
+                                        showToast('Xóa nhân viên thành công!', 'success');
+                                        const tableBody = document.getElementById('employee-table').getElementsByTagName('tbody')[0];
+                                        if (tableBody.rows.length === 0) {
+                                            // Nếu <tbody> không còn hàng nào
+                                            const newRow = tableBody.insertRow(); // Thêm 1 hàng mới
+                                            // Thêm ô "Không có nhân viên nào"
+                                            newRow.innerHTML = `<td colspan="10" style="text-align: center;">Không có nhân viên nào.</td>`;
+                                        }
+                                    } else {
+                                        showToast(`Xóa thất bại: ${result.error}`, 'error');
+                                    }
+                                } catch (err) {
+                                    hideLoader();
+                                    console.log('Lỗi delete employee:', err);
+                                    showToast('Lỗi kết nối máy chủ.', 'error');
+                                }
+                            }
+                        }
 
-            const editEmployeeForm = document.getElementById('edit-employee-form');
-            if (editEmployeeForm) {
-                editEmployeeForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    if (!currentEditingRow) return;
+                        if (e.target.classList.contains('open-edit-modal') || e.target.closest('.open-edit-modal')) {
+                            const btn  = e.target.closest('.open-edit-modal');
+                            currentEditingRow = btn.closest('tr');
+                            if(!currentEditingRow) return;
+                            
+                            // --- LOGIC ĐIỀN DỮ LIỆU VÀO FORM (MAPPING) ---
+                            // Lưu ý: Cần mapping đúng thứ tự cột trong bảng của bạn
+                            const cells = currentEditingRow.cells;
+                            document.getElementById('edit-ho-ten').value = cells[2].textContent;
+                            // Giả lập ngày sinh (do format hiển thị khác value input)
+                            document.getElementById('edit-ngay-sinh').value = currentEditingRow.dataset.ngaySinh;
+                            document.getElementById('edit-sdt').value = cells[4].textContent;
+                            document.getElementById('edit-chuc-vu').value = cells[5].textContent; // Value option phải khớp text
+                            document.getElementById('edit-username').value = cells[6].textContent;
+                            document.getElementById('edit-ngay-nhan-viec').value = currentEditingRow.dataset.ngayNhanViec;
+                            document.getElementById('edit-password').value = ''; // Reset mật khẩu
+    
+                            // SAU KHI điền xong, lưu lại trạng thái gốc ngay lập tức
+                            setTimeout(() => {
+                                 if(editForm) originalFormData = getFormData(editForm);
+                            }, 50); 
+                            
+                            editModal.style.display = 'flex';
+
+                        }
+                    });
+                }
+    
+                // E. Xử lý Submit Form Sửa
+                if (editForm) {
+                    editForm.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        if (!currentEditingRow) return;
 
                     const maNV = currentEditingRow.dataset.id;
                     const data = {
@@ -1017,87 +1227,128 @@
                         hideLoader();
                         showToast('Lỗi kết nối máy chủ.', 'error');
                     }
-                });
-            }
-            
-            const deleteEmployeeBtn = document.getElementById('delete-employee-button');
-            if(deleteEmployeeBtn) {
-                deleteEmployeeBtn.addEventListener('click', async () => {
-                    if (!currentEditingRow) return;
-                    const maNV = currentEditingRow.dataset.id;
-                    
-                    if (confirm(`Bạn có chắc chắn muốn xóa nhân viên ${maNV}?`)) {
-                        showLoader();
-                        try {
-                            // --- SỬA: GỌI API 'delete' ---
-                            const response = await fetch(`/api/employees/deleteEmployee/${maNV}`, {
-                                method: 'DELETE'
-                            });
-                            const result = await response.json();
-                            hideLoader();
-                            
-                            if(response.ok) {
-                                currentEditingRow.remove();
-                                editModal.style.display = 'none';
-                                showToast('Xóa nhân viên thành công!', 'success');
-                                currentEditingRow = null;
-                                const tableBody = document.getElementById('employee-table').getElementsByTagName('tbody')[0];
-                                if (tableBody.rows.length === 0) {
-                                    // Nếu <tbody> không còn hàng nào
-                                    const newRow = tableBody.insertRow(); // Thêm 1 hàng mới
-                                    // Thêm ô "Không có nhân viên nào"
-                                    newRow.innerHTML = `<td colspan="10" style="text-align: center;">Không có nhân viên nào.</td>`;
-                                }
-                            } else {
-                                showToast(`Xóa thất bại: ${result.error}`, 'error');
-                            }
-                        } catch (err) {
-                            hideLoader();
-                            showToast('Lỗi kết nối máy chủ.', 'error');
-                        }
-                    }
-                });
-            }
-
-
-             // --- Xử lý Ẩn/Hiện Mật khẩu ---
-            const togglePasswordBtns = document.querySelectorAll('.toggle-password');
-            if (togglePasswordBtns.length > 0) {
-                togglePasswordBtns.forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const icon = this.querySelector('i');
-                        // SỬA: Tìm input chính xác hơn
-                        const passwordInput = this.closest('.password-wrapper').querySelector('input'); 
-                        if (passwordInput.type === 'password') {
-                            passwordInput.type = 'text';
-                            icon.classList.remove('fa-eye-slash');
-                            icon.classList.add('fa-eye');
-                        } else {
-                            passwordInput.type = 'password';
-                            icon.classList.remove('fa-eye');
-                            icon.classList.add('fa-eye-slash');
-                        }
                     });
-                });
+                }
             }
+    
+            // --- 4. GỌI HÀM SETUP CHO NHÂN VIÊN ---
+            setupSmartModal({
+                addBtnId: 'open-add-modal',
+                addModalId: 'add-modal',
+                addFormId: 'add-employee-form',
+                editModalId: 'edit-modal',
+                formId: 'edit-employee-form',
+                editBtnClass: '.open-edit-modal',
+                resetBtnId: 'btn-reset-edit',      // ID nút Đặt lại
+                tableSelector: '#employee-table',  // ID bảng nhân viên
+                typeName: 'Nhân viên'
+            });
+    
+    
+            // --- 5. XỬ LÝ NÚT "THÊM MỚI" (CUSTOM RESET) Ở MODAL THÊM ---
+            // Logic mới: Nút này dùng để "Làm mới" form.
+            // - Nếu có dữ liệu: Hỏi Lưu hay Xóa trắng. Chọn Không -> Xóa trắng form (giữ modal).
+            // - Nếu không có dữ liệu: Xóa trắng form (giữ modal).
+            
+            const btnCustomReset = document.getElementById('btn-custom-reset');
+            const addEmployeeForm = document.getElementById('add-employee-form');
+            // const addModal = document.getElementById('add-modal'); // Không cần biến này ở đây nữa vì không đóng
 
-            const logoutButton = document.getElementById('logout-button');
-            if (logoutButton) {
-                logoutButton.addEventListener('click', async (event) => {
-                    event.preventDefault(); // Ngăn thẻ <a> nhảy trang
-                    
+            if (btnCustomReset && addEmployeeForm) {
+                btnCustomReset.addEventListener('click', () => {
+                    // Kiểm tra xem form có dữ liệu không (check tên nhân viên)
+                    const hasData = document.getElementById('add-ho-ten').value.trim() !== '';
+
+                    if (hasData) {
+                        // Nếu có dữ liệu -> Hỏi
+                        if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU Nhân viên này trước khi làm mới không?\n\n- OK: Lưu nhân viên này.\n- Cancel: Xóa trắng để nhập nhân viên khác.')) {
+                            // Chọn OK -> Lưu
+                            if (addEmployeeForm.checkValidity()) {
+                                addEmployeeForm.requestSubmit(); 
+                            } else {
+                                addEmployeeForm.reportValidity();
+                            }
+                        } else {
+                            // Chọn Cancel -> Chỉ Reset form, KHÔNG ĐÓNG modal
+                            addEmployeeForm.reset();
+                            showToast('Đã làm mới form!', 'info');
+                        }
+                    } else {
+                        // Nếu chưa nhập gì -> Chỉ Reset cho chắc chắn
+                        addEmployeeForm.reset();
+                        showToast('Form đã được làm mới.', 'info');
+                    }
+                });
+
+                // Xử lý sự kiện Submit Form (Giữ nguyên)
+                addEmployeeForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    showLoader();
+                    const data = {
+                        hoTen: document.getElementById('add-ho-ten').value,
+                        ngaySinh: document.getElementById('add-ngay-sinh').value,
+                        soDienThoai: document.getElementById('add-sdt').value,
+                        chucVu: document.getElementById('add-chuc-vu').value,
+                        username: document.getElementById('add-username').value,
+                        password: document.getElementById('add-password').value,
+                        ngayNhanViec: document.getElementById('add-ngay-nhan-viec').value,
+                    };
                     try {
-                        // Gọi API /api/logout
-                        await fetch('/api/logout', { method: 'GET' });
-                        window.location.href = '/login';
+                        // --- SỬA: GỌI API 'register' ---
+                        const response = await fetch('/api/employees/registerEmployee', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        });
 
-                    } catch (error) {
-                        console.error('Lỗi khi đăng xuất:', error);
-                        window.location.href = '/login';
+                        const result = await response.json();
+                        hideLoader();
+
+                        if (response.ok) {
+                            await showToast('Thêm nhân viên thành công!', 'success');
+                            document.getElementById('add-modal').style.display = 'none';
+                            // Tải lại trang để xem nhân viên mới
+                            //window.location.reload(); 
+                            fetchEmployees(); // tải lại danh sách nhân viên
+                        } else {
+                            showToast(`Thêm thất bại: ${result.error}`, 'error');
+                        }
+                    } catch (err) {
+                        hideLoader();
+                        console.log("[register employee] error:", err);
+                        showToast('Lỗi kết nối máy chủ.', 'error');
                     }
                 });
             }
-
+    
+    
+            // --- 6. CÁC TIỆN ÍCH KHÁC (Close modal, Password toggle) ---
+            
+            // Đóng modal chung
+            const closeModalBtns = document.querySelectorAll('.close-modal');
+            closeModalBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => { e.target.closest('.modal-overlay').style.display = 'none'; });
+            });
+            window.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal-overlay')) e.target.style.display = 'none';
+            });
+    
+            // Ẩn hiện mật khẩu
+            const togglePasswordBtns = document.querySelectorAll('.toggle-password');
+            togglePasswordBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const input = this.closest('.password-wrapper').querySelector('input'); 
+                    const icon = this.querySelector('i');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash');
+                    }
+                });
+            });
+    
         });
     </script>
 
