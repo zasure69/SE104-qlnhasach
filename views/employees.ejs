@@ -656,15 +656,15 @@
             <nav class="sidebar-nav">
                 <ul>
                     <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
-                    <li><a href="/dashboard/employees" class="active"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
-                    <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
+                    <li><a href="#" class="active"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
+                    <li><a href="/dashboard/books"><i class="fas fa-book"></i>QL Sách</a></li>
                     <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li>
-                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
+                    <li><a href="/dashboard/books-import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
                     <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
                     <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
                     <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
                     <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="/dashboard/changerule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
+                    <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
         </aside>
@@ -717,7 +717,43 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr data-id="NV01"> <!-- THÊM data-id -->
+                            <% if (employees && employees.length > 0) { %>
+                                <% employees.forEach((employee, index) => { %>
+                                    <%
+                                        // Dùng 'en-US' (kiểu Mỹ) để ép ra MM/DD/YYYY
+                                        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+                                        
+                                        // Dùng 'en-US' (Kiểu Mỹ) để format
+                                        const formattedNgaySinh = new Date(employee.NgaySinh).toLocaleDateString('en-US', options);
+                                        const formattedNgayNhanViec = new Date(employee.NgayNhanViec).toLocaleDateString('en-US', options);
+                                    %>
+                                    <tr data-id="<%= employee.MaNhanVien %>"
+                                        data-ngay-sinh="<%= new Date(employee.NgaySinh).toISOString().split('T')[0] %>"
+                                        data-ngay-nhan-viec="<%= new Date(employee.NgayNhanViec).toISOString().split('T')[0] %>">
+                                        <td><%= index + 1 %></td>
+                                        <td><%= employee.MaNhanVien %></td>
+                                        <td><%= employee.HoTen %></td>
+                                        <td><%= employee.NgaySinh %></td>
+                                        <td><%= employee.SoDienThoai %></td>
+                                        <td><%= employee.ChucVu %></td>
+                                        <td><%= employee.Username %></td>
+                                        <td>******</td> 
+                                        <td><%= employee.NgayNhanViec %></td>
+                                        <td>
+                                            <%# Kiểm tra xem Username có phải là 'admin' không %>
+                                            <% if (employee.Username !== 'admin') { %>
+                                                <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
+                                                <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="10" style="text-align: center;">Không có nhân viên nào.</td>
+                                </tr>
+                            <% } %>
+                            <!-- <tr data-id="NV01"> 
                                 <td>1</td>
                                 <td>NV01</td>
                                 <td>Nguyễn Văn A</td>
@@ -732,7 +768,7 @@
                                     <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
                                 </td>
                             </tr>
-                            <tr data-id="NV02"> <!-- THÊM data-id -->
+                            <tr data-id="NV02"> 
                                 <td>2</td>
                                 <td>NV02</td>
                                 <td>Trần Thị B</td>
@@ -745,7 +781,7 @@
                                 <td>
                                     <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
                                     <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
-                                </td>
+                                </td> -->
                             </tr>
                         </tbody>
                     </table>
@@ -799,8 +835,8 @@
                         <div class="form-group" style="grid-column: 1 / -1;">
                              <label for="add-chuc-vu" class="required">Chức vụ</label>
                              <select id="add-chuc-vu">
-                                 <option value="NV Bán hàng">Nhân viên</option>
-                                 <option value="NV Kho">Chủ cửa hàng</option>
+                                 <option value="Nhân viên">Nhân viên</option>
+                                 <option value="Chủ cửa hàng">Chủ cửa hàng</option>
                              </select>
                         </div>
                     </div>
@@ -876,7 +912,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             
-            // --- 1. CÁC HÀM TIỆN ÍCH (LOADER, TOAST) ---
+            // --- 1. CÁC HÀM TIỆN ÍCH (LOADER, TOAST, FETCH DATA) ---
             const loader = document.getElementById('loader');
             const toastContainer = document.getElementById('toast-container');
             let currentEditingRow = null; 
@@ -905,6 +941,64 @@
                     const success = Math.random() > 0.1; // 90% thành công
                     callback(success); 
                 }, 1000); 
+            }
+
+            async function fetchEmployees() {
+                try {
+                    const response = await fetch('/api/employees/getEmployees'); // Đổi lại đường dẫn API của bạn nếu khác
+                    if (!response.ok) throw new Error('Không thể tải dữ liệu');
+                    
+                    const employees = await response.json();
+                    const tbody = document.querySelector('#employee-table tbody');
+                    tbody.innerHTML = ''; // Xóa sạch dữ liệu cũ
+
+                    if (employees && employees.length > 0) {
+                        employees.forEach((employee, index) => {
+                            const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+                            
+                            // Xử lý ngày tháng (để hiện dd/mm/yyyy)
+                            const formattedNgaySinh = employee.NgaySinh ? new Date(employee.NgaySinh).toLocaleDateString('en-US', options) : '';
+                            const formattedNgayNhanViec = employee.NgayNhanViec ? new Date(employee.NgayNhanViec).toLocaleDateString('en-US', options) : '';
+                            
+                            // Xử lý ngày chuẩn (để lưu vào dataset cho nút Sửa)
+                            const rawNgaySinh = employee.NgaySinh ? new Date(employee.NgaySinh).toISOString().split('T')[0] : '';
+                            const rawNgayNhanViec = employee.NgayNhanViec ? new Date(employee.NgayNhanViec).toISOString().split('T')[0] : '';
+
+                            const tr = document.createElement('tr');
+                            tr.dataset.id = employee.MaNhanVien;
+                            tr.dataset.ngaySinh = rawNgaySinh;
+                            tr.dataset.ngayNhanViec = rawNgayNhanViec;
+
+                            // Nút Sửa/Xóa chỉ hiện nếu không phải admin (giống logic EJS của bạn)
+                            let actionButtons = '';
+                            if (employee.Username !== 'admin') {
+                                actionButtons = `
+                                    <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
+                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                                `;
+                            }
+
+                            tr.innerHTML = `
+                                <td>${index + 1}</td>
+                                <td>${employee.MaNhanVien}</td>
+                                <td>${employee.HoTen}</td>
+                                <td>${formattedNgaySinh}</td>
+                                <td>${employee.SoDienThoai}</td>
+                                <td>${employee.ChucVu}</td>
+                                <td>${employee.Username}</td>
+                                <td>******</td>
+                                <td>${formattedNgayNhanViec}</td>
+                                <td>${actionButtons}</td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Không có nhân viên nào.</td></tr>';
+                    }
+                } catch (error) {
+                    console.error("Lỗi tải nhân viên:", error);
+                    // showToast('Lỗi tải danh sách nhân viên', 'error');
+                }
             }
     
             // --- 2. XỬ LÝ SIDEBAR & RESPONSIVE ---
@@ -965,34 +1059,34 @@
                     });
                 }
     
-                // B. Mở Modal Sửa (Điền dữ liệu & Lưu snapshot)
-                if (editBtns.length > 0 && editModal) {
-                    editBtns.forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            currentEditingRow = e.target.closest('tr');
-                            if(!currentEditingRow) return;
+                // // B. Mở Modal Sửa (Điền dữ liệu & Lưu snapshot)
+                // if (editBtns.length > 0 && editModal) {
+                //     editBtns.forEach(btn => {
+                //         btn.addEventListener('click', (e) => {
+                //             currentEditingRow = e.target.closest('tr');
+                //             if(!currentEditingRow) return;
     
-                            // --- LOGIC ĐIỀN DỮ LIỆU VÀO FORM (MAPPING) ---
-                            // Lưu ý: Cần mapping đúng thứ tự cột trong bảng của bạn
-                            const cells = currentEditingRow.cells;
-                            document.getElementById('edit-ho-ten').value = cells[2].textContent;
-                            // Giả lập ngày sinh (do format hiển thị khác value input)
-                            document.getElementById('edit-ngay-sinh').value = '1990-01-01'; 
-                            document.getElementById('edit-sdt').value = cells[4].textContent;
-                            document.getElementById('edit-chuc-vu').value = cells[5].textContent; // Value option phải khớp text
-                            document.getElementById('edit-username').value = cells[6].textContent;
-                            document.getElementById('edit-ngay-nhan-viec').value = '2025-01-01';
-                            document.getElementById('edit-password').value = ''; // Reset mật khẩu
+                //             // --- LOGIC ĐIỀN DỮ LIỆU VÀO FORM (MAPPING) ---
+                //             // Lưu ý: Cần mapping đúng thứ tự cột trong bảng của bạn
+                //             const cells = currentEditingRow.cells;
+                //             document.getElementById('edit-ho-ten').value = cells[2].textContent;
+                //             // Giả lập ngày sinh (do format hiển thị khác value input)
+                //             document.getElementById('edit-ngay-sinh').value = currentEditingRow.dataset.ngaySinh;
+                //             document.getElementById('edit-sdt').value = cells[4].textContent;
+                //             document.getElementById('edit-chuc-vu').value = cells[5].textContent; // Value option phải khớp text
+                //             document.getElementById('edit-username').value = cells[6].textContent;
+                //             document.getElementById('edit-ngay-nhan-viec').value = currentEditingRow.dataset.ngayNhanViec;
+                //             document.getElementById('edit-password').value = ''; // Reset mật khẩu
     
-                            // SAU KHI điền xong, lưu lại trạng thái gốc ngay lập tức
-                            setTimeout(() => {
-                                 if(editForm) originalFormData = getFormData(editForm);
-                            }, 50); 
+                //             // SAU KHI điền xong, lưu lại trạng thái gốc ngay lập tức
+                //             setTimeout(() => {
+                //                  if(editForm) originalFormData = getFormData(editForm);
+                //             }, 50); 
                             
-                            editModal.style.display = 'flex';
-                        });
-                    });
-                }
+                //             editModal.style.display = 'flex';
+                //         });
+                //     });
+                // }
     
                 // C. Xử lý nút ĐẶT LẠI (Thông minh)
                 if (resetBtn && editForm) {
@@ -1015,44 +1109,125 @@
                     });
                 }
     
-                // D. Xử lý nút XÓA (Icon thùng rác ở bảng)
+                // D. Xử lý nút XÓA (Icon thùng rác ở bảng) và nút CHỈNH SỬA
                 if (table) {
-                    table.addEventListener('click', (e) => {
+                    table.addEventListener('click', async (e) => {
                         // Bắt sự kiện click vào icon xóa hoặc nút chứa icon xóa
                         if (e.target.classList.contains('delete-icon') || e.target.closest('.delete-icon')) {
                             const row = e.target.closest('tr');
                             const itemName = row.cells[2].textContent; // Lấy tên nhân viên (cột 3)
+                            const maNV = row.cells[1].textContent; // Lấy mã nhân viên (cột 2)
                             
                             if (confirm(`Bạn có chắc chắn muốn XÓA nhân viên: ${itemName}?`)) {
-                                simulateApiCall((success) => {
-                                    if (success) {
+                                showLoader();
+                                try {
+                                    console.log('Xóa nhân viên:', row);
+                                    // --- SỬA: GỌI API 'delete' ---
+                                    const response = await fetch(`/api/employees/deleteEmployee/${maNV}`, {
+                                        method: 'DELETE'
+                                    });
+                                    const result = await response.json();
+                                    hideLoader();
+                                    console.log('Kết quả xóa:', result);
+                                    
+                                    if(response.ok) {
                                         row.remove();
-                                        showToast('Đã xóa nhân viên thành công!', 'success');
+                                        showToast('Xóa nhân viên thành công!', 'success');
+                                        const tableBody = document.getElementById('employee-table').getElementsByTagName('tbody')[0];
+                                        if (tableBody.rows.length === 0) {
+                                            // Nếu <tbody> không còn hàng nào
+                                            const newRow = tableBody.insertRow(); // Thêm 1 hàng mới
+                                            // Thêm ô "Không có nhân viên nào"
+                                            newRow.innerHTML = `<td colspan="10" style="text-align: center;">Không có nhân viên nào.</td>`;
+                                        }
                                     } else {
-                                        showToast('Lỗi! Không thể xóa.', 'error');
+                                        showToast(`Xóa thất bại: ${result.error}`, 'error');
                                     }
-                                });
+                                } catch (err) {
+                                    hideLoader();
+                                    console.log('Lỗi delete employee:', err);
+                                    showToast('Lỗi kết nối máy chủ.', 'error');
+                                }
                             }
+                        }
+
+                        if (e.target.classList.contains('open-edit-modal') || e.target.closest('.open-edit-modal')) {
+                            const btn  = e.target.closest('.open-edit-modal');
+                            currentEditingRow = btn.closest('tr');
+                            if(!currentEditingRow) return;
+                            
+                            // --- LOGIC ĐIỀN DỮ LIỆU VÀO FORM (MAPPING) ---
+                            // Lưu ý: Cần mapping đúng thứ tự cột trong bảng của bạn
+                            const cells = currentEditingRow.cells;
+                            document.getElementById('edit-ho-ten').value = cells[2].textContent;
+                            // Giả lập ngày sinh (do format hiển thị khác value input)
+                            document.getElementById('edit-ngay-sinh').value = currentEditingRow.dataset.ngaySinh;
+                            document.getElementById('edit-sdt').value = cells[4].textContent;
+                            document.getElementById('edit-chuc-vu').value = cells[5].textContent; // Value option phải khớp text
+                            document.getElementById('edit-username').value = cells[6].textContent;
+                            document.getElementById('edit-ngay-nhan-viec').value = currentEditingRow.dataset.ngayNhanViec;
+                            document.getElementById('edit-password').value = ''; // Reset mật khẩu
+    
+                            // SAU KHI điền xong, lưu lại trạng thái gốc ngay lập tức
+                            setTimeout(() => {
+                                 if(editForm) originalFormData = getFormData(editForm);
+                            }, 50); 
+                            
+                            editModal.style.display = 'flex';
+
                         }
                     });
                 }
     
                 // E. Xử lý Submit Form Sửa
                 if (editForm) {
-                    editForm.addEventListener('submit', (e) => {
+                    editForm.addEventListener('submit', async (e) => {
                         e.preventDefault();
-                        simulateApiCall((success) => {
-                            if (success) {
-                                if(currentEditingRow) {
-                                    // Cập nhật lại giao diện bảng (Giả lập)
-                                    currentEditingRow.cells[2].textContent = document.getElementById('edit-ho-ten').value;
-                                    currentEditingRow.cells[4].textContent = document.getElementById('edit-sdt').value;
-                                    currentEditingRow.cells[5].textContent = document.getElementById('edit-chuc-vu').value;
-                                }
-                                editModal.style.display = 'none';
-                                showToast(`Cập nhật ${config.typeName} thành công!`);
-                            }
+                        if (!currentEditingRow) return;
+
+                    const maNV = currentEditingRow.dataset.id;
+                    const data = {
+                        hoTen: document.getElementById('edit-ho-ten').value,
+                        ngaySinh: document.getElementById('edit-ngay-sinh').value,
+                        soDienThoai: document.getElementById('edit-sdt').value,
+                        chucVu: document.getElementById('edit-chuc-vu').value,
+                        ngayNhanViec: document.getElementById('edit-ngay-nhan-viec').value,
+                        password: document.getElementById('edit-password').value // Gửi cả password (trống hoặc mới)
+                    };
+
+                    showLoader();
+                    try {
+                        // --- GỌI API 'update' ---
+                        const response = await fetch(`/api/employees/updateEmployee/${maNV}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
                         });
+                        const result = await response.json();
+                        hideLoader();
+
+                        if (response.ok) {
+                            showToast('Cập nhật thành công!', 'success');
+                            editModal.style.display = 'none';
+                            const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+                            // Cập nhật hàng trong bảng
+                            currentEditingRow.cells[2].textContent = result.user.HoTen;
+                            currentEditingRow.cells[3].textContent = result.user.NgaySinh;
+                            currentEditingRow.cells[4].textContent = result.user.SoDienThoai;
+                            currentEditingRow.cells[5].textContent = result.user.ChucVu;
+                            currentEditingRow.cells[8].textContent = result.user.NgayNhanViec;
+                            //Cập nhật "bộ nhớ" data- attributes của hàng cho lần sửa tiếp theo
+                            currentEditingRow.dataset.ngaySinh = new Date(result.user.NgaySinh).toISOString().split('T')[0];
+                            currentEditingRow.dataset.ngayNhanViec = new Date(result.user.NgayNhanViec).toISOString().split('T')[0];
+                            currentEditingRow = null;
+                        } else {
+                            restoreFormData(editForm, originalFormData); // Reset form
+                            showToast('Đã khôi phục dữ liệu gốc!', 'success');
+                        }
+                    } catch (err) {
+                        hideLoader();
+                        showToast('Lỗi kết nối máy chủ.', 'error');
+                    }
                     });
                 }
             }
@@ -1107,19 +1282,43 @@
                 });
 
                 // Xử lý sự kiện Submit Form (Giữ nguyên)
-                addEmployeeForm.addEventListener('submit', (e) => {
+                addEmployeeForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    simulateApiCall((success) => {
-                        if(success) { 
-                            // Logic thêm hàng giả lập (Giữ nguyên code cũ của bạn đoạn này)
-                            // ...
-                            
-                            // Sau khi Lưu thành công -> Đóng modal
-                            document.getElementById('add-modal').style.display = 'none'; 
-                            showToast('Thêm Nhân viên thành công!'); 
-                            addEmployeeForm.reset(); 
+                    showLoader();
+                    const data = {
+                        hoTen: document.getElementById('add-ho-ten').value,
+                        ngaySinh: document.getElementById('add-ngay-sinh').value,
+                        soDienThoai: document.getElementById('add-sdt').value,
+                        chucVu: document.getElementById('add-chuc-vu').value,
+                        username: document.getElementById('add-username').value,
+                        password: document.getElementById('add-password').value,
+                        ngayNhanViec: document.getElementById('add-ngay-nhan-viec').value,
+                    };
+                    try {
+                        // --- SỬA: GỌI API 'register' ---
+                        const response = await fetch('/api/employees/registerEmployee', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        });
+
+                        const result = await response.json();
+                        hideLoader();
+
+                        if (response.ok) {
+                            await showToast('Thêm nhân viên thành công!', 'success');
+                            document.getElementById('add-modal').style.display = 'none';
+                            // Tải lại trang để xem nhân viên mới
+                            //window.location.reload(); 
+                            fetchEmployees(); // tải lại danh sách nhân viên
+                        } else {
+                            showToast(`Thêm thất bại: ${result.error}`, 'error');
                         }
-                    });
+                    } catch (err) {
+                        hideLoader();
+                        console.log("[register employee] error:", err);
+                        showToast('Lỗi kết nối máy chủ.', 'error');
+                    }
                 });
             }
     

@@ -288,31 +288,45 @@
         /* --- Bảng --- */
         .table-responsive {
             overflow-x: auto;
+            /* border-radius: 8px; Bo góc khung bao ngoài */
+            /* border: 1px solid var(--border-color); Viền bao ngoài cho đẹp */
         }
 
         .data-table { 
             width: 100%;
-            border-collapse: collapse;
-            min-width: 800px; 
+            border-collapse: collapse; /* Đảm bảo các ô dính liền nhau không hở trắng */
+            min-width: 900px; /* Đảm bảo bảng không bị bóp méo trên màn hình nhỏ */
+        }
+
+        /* Tô màu nền cho cả hàng tiêu đề (TR) thay vì từng ô (TH) -> Sửa lỗi vùng xám bị đứt */
+        .data-table thead tr {
+            background-color: #f9f9f9;
+            border-bottom: 2px solid var(--border-color);
         }
 
         .data-table th,
         .data-table td {
-            padding: 0.85rem 1rem;
+            padding: 1rem; /* Tăng padding cho thoáng */
             text-align: left;
             border-bottom: 1px solid var(--border-color);
             font-size: 0.9rem;
             vertical-align: middle;
         }
 
-        .data-table thead th {
-            background-color: #f9f9f9;
-            font-weight: 600;
-            color: var(--text-light);
+        .data-table th {
+            font-weight: 700;
+            color: var(--primary-color); /* Đổi màu chữ tiêu đề sang xanh đậm cho nổi bật */
+            white-space: nowrap; /* Giữ tiêu đề trên 1 dòng */
         }
 
         .data-table tbody tr:hover {
-            background-color: #f5f5f5;
+            background-color: #f0f4f8; /* Hiệu ứng hover rõ hơn */
+        }
+        
+        /* Căn giữa cột STT và Action cho đẹp */
+        .data-table th:first-child, .data-table td:first-child,
+        .data-table th:last-child, .data-table td:last-child {
+            text-align: center;
         }
 
         .action-icon {
@@ -648,13 +662,13 @@
                     <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
                     <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
                     <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
-                    <li><a href="/dashboard/customers" class="active"><i class="fas fa-id-card"></i>QL Khách hàng</a></li>
-                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
+                    <li><a href="#" class="active" class="active"><i class="fas fa-id-card"></i>QL Khách hàng</a></li>
+                    <li><a href="/dashboard/books-import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
                     <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
                     <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
                     <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
                     <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="/dashboard/changerule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
+                    <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
         </aside>
@@ -701,11 +715,40 @@
                                 <th>Số điện thoại</th>
                                 <th>Giới tính</th>
                                 <th>Địa chỉ</th>
+                                <th>Tổng nợ</th> 
                                 <th></th> 
                             </tr>
                         </thead>
                         <tbody>
-                            <tr data-id="KH01"> <!-- THÊM data-id -->
+                            <% if (customers && customers.length > 0) { %>
+                                <% customers.forEach((customer, index) => { %>
+                                    <%
+                                        // Format ngày tháng (MM/DD/YYYY) để đồng bộ với input
+                                        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+                                        const formattedNgaySinh = customer.NgaySinh ? new Date(customer.NgaySinh).toLocaleDateString('en-US', options) : '';
+                                        const rawNgaySinh = customer.NgaySinh ? new Date(customer.NgaySinh).toISOString().split('T')[0] : '';
+                                    %>
+                                    <tr data-id="<%= customer.MaKhachHang %>" data-ngay-sinh="<%= rawNgaySinh %>">
+                                        <td><%= index + 1 %></td>
+                                        <td><%= customer.MaKhachHang %></td>
+                                        <td><%= customer.HoVaTen %></td>
+                                        <td><%= customer.NgaySinh %></td>
+                                        <td><%= customer.SoDienThoai %></td>
+                                        <td><%= customer.GioiTinh %></td>
+                                        <td><%= customer.DiaChi %></td>
+                                        <td><%= customer.TongNo %></td>
+                                        <td>
+                                            <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
+                                            <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="9" style="text-align: center;">Không có khách hàng nào.</td>
+                                </tr>
+                            <% } %>
+                            <!-- <tr data-id="KH01"> 
                                 <td>1</td>
                                 <td>KH01</td>
                                 <td>Nguyễn Văn A</td>
@@ -718,7 +761,7 @@
                                     <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
                                 </td>
                             </tr>
-                             <tr data-id="KH02"> <!-- THÊM data-id -->
+                             <tr data-id="KH02"> 
                                 <td>2</td>
                                 <td>KH02</td>
                                 <td>Trần Thị B</td>
@@ -730,7 +773,7 @@
                                     <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
                                     <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
                                 </td>
-                            </tr>
+                            </tr> -->
                         </tbody>
                     </table>
                 </div>
@@ -836,7 +879,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             
-            // --- 1. CÁC HÀM TIỆN ÍCH (LOADER, TOAST) ---
+            // --- 1. CÁC HÀM TIỆN ÍCH (LOADER, TOAST, FETCH DATA) ---
             const loader = document.getElementById('loader');
             const toastContainer = document.getElementById('toast-container');
             let currentEditingRow = null; 
@@ -865,6 +908,83 @@
                     const success = Math.random() > 0.1; // 90% thành công
                     callback(success); 
                 }, 1000); 
+            }
+
+            // Hàm load danh sách khách hàng từ Server
+            async function fetchCustomers() {
+                // 1. Hiển thị loader trong lúc chờ dữ liệu
+                // (Nếu bạn có element loader thì bỏ comment dòng dưới)
+                // showLoader(); 
+
+                try {
+                    // 2. Gọi API (Đường dẫn này phải khớp với backend của bạn)
+                    const response = await fetch('/api/customers/getCustomers'); 
+                    
+                    if (!response.ok) {
+                        throw new Error('Không thể tải dữ liệu');
+                    }
+
+                    // 3. Chuyển đổi dữ liệu nhận được sang JSON
+                    const customers = await response.json();
+                    
+                    // 4. Tìm thẻ tbody của bảng để bắt đầu vẽ
+                    const tbody = document.querySelector('#customer-table tbody');
+                    tbody.innerHTML = ''; // Xóa sạch dữ liệu cũ (nếu có)
+
+                    // 5. Kiểm tra xem có dữ liệu không
+                    if (customers && customers.length > 0) {
+                        
+                        // 6. Duyệt qua từng khách hàng để tạo dòng
+                        customers.forEach((customer, index) => {
+                            
+                            // --- XỬ LÝ NGÀY THÁNG ---
+                            // Dùng 'en-US' (kiểu Mỹ) để ép ra MM/DD/YYYY
+                            const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+                            const rawNgaySinh = customer.NgaySinh ? new Date(customer.NgaySinh).toISOString().split('T')[0] : '';
+                            // Dùng 'en-US' (Kiểu Mỹ) để format
+                            const formattedNgaySinh = new Date(customer.NgaySinh).toLocaleDateString('en-US', options);
+
+
+                            
+                            // --- TẠO DÒNG TR ---
+                            const tr = document.createElement('tr');
+                            
+                            // Lưu các dữ liệu quan trọng vào dataset để nút Sửa dễ lấy
+                            tr.dataset.id = customer.MaKhachHang;
+                            tr.dataset.ngaySinh = rawNgaySinh; 
+                            
+                            // --- ĐIỀN NỘI DUNG HTML ---
+                            tr.innerHTML = `
+                                <td>${index + 1}</td>
+                                <td>${customer.MaKhachHang}</td>
+                                <td>${customer.HoVaTen}</td>
+                                <td>${formattedNgaySinh}</td>
+                                <td>${customer.SoDienThoai}</td>
+                                <td>${customer.GioiTinh}</td>
+                                <td>${customer.DiaChi}</td>
+                                <td>${customer.TongNo ? customer.TongNo.toLocaleString('vi-VN') : 0}</td>
+                                <td>
+                                    <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
+                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent); cursor: pointer;" title="Xóa"></i>
+                                </td>
+                            `;
+                            
+                            // Gắn dòng vừa tạo vào bảng
+                            tbody.appendChild(tr);
+                        });
+
+                    } else {
+                        // Trường hợp không có dữ liệu
+                        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 20px;">Không có khách hàng nào.</td></tr>';
+                    }
+
+                } catch (error) {
+                    console.error("Lỗi tải dữ liệu:", error);
+                    showToast('Lỗi tải danh sách khách hàng!', 'error');
+                } finally {
+                    // Tắt loader dù thành công hay thất bại
+                    // hideLoader(); 
+                }
             }
     
             // --- 2. XỬ LÝ SIDEBAR & RESPONSIVE ---
@@ -925,32 +1045,31 @@
                     });
                 }
     
-                // B. Mở Modal Sửa (Điền dữ liệu & Lưu snapshot)
-                if (editBtns.length > 0 && editModal) {
-                    editBtns.forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            currentEditingRow = e.target.closest('tr');
-                            if(!currentEditingRow) return;
+                // // B. Mở Modal Sửa (Điền dữ liệu & Lưu snapshot)
+                // if (editBtns.length > 0 && editModal) {
+                //     editBtns.forEach(btn => {
+                //         btn.addEventListener('click', (e) => {
+                //             currentEditingRow = e.target.closest('tr');
+                //             if(!currentEditingRow) return;
     
-                            // --- LOGIC ĐIỀN DỮ LIỆU VÀO FORM ---
-                            // Cấu trúc bảng: STT(0), Mã(1), Tên(2), Ngày sinh(3), SĐT(4), Giới tính(5), Địa chỉ(6)
-                            const cells = currentEditingRow.cells;
-                            document.getElementById('edit-ho-ten-kh').value = cells[2].textContent;
-                            // Giả lập ngày sinh (vì hiển thị là dd/mm/yyyy nhưng input date cần yyyy-mm-dd)
-                            document.getElementById('edit-ngay-sinh-kh').value = '1990-01-01'; 
-                            document.getElementById('edit-sdt-kh').value = cells[4].textContent;
-                            document.getElementById('edit-gioi-tinh-kh').value = cells[5].textContent;
-                            document.getElementById('edit-dia-chi-kh').value = cells[6].textContent;
+                //             // --- LOGIC ĐIỀN DỮ LIỆU VÀO FORM ---
+                //             // Cấu trúc bảng: STT(0), Mã(1), Tên(2), Ngày sinh(3), SĐT(4), Giới tính(5), Địa chỉ(6)
+                //             const cells = currentEditingRow.cells;
+                //             document.getElementById('edit-ho-ten-kh').value = cells[2].textContent;
+                //             document.getElementById('edit-ngay-sinh-kh').value = currentEditingRow.dataset.ngaySinh;
+                //             document.getElementById('edit-sdt-kh').value = cells[4].textContent;
+                //             document.getElementById('edit-gioi-tinh-kh').value = cells[5].textContent;
+                //             document.getElementById('edit-dia-chi-kh').value = cells[6].textContent;
     
-                            // SAU KHI điền xong, lưu lại trạng thái gốc
-                            setTimeout(() => {
-                                 if(editForm) originalFormData = getFormData(editForm);
-                            }, 50); 
+                //             // SAU KHI điền xong, lưu lại trạng thái gốc
+                //             setTimeout(() => {
+                //                  if(editForm) originalFormData = getFormData(editForm);
+                //             }, 50); 
                             
-                            editModal.style.display = 'flex';
-                        });
-                    });
-                }
+                //             editModal.style.display = 'flex';
+                //         });
+                //     });
+                // }
     
                 // C. Xử lý nút ĐẶT LẠI (Thông minh)
                 if (resetBtn && editForm) {
@@ -973,45 +1092,109 @@
                     });
                 }
     
-                // D. Xử lý nút XÓA (Icon thùng rác ở bảng)
+                // D. Xử lý nút XÓA (Icon thùng rác ở bảng) và nút CHỈNH SỬA
                 if (table) {
-                    table.addEventListener('click', (e) => {
+                    table.addEventListener('click', async (e) => {
                         // Bắt sự kiện click vào icon xóa
                         if (e.target.classList.contains('delete-icon') || e.target.closest('.delete-icon')) {
                             const row = e.target.closest('tr');
                             const itemName = row.cells[2].textContent; // Lấy tên KH (cột 3)
-                            
+                            const maKH = row.getAttribute('data-id'); // Lấy mã KH từ thuộc tính data-id
                             if (confirm(`Bạn có chắc chắn muốn XÓA khách hàng: ${itemName}?`)) {
-                                simulateApiCall((success) => {
-                                    if (success) {
+                                showLoader();
+                                try {
+                                    const response = await fetch(`/api/customers/deleteCustomers/${maKH}`, {
+                                        method: 'DELETE'
+                                    });
+                                    const result = await response.json();
+                                    hideLoader();
+                                    if (response.ok) {
                                         row.remove();
-                                        showToast('Đã xóa khách hàng thành công!', 'success');
+                                        showToast('Xóa khách hàng thành công!', 'success');
+                                        const tableBody = document.getElementById('customer-table').getElementsByTagName('tbody')[0];
+                                        if (tableBody.rows.length === 0) {
+                                            // Nếu <tbody> không còn hàng nào
+                                            const newRow = tableBody.insertRow(); // Thêm 1 hàng mới
+                                            // Thêm ô "Không có khách hàng nào"
+                                            newRow.innerHTML = `<td colspan="9" style="text-align: center;">Không có khách hàng nào.</td>`;
+                                        }
                                     } else {
-                                        showToast('Lỗi! Không thể xóa (có thể do ràng buộc dữ liệu).', 'error');
+                                        showToast(`Xóa thất bại: ${result.error}`, 'error');
                                     }
-                                });
+                                } catch (err) {
+                                    hideLoader();
+                                    showToast('Lỗi kết nối máy chủ.', 'error');
+                                }
                             }
+                        }
+
+                        if (e.target.classList.contains('open-edit-modal') || e.target.closest('.open-edit-modal')) {
+                            const btn  = e.target.closest('.open-edit-modal');
+                            currentEditingRow = btn.closest('tr');
+                            if(!currentEditingRow) return;
+    
+                            // --- LOGIC ĐIỀN DỮ LIỆU VÀO FORM ---
+                            // Cấu trúc bảng: STT(0), Mã(1), Tên(2), Ngày sinh(3), SĐT(4), Giới tính(5), Địa chỉ(6)
+                            const cells = currentEditingRow.cells;
+                            document.getElementById('edit-ho-ten-kh').value = cells[2].textContent;
+                            document.getElementById('edit-ngay-sinh-kh').value = currentEditingRow.dataset.ngaySinh;
+                            document.getElementById('edit-sdt-kh').value = cells[4].textContent;
+                            document.getElementById('edit-gioi-tinh-kh').value = cells[5].textContent;
+                            document.getElementById('edit-dia-chi-kh').value = cells[6].textContent;
+    
+                            // SAU KHI điền xong, lưu lại trạng thái gốc
+                            setTimeout(() => {
+                                 if(editForm) originalFormData = getFormData(editForm);
+                            }, 50); 
+                            
+                            editModal.style.display = 'flex';
                         }
                     });
                 }
     
                 // E. Xử lý Submit Form Sửa
                 if (editForm) {
-                    editForm.addEventListener('submit', (e) => {
+                    editForm.addEventListener('submit', async (e) => {
                         e.preventDefault();
-                        simulateApiCall((success) => {
-                            if (success) {
-                                if(currentEditingRow) {
-                                    // Cập nhật lại giao diện bảng (Giả lập)
-                                    currentEditingRow.cells[2].textContent = document.getElementById('edit-ho-ten-kh').value;
-                                    currentEditingRow.cells[4].textContent = document.getElementById('edit-sdt-kh').value;
-                                    currentEditingRow.cells[5].textContent = document.getElementById('edit-gioi-tinh-kh').value;
-                                    currentEditingRow.cells[6].textContent = document.getElementById('edit-dia-chi-kh').value;
-                                }
+                        if (!currentEditingRow) return;
+                        
+                        const maKH = currentEditingRow.dataset.id;
+                        const data = {
+                            hoTen: document.getElementById('edit-ho-ten-kh').value,
+                            ngaySinh: document.getElementById('edit-ngay-sinh-kh').value || null,
+                            gioiTinh: document.getElementById('edit-gioi-tinh-kh').value,
+                            soDienThoai: document.getElementById('edit-sdt-kh').value,
+                            diaChi: document.getElementById('edit-dia-chi-kh').value
+                        };
+
+                        showLoader();
+                        try {
+                            const response = await fetch(`/api/customers/updateCustomers/${maKH}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(data)
+                            });
+                            const result = await response.json();
+                            hideLoader();
+                            if (response.ok) {
+                                showToast('Cập nhật thành công!', 'success');
                                 editModal.style.display = 'none';
-                                showToast(`Cập nhật thông tin thành công!`);
+                                // Cập nhật hàng (hoặc reload)
+                                const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+                                currentEditingRow.cells[2].textContent = result.customer.HoVaTen;
+                                currentEditingRow.cells[3].textContent = result.customer.NgaySinh;
+                                currentEditingRow.cells[4].textContent = result.customer.SoDienThoai;
+                                currentEditingRow.cells[5].textContent = result.customer.GioiTinh;
+                                currentEditingRow.cells[6].textContent = result.customer.DiaChi;
+                                currentEditingRow.dataset.ngaySinh = new Date(result.customer.NgaySinh).toISOString().split('T')[0];
+                                currentEditingRow = null;
+                            } else {
+                                showToast(`Cập nhật thất bại: ${result.error}`, 'error');
                             }
-                        });
+                        } catch (err) {
+                            hideLoader();
+                            showToast('Lỗi kết nối máy chủ.', 'error');
+                        }
                     });
                 }
             }
@@ -1067,37 +1250,37 @@
                 // Xử lý sự kiện Submit Form Thêm
                 addKhForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    
-                    const formData = {
-                        HoTen: document.getElementById('add-ho-ten-kh').value.trim(),
-                        NgaySinh: document.getElementById('add-ngay-sinh-kh').value,
-                        GioiTinh: document.getElementById('add-gioi-tinh-kh').value,
-                        SDT: document.getElementById('add-sdt-kh').value,
-                        DiaChi: document.getElementById('add-dia-chi-kh').value.trim()
+                    showLoader();
+
+                    const data = {
+                        hoTen: document.getElementById('add-ho-ten-kh').value,
+                        ngaySinh: document.getElementById('add-ngay-sinh-kh').value || null,
+                        gioiTinh: document.getElementById('add-gioi-tinh-kh').value,
+                        soDienThoai: document.getElementById('add-sdt-kh').value,
+                        diaChi: document.getElementById('add-dia-chi-kh').value
                     };
 
-                    showLoader();
                     try {
-                        const response = await fetch('/api/customers/createCustomers', { // ✅ Sửa đường dẫn
+                        const response = await fetch('/api/customers/createCustomers', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(formData)
+                            body: JSON.stringify(data)
                         });
-                        
-                        const data = await response.json();
+                        const result = await response.json();
                         hideLoader();
-                        
-                        if(response.ok) {
-                            showToast('Thêm khách hàng thành công!');
+                        if (response.ok) {
+                            showToast('Thêm khách hàng thành công!', 'success');
                             document.getElementById('add-modal').style.display = 'none';
-                            location.reload();
+                            fetchCustomers(); // Tải lại danh sách khách hàng
                         } else {
-                            showToast(data.error || 'Có lỗi xảy ra!', 'error');
+                            // Chọn Cancel -> Chỉ Reset form, KHÔNG ĐÓNG modal
+                            addKhForm.reset();
+                            showToast('Đã làm mới form!', 'info');
                         }
-                    } catch(error) {
+                    } catch (err) {
                         hideLoader();
-                        console.error('Error:', error);
-                        showToast('Lỗi kết nối server!', 'error');
+                        console.log(err);
+                        showToast('Lỗi kết nối máy chủ.', 'error');
                     }
                 });
             }

@@ -273,6 +273,20 @@
             background-color: var(--red-accent-hover);
         }
 
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            min-width: auto;
+        }
+
+        .btn-warning {
+            background-color: #f39c12;
+            color: white;
+        }
+        .btn-warning:hover {
+            background-color: #d35400;
+        }
+
         /* --- Bảng --- */
         .table-responsive {
             overflow-x: auto;
@@ -312,6 +326,12 @@
 
         .action-icon:hover {
             color: #2980b9;
+        }
+
+        .action-icon.open-edit-modal:hover {
+            color: #2980b9;
+            transform: scale(1.2);
+            transition: all 0.2s;
         }
 
         /* --- Modal (Chỉ còn modal Sửa) --- */
@@ -537,7 +557,7 @@
                     <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
                     <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
                     <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="/dashboard/changerule" class="active"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
+                    <li><a href="#" class="active"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
         </aside>
@@ -581,8 +601,22 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <% if (rules && rules.length > 0) { %>
+                                <% rules.forEach((rule, index) => { %>
+                                    <tr data-id="<%= rule.TenThamSo %>"">
+                                        <td><%= index + 1 %></td>
+                                        <td><%= rule.TenThamSo %></td>
+                                        <td><%= rule.GiaTri %></td>
+                                        <td> <i class="fas fa-pencil-alt action-icon open-edit-modal"></i> </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="4" style="text-align: center;">Không có tham số nào.</td>
+                                </tr>
+                            <% } %>
                              <!-- SỬA: Dữ liệu mẫu mới -->
-                            <tr>
+                            <!-- <tr>
                                 <td>Số lượng nhập tối thiểu</td>
                                 <td>150</td>
                                 <td> <i class="fas fa-pencil-alt action-icon open-edit-modal"></i> </td>
@@ -601,7 +635,7 @@
                                 <td>Số tiền thu không vượt quá số tiền nợ</td>
                                 <td>Có</td>
                                 <td> <i class="fas fa-pencil-alt action-icon open-edit-modal"></i> </td>
-                            </tr>
+                            </tr> -->
                         </tbody>
                     </table>
                 </div>
@@ -634,12 +668,9 @@
                         </div>
                     </div>
                 </div>
-                <!-- SỬA: Footer chỉ còn Hủy và Lưu -->
                 <div class="modal-footer">
-                    <!-- XÓA: Nút Xóa -->
-                    <!-- <button type="button" class="btn btn-danger">Xóa...</button> -->
                     <div> 
-                        <button type="button" class="btn btn-secondary close-modal">Hủy</button> 
+                        <button type="button" class="btn btn-warning" id="btn-reset-line-item" style="flex: 1; margin-right: 1rem;">Đặt lại</button>
                         <button type="submit" class="btn btn-primary">Lưu</button> 
                     </div>
                 </div>
@@ -651,7 +682,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // --- THÊM: Các hàm điều khiển Loader và Toast ---
+            
+            // --- 1. CÁC HÀM TIỆN ÍCH (LOADER, TOAST) ---
             const loader = document.getElementById('loader');
             const toastContainer = document.getElementById('toast-container');
 
@@ -661,17 +693,12 @@
             function showToast(message, type = 'success') {
                 const toast = document.createElement('div');
                 toast.classList.add('toast', type);
-                toast.innerHTML = `
-                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i>
-                    <span class="toast-message">${message}</span>
-                `;
+                toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i><span class="toast-message">${message}</span>`;
                 toastContainer.appendChild(toast);
                 setTimeout(() => { toast.classList.add('show'); }, 100);
                 setTimeout(() => {
                     toast.classList.remove('show');
-                    toast.addEventListener('transitionend', () => {
-                        if (toast.parentNode) { toast.parentNode.removeChild(toast); }
-                    });
+                    toast.addEventListener('transitionend', () => { if (toast.parentNode) toast.parentNode.removeChild(toast); });
                 }, 3000);
             }
 
@@ -679,13 +706,11 @@
                 showLoader();
                 setTimeout(() => {
                     hideLoader();
-                    const success = Math.random() > 0.2; 
-                    callback(success); 
-                }, 1500); 
+                    callback(true); 
+                }, 1000); 
             }
-            // --- KẾT THÚC HÀM MỚI ---
-            
-            // --- Xử lý Sidebar ---
+
+            // --- 2. XỬ LÝ SIDEBAR ---
             const menuToggle = document.getElementById('menu-toggle');
             const sidebar = document.getElementById('sidebar');
             const container = document.querySelector('.dashboard-container');
@@ -696,59 +721,89 @@
                 });
             }
 
-            // --- Xử lý Modal Sửa ---
+            // --- 3. LOGIC MODAL SỬA QUY ĐỊNH ---
             const editModal = document.getElementById('edit-modal');
-            const openEditModalBtns = document.querySelectorAll('.open-edit-modal');
-            const mainCloseModalBtns = document.querySelectorAll('#edit-modal .close-modal');
+            const openEditBtns = document.querySelectorAll('.open-edit-modal');
+            const closeEditBtns = document.querySelectorAll('.close-modal');
             const editForm = document.getElementById('edit-regulation-form');
-            const editParamNameInput = document.getElementById('edit-param-name');
-            const editParamValueInput = document.getElementById('edit-param-value');
+            const inputParamName = document.getElementById('edit-param-name');
+            const inputParamValue = document.getElementById('edit-param-value');
+            const btnReset = document.getElementById('btn-reset-line-item'); // Nút Đặt lại
 
-            let currentEditingRow = null; // Biến lưu trữ hàng đang sửa
+            let currentEditingRow = null; 
+            let originalValue = ''; // Biến lưu giá trị gốc
 
-            // Mở modal Sửa
-            if (openEditModalBtns.length > 0 && editModal) {
-                openEditModalBtns.forEach(btn => {
+            // Mở Modal
+            if (openEditBtns.length > 0 && editModal) {
+                openEditBtns.forEach(btn => {
                     btn.addEventListener('click', (event) => {
-                        currentEditingRow = event.target.closest('tr'); // Lưu lại hàng đang sửa
+                        currentEditingRow = event.target.closest('tr');
                         if (!currentEditingRow) return;
 
-                        const paramName = currentEditingRow.cells[0].textContent;
-                        const paramValue = currentEditingRow.cells[1].textContent;
+                        const paramName = currentEditingRow.cells[1].textContent;
+                        const paramValue = currentEditingRow.cells[2].textContent.trim();
 
-                        // Điền dữ liệu vào modal
-                        editParamNameInput.value = paramName.trim();
-                        editParamValueInput.value = paramValue.trim();
+                        // Điền dữ liệu
+                        inputParamName.value = paramName;
+                        inputParamValue.value = paramValue;
                         
+                        // LƯU SNAPSHOT (Giá trị gốc)
+                        originalValue = paramValue;
+
                         editModal.style.display = 'flex';
-                        editParamValueInput.focus(); // Focus vào ô giá trị
+                        inputParamValue.focus();
                     });
                 });
             }
             
-            // Đóng modal Sửa
-            mainCloseModalBtns.forEach(btn => {
-                btn.addEventListener('click', (event) => {
-                    event.target.closest('.modal-overlay').style.display = 'none';
-                    currentEditingRow = null; // Reset hàng đang sửa
-                });
-            });
-            window.addEventListener('click', function (event) {
-                if (event.target.id === 'edit-modal') {
-                    event.target.style.display = 'none';
-                    currentEditingRow = null; // Reset hàng đang sửa
-                }
-            });
+            // Xử lý nút Đặt lại (Reset)
+            if (btnReset) {
+                btnReset.addEventListener('click', () => {
+                    const currentValue = inputParamValue.value.trim();
 
-            // Xử lý Lưu thay đổi
+                    // Kiểm tra xem có thay đổi không
+                    if (currentValue === originalValue) {
+                        showToast('Chưa có thay đổi nào để đặt lại!', 'error');
+                        return;
+                    }
+
+                    // Hỏi người dùng
+                    if (confirm("Dữ liệu đã thay đổi. Bạn có muốn LƯU LẠI không?\n\n- OK: Lưu thay đổi.\n- Cancel: Khôi phục lại giá trị gốc.")) {
+                        // Chọn OK -> Lưu (Submit form)
+                        editForm.requestSubmit(); 
+                    } else {
+                        // Chọn Cancel -> Khôi phục
+                        inputParamValue.value = originalValue;
+                        showToast('Đã khôi phục giá trị gốc!', 'success');
+                    }
+                });
+            }
+
+            // Xử lý Lưu (Submit)
             if (editForm) {
-                editForm.addEventListener('submit', function(event) {
+                editForm.addEventListener('submit', async function(event) {
                     event.preventDefault(); 
                     
-                    const newValue = editParamValueInput.value;
-                    
-                    simulateApiCall((success) => {
-                        if (success) {
+                    if (!currentEditingRow) return;
+
+                    const tenThamSo = currentEditingRow.dataset.id; // Lấy 'TenThamSo' từ data-id
+                    const newValue = inputParamValue.value.trim();
+                    console.log('Cập nhật:', tenThamSo, '->', newValue);
+
+                    showLoader(); // Hiển thị loader
+
+                    try {
+                        // Gọi API đã tạo ở bước trước
+                        const response = await fetch(`/api/change-rules/${tenThamSo}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ GiaTri: newValue })
+                        });
+                        
+                        const result = await response.json();
+                        hideLoader(); // Ẩn loader
+
+                        if (response.ok) {
                             if (currentEditingRow) {
                                 // Cập nhật giá trị mới vào bảng
                                 currentEditingRow.cells[1].textContent = newValue;
@@ -760,10 +815,44 @@
                             // Nếu lỗi, không đóng modal
                             showToast('Cập nhật thất bại! Vui lòng thử lại.', 'error');
                         }
-                    });
+                    } catch (err) {
+                        hideLoader();
+                        showToast('Lỗi kết nối máy chủ!', 'error');
+                    }
                 });
             }
 
+            // Đóng Modal
+            closeEditBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    editModal.style.display = 'none';
+                    currentEditingRow = null;
+                });
+            });
+            window.addEventListener('click', function (event) {
+                if (event.target.classList.contains('modal-overlay')) {
+                    event.target.style.display = 'none';
+                    currentEditingRow = null;
+                }
+            });
+
+            // --- 4. XỬ LÝ ĐĂNG XUẤT ---
+            const logoutButton = document.getElementById('logout-button');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', async (event) => {
+                    event.preventDefault(); // Ngăn thẻ <a> nhảy trang
+                    
+                    try {
+                        // Gọi API /api/logout
+                        await fetch('/api/logout', { method: 'GET' });
+                        window.location.href = '/login';
+
+                    } catch (error) {
+                        console.error('Lỗi khi đăng xuất:', error);
+                        window.location.href = '/login';
+                    }
+                });
+            }
             
         });
     </script>
