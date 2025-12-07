@@ -223,12 +223,9 @@ const getReportPage = async (req, res) => {
         ============================= */
         res.render("report", {
             ...userInfo,
-            ton,
-            congno,
-            doanhthu: {
-                totalRevenue,
-                revenueByCategory
-            }
+            bcton: {},
+            bccongno: {}, 
+            bcdoanhthu: {}
         });
 
     } catch (err) {

@@ -337,17 +337,22 @@
                                     </tr> 
                                 </thead>
                                 <tbody>
-                                    <tr> 
-                                        <td>1</td> 
-                                        <td>Sách A</td> 
-                                        <td>450</td> 
-                                        <td>300</td> 
-                                        <td>700</td> 
-                                        <td>150</td> 
+                                    <% if (bcton && bcton.length > 0) { %>
+                                <% bcton.forEach((bcton, index) => { %>
+                                    <tr data-id="<%= bcton.TenThamSo %>"">
+                                        <td><%= index + 1 %></td>
+                                        <td><%= bcton.MaSach %></td>
+                                        <td><%= bcton.TonDau %></td>
+                                        <td><%= bcton.NhapTrongThang %></td>
+                                        <td><%= bcton.BanTrongThang %></td>
+                                        <td><%= bcton.TonCuoi %></td>
                                     </tr>
-                                    <!-- Thêm dòng dữ liệu khác nếu cần -->
-                                    <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>
-                                    <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="6" style="text-align: center;">Không có tham số nào.</td>
+                                </tr>
+                            <% } %>
                                 </tbody>
                             </table>
                             <div class="empty-table-rows"></div>
@@ -377,16 +382,23 @@
                                     </tr> 
                                 </thead>
                                 <tbody>
-                                    <tr> 
-                                        <td>1</td> 
-                                        <td>KH001</td> 
-                                        <td>Nguyễn Văn A</td> 
-                                        <td>300 000</td> 
-                                        <td>0</td> 
-                                        <td>0</td> 
+                                    <% if (bccongno && bccongno.length > 0) { %>
+                                <% bcongno.forEach((bccongno, index) => { %>
+                                    <tr data-id="<%= bcton.TenThamSo %>"">
+                                        <td><%= index + 1 %></td>
+                                        <td><%= bccongno.MaKhachHang %></td>
+                                        <td><%= bccongno.HoVaTen %></td>
+                                        <td><%= bccongno.NoDau %></td>
+                                        <td><%= bccongno.NoPhaatSinh %></td>
+                                        <td><%= bccongno.NoCuoi %></td>
+                                        
                                     </tr>
-                                    <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>
-                                    <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="6" style="text-align: center;">Không có tham số nào.</td>
+                                </tr>
+                            <% } %>
                                 </tbody>
                             </table>
                             <div class="empty-table-rows"></div>
@@ -404,8 +416,8 @@
                         </div>
                         <div class="table-responsive">
                             <h3 class="table-caption">Chi tiết báo cáo</h3>
-                            <div class="report-summary">
-                                Tổng doanh thu: 2000000 
+                            <div class="report-summary" id="display-tong-doanh-thu">
+                                    Tổng doanh thu: 0 đ
                             </div>
                             <table class="data-table" id="revenue-report-table"> 
                                 <thead> 
@@ -418,15 +430,23 @@
                                     </tr> 
                                 </thead>
                                 <tbody>
-                                    <tr> 
-                                        <td>1</td> 
-                                        <td>KH001</td> <!-- Dữ liệu có vẻ nhầm, nên là tên thể loại? -->
-                                        <td>1000</td> 
-                                        <td>300 000</td> 
-                                        <td>10%</td> 
+                                    <% if (bcdoanhthu && bcdoanhthu.length > 0) { %>
+                                <% bcdoanhthu.forEach((bcdoanhthu, index) => { %>
+                                    <tr data-id="<%= bcton.TenThamSo %>"">
+                                        <td><%= index + 1 %></td>
+                                        <td><%= bcdoanhthu.MaTheLoai %></td>
+                                        <td><%= bcdoanhthu.SoLuongBan %></td>
+                                        <td><%= bcdoanhthu.ThanhTien %></td>
+                                        <td><%= bcdoanhthu.TiLe %></td>
+                                       
+                                        
                                     </tr>
-                                     <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
-                                     <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="5" style="text-align: center;">Không có tham số nào.</td>
+                                </tr>
+                            <% } %>
                                 </tbody>
                             </table>
                              <div class="empty-table-rows"></div>
@@ -439,92 +459,243 @@
         </main>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
 
-            // --- THÊM: Các hàm điều khiển Loader và Toast ---
-            const loader = document.getElementById('loader');
-            const toastContainer = document.getElementById('toast-container');
+        // ============================================================
+        // 1. CÁC HÀM TIỆN ÍCH (UI & FORMAT)
+        // ============================================================
+        const loader = document.getElementById('loader');
+        const toastContainer = document.getElementById('toast-container');
 
-            function showLoader() { loader.style.display = 'flex'; }
-            function hideLoader() { loader.style.display = 'none'; }
-            
-            function showToast(message, type = 'success') {
-                const toast = document.createElement('div');
-                toast.classList.add('toast', type);
-                toast.innerHTML = `
-                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i>
-                    <span class="toast-message">${message}</span>
-                `;
+        // Hàm định dạng tiền tệ (VND)
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        };
+
+        function showLoader() { if(loader) loader.style.display = 'flex'; }
+        function hideLoader() { if(loader) loader.style.display = 'none'; }
+        
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.classList.add('toast', type);
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i>
+                <span class="toast-message">${message}</span>
+            `;
+            if(toastContainer) {
                 toastContainer.appendChild(toast);
                 setTimeout(() => { toast.classList.add('show'); }, 100);
                 setTimeout(() => {
                     toast.classList.remove('show');
                     toast.addEventListener('transitionend', () => {
-                        if (toast.parentNode) { toast.parentNode.removeChild(toast); }
+                        if (toast.parentNode) toast.parentNode.removeChild(toast);
                     });
                 }, 3000);
             }
+        }
 
-            function simulateApiCall(callback) {
-                showLoader();
-                setTimeout(() => {
-                    hideLoader();
-                    const success = Math.random() > 0.2; 
-                    callback(success); 
-                }, 1500); // Giả lập 1.5 giây tải báo cáo
+        // ============================================================
+        // 2. HÀM GỌI API (THAY THẾ simulateApiCall)
+        // ============================================================
+        async function fetchReportData(type, dateString) {
+            if (!dateString) return null;
+            showLoader();
+            try {
+                // dateString dạng "2024-05" -> Tách ra year=2024, month=05
+                const [year, month] = dateString.split('-');
+                
+                let url = '';
+                if (type === 'doanhthu') url = `/api/report/revenue?month=${month}&year=${year}`;
+                else if (type === 'congno') url = `/api/report/debt?month=${month}&year=${year}`;
+                else if (type === 'ton') url = `/api/report/inventory?month=${month}&year=${year}`;
+
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`Lỗi server: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                hideLoader();
+                showToast('Cập nhật dữ liệu thành công!', 'success');
+                return result; 
+            } catch (error) {
+                hideLoader();
+                console.error(error);
+                showToast('Không tải được báo cáo: ' + error.message, 'error');
+                return null;
             }
-            // --- KẾT THÚC HÀM MỚI ---
+        }
+
+        // ============================================================
+        // 3. CÁC HÀM RENDER (VẼ BẢNG)
+        // ============================================================
+
+        // --- Render Bảng Doanh Thu ---
+        function renderRevenueTable(data, totalRevenue) {
+            const tbody = document.querySelector('#revenue-report-table tbody');
+            const summaryDiv = document.getElementById('display-tong-doanh-thu'); // Cần ID này trong HTML
             
-            // --- Xử lý Responsive Sidebar ---
-            const menuToggle = document.getElementById('menu-toggle');
-            const sidebar = document.getElementById('sidebar');
-            const container = document.querySelector('.dashboard-container'); 
-            if (menuToggle && sidebar && container) {
-                menuToggle.addEventListener('click', function() {
-                    if (window.innerWidth <= 992) { sidebar.classList.toggle('active'); } 
-                    else { container.classList.toggle('sidebar-collapsed'); }
-                });
+            // Cập nhật dòng tổng tiền
+            if(summaryDiv) {
+                summaryDiv.textContent = `Tổng doanh thu: ${formatCurrency(totalRevenue || 0)}`;
             }
-            
-             // --- Xử lý Chuyển Tab ---
-             const tabButtons = document.querySelectorAll('.tab-button');
-             const tabPanes = document.querySelectorAll('.tab-pane');
-             if (tabButtons.length > 0 && tabPanes.length > 0) {
-                 tabButtons.forEach(button => {
-                     button.addEventListener('click', function() {
-                         const targetId = this.dataset.target; 
-                         const targetPane = document.querySelector(targetId);
-                         if (targetPane) {
-                             tabButtons.forEach(btn => btn.classList.remove('active'));
-                             tabPanes.forEach(pane => pane.classList.remove('active'));
-                             this.classList.add('active');
-                             targetPane.classList.add('active');
-                         }
-                     });
-                 });
-             }
 
-             // --- Placeholder cho việc chọn tháng/năm ---
-             const monthInputs = document.querySelectorAll('.report-filter input[type="month"]');
-             monthInputs.forEach(input => {
-                 input.addEventListener('change', function() {
-                    console.log(`Đang tải báo cáo cho ${this.id}: ${this.value}`);
-                     
-                     simulateApiCall((success) => {
-                         if (success) {
-                             // Nếu thành công, giả lập cập nhật dữ liệu (ở đây chỉ hiện toast)
-                             showToast('Tải báo cáo thành công!', 'success');
-                             // TODO: Thêm logic cập nhật bảng với dữ liệu mới
-                         } else {
-                             showToast('Tải báo cáo thất bại!', 'error');
-                         }
-                     });
-                 });
-             });
+            if (!tbody) return;
+            tbody.innerHTML = ''; // Xóa dữ liệu cũ
 
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Không có dữ liệu tháng này</td></tr>`;
+                return;
+            }
+
+            data.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${item.MaTheLoai}</td> <td>${item.SoLuongBan}</td>
+                    <td>${formatCurrency(item.ThanhTien)}</td>
+                    <td>${item.TiLe}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- Render Bảng Công Nợ ---
+        function renderDebtTable(data) {
+            const tbody = document.querySelector('#debt-report-table tbody');
+            if (!tbody) return;
+            tbody.innerHTML = ''; 
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px;">Không có dữ liệu công nợ</td></tr>`;
+                return;
+            }
+
+            data.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${item.MaKhachHang}</td>
+                    <td>${item.HoVaTen}</td>
+                    <td>${formatCurrency(item.NoDau)}</td>
+                    <td>${formatCurrency(item.NoPhatSinh)}</td>
+                    <td>${formatCurrency(item.NoCuoi)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- Render Bảng Tồn Kho ---
+        function renderInventoryTable(data) {
+            const tbody = document.querySelector('#inventory-report-table tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px;">Không có dữ liệu tồn kho</td></tr>`;
+                return;
+            }
+
+            data.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${item.TenSach}</td>
+                    <td>${item.TonDau}</td>
+                    <td>${item.Nhap}</td>
+                    <td>${item.Ban}</td>
+                    <td>${item.TonCuoi}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ============================================================
+        // 4. SỰ KIỆN & KHỞI TẠO (LOGIC CHÍNH)
+        // ============================================================
+        
+        // --- Xử lý Sidebar (Giữ nguyên của bạn) ---
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const container = document.querySelector('.dashboard-container'); 
+        if (menuToggle && sidebar && container) {
+            menuToggle.addEventListener('click', function() {
+                if (window.innerWidth <= 992) { sidebar.classList.toggle('active'); } 
+                else { container.classList.toggle('sidebar-collapsed'); }
+            });
+        }
+
+        // --- Lấy các Input Date ---
+        const inputDoanhThu = document.getElementById('month-doanh-thu');
+        const inputCongNo = document.getElementById('month-cong-no');
+        const inputTon = document.getElementById('month-ton');
+
+        // --- Sự kiện khi chọn ngày (Thay đổi Input) ---
+        if(inputDoanhThu) {
+            inputDoanhThu.addEventListener('change', async function() {
+                const result = await fetchReportData('doanhthu', this.value);
+                if (result) renderRevenueTable(result.data, result.totalRevenue);
+            });
+        }
+
+        if(inputCongNo) {
+            inputCongNo.addEventListener('change', async function() {
+                const result = await fetchReportData('congno', this.value);
+                if (result) renderDebtTable(result.data);
+            });
+        }
+
+        if(inputTon) {
+            inputTon.addEventListener('change', async function() {
+                const result = await fetchReportData('ton', this.value);
+                if (result) renderInventoryTable(result.data);
+            });
+        }
+
+        // --- Khởi tạo giá trị mặc định (Tháng hiện tại) ---
+        const now = new Date();
+        const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        
+        [inputDoanhThu, inputCongNo, inputTon].forEach(input => {
+            if(input) input.value = currentMonthStr;
         });
-    </script>
+
+        // Tự động tải dữ liệu cho tab mặc định (Báo cáo Tồn)
+        if(inputTon) inputTon.dispatchEvent(new Event('change'));
+
+
+        // --- Xử lý Chuyển Tab và Tải dữ liệu khi chuyển ---
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+        
+        if (tabButtons.length > 0) {
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // UI Switch
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabPanes.forEach(pane => pane.classList.remove('active'));
+                    this.classList.add('active');
+                    const targetId = this.dataset.target;
+                    const targetPane = document.querySelector(targetId);
+                    if (targetPane) targetPane.classList.add('active');
+
+                    // Data Load Trigger (Nếu tab đó chưa có dữ liệu hoặc muốn reload)
+                    if(targetId === '#tab-doanh-thu' && inputDoanhThu) 
+                        inputDoanhThu.dispatchEvent(new Event('change'));
+                    
+                    if(targetId === '#tab-cong-no' && inputCongNo) 
+                        inputCongNo.dispatchEvent(new Event('change'));
+
+                    if(targetId === '#tab-ton' && inputTon) 
+                        inputTon.dispatchEvent(new Event('change'));
+                });
+            });
+        }
+
+    });
+</script>
 
 </body>
 </html>
