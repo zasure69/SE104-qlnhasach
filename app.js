@@ -8,6 +8,7 @@ const port = 3000;
 const userRoutes = require("./routes/userRoutes");
 const customerRoutes = require("./routes/customersRoutes");
 const booksRoutes = require("./routes/booksRoutes");
+const booksImportRoutes = require("./routes/booksimportRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 
 // === MIDDLEWARE SETUP ===
@@ -38,6 +39,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", userRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/books", booksRoutes); // ✅ Prefix /api/books
+app.use("/api/import", booksImportRoutes); // ✅ Prefix /api/import
 app.use("/dashboard", dashboardRoutes); // ✅ Dashboard routes
 
 // Trang chủ
