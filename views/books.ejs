@@ -871,7 +871,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Lấy danh sách tác giả từ server-side data
     // @ts-ignore - EJS syntax
-    const allAuthors = <%- JSON.stringify(authors) %>;
+    // const allAuthors = <%- JSON.stringify(authors) %>;
     
     function showLoader() { if(loader) loader.style.display = 'flex'; }
     function hideLoader() { if(loader) loader.style.display = 'none'; }
