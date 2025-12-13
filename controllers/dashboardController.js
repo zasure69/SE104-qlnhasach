@@ -230,7 +230,7 @@ const getReportPage = async (req, res) => {
         let revenueByCategory = {};
 
         listHD.forEach(hd => {
-            hd.CT_HDs.forEach(ct => {
+            hd.CT_HD.forEach(ct => {
                 const tien = parseFloat(ct.ThanhTien || 0);
 
                 totalRevenue += tien;

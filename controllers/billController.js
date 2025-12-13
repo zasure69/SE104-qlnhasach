@@ -334,37 +334,50 @@ const updateBill = async (req, res) => {
 //  API: XÓA HÓA ĐƠN (DELETE /api/bill/:id)
 // =============================================================
 const deleteBill = async (req, res) => {
-    const { id } = req.params;
-    const t = await sequelize.transaction();
+    const MaHD = req.params.MaHD;
+    const t = await sequelize.transaction(); // Bắt đầu Transaction
 
     try {
-        const billToDelete = await HoaDon.findByPk(id, { transaction: t });
-        if (!billToDelete) { await t.rollback(); return res.status(404).json({ message: 'Không tìm thấy hóa đơn.' }); }
-        
-        const detailsToDelete = await CT_HD.findAll({ where: { MaHoaDon: id }, transaction: t });
-
-        // 1. HOÀN TÁC TỒN KHO
-        for (const detail of detailsToDelete) {
-            await Sach.increment('SoLuongTon', { by: detail.SoLuongBan, where: { MaSach: detail.MaSach }, transaction: t });
+        // 1. Tìm Hóa đơn và Chi tiết cũ
+        const bill = await HoaDon.findByPk(MaHD, { transaction: t });
+        if (!bill) {
+            await t.rollback();
+            return res.status(404).json({ message: 'Không tìm thấy hóa đơn.' });
         }
 
-        // 2. HOÀN TÁC NỢ
-        const conLai = parseFloat(billToDelete.ConLai);
+        const details = await CT_HD.findAll({ where: { MaHoaDon: MaHD }, transaction: t });
+
+        // 2. HOÀN TÁC TỒN KHO (Cộng lại số lượng sách đã bán vào kho)
+        for (const item of details) {
+            await Sach.increment('SoLuongTon', { 
+                by: item.SoLuongBan, 
+                where: { MaSach: item.MaSach }, 
+                transaction: t 
+            });
+        }
+
+        // 3. HOÀN TÁC NỢ KHÁCH HÀNG (Nếu hóa đơn này có ghi nợ, phải trừ nợ đi)
+        // Logic: Khi xóa hóa đơn, coi như giao dịch chưa từng xảy ra -> Trả lại trạng thái nợ cũ
+        const conLai = parseFloat(bill.ConLai);
         if (conLai > 0) {
-            await KhachHang.increment('TongNo', { by: -conLai, where: { MaKhachHang: billToDelete.MaKhachHang }, transaction: t });
+            await KhachHang.increment('TongNo', { 
+                by: -conLai, // Giảm nợ
+                where: { MaKhachHang: bill.MaKhachHang }, 
+                transaction: t 
+            });
         }
 
-        // 3. XÓA DỮ LIỆU
-        await CT_HD.destroy({ where: { MaHoaDon: id }, transaction: t });
-        await HoaDon.destroy({ where: { MaHoaDon: id }, transaction: t });
+        // 4. Xóa Chi tiết và Hóa đơn
+        await CT_HD.destroy({ where: { MaHoaDon: MaHD }, transaction: t });
+        await HoaDon.destroy({ where: { MaHoaDon: MaHD }, transaction: t });
 
         await t.commit();
-        res.json({ message: `Hóa đơn ${id} đã được xóa thành công.` });
+        res.json({ message: `Đã xóa hóa đơn ${MaHD} và hoàn tác tồn kho/nợ thành công.` });
 
     } catch (error) {
         await t.rollback();
-        console.error('Lỗi khi xóa hóa đơn:', error);
-        res.status(500).json({ message: 'Lỗi server khi xóa hóa đơn.', error: error.message });
+        console.error("Lỗi khi xóa hóa đơn:", error);
+        res.status(500).json({ message: `Lỗi server: ${error.message}` });
     }
 };
 
