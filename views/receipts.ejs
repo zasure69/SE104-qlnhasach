@@ -885,8 +885,8 @@
                         </div>
                         <div class="form-group"> <label>Số Điện Thoại</label> <input type="text" id="add-sdt" readonly>
                         </div>
-                        <div class="form-group"> <label>Email</label> <input type="text" id="add-email" readonly>
-                        </div>
+                        <!-- <div class="form-group"> <label>Email</label> <input type="text" id="add-email" readonly>
+                        </div> -->
                         <div class="form-group"> <label class="required">Số Tiền Thu</label> <input type="text" id="add-so-tien"
                                 required inputmode="numeric"> </div>
                     </div>
@@ -922,8 +922,8 @@
                             readonly> </div>
                         <!-- <div class="form-group"> <label>Email</label> <input type="text" id="edit-email" readonly>
                         </div> -->
-                        <div class="form-group"> <label class="required">Số Tiền Thu</label> <input type="number" id="edit-so-tien"
-                                required inputmode="numeric"> </div>
+                        <div class="form-group"> <label class="required">Số Tiền Thu</label> <input type="text" id="edit-so-tien"
+                                required inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')"> </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1228,7 +1228,7 @@
 
                             // Hiển thị Modal ngay lập tức
                             editModal.style.display = 'flex';
-                            showToast('Tải dữ liệu thành công!', 'success');
+                            // showToast('Tải dữ liệu thành công!', 'success');
 
                         })
                         .catch(error => {
@@ -1250,13 +1250,94 @@
 
 
             // --- 8. SUBMIT FORM (LƯU) ---
+
+            function generateMaPhieuThu(lastMaPT) {
+                if (!lastMaPT) return 'PT001'; // Mặc định nếu chưa có phiếu nào
+
+                // Lấy phần số: 'PT012' -> '012' -> 12
+                const lastNumberStr = lastMaPT.replace('PT', '');
+                const lastNumber = parseInt(lastNumberStr);
+
+                if (isNaN(lastNumber)) return 'PT001';
+
+                const nextNumber = lastNumber + 1;
+                
+                // Định dạng thành 3 chữ số (001, 099, 100...)
+                const nextNumberStr = nextNumber.toString().padStart(3, '0');
+
+                return `PT${nextNumberStr}`;
+            }
+
             if (addForm) {
-                addForm.addEventListener('submit', (e) => {
+                addForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    simulateApiCall((success) => {
-                        showToast('Lập phiếu thu thành công!');
-                        addModal.style.display = 'none';
-                    });
+
+                    // 1. Thu thập dữ liệu từ Form
+                    const maKhInput = document.getElementById('add-ma-kh');
+                    const ngayThuInput = document.getElementById('add-ngay-thu');
+                    const soTienInput = document.getElementById('add-so-tien'); // Input tiền định dạng (VD: 100.000)
+
+                    const maKhachHang = maKhInput.value.trim();
+                    const ngayThuTien = ngayThuInput.value;
+                    const soTienThu = parseNumber(soTienInput.value); // Chuyển "100.000" -> 100000
+
+                    // Validate cơ bản
+                    if (!maKhachHang || soTienThu <= 0 || !ngayThuTien) {
+                        showToast('Vui lòng nhập đầy đủ thông tin và số tiền > 0', 'error');
+                        return;
+                    }
+
+                    try {
+                        // 2. Lấy Mã Phiếu Thu cuối cùng từ Server để tạo mã mới
+                        // (Đảm bảo bạn đã có route GET /api/receipts/lastMaPhieuThu như hướng dẫn trước)
+                        const resLastID = await fetch('/api/receipts/lastMaPhieuThu');
+                        const dataLastID = await resLastID.json();
+                        
+                        // Tạo mã mới (VD: PT005)
+                        const newMaPhieuThu = generateMaPhieuThu(dataLastID.lastMaPhieuThu);
+
+                        // 3. Chuẩn bị dữ liệu gửi đi
+                        const payload = {
+                            MaPhieuThu: newMaPhieuThu,
+                            MaKhachHang: maKhachHang,
+                            NgayThuTien: ngayThuTien,
+                            SoTienThu: soTienThu
+                        };
+
+                        // 4. Gọi API POST để tạo phiếu thu
+                        const response = await fetch('/api/receipts/create', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            showToast(`Lập phiếu thu ${newMaPhieuThu} thành công!`, 'success');
+                            
+                            // 5. Đóng Modal và Reset form
+                            addModal.style.display = 'none';
+                            addForm.reset();
+                            
+                            // Reset các trường thông tin khách hàng (nếu có auto-fill)
+                            const infoFields = ['ten-kh', 'dia-chi', 'sdt', 'email', 'tong-no'];
+                            infoFields.forEach(id => {
+                                const el = document.getElementById(`add-${id}`);
+                                if (el) el.value = '';
+                            });
+
+                            // (Tùy chọn) Reload lại trang sau 1s để cập nhật bảng danh sách
+                            setTimeout(() => location.reload(), 1000); 
+
+                        } else {
+                            showToast(`Lỗi: ${result.message}`, 'error');
+                        }
+
+                    } catch (error) {
+                        console.error('Lỗi khi lập phiếu thu:', error);
+                        showToast('Lỗi kết nối server.', 'error');
+                    }
                 });
             }
 
@@ -1321,6 +1402,8 @@
                                     // Cập nhật Số Tiền Thu (Sử dụng định dạng VN)
                                     if (cells[3]) cells[3].textContent = SoTienThu.toLocaleString('vi-VN');
                                 }
+                                
+                                setTimeout(() => location.reload(), 1000);
                                 
                                 // 4. Đóng Modal
                                 editModal.style.display = 'none';
