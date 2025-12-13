@@ -994,6 +994,7 @@
                     return { success: false, error: error.message };
                 }
             }
+            
             function formatNumber(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
             function parseNumber(str) { if (!str) return 0; return parseFloat(str.toString().replace(/\./g, '')) || 0; }
 
