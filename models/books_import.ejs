@@ -775,8 +775,8 @@
                             <label class="required">Đơn Giá Nhập:</label> 
                             <input type="text" id="add-input-don-gia" placeholder="0"> 
                         </div>
-                        <div class="form-group"> 
-                            <label>Đơn Giá Bán:</label> 
+                        <div class="form-group" style="display: none;"> 
+                            <label>Đơn Giá Bán (Tự động):</label> 
                             <input type="text" id="add-input-don-gia-ban" placeholder="0" readonly style="background-color: #e9ecef;"> 
                         </div>
                         <div class="form-group">
@@ -865,8 +865,8 @@
                             <label class="required">Đơn Giá Nhập:</label> 
                             <input type="text" id="edit-input-don-gia"> 
                         </div>
-                        <div class="form-group"> 
-                            <label>Đơn Giá Bán:</label> 
+                        <div class="form-group" style="display: none;"> 
+                            <label>Đơn Giá Bán (Tự động):</label> 
                             <input type="text" id="edit-input-don-gia-ban" readonly style="background-color: #e9ecef;"> 
                         </div>
                         <div class="form-group">
@@ -930,8 +930,8 @@
                     <label class="required">Đơn Giá Nhập:</label>
                     <input type="text" id="item-edit-price" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="font-weight: bold;">
                 </div>
-                <div class="form-group" style="margin-top: 1rem;">
-                    <label>Đơn Giá Bán:</label>
+                <div class="form-group" style="margin-top: 1rem; display: none;">
+                    <label>Đơn Giá Bán (Tự động):</label>
                     <input type="text" id="item-edit-sell-price" readonly style="font-weight: bold; background-color: #e9ecef;">
                 </div>
             </div>
