@@ -194,7 +194,7 @@ const getDetail = async (req, res) => {
                 },
                 {
                     model: CT_HD,
-                    as: 'Details', // PHẢI KHỚP với alias đã định nghĩa trong index.js
+                    as: 'CT_HDs', // PHẢI KHỚP với alias đã định nghĩa trong index.js
                     // Chỉ lấy các trường cần thiết của CT_HD
                     attributes: ['MaSach', 'SoLuongBan', 'DonGiaBan', 'ThanhTien'],
                     include: [

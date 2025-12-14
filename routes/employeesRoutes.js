@@ -12,7 +12,7 @@ router.get('/getEmployees', authorizeAdmin, userController.getEmployees);
 router.post('/registerEmployee', authorizeAdmin, userController.registerEmployee);
 router.patch('/updateEmployee/:maNV', authorizeAdmin, userController.updateEmployee);
 router.delete('/deleteEmployee/:maNV', authorizeAdmin, userController.deleteEmployee);
-
+router.get('/check-employee/:maNV', userController.checkEmployeeExists);
 // (thêm các route admin khác ở đây)
 
 module.exports = router;

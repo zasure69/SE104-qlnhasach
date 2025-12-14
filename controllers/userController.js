@@ -202,6 +202,31 @@ const getEmployees = async (req, res) => {
 }
 
 // =============================================================
+// HÀM KIỂM TRA SỰ TỒN TẠI CỦA NHÂN VIÊN (AJAX)
+// =============================================================
+const checkEmployeeExists = async (req, res) => {
+  try {
+    const maNhanVien = req.params.maNV;
+    if (!maNhanVien) {
+      return res.status(400).json({ exists: false, message: 'Vui lòng cung cấp Mã Nhân viên.' });
+    }
+
+    const employee = await db.User.findOne({
+      where: { MaNhanVien: maNhanVien }
+    });
+
+    if (employee) {
+      res.status(200).json({ exists: true });
+    } else {
+      res.status(200).json({ exists: false, message: 'Mã nhân viên không tồn tại trong hệ thống.' });
+    }
+  } catch (err) {
+    console.error('Lỗi khi kiểm tra nhân viên:', err);
+    res.status(500).json({ exists: false, error: 'Lỗi server nội bộ' });
+  }
+};
+
+// =============================================================
 // HÀM XÓA NHÂN VIÊN (DELETE)
 // =============================================================
 const deleteEmployee = async (req, res) => {
@@ -239,6 +264,7 @@ module.exports = {
   registerEmployee,
   updateEmployee,
   deleteEmployee,
+  checkEmployeeExists,
   login,
   logout
 };
