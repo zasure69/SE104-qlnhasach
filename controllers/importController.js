@@ -186,7 +186,9 @@ const createImportReceipt = async (req, res) => {
         const sach = await db.Sach.findByPk(item.MaSach, { transaction: t });
         if (sach) {
           await sach.update(
-            { SoLuongTon: (sach.SoLuongTon || 0) + item.SoLuong },
+            { SoLuongTon: (sach.SoLuongTon || 0) + item.SoLuong,
+              DonGia: donGiaBan
+            },
             { transaction: t }
           );
         }
@@ -231,7 +233,9 @@ const updateImportReceipt = async (req, res) => {
         const sach = await db.Sach.findByPk(old.MaSach, { transaction: t });
         if (sach) {
           await sach.update(
-            { SoLuongTon: sach.SoLuongTon - old.SoLuong },
+            { SoLuongTon: sach.SoLuongTon - old.SoLuong,
+              DonGia: old.DonGiaBan
+             },
             { transaction: t }
           );
         }
@@ -276,7 +280,9 @@ const updateImportReceipt = async (req, res) => {
         const sach = await db.Sach.findByPk(item.MaSach, { transaction: t });
         if (sach) {
           await sach.update(
-            { SoLuongTon: sach.SoLuongTon + item.SoLuong },
+            { SoLuongTon: sach.SoLuongTon + item.SoLuong,
+              DonGia: donGiaBan
+            },
             { transaction: t }
           );
         }

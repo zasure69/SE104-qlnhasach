@@ -551,12 +551,11 @@
                     <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
                     <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
                     <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
-                    <li><a href="/dashboard/types"><i class="fas fa-tags"></i>QL Thể loại & Tác giả</a></li>
                     <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
                     <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
                     <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
                     <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+                    <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
                     <li><a href="#" class="active"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
@@ -572,7 +571,7 @@
                 </div>
                 <div class="user-menu">
                     <span class="user-trigger">
-                        Chào, <strong>admin</strong> <i class="fas fa-chevron-down"></i>
+                        Chào, <strong><%= username %></strong> <i class="fas fa-chevron-down"></i>
                     </span>
 
                     <div class="dropdown-menu">
@@ -854,6 +853,17 @@
                     }
                 });
             }
+
+            // --- LOGOUT ---
+    const logoutBtn = document.getElementById('logout-button');
+    if(logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if(confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                window.location.href = '/logout';
+            }
+        });
+    }
             
         });
     </script>

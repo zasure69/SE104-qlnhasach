@@ -698,7 +698,7 @@
                     <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
                     <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
                     <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+                    <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
                     <li><a href="/dashboard/changerule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
@@ -1196,6 +1196,17 @@
                     currentEditingRow = null; // Reset khi đóng
                 }
             });
+
+            // --- LOGOUT ---
+    const logoutBtn = document.getElementById('logout-button');
+    if(logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if(confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                window.location.href = '/logout';
+            }
+        });
+    }
 
         });
     </script>
