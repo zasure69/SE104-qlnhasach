@@ -715,14 +715,17 @@
                                             <button class="btn btn-sm btn-secondary view-detail-btn" data-id="<%= receipt.MaPhieuNhap %>">
                                                 <i class="fas fa-eye"></i> Chi tiết
                                             </button>
+                                            <button class="btn btn-sm btn-print ml-2"
+                                                onclick="alert('Chức năng in hóa đơn HD001')"> <i class="fas fa-print"></i>
+                                            </button>
                                             <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
                                         </td>
                                     </tr>
                                 <% }) %>
                             <% } else { %>
                                 <tr>
-                                    <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-light);">
-                                        Chưa có phiếu nhập sách nào
+                                    <td colspan="5" style="text-align: center;">
+                                        Chưa có phiếu nhập sách nào.
                                     </td>
                                 </tr>
                             <% } %>
@@ -1434,6 +1437,13 @@
                             if (result.success) {
                                 row.remove();
                                 showToast('Xóa phiếu nhập thành công!');
+                                const tableBody = document.getElementById('master-table').getElementsByTagName('tbody')[0];
+                                if (tableBody.rows.length === 0) {
+                                    // Nếu <tbody> không còn hàng nào
+                                    const newRow = tableBody.insertRow(); // Thêm 1 hàng mới
+                                    // Thêm ô "Không có nhân viên nào"
+                                    newRow.innerHTML = `<td colspan="5" style="text-align: center;">Chưa có phiếu nhập sách nào.</td>`;
+                                }
                             } else {
                                 showToast(result.error || 'Có lỗi xảy ra!', 'error');
                             }
