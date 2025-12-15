@@ -735,10 +735,9 @@
                                     <td><%= new Date(bill.NgayLapHoaDon).toLocaleDateString('vi-VN') %></td>
                                     <td class="text-right"><%= new Intl.NumberFormat('vi-VN').format(bill.TongTien) %></td>
                                     <td>
-                                        <button class="btn btn-sm btn-secondary view-detail-btn" data-id=<%= bill.MaHoaDon %>> <i
+                                        <button class="btn btn-sm btn-secondary view-detail-btn" data-id="<%= bill.MaHoaDon %>"> <i
                                             class="fas fa-eye"></i> Chi tiết </button>
-                                        <button class="btn btn-sm btn-print ml-2"
-                                            onclick="alert('Chức năng in hóa đơn <%= bill.MaHoaDon %>')"> <i class="fas fa-print"></i>
+                                        <button class="btn btn-sm btn-print ml-2" data-id="<%= bill.MaHoaDon %>"> <i class="fas fa-print"></i>
                                         </button>
                                         <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
                                     </td>
@@ -983,7 +982,7 @@
                 </div>
                 <div class="form-group" style="margin-top: 1rem;">
                     <label class="required">Đơn Giá:</label>
-                    <input type="text" id="item-edit-price" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="font-weight: bold;">
+                    <input type="text" id="item-edit-price" disabled inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="font-weight: bold;">
                 </div>
             </div>
             <div class="modal-footer" style="justify-content: space-between;">
@@ -1411,6 +1410,151 @@
 
 
             // --- 5. QUẢN LÝ MODAL CHÍNH ---
+            // --- XỬ LÝ IN HÓA ĐƠN ---
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.btn-print'); // Tìm nút có class .btn-print
+                if (btn) {
+                    const row = btn.closest('tr');
+                    const maHD = btn.dataset.id || (row ? row.cells[1].innerText : null); 
+                    
+                    if (maHD) {
+                        printBill(maHD);
+                    }
+                }
+            });
+            async function printBill(maHD) {
+                try {
+                    // 1. Gọi API lấy chi tiết Hóa Đơn
+                    const response = await fetch(`/api/bill/detail/${maHD}`);
+                    if (!response.ok) throw new Error('Không tìm thấy hóa đơn');
+                    const result = await response.json(); 
+                    
+                    // Tùy vào cấu trúc API trả về, biến data có thể là result hoặc result.bill
+                    const data = result.HoaDon || result; 
+
+                    const date = new Date(data.NgayLapHoaDon);
+                    const dateStr = `Ngày ${date.getDate()} tháng ${date.getMonth() + 1} năm ${date.getFullYear()}`;
+                    const khachHang = data.KhachHang || { HoVaTen: 'Khách lẻ' };
+
+                    // 2. Tạo các dòng HTML cho bảng sách
+                    let itemsHtml = '';
+                    let stt = 1;
+                    
+                    // Giả sử mảng chi tiết tên là 'ChiTiet' hoặc 'Details'
+                    const details = data.CT_HDs || [];
+
+                    if (details.length > 0) {
+                        details.forEach(item => {
+                            // Xử lý tên sách (tùy cấu trúc object trả về)
+                            const tenSach = item.Sach.DauSach.TenSach;
+                            const theLoai = item.Sach.DauSach.TheLoai.TenTheLoai;
+                            
+                            itemsHtml += `
+                            <tr>
+                                <td style="text-align: center;">${stt++}</td>
+                                <td>${tenSach}</td>
+                                <td>${theLoai}</td>
+                                <td style="text-align: center;">${item.SoLuongBan || item.SoLuong}</td>
+                                <td style="text-align: right;">${new Intl.NumberFormat('vi-VN').format(item.DonGiaBan)}</td>
+                                <td style="text-align: right;">${new Intl.NumberFormat('vi-VN').format(item.ThanhTien)}</td>
+                            </tr>
+                            `;
+                        });
+                    }
+
+                    // 3. Tạo khung HTML
+                    const printContent = `
+                    <html>
+                    <head>
+                        <title>In Hóa Đơn - ${data.MaHoaDon}</title>
+                        <style>
+                            body { font-family: 'Times New Roman', Times, serif; font-size: 14px; margin: 20px; }
+                            .header { text-align: center; margin-bottom: 20px; }
+                            .store-name { font-size: 18px; font-weight: bold; text-transform: uppercase; }
+                            .title { font-size: 22px; font-weight: bold; margin-top: 10px; }
+                            .info-table { width: 100%; margin-bottom: 20px; }
+                            .info-table td { padding: 4px; vertical-align: top; }
+                            
+                            table.items { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                            table.items th, table.items td { border: 1px solid #333; padding: 6px; font-size: 13px; }
+                            table.items th { background-color: #f0f0f0; }
+                            
+                            .total-section { float: right; width: 40%; }
+                            .total-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+                            .grand-total { border-top: 1px solid #000; padding-top: 5px; }
+                            
+                            .footer { clear: both; text-align: center; margin-top: 50px; font-style: italic; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <div class="store-name">NHÀ SÁCH CỦA BẠN</div>
+                            <div>ĐC: 123 Đường ABC, TP.HCM - SĐT: 0909.123.456</div>
+                            <div class="title">HÓA ĐƠN BÁN HÀNG</div>
+                            
+                        </div>
+
+                        <table class="info-table">
+                            <tr> <td><strong>Mã hóa đơn: </strong>${data.MaHoaDon} </td></tr>
+                            <tr>
+                                <td><strong>Khách hàng:</strong> ${khachHang.HoVaTen}</td>
+                                <td style="text-align: right;"><strong>Ngày:</strong> ${dateStr}</td>
+                            </tr>
+                        </table>
+
+                        <table class="items">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;">STT</th>
+                                    <th>Tên Sách</th>
+                                    <th>Thể Loại</th>
+                                    <th style="width: 50px;">SL</th>
+                                    <th style="width: 100px;">Đơn Giá</th>
+                                    <th style="width: 120px;">Thành Tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${itemsHtml}
+                            </tbody>
+                        </table>
+
+                        <div class="total-section">
+                            <div class="total-row">
+                                <span>Tổng tiền hàng:</span>
+                                <span>${new Intl.NumberFormat('vi-VN').format(data.TongTien)}</span>
+                            </div>
+                            <div class="total-row">
+                                <span>Thanh toán:</span>
+                                <span>${new Intl.NumberFormat('vi-VN').format(data.SoTienTra || data.TongTien)}</span>
+                            </div>
+                            <div class="total-row grand-total">
+                                <span>Còn lại (Nợ):</span>
+                                <span>${new Intl.NumberFormat('vi-VN').format(data.ConLai || 0)}</span>
+                            </div>
+                        </div>
+
+                        <div class="footer">
+                            <p>Cảm ơn quý khách và hẹn gặp lại!</p>
+                        </div>
+                    </body>
+                    </html>
+                    `;
+
+                    const printWindow = window.open('', '', 'height=600,width=800');
+                    printWindow.document.write(printContent);
+                    printWindow.document.close();
+                    
+                    setTimeout(() => {
+                        printWindow.focus();
+                        printWindow.print();
+                    }, 500);
+
+                } catch (error) {
+                    console.error(error);
+                    alert('Lỗi in hóa đơn: ' + error.message);
+                }
+            }
+
             const addModal = document.getElementById('add-modal');
             const editModal = document.getElementById('edit-modal');
             
@@ -1581,7 +1725,7 @@
             // Lưu & Đóng
             document.getElementById('btn-save-add').addEventListener('click', () => {
                 const MaHD = generateMaHD(lastBillMaHD); 
-                const addModal = document.getElementById('addModal'); // Giả định ID của Modal thêm mới
+                const addModal = document.getElementById('add-modal'); // Giả định ID của Modal thêm mới
 
                 // Lấy dữ liệu từ các trường input
                 const maKhachHang = document.getElementById('add-ma-kh').value.trim();
@@ -1651,7 +1795,9 @@
                         // Tải lại bảng chính hoặc thêm dòng mới vào bảng master (tùy chọn)
                         
                         // Đóng Modal
-                        if (addModal) addModal.style.display = 'none';
+                        addModal.style.display = 'none';
+
+                        setTimeout(() => { location.reload(); }, 1000);
 
                     } else {
                         showToast(`Thêm thất bại: ${data.message || 'Lỗi không xác định.'}`, 'error');
@@ -1667,11 +1813,10 @@
                 // Bạn cần đảm bảo biến 'currentEditingMaHD' chứa Mã Hóa Đơn đang được chỉnh sửa.
                 // Biến này phải được thiết lập khi Modal được mở (ví dụ: khi nhấn nút 'Chỉnh sửa')
                 const MaHD = document.getElementById('edit-ma-hd').value; 
-                const editModal = document.getElementById('editModal'); // Giả định ID của Modal chỉnh sửa
+                const editModal = document.getElementById('edit-modal'); // Giả định ID của Modal chỉnh sửa
 
                 // 2. Lấy dữ liệu từ các trường input
                 const maKhachHang = document.getElementById('edit-ma-kh').value;
-                showToast(maKhachHang);
                 const tongTien = parseNumber(document.getElementById('edit-total-amount').dataset.rawValue);
                 const soTienTra = parseNumber(document.getElementById('edit-amount-paid').value); // Giả định ID này
                 
@@ -1729,9 +1874,10 @@
                 .then(data => {
                     if (data.message && data.message.includes('thành công')) {
                         showToast('Cập nhật hóa đơn thành công!', 'success');
+
+                        setTimeout(() => { location.reload(); }, 1000);
                         
-                        // Sau khi thành công: Cập nhật lại DOM trên bảng master (nếu cần) và Đóng Modal
-                        if (editModal) editModal.style.display = 'none';
+                        editModal.style.display = 'none';
 
                     } else {
                         // Hiển thị lỗi từ server (Ví dụ: Lỗi Tồn kho, Lỗi Quy định Nợ)

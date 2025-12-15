@@ -120,7 +120,7 @@ const getUserInfo = (req) => {
                 as: 'KhachHang',
                 attributes: ['HoVaTen'] // Lấy tên khách hàng
             }],
-            order: [['NgayLapHoaDon', 'DESC']]
+            order: [['NgayLapHoaDon', 'ASC']]
         });
         
         // 2. Render trang bills.ejs và truyền dữ liệu
@@ -273,7 +273,7 @@ const getReportPage = async (req, res) => {
                 as: 'KhachHang', // Đảm bảo alias này khớp với mối quan hệ đã định nghĩa
                 attributes: ['HoVaTen', 'TongNo'] // Lấy tên và nợ của khách hàng
             }],
-            order: [['NgayThuTien', 'DESC'], ['MaPhieuThu', 'DESC']] // Sắp xếp theo ngày mới nhất
+            order: [['MaPhieuThu', 'ASC'], ['NgayThuTien', 'DESC']] // Sắp xếp theo ngày mới nhất
         });
         
         // 2. Render trang receipts.ejs và truyền dữ liệu
