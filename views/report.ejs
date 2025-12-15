@@ -267,15 +267,15 @@
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="#" ><i class="fas fa-home"></i> Tổng quan</a></li>
+                    <li><a href="/dashboard" ><i class="fas fa-home"></i> Tổng quan</a></li>
                     <li><a href="/dashboard/employees"><i class="fas fa-users"></i>Nhân Viên</a></li>
                     <li><a href="/dashboard/books"><i class="fas fa-book"></i>Sách</a></li>
                     <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>Khách hàng</a></li> 
                     <li><a href="/dashboard/types-authors"><i class="fas fa-tags"></i>Thể loại & Tác giả</a></li>
-                    <li><a href="/dashboard/books-import"><i class="fas fa-file-invoice"></i>Phiếu nhập sách</a></li>
+                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>Phiếu nhập sách</a></li>
                     <li><a href="/dashboard/bills"><i class="fas fa-receipt"></i>Phiếu thu tiền</a></li>
                     <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="/dashboard/report" class="active"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+                    <li><a href="#" class="active"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
                     <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
@@ -293,7 +293,7 @@
                 </div>
                 <div class="user-menu">
                     <span class="user-trigger">
-                        Chào, <strong>admin</strong> <i class="fas fa-chevron-down"></i>
+                        Chào, <strong><%= username %></strong> <i class="fas fa-chevron-down"></i>
                     </span>
 
                     <div class="dropdown-menu">
@@ -693,6 +693,17 @@
                 });
             });
         }
+
+        // --- LOGOUT ---
+    const logoutBtn = document.getElementById('logout-button');
+    if(logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if(confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                window.location.href = '/logout';
+            }
+        });
+    }
 
     });
 </script>

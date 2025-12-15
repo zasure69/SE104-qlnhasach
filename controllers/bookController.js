@@ -759,6 +759,58 @@ const updateSach = async (req, res) => {
   }
 };
 
+const getSachById = async (req, res) => {
+  try {
+    const maSach = req.params.maSach;
+    console.log("[bookController] getSachById called with maSach:", maSach);
+
+    const sach = await db.Sach.findByPk(maSach, {
+      include: [
+        {
+          model: db.DauSach,
+          attributes: ["TenSach", "MaTheLoai"],
+          include: [
+            {
+              model: db.TheLoai,
+              attributes: ["TenTheLoai"],
+              required: false,
+            },
+          ],
+          required: false,
+        },
+      ],
+      raw: false,
+    });
+
+    console.log(
+      "[bookController] Found sach:",
+      sach ? sach.MaSach : "NOT FOUND"
+    );
+
+    if (!sach) {
+      console.log("[bookController] Sach not found, returning 404");
+      return res.status(404).json({ error: "Không tìm thấy sách" });
+    }
+
+    const result = {
+      MaSach: sach.MaSach,
+      TenSach: sach.DauSach ? sach.DauSach.TenSach : "",
+      NhaXB: sach.NhaXB || "",
+      NamXB: sach.NamXB || "",
+      SoLuongTon: sach.SoLuongTon || 0,
+      DonGia: 0, // Giá nhập mặc định
+      DonGiaBan: 0, // Giá bán mặc định
+    };
+
+    console.log("[bookController] Returning result:", result);
+    return res.status(200).json({ sach: result });
+  } catch (err) {
+    console.error("[bookController] getSachById error:", err.message);
+    console.error("[bookController] Stack:", err.stack);
+    return res.status(500).json({ error: "Lỗi server nội bộ: " + err.message });
+  }
+};
+
 const deleteSach = async (req, res) => {
   try {
     const maSach = req.params.maSach;
@@ -1019,6 +1071,7 @@ module.exports = {
   deleteDauSach,
   // Sach
   getAllSach,
+  getSachById,
   createSach,
   updateSach,
   deleteSach,

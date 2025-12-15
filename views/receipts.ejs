@@ -763,7 +763,7 @@
                     <li><a href="#" class="active"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
                     <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
                     <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+                    <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
                     <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
@@ -777,7 +777,7 @@
                 </div>
                 <div class="user-menu">
                     <span class="user-trigger">
-                        Chào, <strong>admin</strong> <i class="fas fa-chevron-down"></i>
+                        Chào, <strong><%= username %></strong> <i class="fas fa-chevron-down"></i>
                     </span>
 
                     <div class="dropdown-menu">
@@ -885,8 +885,8 @@
                         </div>
                         <div class="form-group"> <label>Số Điện Thoại</label> <input type="text" id="add-sdt" readonly>
                         </div>
-                        <div class="form-group"> <label>Email</label> <input type="text" id="add-email" readonly>
-                        </div>
+                        <!-- <div class="form-group"> <label>Email</label> <input type="text" id="add-email" readonly>
+                        </div> -->
                         <div class="form-group"> <label class="required">Số Tiền Thu</label> <input type="text" id="add-so-tien"
                                 required inputmode="numeric"> </div>
                     </div>
@@ -922,8 +922,8 @@
                             readonly> </div>
                         <!-- <div class="form-group"> <label>Email</label> <input type="text" id="edit-email" readonly>
                         </div> -->
-                        <div class="form-group"> <label class="required">Số Tiền Thu</label> <input type="number" id="edit-so-tien"
-                                required inputmode="numeric"> </div>
+                        <div class="form-group"> <label class="required">Số Tiền Thu</label> <input type="text" id="edit-so-tien"
+                                required inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')"> </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1140,22 +1140,52 @@
             // --- 6. LOGIC ICON XÓA (NGOÀI BẢNG DANH SÁCH) ---
             const receiptTable = document.getElementById('receipt-table');
             if (receiptTable) {
-                receiptTable.addEventListener('click', function(e) {
-                    // Kiểm tra click vào icon xóa
-                    if (e.target.classList.contains('delete-icon') || e.target.closest('.delete-icon')) {
-                        const row = e.target.closest('tr');
-                        const maPhieu = row.cells[1].textContent; // Cột 2 là Mã Phiếu
-                        
-                        if(confirm(`Bạn có chắc chắn muốn XÓA vĩnh viễn phiếu thu ${maPhieu}?`)) {
-                            simulateApiCall((success) => {
-                                if(success) {
-                                    row.remove();
-                                    showToast(`Đã xóa phiếu thu ${maPhieu} thành công!`, 'success');
+                receiptTable.addEventListener('click', async function(e) {
+        
+                // Kiểm tra click vào icon xóa (hoặc phần tử con của nó)
+                const deleteBtn = e.target.classList.contains('delete-icon') ? e.target : e.target.closest('.delete-icon');
+                
+                if (deleteBtn) {
+                    const row = deleteBtn.closest('tr');
+                    
+                    // Lấy Mã Phiếu Thu: Ưu tiên lấy từ data-id (chuẩn xác hơn), nếu không có thì lấy từ cột
+                    const maPhieu = row.dataset.id || row.cells[0].textContent.trim(); 
+                    
+                    // Cảnh báo người dùng (Thêm thông tin về việc hoàn tác nợ)
+                    if (confirm(`Bạn có chắc chắn muốn XÓA vĩnh viễn phiếu thu ${maPhieu}?\n\nLưu ý: Tổng nợ của khách hàng sẽ tăng trở lại tương ứng với số tiền của phiếu này.`)) {
+                        try {
+                            // 1. GỌI API DELETE
+                            const response = await fetch(`/api/receipts/${maPhieu}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Content-Type': 'application/json'
                                 }
                             });
+
+                            const result = await response.json();
+
+                            // 2. XỬ LÝ KẾT QUẢ
+                            if (response.ok) {
+                                // Thành công: Xóa dòng khỏi bảng giao diện ngay lập tức
+                                row.remove();
+                                showToast(`Đã xóa phiếu thu ${maPhieu} thành công!`, 'success');
+                                
+                                // (Tùy chọn) Nếu bảng danh sách trống, hiển thị thông báo "Chưa có phiếu thu"
+                                const tbody = receiptTable.querySelector('tbody');
+                                if (tbody && tbody.children.length === 0) {
+                                    tbody.innerHTML = '<tr><td colspan="5" class="no-data" style="text-align: center; padding: 20px;">Chưa có phiếu thu nào.</td></tr>';
+                                }
+                            } else {
+                                // Thất bại: Hiển thị lỗi từ server
+                                showToast(`Xóa thất bại: ${result.message}`, 'error');
+                            }
+                        } catch (error) {
+                            console.error('Lỗi khi xóa phiếu thu:', error);
+                            showToast('Lỗi kết nối server khi xóa.', 'error');
                         }
                     }
-                });
+                }
+            });
             }
 
 
@@ -1228,7 +1258,7 @@
 
                             // Hiển thị Modal ngay lập tức
                             editModal.style.display = 'flex';
-                            showToast('Tải dữ liệu thành công!', 'success');
+                            // showToast('Tải dữ liệu thành công!', 'success');
 
                         })
                         .catch(error => {
@@ -1250,13 +1280,94 @@
 
 
             // --- 8. SUBMIT FORM (LƯU) ---
+
+            function generateMaPhieuThu(lastMaPT) {
+                if (!lastMaPT) return 'PT001'; // Mặc định nếu chưa có phiếu nào
+
+                // Lấy phần số: 'PT012' -> '012' -> 12
+                const lastNumberStr = lastMaPT.replace('PT', '');
+                const lastNumber = parseInt(lastNumberStr);
+
+                if (isNaN(lastNumber)) return 'PT001';
+
+                const nextNumber = lastNumber + 1;
+                
+                // Định dạng thành 3 chữ số (001, 099, 100...)
+                const nextNumberStr = nextNumber.toString().padStart(3, '0');
+
+                return `PT${nextNumberStr}`;
+            }
+
             if (addForm) {
-                addForm.addEventListener('submit', (e) => {
+                addForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    simulateApiCall((success) => {
-                        showToast('Lập phiếu thu thành công!');
-                        addModal.style.display = 'none';
-                    });
+
+                    // 1. Thu thập dữ liệu từ Form
+                    const maKhInput = document.getElementById('add-ma-kh');
+                    const ngayThuInput = document.getElementById('add-ngay-thu');
+                    const soTienInput = document.getElementById('add-so-tien'); // Input tiền định dạng (VD: 100.000)
+
+                    const maKhachHang = maKhInput.value.trim();
+                    const ngayThuTien = ngayThuInput.value;
+                    const soTienThu = parseNumber(soTienInput.value); // Chuyển "100.000" -> 100000
+
+                    // Validate cơ bản
+                    if (!maKhachHang || soTienThu <= 0 || !ngayThuTien) {
+                        showToast('Vui lòng nhập đầy đủ thông tin và số tiền > 0', 'error');
+                        return;
+                    }
+
+                    try {
+                        // 2. Lấy Mã Phiếu Thu cuối cùng từ Server để tạo mã mới
+                        // (Đảm bảo bạn đã có route GET /api/receipts/lastMaPhieuThu như hướng dẫn trước)
+                        const resLastID = await fetch('/api/receipts/lastMaPhieuThu');
+                        const dataLastID = await resLastID.json();
+                        
+                        // Tạo mã mới (VD: PT005)
+                        const newMaPhieuThu = generateMaPhieuThu(dataLastID.lastMaPhieuThu);
+
+                        // 3. Chuẩn bị dữ liệu gửi đi
+                        const payload = {
+                            MaPhieuThu: newMaPhieuThu,
+                            MaKhachHang: maKhachHang,
+                            NgayThuTien: ngayThuTien,
+                            SoTienThu: soTienThu
+                        };
+
+                        // 4. Gọi API POST để tạo phiếu thu
+                        const response = await fetch('/api/receipts/create', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            showToast(`Lập phiếu thu ${newMaPhieuThu} thành công!`, 'success');
+                            
+                            // 5. Đóng Modal và Reset form
+                            addModal.style.display = 'none';
+                            addForm.reset();
+                            
+                            // Reset các trường thông tin khách hàng (nếu có auto-fill)
+                            const infoFields = ['ten-kh', 'dia-chi', 'sdt', 'email', 'tong-no'];
+                            infoFields.forEach(id => {
+                                const el = document.getElementById(`add-${id}`);
+                                if (el) el.value = '';
+                            });
+
+                            // (Tùy chọn) Reload lại trang sau 1s để cập nhật bảng danh sách
+                            setTimeout(() => location.reload(), 1000); 
+
+                        } else {
+                            showToast(`Lỗi: ${result.message}`, 'error');
+                        }
+
+                    } catch (error) {
+                        console.error('Lỗi khi lập phiếu thu:', error);
+                        showToast('Lỗi kết nối server.', 'error');
+                    }
                 });
             }
 
@@ -1322,6 +1433,8 @@
                                     if (cells[3]) cells[3].textContent = SoTienThu.toLocaleString('vi-VN');
                                 }
                                 
+                                setTimeout(() => location.reload(), 1000);
+                                
                                 // 4. Đóng Modal
                                 editModal.style.display = 'none';
 
@@ -1336,6 +1449,17 @@
                     });
                     });
             }
+
+            // --- LOGOUT ---
+    const logoutBtn = document.getElementById('logout-button');
+    if(logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if(confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                window.location.href = '/logout';
+            }
+        });
+    }
 
         });
     </script>

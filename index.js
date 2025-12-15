@@ -59,10 +59,6 @@ app.use('/api/customers', customersRoutes);
 const searchRoutes = require("./routes/searchRoutes");
 app.use("/api/search", searchRoutes);
 
-// Route xử lý API của Admin
-const employeesRoutes = require("./routes/employeesRoutes");
-app.use("/api/employees", employeesRoutes);
-
 const changeruleRoutes = require("./routes/changeruleRoutes");
 app.use("/api/change-rules", changeruleRoutes);
 
@@ -73,8 +69,15 @@ app.use("/api/reports", reportRoutes);
 const booksRoutes = require("./routes/booksRoutes");
 app.use("/api/books", booksRoutes);
 
-const receiptsRoute = require('./routes/receiptsRoutes');
-app.use('/api/receipts', receiptsRoute);
+const receiptsRoutes = require('./routes/receiptsRoutes');
+app.use('/api/receipts', receiptsRoutes);
+
+const booksimportRoutes = require('./routes/booksimportRoutes');
+app.use('/api/import', booksimportRoutes);
+
+// Route xử lý API của Admin
+const employeesRoutes = require("./routes/employeesRoutes");
+app.use("/api/employees", employeesRoutes);
 
 // --- Khởi động Server và Đồng bộ Database ---
 

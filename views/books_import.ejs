@@ -660,12 +660,11 @@
                     <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
                     <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
                     <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
-                    <li><a href="/dashboard/types"><i class="fas fa-tags"></i>QL Thể loại & Tác giả</a></li>
                     <li><a href="#" class="active"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
                     <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
                     <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
                     <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+                    <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
                     <li><a href="/dashboard/changerule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
@@ -676,7 +675,7 @@
                 <div class="top-bar-left"> <button class="menu-toggle" id="menu-toggle"> <i class="fas fa-bars"></i> </button> <h1>Quản lý Phiếu nhập sách</h1> </div>
                 <div class="user-menu">
                     <span class="user-trigger">
-                        Chào, <strong>admin</strong> <i class="fas fa-chevron-down"></i>
+                        Chào, <strong><%= username %></strong> <i class="fas fa-chevron-down"></i>
                     </span>
 
                     <div class="dropdown-menu">
@@ -705,36 +704,31 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>PN001</td>
-                                <td>10/11/2024</td>
-                                <td>20.000</td>
-                                <td>
-                                    <button class="btn btn-sm btn-secondary view-detail-btn" data-id="PN001">
-                                        <i class="fas fa-eye"></i> Chi tiết
-                                    </button>
-                                    <button class="btn btn-sm btn-print ml-2"
-                                        onclick="alert('Chức năng in hóa đơn HD001')"> <i class="fas fa-print"></i>
-                                    </button>
-                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
-                                </td>
-                            </tr>
-                             <tr>
-                                <td>2</td>
-                                <td>PN002</td>
-                                <td>15/11/2024</td>
-                                <td>5.500.000</td>
-                                <td>
-                                    <button class="btn btn-sm btn-secondary view-detail-btn" data-id="PN002">
-                                        <i class="fas fa-eye"></i> Chi tiết
-                                    </button>
-                                    <button class="btn btn-sm btn-print ml-2"
-                                        onclick="alert('Chức năng in hóa đơn HD001')"> <i class="fas fa-print"></i>
-                                    </button>
-                                    <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
-                                </td>
-                            </tr>
+                            <% if (importReceipts && importReceipts.length > 0) { %>
+                                <% importReceipts.forEach((receipt, index) => { %>
+                                    <tr>
+                                        <td><%= index + 1 %></td>
+                                        <td><%= receipt.MaPhieuNhap %></td>
+                                        <td><%= new Date(receipt.NgayNhapPhieu).toLocaleDateString('vi-VN') %></td>
+                                        <td><%= new Intl.NumberFormat('vi-VN').format(receipt.TongTien) %></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-secondary view-detail-btn" data-id="<%= receipt.MaPhieuNhap %>">
+                                                <i class="fas fa-eye"></i> Chi tiết
+                                            </button>
+                                            <button class="btn btn-sm btn-print ml-2 print-btn" data-id="<%= receipt.MaPhieuNhap %>"> 
+                                                <i class="fas fa-print"></i>
+                                            </button>
+                                            <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="5" style="text-align: center;">
+                                        Chưa có phiếu nhập sách nào.
+                                    </td>
+                                </tr>
+                            <% } %>
                         </tbody>
                     </table>
                 </div>
@@ -785,8 +779,8 @@
                             <input type="text" id="add-input-don-gia" placeholder="0"> 
                         </div>
                         <div class="form-group"> 
-                            <label class="required">Đơn Giá Bán:</label> 
-                            <input type="text" id="add-input-don-gia-ban" placeholder="0"> 
+                            <label>Đơn Giá Bán:</label> 
+                            <input type="text" id="add-input-don-gia-ban" placeholder="0" readonly style="background-color: #e9ecef;"> 
                         </div>
                         <div class="form-group">
                             <button type="button" class="btn btn-primary" id="btn-add-to-list" style="width: 100%; white-space: nowrap;"> 
@@ -856,7 +850,7 @@
                 </div>
 
                 <div class="section-wrapper">
-                    <h3 class="section-header-title">Thêm / Sửa sách trong phiếu</h3>
+                    <h3 class="section-header-title">Thêm sách trong phiếu</h3>
                     <div class="grid-add-book">
                         <div class="form-group"> 
                             <label class="required">Mã Sách:</label> 
@@ -875,8 +869,8 @@
                             <input type="text" id="edit-input-don-gia"> 
                         </div>
                         <div class="form-group"> 
-                            <label class="required">Đơn Giá Bán:</label> 
-                            <input type="text" id="edit-input-don-gia-ban"> 
+                            <label>Đơn Giá Bán:</label> 
+                            <input type="text" id="edit-input-don-gia-ban" readonly style="background-color: #e9ecef;"> 
                         </div>
                         <div class="form-group">
                             <button type="button" class="btn btn-primary" id="btn-add-to-list-edit" style="width: 100%; white-space: nowrap;"> 
@@ -940,8 +934,8 @@
                     <input type="text" id="item-edit-price" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="font-weight: bold;">
                 </div>
                 <div class="form-group" style="margin-top: 1rem;">
-                    <label class="required">Đơn Giá Bán:</label>
-                    <input type="text" id="item-edit-sell-price" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="font-weight: bold;">
+                    <label>Đơn Giá Bán:</label>
+                    <input type="text" id="item-edit-sell-price" readonly style="font-weight: bold; background-color: #e9ecef;">
                 </div>
             </div>
             <div class="modal-footer">
@@ -975,7 +969,35 @@
                 setTimeout(() => { toast.classList.add('show'); }, 100);
                 setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
             }
-            function simulateApiCall(callback) { showLoader(); setTimeout(() => { hideLoader(); callback(true); }, 500); }
+            // API Call Helper (Real API)
+            async function apiCall(url, method = 'GET', body = null) {
+                showLoader();
+                try {
+                    const options = {
+                        method,
+                        headers: { 'Content-Type': 'application/json' }
+                    };
+                    if (body) options.body = JSON.stringify(body);
+                    
+                    const response = await fetch(url, options);
+                    
+                    // KIỂM TRA response.ok TRƯỚC KHI parse JSON
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        hideLoader();
+                        throw new Error(`Server error ${response.status}: ${errorText.substring(0, 100)}`);
+                    }
+                    
+                    const data = await response.json();
+                    hideLoader();
+                    return { success: true, data };
+                } catch (error) {
+                    hideLoader();
+                    console.error('API Error:', error);
+                    return { success: false, error: error.message };
+                }
+            }
+            
             function formatNumber(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
             function parseNumber(str) { if (!str) return 0; return parseFloat(str.toString().replace(/\./g, '')) || 0; }
 
@@ -984,12 +1006,17 @@
 
             // Hàm tính tổng tiền
             window.updateTotal = function(tableId, totalId) {
-                const rows = document.querySelectorAll(`#${tableId} .row-total`);
+                const rows = document.querySelectorAll(`#${tableId} tbody tr`);
                 let total = 0;
-                if (rows) rows.forEach(r => total += parseFloat(r.dataset.value));
+                rows.forEach(row => {
+                    const totalCell = row.querySelector('.total-cell');
+                    if (totalCell && totalCell.dataset.value) {
+                        total += parseFloat(totalCell.dataset.value);
+                    }
+                });
                 
                 const totalEl = document.getElementById(totalId);
-                if (totalEl) totalEl.textContent = formatNumber(total);
+                if (totalEl) totalEl.textContent = total;
             }
 
             // Hàm MỞ Modal Sửa Dòng (Được gọi khi bấm bút chì)
@@ -1007,8 +1034,8 @@
                 // Điền vào Modal nhỏ
                 document.getElementById('item-edit-name').value = name;
                 document.getElementById('item-edit-qty').value = qty;
-                document.getElementById('item-edit-price').value = formatNumber(priceRaw); 
-                document.getElementById('item-edit-sell-price').value = formatNumber(sellPriceRaw); // Điền giá bán
+                document.getElementById('item-edit-price').value = priceRaw; 
+                document.getElementById('item-edit-sell-price').value = sellPriceRaw; // Điền giá bán
 
                 // Hiện Modal nhỏ
                 document.getElementById('line-item-modal').style.display = 'flex';
@@ -1037,8 +1064,8 @@
                     <td>${data.maSach}</td>
                     <td class="name-cell">${data.tenSach}</td>
                     <td class="qty-cell text-center">${data.soLuong}</td>
-                    <td class="price-cell text-right" data-raw="${data.donGia}">${formatNumber(data.donGia)}</td>
-                    <td class="sell-price-cell text-right" data-raw="${data.donGiaBan}">${formatNumber(data.donGiaBan)}</td> <td class="total-cell text-right" data-value="${thanhTien}">${formatNumber(thanhTien)}</td>
+                    <td class="price-cell text-right" data-raw="${data.donGia}">${data.donGia}</td>
+                    <td class="sell-price-cell text-right" data-raw="${data.donGiaBan}">${data.donGiaBan}</td> <td class="total-cell text-right" data-value="${thanhTien}">${thanhTien}</td>
                     <td class="text-center">
                         <i class="fas fa-pencil-alt action-icon edit-row-icon" 
                            onclick="openItemEditModal(this, '${tableId}')"
@@ -1062,7 +1089,7 @@
 
                     const newQty = parseInt(document.getElementById('item-edit-qty').value);
                     const newPrice = parseNumber(document.getElementById('item-edit-price').value);
-                    const newSellPrice = parseNumber(document.getElementById('item-edit-sell-price').value); // Lấy giá bán mới
+                    const newSellPrice = Math.round(newPrice * 1.05); // Tự động tính giá bán = giá nhập * 1.05
 
                     if (newQty <= 0) { alert("Số lượng phải lớn hơn 0"); return; }
 
@@ -1070,16 +1097,16 @@
                     currentRowToEdit.querySelector('.qty-cell').textContent = newQty;
                     
                     const priceCell = currentRowToEdit.querySelector('.price-cell');
-                    priceCell.textContent = formatNumber(newPrice);
+                    priceCell.textContent = newPrice;
                     priceCell.dataset.raw = newPrice;
 
                     const sellPriceCell = currentRowToEdit.querySelector('.sell-price-cell');
-                    sellPriceCell.textContent = formatNumber(newSellPrice);
+                    sellPriceCell.textContent = newSellPrice;
                     sellPriceCell.dataset.raw = newSellPrice;
 
                     const newTotal = newQty * newPrice; // Thành tiền tính theo giá nhập
                     const totalCell = currentRowToEdit.querySelector('.total-cell');
-                    totalCell.textContent = formatNumber(newTotal);
+                    totalCell.textContent = newTotal;
                     totalCell.dataset.value = newTotal;
 
                     // Cập nhật tổng
@@ -1101,25 +1128,56 @@
                 });
             });
             
-            // Format input giá
-            ['item-edit-price', 'item-edit-sell-price'].forEach(id => {
-                const el = document.getElementById(id);
-                if(el) {
-                    el.addEventListener('input', function() {
-                        const val = this.value.replace(/[^0-9]/g, '');
-                        this.value = val ? formatNumber(val) : '';
-                    });
+            // Format input giá VÀ tự động tính giá bán
+            const itemEditPriceInput = document.getElementById('item-edit-price');
+            const itemEditSellPriceInput = document.getElementById('item-edit-sell-price');
+            
+            if(itemEditPriceInput) {
+                itemEditPriceInput.addEventListener('input', function() {
+                    const val = this.value.replace(/[^0-9]/g, '');
+                    this.value = val ? val : '';
+                    
+                    // Tự động tính đơn giá bán = đơn giá nhập * 1.05
+                    if(val && itemEditSellPriceInput) {
+                        const giaNhap = parseFloat(val);
+                        const giaBan = Math.round(giaNhap * 1.05);
+                        itemEditSellPriceInput.value = giaBan;
+                    }
+                });
+            }
+
+
+            // --- 4. AUTO-FILL SÁCH TỪ API ---
+            async function findBookInfo(maSach) {
+                try {
+                    console.log('[DEBUG] Fetching book info for:', maSach);
+                    const response = await fetch(`/api/books/getSach/${maSach}`);
+                    console.log('[DEBUG] Response status:', response.status);
+                    
+                    if (!response.ok) {
+                        const text = await response.text();
+                        console.error('[DEBUG] Response error:', text);
+                        return null;
+                    }
+                    
+                    const contentType = response.headers.get('content-type');
+                    console.log('[DEBUG] Content-Type:', contentType);
+                    
+                    if (!contentType || !contentType.includes('application/json')) {
+                        const text = await response.text();
+                        console.error('[DEBUG] Response is not JSON:', text.substring(0, 200));
+                        showToast('Lỗi server: Không nhận được JSON', 'error');
+                        return null;
+                    }
+                    
+                    const data = await response.json();
+                    console.log('[DEBUG] Book data:', data);
+                    return data.sach || null;
+                } catch (error) {
+                    console.error('[ERROR] Fetching book:', error);
+                    showToast('Lỗi kết nối: ' + error.message, 'error');
+                    return null;
                 }
-            });
-
-
-            // --- 4. DATA GIẢ LẬP & LOGIC FORM ---
-            function findBookInfo(maSach) {
-                const books = {
-                    'S001': { name: 'Mắt biếc', price: 80000, sellPrice: 105000 }, 
-                    'S002': { name: 'Harry Potter', price: 150000, sellPrice: 220000 }
-                };
-                return books[maSach.toUpperCase()] || null;
             }
 
             ['add', 'edit'].forEach(prefix => {
@@ -1127,31 +1185,68 @@
                 const tenSachInput = document.getElementById(`${prefix}-input-ten-sach`);
                 const donGiaInput = document.getElementById(`${prefix}-input-don-gia`);
                 const donGiaBanInput = document.getElementById(`${prefix}-input-don-gia-ban`);
+                const maNhanVienInput = document.getElementById(`${prefix}-ma-nv`);
 
+                if (maNhanVienInput) {
+                    maNhanVienInput.addEventListener('blur', async function() {
+                        const maNhanVien = this.value.trim();
+
+                        // Chỉ kiểm tra khi có giá trị
+                        if (maNhanVien) {
+                            try {
+                                // Gọi API để kiểm tra
+                                const response = await fetch(`/api/employees/check-employee/${maNhanVien}`);
+                                const data = await response.json();
+
+                                if (!data.exists) {
+                                    // Nếu không tồn tại, hiển thị toast lỗi
+                                    showToast(data.message || 'Mã nhân viên không tồn tại.', 'error');
+                                }
+                            } catch (error) {
+                                console.error('Lỗi khi kiểm tra mã nhân viên:', error);
+                                showToast('Không thể kết nối đến máy chủ để kiểm tra. Vui lòng thử lại.', 'error');
+                            }
+                        }
+                    });
+                }
                 if(maSachInput && tenSachInput){
-                    maSachInput.addEventListener('blur', function() {
-                        const book = findBookInfo(this.value);
+                    maSachInput.addEventListener('blur', async function() {
+                        const maSach = this.value.trim();
+                        if (!maSach) return;
+                        
+                        const book = await findBookInfo(maSach);
                         if (book) {
-                            tenSachInput.value = book.name;
-                            if(donGiaInput && !donGiaInput.value) donGiaInput.value = formatNumber(book.price);
-                            if(donGiaBanInput && !donGiaBanInput.value) donGiaBanInput.value = formatNumber(book.sellPrice); // Auto-fill giá bán
+                            tenSachInput.value = book.TenSach || book.name || '';
+                            // Nếu có giá nhập từ DB, fill vào và tự động tính giá bán
+                            if(donGiaInput && !donGiaInput.value && book.DonGia) {
+                                const giaNhap = book.DonGia;
+                                donGiaInput.value = giaNhap;
+                                // Tự động tính giá bán
+                                if(donGiaBanInput) {
+                                    donGiaBanInput.value = Math.round(giaNhap * 1.05);
+                                }
+                            }
+                        } else {
+                            showToast('Không tìm thấy sách với mã: ' + maSach, 'error');
                         }
                     });
                 }
                 
-                // Format input khi nhập
+                // Format input khi nhập VÀ tự động tính giá bán
                 if(donGiaInput) {
                     donGiaInput.addEventListener('input', function() {
                         const val = this.value.replace(/[^0-9]/g, '');
-                        this.value = val ? formatNumber(val) : '';
+                        this.value = val ? val : '';
+                        
+                        // Tự động tính đơn giá bán = đơn giá nhập * 1.05
+                        if(val && donGiaBanInput) {
+                            const giaNhap = parseFloat(val);
+                            const giaBan = Math.round(giaNhap * 1.05);
+                            donGiaBanInput.value = giaBan;
+                        }
                     });
                 }
-                if(donGiaBanInput) {
-                    donGiaBanInput.addEventListener('input', function() {
-                        const val = this.value.replace(/[^0-9]/g, '');
-                        this.value = val ? formatNumber(val) : '';
-                    });
-                }
+                // Không cần xử lý input cho giá bán nữa vì nó tự động
 
                 // Nút "Thêm" vào bảng
                 const btnId = `btn-add-to-list${prefix === 'edit' ? '-edit' : ''}`;
@@ -1170,8 +1265,8 @@
                             maSach: maSachInput.value, 
                             tenSach: tenSachInput.value, 
                             soLuong: parseInt(soLuongInput.value), 
-                            donGia: parseNumber(donGiaInput.value),
-                            donGiaBan: parseNumber(donGiaBanInput.value) // Lấy giá bán
+                            donGia: donGiaInput.value,
+                            donGiaBan: donGiaBanInput.value // Lấy giá bán
                         });
 
                         // Reset
@@ -1210,21 +1305,47 @@
             // Mở Modal Sửa
             const viewDetailBtns = document.querySelectorAll('.view-detail-btn');
             viewDetailBtns.forEach(btn => {
-                btn.addEventListener('click', function () {
+                btn.addEventListener('click', async function () {
                     const id = this.dataset.id;
-                    document.getElementById('edit-ma-phieu').value = id;
-                    document.getElementById('edit-ngay-nhap').value = '2024-11-10';
-                    document.getElementById('edit-ma-nv').value = 'NV01';
-
-                    const tbody = document.querySelector('#edit-detail-table tbody');
-                    tbody.innerHTML = '';
+                    // 1. Gọi API lấy chi tiết phiếu
+                    const result = await apiCall(`/api/import/${id}`);
                     
-                    // Thêm dòng mẫu (Có thêm donGiaBan)
-                    addRowToDetailTable('edit-detail-table', 'edit-total-amount', {
-                        maSach: 'S001', tenSach: 'Mắt biếc', soLuong: 50, donGia: 80000, donGiaBan: 105000
-                    });
+                    if (!result.success) {
+                        showToast('Không thể tải dữ liệu phiếu nhập!', 'error');
+                        return;
+                    }
 
+                    const receipt = result.data.receipt;
+
+                    // 2. Điền thông tin chung (Header)
+                    document.getElementById('edit-ma-phieu').value = receipt.MaPhieuNhap;
+                    document.getElementById('edit-ngay-nhap').value = receipt.NgayNhapPhieu ? receipt.NgayNhapPhieu.substring(0, 10) : '';
+                    document.getElementById('edit-ma-nv').value = receipt.MaNhanVien || '';
+
+                    // 3. Điền chi tiết sách (Table)
+                    const tbody = document.querySelector('#edit-detail-table tbody');
+                    tbody.innerHTML = ''; // Xóa dữ liệu cũ/dummy
+
+                    if (receipt.ChiTiet && receipt.ChiTiet.length > 0) {
+                        receipt.ChiTiet.forEach(item => {
+                            // Lấy tên sách từ quan hệ lồng nhau: CT_PNS -> Sach -> DauSach -> TenSach
+                            // Cần kiểm tra null an toàn (optional chaining)
+                            const tenSach = item.Sach?.DauSach?.TenSach || "Không xác định";
+
+                            addRowToDetailTable('edit-detail-table', 'edit-total-amount', {
+                                maSach: item.MaSach, 
+                                tenSach: tenSach, 
+                                soLuong: item.SoLuong, 
+                                donGia: item.DonGiaNhap, 
+                                donGiaBan: item.DonGiaBan
+                            });
+                        });
+                    }
+
+                    // 4. Lưu trạng thái ban đầu để dùng cho nút "Đặt lại"
                     setTimeout(() => { originalEditState = getEditState(); }, 100);
+                    
+                    // 5. Hiển thị Modal
                     editModal.style.display = 'flex';
                 });
             });
@@ -1277,12 +1398,72 @@
                 });
             }
 
-            // Lưu & Đóng
-            document.getElementById('btn-save-add').addEventListener('click', () => {
-                simulateApiCall(() => { addModal.style.display = 'none'; showToast('Thêm thành công!'); });
+            // Lưu Thêm Mới
+            document.getElementById('btn-save-add').addEventListener('click', async () => {
+                const ngayNhap = document.getElementById('add-ngay-nhap').value;
+                const maNV = document.getElementById('add-ma-nv').value.trim();
+                
+                // Lấy chi tiết từ bảng
+                const rows = document.querySelectorAll('#add-detail-table tbody tr');
+                if (rows.length === 0) {
+                    showToast('Vui lòng thêm ít nhất một sách!', 'error');
+                    return;
+                }
+                
+                const chiTiet = Array.from(rows).map(row => ({
+                    MaSach: row.cells[1].textContent.trim(), // cells[0]=STT, cells[1]=Mã Sách
+                    SoLuong: parseInt(row.cells[3].textContent), // cells[3]=Số Lượng
+                    DonGiaNhap: row.cells[4].textContent, // cells[4]=Đơn Giá Nhập
+                    DonGiaBan: row.cells[5].textContent // cells[5]=Đơn Giá Bán
+                }));
+                
+                const result = await apiCall('/api/import/create', 'POST', {
+                    NgayNhapPhieu: ngayNhap,
+                    MaNhanVien: maNV || null,
+                    chiTiet
+                });
+                
+                if (result.success) {
+                    addModal.style.display = 'none';
+                    showToast('Thêm phiếu nhập thành công!');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(result.error || 'Có lỗi xảy ra!', 'error');
+                }
             });
-            document.getElementById('btn-save-edit').addEventListener('click', () => {
-                simulateApiCall(() => { editModal.style.display = 'none'; showToast('Cập nhật thành công!'); });
+            
+            // Lưu Cập Nhật
+            document.getElementById('btn-save-edit').addEventListener('click', async () => {
+                const maPhieu = document.getElementById('edit-ma-phieu').value;
+                const ngayNhap = document.getElementById('edit-ngay-nhap').value;
+                const maNV = document.getElementById('edit-ma-nv').value.trim();
+                
+                const rows = document.querySelectorAll('#edit-detail-table tbody tr');
+                if (rows.length === 0) {
+                    showToast('Vui lòng thêm ít nhất một sách!', 'error');
+                    return;
+                }
+                
+                const chiTiet = Array.from(rows).map(row => ({
+                    MaSach: row.cells[1].textContent.trim(), // cells[0]=STT, cells[1]=Mã Sách
+                    SoLuong: parseInt(row.cells[3].textContent), // cells[3]=Số Lượng
+                    DonGiaNhap: row.cells[4].textContent, // cells[4]=Đơn Giá Nhập
+                    DonGiaBan: row.cells[5].textContent // cells[5]=Đơn Giá Bán
+                }));
+                
+                const result = await apiCall(`/api/import/update/${maPhieu}`, 'PATCH', {
+                    NgayNhapPhieu: ngayNhap,
+                    MaNhanVien: maNV || null,
+                    chiTiet
+                });
+                
+                if (result.success) {
+                    editModal.style.display = 'none';
+                    showToast('Cập nhật phiếu nhập thành công!');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(result.error || 'Có lỗi xảy ra!', 'error');
+                }
             });
 
             document.querySelectorAll('.close-modal').forEach(btn => {
@@ -1291,18 +1472,168 @@
                     editModal.style.display = 'none';
                 });
             });
+
+            // --- XỬ LÝ IN PHIẾU NHẬP ---
+            
+            // Bắt sự kiện click cho tất cả nút in
+            document.addEventListener('click', function(e) {
+                // Kiểm tra nếu click vào nút in hoặc icon bên trong nút in
+                const btn = e.target.closest('.print-btn');
+                if (btn) {
+                    const id = btn.dataset.id;
+                    printReceipt(id);
+                }
+            });
+
+            async function printReceipt(maPhieu) {
+                // 1. Lấy dữ liệu phiếu từ Server
+                const result = await apiCall(`/api/import/${maPhieu}`);
+                
+                if (!result.success) {
+                    showToast('Không thể lấy dữ liệu để in!', 'error');
+                    return;
+                }
+
+                const data = result.data.receipt;
+                const date = new Date(data.NgayNhapPhieu);
+                const dateStr = `Ngày ${date.getDate()} tháng ${date.getMonth() + 1} năm ${date.getFullYear()}`;
+
+                // 2. Tạo nội dung HTML cho hóa đơn (Template in)
+                // Bạn có thể sửa CSS trong thẻ <style> dưới đây để đẹp hơn
+                let itemsHtml = '';
+                let stt = 1;
+                
+                if (data.ChiTiet) {
+                    data.ChiTiet.forEach(item => {
+                        const tenSach = item.Sach?.DauSach?.TenSach || "Sách đã xóa";
+                        itemsHtml += `
+                            <tr>
+                                <td style="text-align: center;">${stt++}</td>
+                                <td>${tenSach}</td>
+                                <td style="text-align: center;">${item.SoLuong}</td>
+                                <td style="text-align: right;">${item.DonGiaNhap}</td>
+                                <td style="text-align: right;">${item.ThanhTien}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                const printContent = `
+                <html>
+                <head>
+                    <title>In Phiếu Nhập - ${maPhieu}</title>
+                    <style>
+                        body { font-family: 'Times New Roman', Times, serif; font-size: 14px; margin: 20px; }
+                        .header { text-align: center; margin-bottom: 20px; }
+                        .store-name { font-size: 18px; font-weight: bold; text-transform: uppercase; }
+                        .title { font-size: 22px; font-weight: bold; margin-top: 10px; }
+                        .info { margin-bottom: 20px; }
+                        .info p { margin: 5px 0; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                        th, td { border: 1px solid #333; padding: 8px; }
+                        th { background-color: #f0f0f0; }
+                        .total-section { text-align: right; font-weight: bold; font-size: 16px; margin-bottom: 30px; }
+                        .signature-section { display: flex; justify-content: space-between; text-align: center; margin-top: 50px; }
+                        .signature-box { width: 30%; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <div class="store-name">NHÀ SÁCH CỦA BẠN</div>
+                        <div>Địa chỉ: 123 Đường ABC, TP.HCM</div>
+                        <div class="title">PHIẾU NHẬP SÁCH</div>
+                        <div>(${dateStr})</div>
+                    </div>
+
+                    <div class="info">
+                        <p><strong>Mã phiếu:</strong> ${data.MaPhieuNhap}</p>
+                        <p><strong>Nhân viên nhập:</strong> ${data.MaNhanVien || '---'}</p>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">STT</th>
+                                <th>Tên Sách</th>
+                                <th style="width: 80px;">SL</th>
+                                <th style="width: 120px;">Đơn Giá</th>
+                                <th style="width: 150px;">Thành Tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsHtml}
+                        </tbody>
+                    </table>
+
+                    <div class="total-section">
+                        Tổng cộng: ${data.TongTien} VNĐ
+                    </div>
+
+                    <div class="signature-section">
+                        <div class="signature-box">
+                            <strong>Người lập phiếu</strong><br>
+                            (Ký, họ tên)<br><br><br><br>
+                        </div>
+                        <div class="signature-box">
+                            <strong>Thủ kho</strong><br>
+                            (Ký, họ tên)<br><br><br><br>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                `;
+
+                // 3. Mở cửa sổ in
+                const printWindow = window.open('', '', 'height=600,width=800');
+                printWindow.document.write(printContent);
+                printWindow.document.close(); // Quan trọng: Đóng luồng ghi để trình duyệt render
+                
+                // Đợi một chút để load nội dung rồi mới gọi lệnh in
+                setTimeout(() => {
+                    printWindow.focus();
+                    printWindow.print();
+                    // printWindow.close(); // Có thể bỏ comment nếu muốn tự đóng sau khi in
+                }, 500);
+            }
             
             // Xóa phiếu ngoài bảng
             const masterTable = document.getElementById('master-table');
             if (masterTable) {
-                masterTable.addEventListener('click', function(e) {
+                masterTable.addEventListener('click', async function(e) {
                     if (e.target.classList.contains('delete-icon') || e.target.closest('.delete-icon')) {
-                        if(confirm(`Xóa phiếu nhập này?`)) {
-                            simulateApiCall(() => { e.target.closest('tr').remove(); showToast('Đã xóa!'); });
+                        const row = e.target.closest('tr');
+                        const maPhieu = row.cells[1].textContent.trim();
+                        
+                        if(confirm(`Xóa phiếu nhập ${maPhieu}?`)) {
+                            const result = await apiCall(`/api/import/delete/${maPhieu}`, 'DELETE');
+                            if (result.success) {
+                                row.remove();
+                                showToast('Xóa phiếu nhập thành công!');
+                                const tableBody = document.getElementById('master-table').getElementsByTagName('tbody')[0];
+                                if (tableBody.rows.length === 0) {
+                                    // Nếu <tbody> không còn hàng nào
+                                    const newRow = tableBody.insertRow(); // Thêm 1 hàng mới
+                                    // Thêm ô "Không có nhân viên nào"
+                                    newRow.innerHTML = `<td colspan="5" style="text-align: center;">Chưa có phiếu nhập sách nào.</td>`;
+                                }
+                            } else {
+                                showToast(result.error || 'Có lỗi xảy ra!', 'error');
+                            }
                         }
                     }
                 });
             }
+
+            // --- LOGOUT ---
+    const logoutBtn = document.getElementById('logout-button');
+    if(logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if(confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                window.location.href = '/logout';
+            }
+        });
+    }
 
         });
     </script>

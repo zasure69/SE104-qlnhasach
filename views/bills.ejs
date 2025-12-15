@@ -682,7 +682,7 @@
                     <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
                     <li><a href="#" class="active"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
                     <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="/dashboard/report"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+                    <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
                     <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
@@ -696,7 +696,7 @@
                 </div>
                 <div class="user-menu">
                     <span class="user-trigger">
-                        Chào, <strong>admin</strong> <i class="fas fa-chevron-down"></i>
+                        Chào, <strong><%= username %></strong> <i class="fas fa-chevron-down"></i>
                     </span>
 
                     <div class="dropdown-menu">
@@ -1430,25 +1430,6 @@
             const viewDetailBtns = document.querySelectorAll('.view-detail-btn');
             viewDetailBtns.forEach(btn => {
                 btn.addEventListener('click', function () {
-                    // const id = this.dataset.id;
-                    // document.getElementById('edit-ma-hd').value = id;
-                    // document.getElementById('edit-ngay-lap').value = '2025-11-22';
-                    // document.getElementById('edit-ma-kh').value = 'KH01';
-                    // document.getElementById('edit-ten-kh').value = 'Nguyễn Văn A';
-
-                    // const tbody = document.querySelector('#edit-detail-table tbody');
-                    // tbody.innerHTML = '';
-                    
-                    // addRowToDetailTable('edit-detail-table', 'edit-total-amount', {
-                    //     maSach: 'S001', tenSach: 'Mắt biếc', cat: 'Truyện ngắn', soLuong: 2, donGia: 105000
-                    // });
-
-                    // document.getElementById('edit-amount-paid').value = '100.000';
-                    // updateTotal('edit-detail-table', 'edit-total-amount');
-
-                    // // Lưu snapshot cho nút Đặt lại
-                    // setTimeout(() => { originalEditState = getEditState(); }, 100);
-                    // editModal.style.display = 'flex';
                     const maHd = this.dataset.id;
         
                     showLoader(); // Bắt đầu hiển thị loader
@@ -1467,7 +1448,7 @@
                             
                             // Trích xuất dữ liệu Master và Detail theo cấu trúc JSON của Controller
                             const masterBill = data.HoaDon;
-                            const detailLines = data.Details;
+                            const detailLines = masterBill.CT_HDs;
 
                             // --- 1. Đổ dữ liệu HÓA ĐƠN (HOADON) vào các trường Master ---
                             document.getElementById('edit-ma-hd').value = masterBill.MaHoaDon;
@@ -1773,14 +1754,62 @@
             // Xóa hóa đơn ngoài bảng
             const masterTable = document.getElementById('master-table');
             if (masterTable) {
-                masterTable.addEventListener('click', function(e) {
-                    if (e.target.classList.contains('delete-icon') || e.target.closest('.delete-icon')) {
-                        if(confirm(`Xóa hóa đơn này?`)) {
-                            simulateApiCall(() => { e.target.closest('tr').remove(); showToast('Đã xóa!'); });
+                masterTable.addEventListener('click', async function(e) {
+                // Tìm nút xóa (icon hoặc phần tử cha)
+                const deleteBtn = e.target.classList.contains('delete-icon') ? e.target : e.target.closest('.delete-icon');
+
+                if (deleteBtn) {
+                    const row = deleteBtn.closest('tr');
+                    // Lấy Mã Hóa Đơn (Ưu tiên lấy từ data-id nếu có, không thì lấy cột đầu tiên)
+                    const maHD = row.dataset.id || row.cells[0].textContent.trim();
+
+                    const confirmMsg = `CẢNH BÁO: Bạn có chắc chắn muốn XÓA hóa đơn ${maHD}?\n\n` +
+                                    `- Số lượng sách sẽ được cộng lại vào kho.\n` +
+                                    `- Số nợ của khách hàng (nếu có) sẽ bị hủy bỏ.`;
+
+                    if (confirm(confirmMsg)) {
+                        try {
+                            // 1. Gọi API DELETE
+                            const response = await fetch(`/api/bill/${maHD}`, {
+                                method: 'DELETE',
+                                headers: { 'Content-Type': 'application/json' }
+                            });
+
+                            const result = await response.json();
+
+                            if (response.ok) {
+                                // 2. Thành công: Xóa dòng khỏi bảng
+                                row.remove();
+                                showToast(`Đã xóa hóa đơn ${maHD} thành công!`, 'success');
+
+                                // Kiểm tra nếu bảng trống thì hiện thông báo
+                                const tbody = masterTable.querySelector('tbody');
+                                if (tbody && tbody.children.length === 0) {
+                                    tbody.innerHTML = '<tr><td colspan="7" class="no-data" style="text-align:center; padding:20px;">Chưa có hóa đơn nào.</td></tr>';
+                                }
+                            } else {
+                                // Thất bại
+                                showToast(`Lỗi: ${result.message}`, 'error');
+                            }
+                        } catch (error) {
+                            console.error('Lỗi khi xóa hóa đơn:', error);
+                            showToast('Lỗi kết nối server.', 'error');
                         }
                     }
-                });
+                }
+            });
             }
+
+            // --- LOGOUT ---
+    const logoutBtn = document.getElementById('logout-button');
+    if(logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if(confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                window.location.href = '/logout';
+            }
+        });
+    }
 
         });
     </script>

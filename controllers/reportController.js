@@ -23,12 +23,60 @@ module.exports = {
         }
     },
     async getDoanhThuAPI(req, res) {
+<<<<<<< HEAD
         try {
             let { month, year } = req.query;
             month = parseInt(month);
             year = parseInt(year);
             const startDate = new Date(year, month - 1, 1); 
             const endDate = new Date(year, month, 0, 23, 59, 59);
+=======
+    try {
+      let { month, year } = req.query;
+      month = parseInt(month);
+      year = parseInt(year);
+      const startDate = new Date(year, month - 1, 1); 
+      const endDate = new Date(year, month, 0, 23, 59, 59);
+      const listHD = await HoaDon.findAll({
+        where: {
+          NgayLapHoaDon: {
+            [Op.between]: [startDate, endDate] 
+          }
+        },
+        include: [{
+            model: CT_HD,
+            include: [{
+                model: Sach,
+                include: [DauSach] 
+        }]
+      }]
+      });
+      let reportData = {};
+      let totalRevenue = 0;
+      listHD.forEach(hd => {
+        hd.CT_HD.forEach(ct => {
+           const donGia = parseFloat(ct.DonGiaBan);
+           const soLuong = parseInt(ct.SoLuong);
+           const thanhTien = donGia * soLuong;
+           const theLoai = ct.Sach.DauSach.MaTheLoai || "Khác"; 
+           if (!reportData[theLoai]) {
+               reportData[theLoai] = {
+                   MaTheLoai: theLoai,
+                   SoLuongBan: 0,
+                   ThanhTien: 0
+               };
+           }
+           reportData[theLoai].SoLuongBan += soLuong;
+           reportData[theLoai].ThanhTien += thanhTien;
+           totalRevenue += thanhTien;
+        });
+      });
+      const result = Object.values(reportData).map(item => ({
+          ...item,
+          TiLe: totalRevenue > 0 ? ((item.ThanhTien / totalRevenue) * 100).toFixed(2) + "%" : "0%"
+      }));
+      res.json({ data: result, totalRevenue });
+>>>>>>> main
 
             // 1. Truy vấn tính toán tổng hợp theo MaTheLoai (Aggregation)
             const revenueByGenre = await CT_HD.findAll({
