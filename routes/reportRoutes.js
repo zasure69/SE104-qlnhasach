@@ -15,7 +15,7 @@ const router = express.Router();
 const ReportController = require('../controllers/reportController'); // Đường dẫn tới file vừa sửa
 
 // 1. Route hiển thị trang báo cáo (khi bấm vào menu)
-router.get('/dashboard/report', ReportController.RenderReportPage);
+router.get('/reports', ReportController.RenderReportPage);
 
 // 2. Các Route API (được gọi bởi Ajax/Fetch trong file EJS)
 router.get('/api/report/revenue', ReportController.getDoanhThuAPI);
