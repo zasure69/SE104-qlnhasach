@@ -799,7 +799,7 @@
                     <table class="data-table" id="receipt-table">
                         <thead>
                             <tr>
-                                <th>STT</th>
+                                <th style="width: 50px; text-align: center;">STT</th>
                                 <th>Mã Phiếu</th>
                                 <th>Khách Hàng</th>
                                 <th>Ngày Thu</th>
@@ -812,13 +812,12 @@
                             // 1. Kiểm tra xem biến 'receipts' có tồn tại và là mảng không
                             if (receipts && receipts.length > 0) {
                                 // 2. Lặp qua từng phiếu thu trong mảng 'receipts'
-                                receipts.forEach(receipt => {
+                                receipts.forEach((receipt, index) => {
                             %>
                                 <tr data-id="<%= receipt.MaPhieuThu %>">
+                                    <td style="text-align: center;"><%= index +1 %></td>
                                     <td><%= receipt.MaPhieuThu %></td>
-                                    
                                     <td><%= receipt.KhachHang.HoVaTen %></td>
-                                    
                                     <td>
                                         <% 
                                             // Định dạng ngày theo chuẩn Việt Nam (DD/MM/YYYY)
@@ -839,8 +838,7 @@
                                         <i class="fas fa-pencil-alt action-icon open-edit-modal" data-id="<%= receipt.MaPhieuThu %>"
                                         title="Sửa"></i>
                                     
-                                        <button class="btn btn-sm btn-print ml-2"
-                                            onclick="alert('Chức năng in hóa đơn <%= receipt.MaPhieuThu %>')"> <i class="fas fa-print"></i>
+                                        <button class="btn btn-sm btn-print ml-2" data-id="<%= receipt.MaPhieuThu %>"> <i class="fas fa-print"></i>
                                         </button>
                                         <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
                                     </td>
@@ -850,7 +848,7 @@
                             } else { 
                             %>
                                 <tr>
-                                    <td colspan="5" class="no-data">Chưa có phiếu thu tiền nào được lập.</td>
+                                    <td colspan="6" class="no-data">Chưa có phiếu thu tiền nào được lập.</td>
                                 </tr>
                             <% 
                             } 
@@ -888,7 +886,7 @@
                         <!-- <div class="form-group"> <label>Email</label> <input type="text" id="add-email" readonly>
                         </div> -->
                         <div class="form-group"> <label class="required">Số Tiền Thu</label> <input type="text" id="add-so-tien"
-                                required inputmode="numeric"> </div>
+                                required inputmode="numeric" placeholder="0" oninput="this.value = this.value.replace(/[^0-9]/g, '')"> </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1001,34 +999,6 @@
             }
 
             ['add', 'edit'].forEach(prefix => {
-                // // Auto-fill thông tin khách hàng
-                // const maKhInput = document.getElementById(`${prefix}-ma-kh`);
-                // if (maKhInput) {
-                //     maKhInput.addEventListener('blur', function () {
-                //         const customer = findCustomer(this.value);
-                //         if (customer) {
-                //             document.getElementById(`${prefix}-ten-kh`).value = customer.name;
-                //             document.getElementById(`${prefix}-dia-chi`).value = customer.address;
-                //             document.getElementById(`${prefix}-sdt`).value = customer.phone;
-                //             document.getElementById(`${prefix}-email`).value = customer.email;
-                //         } else {
-                //             // Xóa nếu không tìm thấy
-                //             ['ten-kh', 'dia-chi', 'sdt', 'email'].forEach(field => {
-                //                 document.getElementById(`${prefix}-${field}`).value = '';
-                //             });
-                //         }
-                //     });
-                // }
-
-                // // Format số tiền khi nhập
-                // const amountInput = document.getElementById(`${prefix}-so-tien`);
-                // if (amountInput) {
-                //     amountInput.addEventListener('input', function () {
-                //         // Chỉ giữ lại số
-                //         const val = this.value.replace(/[^0-9]/g, '');
-                //         this.value = val ? formatNumber(val) : '';
-                //     });
-                // }
                 const maKhInput = document.getElementById(`${prefix}-ma-kh`);
 
                 if (maKhInput) {
@@ -1207,23 +1177,6 @@
             
             openEditBtns.forEach(btn => {
                 btn.addEventListener('click', function () {
-                    // const id = this.dataset.id;
-                    // // Mock Load Data
-                    // // (Lưu ý: Bạn nên thay bằng dữ liệu thực từ dòng được click hoặc API)
-                    // document.getElementById('edit-ngay-thu').value = '2025-11-24';
-                    // document.getElementById('edit-ma-kh').value = 'KH01';
-                    // document.getElementById('edit-so-tien').value = '500.000';
-                    
-                    // // Trigger blur để fill thông tin
-                    // document.getElementById('edit-ma-kh').dispatchEvent(new Event('blur'));
-
-                    // // LƯU SNAPSHOT (Sau khi dữ liệu đã load xong)
-                    // setTimeout(() => {
-                    //     originalEditState = getEditState();
-                    // }, 100);
-
-                    // editModal.style.display = 'flex';
-
                     const MaPhieuThu = this.dataset.id;
                     currentEditingMaPhieuThu = MaPhieuThu; // Lưu lại để dùng khi Lưu (btn-save-edit)
                     const editModal = document.getElementById('edit-modal'); // Giả định Modal có ID này
@@ -1370,7 +1323,113 @@
                     }
                 });
             }
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.btn-print'); // Tìm nút có class .btn-print
+                if (btn) {
+                    const row = btn.closest('tr');
+                    const maPhieu = btn.dataset.id || (row ? row.cells[1].innerText : null); 
+                    
+                    if (maPhieu) {
+                        printReceipt(maPhieu);
+                    }
+                }
+            });
 
+            async function printReceipt(maPhieu) {
+                // 1. Lấy dữ liệu phiếu từ Server
+                // Giả sử bạn đã có hàm apiCall hoặc dùng fetch trực tiếp
+                try {
+                    const response = await fetch(`/api/receipts/${maPhieu}`);
+                    if (!response.ok) throw new Error('Không tìm thấy phiếu thu');
+                    const data = await response.json(); // Dữ liệu trả về từ receiptsController.getReceiptDetail
+
+                    // Xử lý dữ liệu
+                    const date = new Date(data.NgayThuTien);
+                    const dateStr = `Ngày ${date.getDate()} tháng ${date.getMonth() + 1} năm ${date.getFullYear()}`;
+                    const khachHang = data.KhachHang || { HoVaTen: 'Khách lẻ', DiaChi: '---', SoDienThoai: '---' };
+                    const soTienFormat = new Intl.NumberFormat('vi-VN').format(data.SoTienThu);
+
+                    // 2. Tạo nội dung HTML
+                    const printContent = `
+                    <html>
+                    <head>
+                        <title>In Phiếu Thu - ${data.MaPhieuThu}</title>
+                        <style>
+                            body { font-family: 'Times New Roman', Times, serif; font-size: 14px; margin: 40px; }
+                            .header { text-align: center; margin-bottom: 30px; }
+                            .store-name { font-size: 18px; font-weight: bold; text-transform: uppercase; }
+                            .title { font-size: 24px; font-weight: bold; margin-top: 15px; }
+                            .date { font-style: italic; margin-top: 5px; }
+                            .content { margin-bottom: 30px; line-height: 1.6; }
+                            .row { display: flex; margin-bottom: 10px; }
+                            .label { width: 150px; font-weight: bold; }
+                            .value { flex: 1; border-bottom: 1px dotted #999; }
+                            .money { font-weight: bold; font-size: 16px; }
+                            .signature-section { display: flex; justify-content: space-between; text-align: center; margin-top: 50px; }
+                            .signature-box { width: 40%; }
+                            .signature-box p { margin-top: 60px; font-style: italic; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <div class="store-name">NHÀ SÁCH CỦA BẠN</div>
+                            <div>Địa chỉ: 123 Đường ABC, TP.HCM - SĐT: 0909.123.456</div>
+                            <div class="title">PHIẾU THU TIỀN</div>
+                            <div class="date">${dateStr}</div>
+                        </div>
+                        
+                        <div class="info">
+                            <p><strong>Mã phiếu:</strong> ${data.MaPhieuThu}</p>
+                        </div>
+
+                        <div class="content">
+                            <div class="row">
+                                <span class="label">Họ và tên người nộp:</span>
+                                <span class="value">${khachHang.HoVaTen}</span>
+                            </div>
+                            <div class="row">
+                                <span class="label">Địa chỉ:</span>
+                                <span class="value">${khachHang.DiaChi || ''}</span>
+                            </div>
+                            <div class="row">
+                                <span class="label">Số điện thoại:</span>
+                                <span class="value">${khachHang.SoDienThoai || ''}</span>
+                            </div>
+                            <div class="row">
+                                <span class="label">Số tiền:</span>
+                                <span class="value money">${soTienFormat} VNĐ</span>
+                            </div>
+                        </div>
+
+                        <div class="signature-section">
+                            <div class="signature-box">
+                                <strong>Người nộp tiền</strong><br>
+                                (Ký, ghi rõ họ tên)
+                            </div>
+                            <div class="signature-box">
+                                <strong>Người lập phiếu</strong><br>
+                                (Ký, ghi rõ họ tên)
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                    `;
+
+                    // 3. Mở cửa sổ in
+                    const printWindow = window.open('', '', 'height=600,width=800');
+                    printWindow.document.write(printContent);
+                    printWindow.document.close();
+                    
+                    setTimeout(() => {
+                        printWindow.focus();
+                        printWindow.print();
+                    }, 500);
+
+                } catch (error) {
+                    console.error(error);
+                    alert('Lỗi khi tải dữ liệu in: ' + error.message);
+                }
+            }
             const editForm = document.getElementById('edit-receipt-form');
             if (editForm) {
                 editForm.addEventListener('submit', async (e) => {
@@ -1448,6 +1507,8 @@
                         }
                     });
                     });
+                
+                    
             }
 
             // --- LOGOUT ---
