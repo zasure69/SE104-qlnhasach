@@ -275,7 +275,7 @@
                     <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>Phiếu nhập sách</a></li>
                     <li><a href="/dashboard/bills"><i class="fas fa-receipt"></i>Phiếu thu tiền</a></li>
                     <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="#" class="active"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+                    <li><a href="/dashboard/reports" class="active"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
                     <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
@@ -506,9 +506,9 @@
                 const [year, month] = dateString.split('-');
                 
                 let url = '';
-                if (type === 'doanhthu') url = `/api/report/revenue?month=${month}&year=${year}`;
-                else if (type === 'congno') url = `/api/report/debt?month=${month}&year=${year}`;
-                else if (type === 'ton') url = `/api/report/inventory?month=${month}&year=${year}`;
+                if (type === 'doanhthu') url = `/dashboard/api/report/revenue?month=${month}&year=${year}`;
+                else if (type === 'congno') url = `/dashboard/api/report/debt?month=${month}&year=${year}`;
+                else if (type === 'ton') url = `/dashboard/api/report/inventory?month=${month}&year=${year}`;
 
                 const response = await fetch(url);
                 

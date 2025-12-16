@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
 const Sach = require("../models/Sach");
 const DauSach = require("../models/DauSach");
 const TheLoai = require("../models/TheLoai"); 
@@ -8,6 +8,7 @@ const CT_HD = require("../models/CT_HD");
 const PhieuThuTien = require("../models/PhieuThuTien");
 const PhieuNhapSach = require("../models/PhieuNhapSach");
 const CT_PNS = require("../models/CT_PNS");
+
 module.exports = {
   async RenderReportPage(req, res) {
     try {
@@ -22,114 +23,73 @@ module.exports = {
             res.status(500).send("Lỗi tải trang");
         }
     },
-    async getDoanhThuAPI(req, res) {
-<<<<<<< HEAD
-        try {
-            let { month, year } = req.query;
-            month = parseInt(month);
-            year = parseInt(year);
-            const startDate = new Date(year, month - 1, 1); 
-            const endDate = new Date(year, month, 0, 23, 59, 59);
-=======
-    try {
-      let { month, year } = req.query;
-      month = parseInt(month);
-      year = parseInt(year);
-      const startDate = new Date(year, month - 1, 1); 
-      const endDate = new Date(year, month, 0, 23, 59, 59);
-      const listHD = await HoaDon.findAll({
-        where: {
-          NgayLapHoaDon: {
-            [Op.between]: [startDate, endDate] 
-          }
+ async getDoanhThuAPI(req, res) {
+  try {
+    let { month, year } = req.query;
+    month = parseInt(month);
+    year = parseInt(year);
+
+    if (!month || !year) {
+      return res.json({ data: [], totalRevenue: 0 });
+    }
+
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59);
+
+    const revenueByGenre = await CT_HD.findAll({
+      attributes: [
+        [Sequelize.fn('SUM', Sequelize.col('CT_HD.SoLuongBan')), 'SoLuongBan'],
+        [Sequelize.fn('SUM', Sequelize.col('CT_HD.ThanhTien')), 'ThanhTien'],
+      ],
+      include: [
+        {
+          model: HoaDon,
+          attributes: [],
+          where: {
+            NgayLapHoaDon: { [Op.between]: [startDate, endDate] }
+          },
+          required: true
         },
-        include: [{
-            model: CT_HD,
-            include: [{
-                model: Sach,
-                include: [DauSach] 
-        }]
-      }]
-      });
-      let reportData = {};
-      let totalRevenue = 0;
-      listHD.forEach(hd => {
-        hd.CT_HD.forEach(ct => {
-           const donGia = parseFloat(ct.DonGiaBan);
-           const soLuong = parseInt(ct.SoLuong);
-           const thanhTien = donGia * soLuong;
-           const theLoai = ct.Sach.DauSach.MaTheLoai || "Khác"; 
-           if (!reportData[theLoai]) {
-               reportData[theLoai] = {
-                   MaTheLoai: theLoai,
-                   SoLuongBan: 0,
-                   ThanhTien: 0
-               };
-           }
-           reportData[theLoai].SoLuongBan += soLuong;
-           reportData[theLoai].ThanhTien += thanhTien;
-           totalRevenue += thanhTien;
-        });
-      });
-      const result = Object.values(reportData).map(item => ({
-          ...item,
-          TiLe: totalRevenue > 0 ? ((item.ThanhTien / totalRevenue) * 100).toFixed(2) + "%" : "0%"
-      }));
-      res.json({ data: result, totalRevenue });
->>>>>>> main
+        {
+          model: Sach,
+          attributes: [],
+          required: true,
+          include: [
+            {
+              model: DauSach,
+              attributes: ['MaTheLoai'],
+              required: true
+            }
+          ]
+        }
+      ],
+      group: ['Sach->DauSach.MaTheLoai'],
+      raw: true
+    });
 
-            // 1. Truy vấn tính toán tổng hợp theo MaTheLoai (Aggregation)
-            const revenueByGenre = await CT_HD.findAll({
-                attributes: [
-                    // Tính tổng số lượng bán
-                    [Sequelize.fn('SUM', Sequelize.col('SoLuong')), 'SoLuongBan'],
-                    // Tính tổng thành tiền (SoLuong * DonGiaBan)
-                    [Sequelize.fn('SUM', Sequelize.literal('CT_HD.SoLuong * CT_HD.DonGiaBan')), 'ThanhTien'],
-                ],
-                include: [
-                    // JOIN tới Hóa Đơn để lọc theo ngày
-                    {
-                        model: HoaDon,
-                        attributes: [], // Không cần lấy cột nào của HoaDon
-                        where: { NgayLapHoaDon: { [Op.between]: [startDate, endDate] } },
-                        required: true // Phải có hóa đơn trong tháng
-                    },
-                    // JOIN tới Sách và Đầu sách để lấy Mã thể loại
-                    {
-                        model: Sach,
-                        attributes: [],
-                        required: true,
-                        include: [{ 
-                            model: DauSach,
-                            attributes: ['MaTheLoai'], // Lấy MaTheLoai để group
-                            required: true
-                        }]
-                    }
-                ],
-                group: ['Sach.DauSach.MaTheLoai'],
-                raw: true // Trả về kết quả dưới dạng JSON thuần (phẳng)
-            });
+    const totalRevenue = revenueByGenre.reduce(
+      (sum, item) => sum + Number(item.ThanhTien || 0),
+      0
+    );
 
-            // 2. Tính Tổng Doanh Thu (Sum lại từ kết quả Aggregation)
-            const totalRevenue = revenueByGenre.reduce((sum, item) => sum + parseFloat(item.ThanhTien), 0);
-            
-            // 3. Format kết quả (Tính Tỉ lệ)
-            const result = revenueByGenre.map(item => ({
-                MaTheLoai: item['Sach.DauSach.MaTheLoai'], // Lấy key theo cấu trúc raw
-                SoLuongBan: parseInt(item.SoLuongBan),
-                ThanhTien: parseFloat(item.ThanhTien),
-                TiLe: totalRevenue > 0 
-                    ? ((parseFloat(item.ThanhTien) / totalRevenue) * 100).toFixed(2) + "%" 
-                    : "0%"
-            }));
-            
-            res.json({ data: result, totalRevenue });
+    const result = revenueByGenre.map(item => ({
+      MaTheLoai: item['Sach.DauSach.MaTheLoai'], // 🔥 FIX QUAN TRỌNG
+      SoLuongBan: Number(item.SoLuongBan),
+      ThanhTien: Number(item.ThanhTien),
+      TiLe: totalRevenue > 0
+        ? ((item.ThanhTien / totalRevenue) * 100).toFixed(2) + '%'
+        : '0%'
+    }));
 
-        } catch (err) {
-            console.error("Lỗi báo cáo doanh thu:", err);
-            res.status(500).json({ error: "Lỗi tính doanh thu: " + err.message });
-        }
-    },
+    res.json({ data: result, totalRevenue });
+
+  } catch (err) {
+    console.error("Lỗi báo cáo doanh thu:", err);
+    res.status(500).json({ error: err.message });
+  }
+}
+
+,
   async getCongNoAPI(req, res) {
     try {
       let { month, year } = req.query;
@@ -145,7 +105,7 @@ module.exports = {
             NgayLapHoaDon: { [Op.lt]: startDate } 
           }
         }) || 0;
-        const totalMua_Truoc = await HoaDon.sum('TongTien', { // Lấy cột tổng tiền hóa đơn
+        const totalMua_Truoc = await HoaDon.sum('ConLai', { // Lấy cột tổng tiền hóa đơn
            where: { MaKhachHang: kh.MaKhachHang, NgayLapHoaDon: { [Op.lt]: startDate } }
         }) || 0;
         
@@ -153,7 +113,7 @@ module.exports = {
            where: { MaKhachHang: kh.MaKhachHang, NgayThuTien: { [Op.lt]: startDate } }
         }) || 0;
         const noDau = totalMua_Truoc - totalTra_Truoc;
-        const noPhatSinh = await HoaDon.sum('TongTien', {
+        const noPhatSinh = await HoaDon.sum('ConLai', {
           where: {
             MaKhachHang: kh.MaKhachHang,
             NgayLapHoaDon: { [Op.between]: [startDate, endDate] }
@@ -185,84 +145,83 @@ module.exports = {
       res.status(500).json({ error: "Lỗi tính công nợ: " + err.message });
     }
   },
-  async getTonKhoAPI(req, res) {
-    try {
-      let { month, year } = req.query;
-      month = parseInt(month);
-      year = parseInt(year);
 
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0, 23, 59, 59);
 
-      // Cần import thêm model PhieuNhap và CT_PhieuNhap ở đầu file nếu chưa có
-      // const PhieuNhap = require("../models/PhieuNhap");
-      // const CT_PhieuNhap = require("../models/CT_PhieuNhap");
+async getTonKhoAPI(req, res) {
+  try {
+    let { month, year } = req.query;
+    month = parseInt(month);
+    year = parseInt(year);
 
-      const listSach = await Sach.findAll({
-        include: [{ model: DauSach }]
-      });
+    if (!month || !year) {
+      return res.json({ data: [] });
+    }
 
-      const result = await Promise.all(listSach.map(async (sach) => {
-        
-        // 1. Tính Tồn Đầu: (Tổng Nhập < Start) - (Tổng Bán < Start)
-        // Lưu ý: Đây là query khá nặng nếu dữ liệu lớn. 
-        
-        // Lấy tổng nhập trước tháng này
-        const nhapTruoc = await CT_PNS.sum('SoLuong', {
-            include: [{
-                model: require("../models/PhieuNhapSach"), // Include để check ngày
-                where: { NgayNhap: { [Op.lt]: startDate } }
-            }],
-            where: { MaSach: sach.MaSach }
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59);
+
+    const listSach = await Sach.findAll({
+      include: [{ model: DauSach }]
+    });
+
+    const result = await Promise.all(
+      listSach.map(async (sach) => {
+
+        // 🔹 NHẬP TRƯỚC THÁNG
+        const nhapTruoc = await CT_PNS.sum("SoLuong", {
+          include: [{
+            model: PhieuNhapSach,
+            where: { NgayNhapPhieu: { [Op.lt]: startDate } }
+          }],
+          where: { MaSach: sach.MaSach }
         }) || 0;
 
-        // Lấy tổng bán trước tháng này
-        const banTruoc = await CT_HD.sum('SoLuong', {
-            include: [{
-                model: HoaDon,
-                where: { NgayLapHoaDon: { [Op.lt]: startDate } }
-            }],
-            where: { MaSach: sach.MaSach }
+        // 🔹 BÁN TRƯỚC THÁNG
+        const banTruoc = await CT_HD.sum("SoLuongBan", {
+          include: [{
+            model: HoaDon,
+            where: { NgayLapHoaDon: { [Op.lt]: startDate } }
+          }],
+          where: { MaSach: sach.MaSach }
         }) || 0;
 
         const tonDau = nhapTruoc - banTruoc;
 
-        // 2. Tính Nhập Trong Tháng
-        const nhapTrongThang = await CT_PNS.sum('SoLuong', {
-            include: [{
-                model: require("../models/PhieuNhapSach"),
-                where: { NgayNhap: { [Op.between]: [startDate, endDate] } }
-            }],
-            where: { MaSach: sach.MaSach }
+        // 🔹 NHẬP TRONG THÁNG
+        const nhapTrongThang = await CT_PNS.sum("SoLuong", {
+          include: [{
+            model: PhieuNhapSach,
+            where: { NgayNhapPhieu: { [Op.between]: [startDate, endDate] } }
+          }],
+          where: { MaSach: sach.MaSach }
         }) || 0;
 
-        // 3. Tính Bán Trong Tháng
-        const banTrongThang = await CT_HD.sum('SoLuong', {
-            include: [{
-                model: HoaDon,
-                where: { NgayLapHoaDon: { [Op.between]: [startDate, endDate] } }
-            }],
-            where: { MaSach: sach.MaSach }
+        // 🔹 BÁN TRONG THÁNG
+        const banTrongThang = await CT_HD.sum("SoLuongBan", {
+          include: [{
+            model: HoaDon,
+            where: { NgayLapHoaDon: { [Op.between]: [startDate, endDate] } }
+          }],
+          where: { MaSach: sach.MaSach }
         }) || 0;
 
-        // 4. Tính Tồn Cuối
         const tonCuoi = tonDau + nhapTrongThang - banTrongThang;
 
         return {
           MaSach: sach.MaSach,
-          TenSach: sach.DauSach ? sach.DauSach.TenSach : "Sách lỗi",
+          TenSach: sach.DauSach?.TenSach || "Không xác định",
           TonDau: tonDau,
           Nhap: nhapTrongThang,
           Ban: banTrongThang,
           TonCuoi: tonCuoi
         };
-      }));
+      })
+    );
 
-      res.json({ data: result });
+    res.json({ data: result });
 
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Lỗi tính tồn kho: " + err.message });
-    }
+  } catch (err) {
+    console.error("Lỗi tồn kho:", err);
+    res.status(500).json({ error: err.message });
   }
-};
+}};
