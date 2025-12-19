@@ -749,7 +749,7 @@
                     <div class="grid-general">
                         <div class="form-group"> 
                             <label class="required">Ngày Nhập:</label>
-                            <div class="date-input-wrapper"> <input type="date" id="add-ngay-nhap" required> </div>
+                            <div class="date-input-wrapper"> <input type="date" id="add-ngay-nhap" max="<%= currentDate %>" required> </div>
                         </div>
                         <div class="form-group"> 
                             <label class="required">Mã Nhân Viên:</label> 
@@ -772,7 +772,7 @@
                         </div>
                         <div class="form-group"> 
                             <label class="required">Số Lượng:</label> 
-                            <input type="number" id="add-input-so-luong" min="1" value="1"> 
+                            <input type="number" id="add-input-so-luong" min="150" value="150" placeholder="150"> 
                         </div>
                         <div class="form-group"> 
                             <label class="required">Đơn Giá Nhập:</label> 
@@ -840,7 +840,7 @@
                         </div>
                         <div class="form-group"> 
                             <label class="required">Ngày Nhập:</label>
-                            <div class="date-input-wrapper"> <input type="date" id="edit-ngay-nhap"> </div>
+                            <div class="date-input-wrapper"> <input type="date" id="edit-ngay-nhap" max="<%= currentDate %>"> </div>
                         </div>
                         <div class="form-group"> 
                             <label class="required">Mã Nhân Viên:</label> 
@@ -862,7 +862,7 @@
                         </div>
                         <div class="form-group"> 
                             <label class="required">Số Lượng:</label> 
-                            <input type="number" id="edit-input-so-luong" min="1"> 
+                            <input type="number" id="edit-input-so-luong" min="150" placeholder="150"> 
                         </div>
                         <div class="form-group"> 
                             <label class="required">Đơn Giá Nhập:</label> 
@@ -927,7 +927,7 @@
                 </div>
                 <div class="form-group" style="margin-top: 1rem;">
                     <label class="required">Số Lượng:</label>
-                    <input type="number" id="item-edit-qty" min="1" style="font-weight: bold; color: var(--secondary-color);">
+                    <input type="number" id="item-edit-qty" min="150" style="font-weight: bold; color: var(--secondary-color);">
                 </div>
                 <div class="form-group" style="margin-top: 1rem;">
                     <label class="required">Đơn Giá Nhập:</label>
@@ -1057,15 +1057,17 @@
             window.addRowToDetailTable = function(tableId, totalId, data) {
                 const tbody = document.querySelector(`#${tableId} tbody`);
                 const row = tbody.insertRow();
-                const thanhTien = data.soLuong * data.donGia;
+                const donGia = Math.round(data.donGia);
+                const donGiaBan = Math.round(data.donGiaBan);
+                const thanhTien = data.soLuong * donGia;
                 
                 row.innerHTML = `
                     <td class="stt-cell text-center">${tbody.rows.length}</td>
                     <td>${data.maSach}</td>
                     <td class="name-cell">${data.tenSach}</td>
                     <td class="qty-cell text-center">${data.soLuong}</td>
-                    <td class="price-cell text-right" data-raw="${data.donGia}">${data.donGia}</td>
-                    <td class="sell-price-cell text-right" data-raw="${data.donGiaBan}">${data.donGiaBan}</td> <td class="total-cell text-right" data-value="${thanhTien}">${thanhTien}</td>
+                    <td class="price-cell text-right" data-raw="${donGia}">${donGia.toLocaleString('vi-VN')}</td>
+                    <td class="sell-price-cell text-right" data-raw="${donGiaBan}">${donGiaBan.toLocaleString('vi-VN')}</td> <td class="total-cell text-right" data-value="${thanhTien}">${thanhTien.toLocaleString('vi-VN')}</td>
                     <td class="text-center">
                         <i class="fas fa-pencil-alt action-icon edit-row-icon" 
                            onclick="openItemEditModal(this, '${tableId}')"
@@ -1091,22 +1093,24 @@
                     const newPrice = parseNumber(document.getElementById('item-edit-price').value);
                     const newSellPrice = Math.round(newPrice * 1.05); // Tự động tính giá bán = giá nhập * 1.05
 
-                    if (newQty <= 0) { alert("Số lượng phải lớn hơn 0"); return; }
+                    // QUY ĐỊNH: Số lượng nhập ít nhất là 150
+                    if (!newQty || newQty < 150) { showToast('Số lượng nhập phải từ 150 trở lên!', 'error'); return; }
+                    if (!newPrice || newPrice < 0) { showToast('Đơn giá nhập không hợp lệ!', 'error'); return; }
 
                     // Cập nhật lại dòng trong bảng
                     currentRowToEdit.querySelector('.qty-cell').textContent = newQty;
                     
                     const priceCell = currentRowToEdit.querySelector('.price-cell');
-                    priceCell.textContent = newPrice;
+                    priceCell.textContent = newPrice.toLocaleString('vi-VN');
                     priceCell.dataset.raw = newPrice;
 
                     const sellPriceCell = currentRowToEdit.querySelector('.sell-price-cell');
-                    sellPriceCell.textContent = newSellPrice;
+                    sellPriceCell.textContent = newSellPrice.toLocaleString('vi-VN');
                     sellPriceCell.dataset.raw = newSellPrice;
 
                     const newTotal = newQty * newPrice; // Thành tiền tính theo giá nhập
                     const totalCell = currentRowToEdit.querySelector('.total-cell');
-                    totalCell.textContent = newTotal;
+                    totalCell.textContent = newTotal.toLocaleString('vi-VN');
                     totalCell.dataset.value = newTotal;
 
                     // Cập nhật tổng
@@ -1260,19 +1264,32 @@
                             showToast('Vui lòng nhập sách!', 'error');
                             return;
                         }
+                        
+                        const soLuong = parseInt(soLuongInput.value);
+                        // QUY ĐỊNH: Số lượng nhập ít nhất là 150
+                        if (!soLuong || soLuong < 150) {
+                            showToast('Số lượng nhập phải từ 150 trở lên!', 'error');
+                            return;
+                        }
+                        
+                        const donGia = parseInt(donGiaInput.value);
+                        if (!donGia || donGia < 0) {
+                            showToast('Đơn giá nhập không hợp lệ!', 'error');
+                            return;
+                        }
 
                         addRowToDetailTable(`${prefix}-detail-table`, `${prefix}-total-amount`, {
                             maSach: maSachInput.value, 
                             tenSach: tenSachInput.value, 
                             soLuong: parseInt(soLuongInput.value), 
-                            donGia: donGiaInput.value,
-                            donGiaBan: donGiaBanInput.value // Lấy giá bán
+                            donGia: Math.round(parseFloat(donGiaInput.value)),
+                            donGiaBan: Math.round(parseFloat(donGiaBanInput.value)) // Lấy giá bán đã làm tròn
                         });
 
                         // Reset
                         maSachInput.value = '';
                         tenSachInput.value = '';
-                        soLuongInput.value = '1';
+                        soLuongInput.value = '150';
                         donGiaInput.value = '';
                         donGiaBanInput.value = '';
                         maSachInput.focus();
@@ -1410,12 +1427,20 @@
                     return;
                 }
                 
-                const chiTiet = Array.from(rows).map(row => ({
-                    MaSach: row.cells[1].textContent.trim(), // cells[0]=STT, cells[1]=Mã Sách
-                    SoLuong: parseInt(row.cells[3].textContent), // cells[3]=Số Lượng
-                    DonGiaNhap: row.cells[4].textContent, // cells[4]=Đơn Giá Nhập
-                    DonGiaBan: row.cells[5].textContent // cells[5]=Đơn Giá Bán
-                }));
+                const chiTiet = Array.from(rows).map(row => {
+                    // Lấy giá trị từ data-raw attribute thay vì textContent
+                    const priceCell = row.querySelector('.price-cell');
+                    const sellPriceCell = row.querySelector('.sell-price-cell');
+                    
+                    return {
+                        MaSach: row.cells[1].textContent.trim(), // cells[0]=STT, cells[1]=Mã Sách
+                        SoLuong: parseInt(row.cells[3].textContent), // cells[3]=Số Lượng
+                        DonGiaNhap: parseFloat(priceCell.dataset.raw || priceCell.textContent.replace(/[^0-9]/g, '')), // Lấy từ data-raw
+                        DonGiaBan: parseFloat(sellPriceCell.dataset.raw || sellPriceCell.textContent.replace(/[^0-9]/g, '')) // Lấy từ data-raw
+                    };
+                });
+                
+                console.log('[DEBUG] Sending chiTiet:', chiTiet); // Debug log
                 
                 const result = await apiCall('/api/import/create', 'POST', {
                     NgayNhapPhieu: ngayNhap,
@@ -1444,12 +1469,20 @@
                     return;
                 }
                 
-                const chiTiet = Array.from(rows).map(row => ({
-                    MaSach: row.cells[1].textContent.trim(), // cells[0]=STT, cells[1]=Mã Sách
-                    SoLuong: parseInt(row.cells[3].textContent), // cells[3]=Số Lượng
-                    DonGiaNhap: row.cells[4].textContent, // cells[4]=Đơn Giá Nhập
-                    DonGiaBan: row.cells[5].textContent // cells[5]=Đơn Giá Bán
-                }));
+                const chiTiet = Array.from(rows).map(row => {
+                    // Lấy giá trị từ data-raw attribute thay vì textContent
+                    const priceCell = row.querySelector('.price-cell');
+                    const sellPriceCell = row.querySelector('.sell-price-cell');
+                    
+                    return {
+                        MaSach: row.cells[1].textContent.trim(), // cells[0]=STT, cells[1]=Mã Sách
+                        SoLuong: parseInt(row.cells[3].textContent), // cells[3]=Số Lượng
+                        DonGiaNhap: parseFloat(priceCell.dataset.raw || priceCell.textContent.replace(/[^0-9]/g, '')), // Lấy từ data-raw
+                        DonGiaBan: parseFloat(sellPriceCell.dataset.raw || sellPriceCell.textContent.replace(/[^0-9]/g, '')) // Lấy từ data-raw
+                    };
+                });
+                
+                console.log('[DEBUG] Sending chiTiet:', chiTiet); // Debug log
                 
                 const result = await apiCall(`/api/import/update/${maPhieu}`, 'PATCH', {
                     NgayNhapPhieu: ngayNhap,

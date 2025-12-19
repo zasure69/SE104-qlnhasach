@@ -62,6 +62,7 @@ const getImportPage = async (req, res) => {
     res.render("books_import", {
       ...userInfo,
       importReceipts: importReceipts || [],
+      currentDate: new Date().toISOString().split("T")[0],
     });
   } catch (err) {
     console.error("[importController] Error:", err);
@@ -69,6 +70,7 @@ const getImportPage = async (req, res) => {
       username: req.user?.username,
       role: req.user?.role,
       importReceipts: [],
+      currentDate: new Date().toISOString().split("T")[0],
     });
   }
 };
@@ -140,6 +142,51 @@ const createImportReceipt = async (req, res) => {
       return res.status(400).json({ error: "Dữ liệu không hợp lệ" });
     }
 
+    // Validate ngày nhập không được sau ngày hôm nay
+    const inputDate = new Date(NgayNhapPhieu);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    inputDate.setHours(0, 0, 0, 0);
+
+    if (inputDate > today) {
+      return res
+        .status(400)
+        .json({ error: "Ngày nhập không được sau ngày hôm nay" });
+    }
+
+    // Validate chi tiết phiếu
+    for (const item of chiTiet) {
+      // Quy định 1: Số lượng nhập ít nhất là 150
+      if (!item.SoLuong || item.SoLuong < 150) {
+        return res.status(400).json({
+          error: "Số lượng nhập phải từ 150 trở lên",
+        });
+      }
+
+      // Quy định 2: Chỉ nhập các sách có số lượng tồn ít hơn 300
+      const tongNhap =
+        (await db.CT_PNS.sum("SoLuong", {
+          where: { MaSach: item.MaSach },
+        })) || 0;
+
+      const tongBan =
+        (await db.CT_HD.sum("SoLuongBan", {
+          where: { MaSach: item.MaSach },
+        })) || 0;
+
+      const soLuongTonHienTai = tongNhap - tongBan;
+
+      if (soLuongTonHienTai >= 300) {
+        const sach = await db.Sach.findByPk(item.MaSach, {
+          include: [{ model: db.DauSach, attributes: ["TenSach"] }],
+        });
+        const tenSach = sach?.DauSach?.TenSach || item.MaSach;
+        return res.status(400).json({
+          error: `Không thể nhập sách "${tenSach}" vì số lượng tồn hiện tại (${soLuongTonHienTai}) đã >= 300`,
+        });
+      }
+    }
+
     // Lấy tỉ lệ tính giá bán từ THAMSO
     const tiLeGiaBan = await db.ThamSo.findOne({
       where: { TenThamSo: "TiLeTinhDonGiaBan" },
@@ -167,16 +214,19 @@ const createImportReceipt = async (req, res) => {
       );
 
       for (const item of chiTiet) {
-        const thanhTien = item.SoLuong * item.DonGiaNhap;
-        // Tự động tính đơn giá bán = đơn giá nhập * tỉ lệ
-        const donGiaBan = item.DonGiaBan || Math.round(item.DonGiaNhap * tiLe);
+        const donGiaNhap = Math.round(parseFloat(item.DonGiaNhap));
+        const thanhTien = parseInt(item.SoLuong) * donGiaNhap;
+        // Tự động tính đơn giá bán = đơn giá nhập * tỉ lệ (làm tròn)
+        const donGiaBan = item.DonGiaBan
+          ? Math.round(parseFloat(item.DonGiaBan))
+          : Math.round(donGiaNhap * tiLe);
 
         await db.CT_PNS.create(
           {
             MaPhieuNhap: newMaPhieu,
             MaSach: item.MaSach,
-            SoLuong: item.SoLuong,
-            DonGiaNhap: item.DonGiaNhap,
+            SoLuong: parseInt(item.SoLuong),
+            DonGiaNhap: donGiaNhap,
             DonGiaBan: donGiaBan,
             ThanhTien: thanhTien,
           },
@@ -186,8 +236,9 @@ const createImportReceipt = async (req, res) => {
         const sach = await db.Sach.findByPk(item.MaSach, { transaction: t });
         if (sach) {
           await sach.update(
-            { SoLuongTon: (sach.SoLuongTon || 0) + item.SoLuong,
-              DonGia: donGiaBan
+            {
+              SoLuongTon: (sach.SoLuongTon || 0) + parseInt(item.SoLuong),
+              DonGia: donGiaBan,
             },
             { transaction: t }
           );
@@ -217,6 +268,67 @@ const updateImportReceipt = async (req, res) => {
       return res.status(404).json({ error: "Không tìm thấy phiếu nhập" });
     }
 
+    // Validate ngày nhập không được sau ngày hôm nay
+    if (NgayNhapPhieu) {
+      const inputDate = new Date(NgayNhapPhieu);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      inputDate.setHours(0, 0, 0, 0);
+
+      if (inputDate > today) {
+        return res
+          .status(400)
+          .json({ error: "Ngày nhập không được sau ngày hôm nay" });
+      }
+    }
+
+    // Validate chi tiết phiếu
+    for (const item of chiTiet) {
+      // Quy định 1: Số lượng nhập ít nhất là 150
+      if (!item.SoLuong || item.SoLuong < 150) {
+        return res.status(400).json({
+          error: "Số lượng nhập phải từ 150 trở lên",
+        });
+      }
+
+      if (!item.DonGiaNhap || item.DonGiaNhap < 0) {
+        return res.status(400).json({ error: "Đơn giá nhập không hợp lệ" });
+      }
+
+      // Quy định 2: Chỉ nhập các sách có số lượng tồn ít hơn 300
+      // Tính số lượng tồn hiện tại (trước khi cập nhật)
+      const oldDetail = await db.CT_PNS.findOne({
+        where: {
+          MaPhieuNhap: maPhieu,
+          MaSach: item.MaSach,
+        },
+      });
+
+      const tongNhap =
+        (await db.CT_PNS.sum("SoLuong", {
+          where: { MaSach: item.MaSach },
+        })) || 0;
+
+      const tongBan =
+        (await db.CT_HD.sum("SoLuongBan", {
+          where: { MaSach: item.MaSach },
+        })) || 0;
+
+      // Số lượng tồn sau khi trừ đi số lượng cũ của phiếu này
+      const soLuongCu = oldDetail ? oldDetail.SoLuong : 0;
+      const soLuongTonTruocCapNhat = tongNhap - tongBan - soLuongCu;
+
+      if (soLuongTonTruocCapNhat >= 300) {
+        const sach = await db.Sach.findByPk(item.MaSach, {
+          include: [{ model: db.DauSach, attributes: ["TenSach"] }],
+        });
+        const tenSach = sach?.DauSach?.TenSach || item.MaSach;
+        return res.status(400).json({
+          error: `Không thể nhập sách "${tenSach}" vì số lượng tồn hiện tại (${soLuongTonTruocCapNhat}) đã >= 300`,
+        });
+      }
+    }
+
     // Lấy tỉ lệ tính giá bán từ THAMSO
     const tiLeGiaBan = await db.ThamSo.findOne({
       where: { TenThamSo: "TiLeTinhDonGiaBan" },
@@ -233,9 +345,10 @@ const updateImportReceipt = async (req, res) => {
         const sach = await db.Sach.findByPk(old.MaSach, { transaction: t });
         if (sach) {
           await sach.update(
-            { SoLuongTon: sach.SoLuongTon - old.SoLuong,
-              DonGia: old.DonGiaBan
-             },
+            {
+              SoLuongTon: sach.SoLuongTon - old.SoLuong,
+              DonGia: old.DonGiaBan,
+            },
             { transaction: t }
           );
         }
@@ -261,16 +374,20 @@ const updateImportReceipt = async (req, res) => {
       );
 
       for (const item of chiTiet) {
-        const thanhTien = item.SoLuong * item.DonGiaNhap;
-        // Tự động tính đơn giá bán = đơn giá nhập * tỉ lệ
-        const donGiaBan = item.DonGiaBan || Math.round(item.DonGiaNhap * tiLe);
+        const donGiaNhap = Math.round(parseFloat(item.DonGiaNhap));
+        const soLuong = parseInt(item.SoLuong);
+        const thanhTien = soLuong * donGiaNhap;
+        // Tự động tính đơn giá bán = đơn giá nhập * tỉ lệ (làm tròn)
+        const donGiaBan = item.DonGiaBan
+          ? Math.round(parseFloat(item.DonGiaBan))
+          : Math.round(donGiaNhap * tiLe);
 
         await db.CT_PNS.create(
           {
             MaPhieuNhap: maPhieu,
             MaSach: item.MaSach,
-            SoLuong: item.SoLuong,
-            DonGiaNhap: item.DonGiaNhap,
+            SoLuong: soLuong,
+            DonGiaNhap: donGiaNhap,
             DonGiaBan: donGiaBan,
             ThanhTien: thanhTien,
           },
@@ -280,9 +397,7 @@ const updateImportReceipt = async (req, res) => {
         const sach = await db.Sach.findByPk(item.MaSach, { transaction: t });
         if (sach) {
           await sach.update(
-            { SoLuongTon: sach.SoLuongTon + item.SoLuong,
-              DonGia: donGiaBan
-            },
+            { SoLuongTon: sach.SoLuongTon + soLuong, DonGia: donGiaBan },
             { transaction: t }
           );
         }

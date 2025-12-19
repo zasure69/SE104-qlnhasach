@@ -277,25 +277,42 @@ const getBooksPage = async (req, res) => {
       raw: false,
     });
 
-    const books = sachsRaw.map((s) => {
-      const plain = s.get({ plain: true });
-      return {
-        MaSach: plain.MaSach,
-        TenSach: plain.DauSach ? plain.DauSach.TenSach : "",
-        TenTheLoai:
-          plain.DauSach && plain.DauSach.TheLoai
-            ? plain.DauSach.TheLoai.TenTheLoai
-            : "",
-        TacGia:
-          plain.DauSach && plain.DauSach.TacGias
-            ? plain.DauSach.TacGias.map((tg) => tg.HoTen).join(", ")
-            : "",
-        NhaXB: plain.NhaXB || "",
-        NamXB: plain.NamXB || "",
-        MoTa: plain.MoTa || "",
-        SoLuongTon: plain.SoLuongTon || 0,
-      };
-    });
+    // Tính số lượng tồn cho tất cả sách
+    const books = await Promise.all(
+      sachsRaw.map(async (s) => {
+        const plain = s.get({ plain: true });
+
+        // Tính số lượng tồn thực tế: Tổng nhập - Tổng bán
+        const tongNhap =
+          (await db.CT_PNS.sum("SoLuong", {
+            where: { MaSach: plain.MaSach },
+          })) || 0;
+
+        const tongBan =
+          (await db.CT_HD.sum("SoLuongBan", {
+            where: { MaSach: plain.MaSach },
+          })) || 0;
+
+        const soLuongTonThucTe = tongNhap - tongBan;
+
+        return {
+          MaSach: plain.MaSach,
+          TenSach: plain.DauSach ? plain.DauSach.TenSach : "",
+          TenTheLoai:
+            plain.DauSach && plain.DauSach.TheLoai
+              ? plain.DauSach.TheLoai.TenTheLoai
+              : "",
+          TacGia:
+            plain.DauSach && plain.DauSach.TacGias
+              ? plain.DauSach.TacGias.map((tg) => tg.HoTen).join(", ")
+              : "",
+          NhaXB: plain.NhaXB || "",
+          NamXB: plain.NamXB || "",
+          MoTa: plain.MoTa || "",
+          SoLuongTon: soLuongTonThucTe,
+        };
+      })
+    );
 
     const [authors, types] = await Promise.all([
       db.TacGia.findAll({ raw: true }),
@@ -318,6 +335,7 @@ const getBooksPage = async (req, res) => {
       books,
       authors,
       types,
+      currentYear: new Date().getFullYear(),
     });
   } catch (err) {
     console.error("[bookController] Error:", err);
@@ -688,7 +706,7 @@ const getAllSach = async (req, res) => {
 
 const createSach = async (req, res) => {
   try {
-    const { MaDauSach, NhaXB, NamXB, MoTa, SoLuongTon } = req.body;
+    const { MaDauSach, NhaXB, NamXB, MoTa } = req.body;
 
     if (!MaDauSach) {
       return res.status(400).json({ error: "Vui lòng chọn Đầu sách" });
@@ -701,22 +719,29 @@ const createSach = async (req, res) => {
 
     const newMaSach = await generateNewSachId();
     const parsedNamXB = NamXB ? parseInt(NamXB, 10) : null;
-    const normalizedNamXB = Number.isNaN(parsedNamXB) ? null : parsedNamXB;
+    const currentYear = new Date().getFullYear();
 
-    const normalizedSoLuongTon =
-      typeof SoLuongTon !== "undefined"
-        ? Number.isNaN(Number(SoLuongTon))
-          ? 0
-          : Number(SoLuongTon)
-        : 0;
+    // Validate NamXB
+    if (
+      parsedNamXB !== null &&
+      (Number.isNaN(parsedNamXB) ||
+        parsedNamXB < 1800 ||
+        parsedNamXB > currentYear)
+    ) {
+      return res
+        .status(400)
+        .json({ error: `Năm xuất bản không hợp lệ (1800-${currentYear})` });
+    }
+    const normalizedNamXB = parsedNamXB;
 
+    // Số lượng tồn ban đầu là 0, sẽ được cập nhật khi có phiếu nhập
     const newSach = await db.Sach.create({
       MaSach: newMaSach,
       MaDauSach,
       NhaXB: NhaXB || null,
       NamXB: normalizedNamXB,
       MoTa: MoTa || null,
-      SoLuongTon: normalizedSoLuongTon,
+      SoLuongTon: 0, // Luôn bắt đầu từ 0, sẽ tự động tính khi có phiếu nhập
     });
 
     return res
@@ -742,14 +767,20 @@ const updateSach = async (req, res) => {
     if (typeof MoTa !== "undefined") sach.MoTa = MoTa;
     if (typeof NamXB !== "undefined") {
       const parsedNamXB = parseInt(NamXB, 10);
+      const currentYear = new Date().getFullYear();
+
+      if (
+        !Number.isNaN(parsedNamXB) &&
+        (parsedNamXB < 1800 || parsedNamXB > currentYear)
+      ) {
+        return res
+          .status(400)
+          .json({ error: `Năm xuất bản không hợp lệ (1800-${currentYear})` });
+      }
       sach.NamXB = Number.isNaN(parsedNamXB) ? sach.NamXB : parsedNamXB;
     }
-    if (typeof SoLuongTon !== "undefined") {
-      const parsedSoLuong = Number(SoLuongTon);
-      sach.SoLuongTon = Number.isNaN(parsedSoLuong)
-        ? sach.SoLuongTon
-        : parsedSoLuong;
-    }
+    // KHÔNG CHO PHÉP CẬP NHẬT SoLuongTon - sẽ tự động tính từ phiếu nhập và hóa đơn
+    // Số lượng tồn được tính tự động: Tổng nhập - Tổng bán
 
     await sach.save();
     return res.status(200).json({ message: "Cập nhật sách thành công!", sach });
@@ -792,12 +823,29 @@ const getSachById = async (req, res) => {
       return res.status(404).json({ error: "Không tìm thấy sách" });
     }
 
+    // Tính số lượng tồn thực tế: Tổng nhập - Tổng bán
+    const tongNhap =
+      (await db.CT_PNS.sum("SoLuong", {
+        where: { MaSach: maSach },
+      })) || 0;
+
+    const tongBan =
+      (await db.CT_HD.sum("SoLuongBan", {
+        where: { MaSach: maSach },
+      })) || 0;
+
+    const soLuongTonThucTe = tongNhap - tongBan;
+
+    console.log(
+      `[bookController] Tính toán: Nhập=${tongNhap}, Bán=${tongBan}, Tồn=${soLuongTonThucTe}`
+    );
+
     const result = {
       MaSach: sach.MaSach,
       TenSach: sach.DauSach ? sach.DauSach.TenSach : "",
       NhaXB: sach.NhaXB || "",
       NamXB: sach.NamXB || "",
-      SoLuongTon: sach.SoLuongTon || 0,
+      SoLuongTon: soLuongTonThucTe,
       DonGia: 0, // Giá nhập mặc định
       DonGiaBan: 0, // Giá bán mặc định
     };
@@ -868,7 +916,7 @@ const createTheLoai = async (req, res) => {
 
 const updateTheLoai = async (req, res) => {
   try {
-    const maTheLoai = req.params.maTL;
+    const maTheLoai = req.params.maTheLoai;
     const { TenTheLoai, MoTa } = req.body;
     console.log(
       `[bookController] updateTheLoai called for ${maTheLoai} with body:`,
@@ -911,7 +959,7 @@ const updateTheLoai = async (req, res) => {
 
 const deleteTheLoai = async (req, res) => {
   try {
-    const maTheLoai = req.params.maTL;
+    const maTheLoai = req.params.maTheLoai;
     const theLoai = await db.TheLoai.findByPk(maTheLoai);
     if (!theLoai) {
       return res.status(404).json({ error: "Không tìm thấy thể loại" });
@@ -955,13 +1003,15 @@ const createTacGia = async (req, res) => {
 
     // Validate NamSinh if provided
     const namSinhInt = NamSinh ? parseInt(NamSinh, 10) : null;
+    const currentYear = new Date().getFullYear();
+
     if (
       namSinhInt !== null &&
-      (isNaN(namSinhInt) || namSinhInt < 1800 || namSinhInt > 2025)
+      (isNaN(namSinhInt) || namSinhInt < 1800 || namSinhInt > currentYear)
     ) {
       return res
         .status(400)
-        .json({ error: "Năm sinh không hợp lệ (1800-2025)" });
+        .json({ error: `Năm sinh không hợp lệ (1800-${currentYear})` });
     }
 
     const newMaTacGia = await generateNewMaTacGia();
@@ -983,7 +1033,7 @@ const createTacGia = async (req, res) => {
 
 const updateTacGia = async (req, res) => {
   try {
-    const maTacGia = req.params.maTG;
+    const maTacGia = req.params.maTacGia;
     const { HoTen, NamSinh } = req.body;
     console.log(
       `[bookController] updateTacGia called for ${maTacGia} with body:`,
@@ -1012,13 +1062,15 @@ const updateTacGia = async (req, res) => {
 
     // Validate NamSinh if provided
     const namSinhInt = NamSinh ? parseInt(NamSinh, 10) : null;
+    const currentYear = new Date().getFullYear();
+
     if (
       namSinhInt !== null &&
-      (isNaN(namSinhInt) || namSinhInt < 1800 || namSinhInt > 2025)
+      (isNaN(namSinhInt) || namSinhInt < 1800 || namSinhInt > currentYear)
     ) {
       return res
         .status(400)
-        .json({ error: "Năm sinh không hợp lệ (1800-2025)" });
+        .json({ error: `Năm sinh không hợp lệ (1800-${currentYear})` });
     }
 
     tacGia.HoTen = HoTen.trim();
@@ -1037,7 +1089,7 @@ const updateTacGia = async (req, res) => {
 
 const deleteTacGia = async (req, res) => {
   try {
-    const maTacGia = req.params.maTG;
+    const maTacGia = req.params.maTacGia;
     const tacGia = await db.TacGia.findByPk(maTacGia);
     if (!tacGia) {
       return res.status(404).json({ error: "Không tìm thấy tác giả" });
