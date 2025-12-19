@@ -681,7 +681,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-warning" id="btn-reset-sach">Đặt lại</button>
+                    <button type="button" class="btn btn-warning" id="btn-reset-dausach">Đặt lại</button>
                     <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
             </form>
@@ -782,7 +782,11 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger delete-sach-icon">Xóa sách</button>
-                    <div> <button type="button" class="btn btn-secondary close-modal">Hủy</button> <button type="submit" class="btn btn-primary">Lưu</button> </div>
+                    <div> 
+                        <button type="button" class="btn btn-warning" id="btn-reset-sach">Đặt lại</button>
+                        <button type="button" class="btn btn-secondary close-modal">Hủy</button> 
+                        <button type="submit" class="btn btn-primary">Lưu</button> 
+                    </div>
                 </div>
             </form>
         </div>
@@ -817,7 +821,11 @@
                 </div>
                 <div class="modal-footer edit-modal-footer"> 
                     <button type="button" class="btn btn-danger delete-theloai-icon">Xóa thể loại</button> 
-                    <div> <button type="button" class="btn btn-secondary close-modal">Hủy</button> <button type="submit" class="btn btn-primary">Lưu</button> </div>
+                    <div> 
+                        <button type="button" class="btn btn-warning" id="btn-reset-theloai">Đặt lại</button>
+                        <button type="button" class="btn btn-secondary close-modal">Hủy</button> 
+                        <button type="submit" class="btn btn-primary">Lưu</button> 
+                    </div>
                 </div>
             </form>
         </div>
@@ -854,7 +862,11 @@
                 </div>
                 <div class="modal-footer edit-modal-footer"> 
                     <button type="button" class="btn btn-danger delete-tacgia-icon">Xóa tác giả</button> 
-                    <div> <button type="button" class="btn btn-secondary close-modal">Hủy</button> <button type="submit" class="btn btn-primary">Lưu</button> </div>
+                    <div> 
+                        <button type="button" class="btn btn-warning" id="btn-reset-tacgia">Đặt lại</button>
+                        <button type="button" class="btn btn-secondary close-modal">Hủy</button> 
+                        <button type="submit" class="btn btn-primary">Lưu</button> 
+                    </div>
                 </div>
             </form>
         </div>
@@ -1069,7 +1081,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Xử lý nút "Đặt lại" cho modal edit đầu sách
-    const btnResetDauSach = document.getElementById('btn-reset-sach');
+    const btnResetDauSach = document.getElementById('btn-reset-dausach');
     if(btnResetDauSach) {
         btnResetDauSach.addEventListener('click', () => {
             if(originalDauSachData) {
@@ -1313,6 +1325,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- SÁCH: CHỈNH SỬA ---
     const editSachModal = document.getElementById('sach-edit-modal');
     const editSachForm = document.getElementById('edit-sach-form');
+    let originalSachData = null; // Lưu dữ liệu ban đầu
 
     document.getElementById('table-sach').addEventListener('click', (e) => {
         if (e.target.classList.contains('open-sach-edit-modal') || 
@@ -1329,9 +1342,39 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit-nam-xb-s').value = cells[6].textContent;
             document.getElementById('edit-so-luong-ton-s').value = cells[7].textContent;
             
+            // Lưu dữ liệu ban đầu
+            originalSachData = {
+                maSach: cells[1].textContent,
+                tenSach: cells[2].textContent,
+                tacGia: cells[4].textContent,
+                theLoai: cells[3].textContent,
+                nhaXB: cells[5].textContent,
+                namXB: cells[6].textContent,
+                soLuongTon: cells[7].textContent
+            };
+            
             editSachModal.style.display = 'flex';
         }
     });
+
+    // Xử lý nút "Đặt lại" cho modal edit sách
+    const btnResetSach = document.getElementById('btn-reset-sach');
+    if(btnResetSach) {
+        btnResetSach.addEventListener('click', () => {
+            if(originalSachData) {
+                if(confirm('Bạn có muốn khôi phục lại dữ liệu ban đầu không?')) {
+                    document.getElementById('edit-ma-sach-s').value = originalSachData.maSach;
+                    document.getElementById('edit-ten-sach-s').value = originalSachData.tenSach;
+                    document.getElementById('edit-tac-gia-s').value = originalSachData.tacGia;
+                    document.getElementById('edit-the-loai-s').value = originalSachData.theLoai;
+                    document.getElementById('edit-nxb-s').value = originalSachData.nhaXB;
+                    document.getElementById('edit-nam-xb-s').value = originalSachData.namXB;
+                    document.getElementById('edit-so-luong-ton-s').value = originalSachData.soLuongTon;
+                    showToast('Đã khôi phục dữ liệu ban đầu!', 'success');
+                }
+            }
+        });
+    }
 
     if(editSachForm) {
         editSachForm.addEventListener('submit', async (e) => {
@@ -1500,6 +1543,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- THỂ LOẠI: CHỈNH SỬA ---
     const editTheLoaiModal = document.getElementById('theloai-edit-modal');
     const editTheLoaiForm = document.getElementById('edit-the-loai-form');
+    let originalTheLoaiData = null; // Lưu dữ liệu ban đầu
 
     document.getElementById('table-the-loai').addEventListener('click', (e) => {
         if (e.target.classList.contains('open-theloai-edit-modal') || 
@@ -1512,9 +1556,31 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit-ten-the-loai').value = cells[2].textContent;
             document.getElementById('edit-mo-ta-tl').value = cells[3].textContent;
             
+            // Lưu dữ liệu ban đầu
+            originalTheLoaiData = {
+                maTheLoai: cells[1].textContent,
+                tenTheLoai: cells[2].textContent,
+                moTa: cells[3].textContent
+            };
+            
             editTheLoaiModal.style.display = 'flex';
         }
     });
+
+    // Xử lý nút "Đặt lại" cho modal edit thể loại
+    const btnResetTheLoai = document.getElementById('btn-reset-theloai');
+    if(btnResetTheLoai) {
+        btnResetTheLoai.addEventListener('click', () => {
+            if(originalTheLoaiData) {
+                if(confirm('Bạn có muốn khôi phục lại dữ liệu ban đầu không?')) {
+                    document.getElementById('edit-ma-the-loai').value = originalTheLoaiData.maTheLoai;
+                    document.getElementById('edit-ten-the-loai').value = originalTheLoaiData.tenTheLoai;
+                    document.getElementById('edit-mo-ta-tl').value = originalTheLoaiData.moTa;
+                    showToast('Đã khôi phục dữ liệu ban đầu!', 'success');
+                }
+            }
+        });
+    }
 
     if(editTheLoaiForm) {
         editTheLoaiForm.addEventListener('submit', async (e) => {
@@ -1679,6 +1745,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- TÁC GIẢ: CHỈNH SỬA ---
     const editTacGiaModal = document.getElementById('tacgia-edit-modal');
     const editTacGiaForm = document.getElementById('edit-tacgia-form');
+    let originalTacGiaData = null; // Lưu dữ liệu ban đầu
 
     document.getElementById('table-tac-gia').addEventListener('click', (e) => {
         if (e.target.classList.contains('open-tacgia-edit-modal') || 
@@ -1691,9 +1758,31 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit-ho-ten-tg').value = cells[2].textContent;
             document.getElementById('edit-nam-sinh-tg').value = cells[3].textContent;
             
+            // Lưu dữ liệu ban đầu
+            originalTacGiaData = {
+                maTacGia: cells[1].textContent,
+                hoTen: cells[2].textContent,
+                namSinh: cells[3].textContent
+            };
+            
             editTacGiaModal.style.display = 'flex';
         }
     });
+
+    // Xử lý nút "Đặt lại" cho modal edit tác giả
+    const btnResetTacGia = document.getElementById('btn-reset-tacgia');
+    if(btnResetTacGia) {
+        btnResetTacGia.addEventListener('click', () => {
+            if(originalTacGiaData) {
+                if(confirm('Bạn có muốn khôi phục lại dữ liệu ban đầu không?')) {
+                    document.getElementById('edit-ma-tac-gia').value = originalTacGiaData.maTacGia;
+                    document.getElementById('edit-ho-ten-tg').value = originalTacGiaData.hoTen;
+                    document.getElementById('edit-nam-sinh-tg').value = originalTacGiaData.namSinh;
+                    showToast('Đã khôi phục dữ liệu ban đầu!', 'success');
+                }
+            }
+        });
+    }
 
     if(editTacGiaForm) {
         editTacGiaForm.addEventListener('submit', async (e) => {
