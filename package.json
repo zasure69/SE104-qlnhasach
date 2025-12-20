@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test jest --detectOpenHandles --reporters=default --reporters=jest-junit",
+    "test": "cross-env NODE_ENV=test jest --detectOpenHandles",
     "start": "nodemon index.js",
     "backup-db:ps": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backup_db.ps1",
     "backup-db:sh": "bash scripts/backup_db.sh"

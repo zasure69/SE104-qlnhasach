@@ -1,8 +1,9 @@
 const request = require('supertest');
-const app = require('../index'); 
+const app = require('../index');
 const resetAndSeedDatabase = require('./test_db_helper');
 const jwt = require('jsonwebtoken');
 const db = require('../models');
+const sequelize = require('../config/db'); // Import sequelize
 
 describe('Complex Logic: Rules & Constraints (5 Scenarios)', () => {
   let adminToken;
@@ -39,17 +40,46 @@ describe('Complex Logic: Rules & Constraints (5 Scenarios)', () => {
   }, 30000); // Increased timeout for database operations
 
   afterAll(async () => {
-    // Individual deletes are here for good measure, though resetAndSeedDatabase should prevent cross-suite issues.
-    // Using .catch(() => {}) to ignore errors if resource was already deleted by a test or previous cleanup.
-    if (receiptId_Scenario3) await request(app).delete(`/api/receipts/${receiptId_Scenario3}`).set('Cookie', [`authToken=${adminToken}`]).catch(() => {});
-    if (receiptId_Scenario5) await request(app).delete(`/api/receipts/${receiptId_Scenario5}`).set('Cookie', [`authToken=${adminToken}`]).catch(() => {});
-    if (billId_Scenario1) await request(app).delete(`/api/bill/${billId_Scenario1}`).set('Cookie', [`authToken=${adminToken}`]).catch(() => {});
-    if (billId_Scenario2) await request(app).delete(`/api/bill/${billId_Scenario2}`).set('Cookie', [`authToken=${adminToken}`]).catch(() => {});
-    if (billId_Scenario4) await request(app).delete(`/api/bill/${billId_Scenario4}`).set('Cookie', [`authToken=${adminToken}`]).catch(() => {});
-    if (phieuNhapId_Scenario1) await request(app).delete(`/api/import/delete/${phieuNhapId_Scenario1}`).set('Cookie', [`authToken=${adminToken}`]).catch(() => {});
-    if (customerId) await request(app).delete(`/api/customers/deleteCustomers/${customerId}`).set('Cookie', [`authToken=${adminToken}`]).catch(() => {});
-    if (bookId) await request(app).delete(`/api/books/deleteSach/${bookId}`).set('Cookie', [`authToken=${adminToken}`]).catch(() => {});
-    if (dauSachId) await request(app).delete(`/api/books/deleteDauSach/${dauSachId}`).set('Cookie', [`authToken=${adminToken}`]).catch(() => {});
+    // DÙNG DB TRỰC TIẾP ĐỂ XÓA (Tránh dùng request(app).delete)
+    
+    // 1. Xóa các hóa đơn (Bill) và chi tiết liên quan
+    const billIdsToDelete = [billId_Scenario1, billId_Scenario2, billId_Scenario4].filter(id => id);
+    if (billIdsToDelete.length > 0) {
+        // Xóa chi tiết hóa đơn trước (nếu không có cascade)
+        await db.CT_HD.destroy({ where: { MaHoaDon: billIdsToDelete } });
+        // Xóa hóa đơn
+        await db.HoaDon.destroy({ where: { MaHoaDon: billIdsToDelete } });
+    }
+
+    // 2. Xóa phiếu thu (Receipt)
+    const receiptIdsToDelete = [receiptId_Scenario3, receiptId_Scenario5].filter(id => id);
+    if (receiptIdsToDelete.length > 0) {
+        await db.PhieuThuTien.destroy({ where: { MaPhieuThu: receiptIdsToDelete } });
+    }
+
+    // 3. Xóa phiếu nhập (Import) và chi tiết
+    if (phieuNhapId_Scenario1) {
+        await db.CT_PNS.destroy({ where: { MaPhieuNhap: phieuNhapId_Scenario1 } });
+        await db.PhieuNhapSach.destroy({ where: { MaPhieuNhap: phieuNhapId_Scenario1 } });
+    }
+
+    // 4. Xóa khách hàng, sách, đầu sách (Thứ tự quan trọng do khóa ngoại)
+    if (customerId) {
+        // Cần đảm bảo xóa hết hóa đơn/phiếu thu của khách này trước nếu có ràng buộc
+        // Ở trên đã xóa theo ID cụ thể, nhưng an toàn thì xóa các bảng phụ thuộc trước
+        await db.KhachHang.destroy({ where: { MaKhachHang: customerId } });
+    }
+
+    if (bookId) {
+        await db.Sach.destroy({ where: { MaSach: bookId } });
+    }
+
+    if (dauSachId) {
+        await db.DauSach.destroy({ where: { MaDauSach: dauSachId } });
+    }
+  
+    // QUAN TRỌNG: Đóng kết nối để Jest thoát hoàn toàn
+    //await sequelize.close(); 
   });
 
   // =========================================================================
@@ -163,17 +193,35 @@ describe('Complex Logic: Rules & Constraints (5 Scenarios)', () => {
   // SCENARIO 4: SỬA HÓA ĐƠN GÂY ÂM KHO
   // =========================================================================
   describe('Rule 4: Update Bill causes Negative Stock', () => {
+      let originalMaxDebtAllowed;
+
+      beforeAll(async () => {
+          // Temporarily increase MaxDebtAllowed to ensure bill creation succeeds in Step 1
+          const maxDebtRule = await db.ThamSo.findOne({ where: { TenThamSo: 'SoTienNoToiDa' } });
+          originalMaxDebtAllowed = maxDebtRule ? maxDebtRule.GiaTri : 0;
+          await db.ThamSo.update({ GiaTri: 100000000 }, { where: { TenThamSo: 'SoTienNoToiDa' } });
+      });
+
+      afterAll(async () => {
+          // Restore original MaxDebtAllowed
+          if (originalMaxDebtAllowed !== undefined) {
+              await db.ThamSo.update({ GiaTri: originalMaxDebtAllowed }, { where: { TenThamSo: 'SoTienNoToiDa' } });
+          }
+      });
+
       test('Step 1: Setup - Stock 100, Sell 10 (Bill A)', async () => {
           await db.Sach.update({ SoLuongTon: 100 }, { where: { MaSach: bookId } });
+          await db.KhachHang.update({ TongNo: 0 }, { where: { MaKhachHang: customerId } }); // Reset debt
           
           billId_Scenario4 = `HD_R4_${Date.now()}`;
-          await request(app).post('/api/bill/create')
+          const createBillRes = await request(app).post('/api/bill/create')
               .set('Cookie', [`authToken=${adminToken}`])
               .send({
                   MaHoaDon: billId_Scenario4, MaKhachHang: customerId,
                   TongTien: 100000, SoTienTra: 100000, ConLai: 0,
                   Details: [{ MaSach: bookId, SoLuongBan: 10, DonGiaBan: 10000, ThanhTien: 100000 }]
               });
+          expect(createBillRes.statusCode).toBe(200); // Expect success now
 
           const currentStock = await db.Sach.findByPk(bookId, { attributes: ['SoLuongTon'] });
           expect(currentStock.SoLuongTon).toBe(90);

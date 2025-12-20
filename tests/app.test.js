@@ -1,7 +1,8 @@
 const request = require('supertest');
-const app = require('../index'); 
+const app = require('../index');
 const resetAndSeedDatabase = require('./test_db_helper');
 const jwt = require('jsonwebtoken');
+const sequelize = require('../config/db'); // Import sequelize instance
 
 describe('Web App Tests', () => {
   let adminToken;
@@ -15,8 +16,7 @@ describe('Web App Tests', () => {
   }, 30000); // Increased timeout for database operations
 
   afterAll(async () => {
-    // We don't need to close sequelize here if other tests might run after this suite.
-    // Jest will handle overall process teardown.
+    //await sequelize.close(); // Close the database connection
   });
 
   describe('Public Routes', () => {

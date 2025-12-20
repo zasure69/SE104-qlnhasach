@@ -39,7 +39,7 @@ describe('Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4)', () => {
   afterAll(async () => {
     // Cleanup data
     // (Thứ tự cleanup quan trọng để tránh lỗi khóa ngoại)
-    await sequelize.close();
+    //await sequelize.close();
   });
 
   // =========================================================================
@@ -64,28 +64,28 @@ describe('Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4)', () => {
   // =========================================================================
   // SCENARIO 2: BÁN HÀNG - GIẢM TỒN KHO
   // =========================================================================
-  test('Step 2: Sell 140 books (Stock: 150 -> 10)', async () => {
+  test('Step 2: Sell 130 books (Stock: 150 -> 20)', async () => {
       const res = await request(app).post('/api/bill/create')
           .set('Cookie', [`authToken=${adminToken}`])
           .send({
               MaHoaDon: `HD_LOGIC_${Date.now()}`,
               MaKhachHang: customerId,
-              TongTien: 1400000, SoTienTra: 0, ConLai: 1400000,
-              Details: [{ MaSach: bookId, SoLuongBan: 140, DonGiaBan: 10000, ThanhTien: 1400000 }]
+              TongTien: 1300000, SoTienTra: 1300000, ConLai: 0,
+              Details: [{ MaSach: bookId, SoLuongBan: 130, DonGiaBan: 10000, ThanhTien: 1300000 }]
           });
       expect(res.statusCode).toBe(200);
 
-      // Verify Stock = 10
+      // Verify Stock = 20
       const book = await request(app).get(`/api/books/getSach/${bookId}`).set('Cookie', [`authToken=${adminToken}`]);
-      expect(book.body.sach.SoLuongTon).toBe(10);
+      expect(book.body.sach.SoLuongTon).toBe(20);
   });
 
   // =========================================================================
   // SCENARIO 3: THỬ XÓA PHIẾU NHẬP -> GÂY ÂM KHO (TEST LOGIC ẢNH)
   // =========================================================================
   test('Step 3: Try Delete Phieu A (150 books) -> Should FAIL', async () => {
-      // Logic: Hiện tại Tồn = 10.
-      // Nếu xóa Phiếu A (đã nhập 150), Tồn sẽ là: 10 - 150 = -140.
+      // Logic: Hiện tại Tồn = 20.
+      // Nếu xóa Phiếu A (đã nhập 150), Tồn sẽ là: 20 - 150 = -130.
       // Database (hoặc Controller) phải chặn hành động này.
       
       const res = await request(app)
@@ -96,9 +96,9 @@ describe('Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4)', () => {
       expect(res.statusCode).not.toBe(200);
       expect(res.body.error).toMatch(/âm/i); // Expect error message to contain "âm"
       
-      // Verify Stock vẫn là 10 (Không bị trừ)
+      // Verify Stock vẫn là 20 (Không bị trừ)
       const book = await request(app).get(`/api/books/getSach/${bookId}`).set('Cookie', [`authToken=${adminToken}`]);
-      expect(book.body.sach.SoLuongTon).toBe(10);
+      expect(book.body.sach.SoLuongTon).toBe(20);
   });
 
   // =========================================================================
@@ -125,7 +125,7 @@ describe('Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4)', () => {
   // SCENARIO 5: TRƯỜNG HỢP HỢP LỆ (ĐỦ TỒN ĐỂ XÓA)
   // =========================================================================
   test('Step 5: Happy Path - Import more then Delete', async () => {
-      // 1. Nhập thêm 200 cuốn (Phiếu B). Tồn: 10 + 200 = 210.
+      // 1. Nhập thêm 200 cuốn (Phiếu B). Tồn: 20 + 200 = 220.
       let res = await request(app).post('/api/import/create')
           .set('Cookie', [`authToken=${adminToken}`])
           .send({
@@ -136,21 +136,21 @@ describe('Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4)', () => {
       expect(res.statusCode).toBe(201);
       phieuNhapId_B = res.body.maPhieu;
 
-      // Check stock = 210
+      // Check stock = 220
       let book = await request(app).get(`/api/books/getSach/${bookId}`).set('Cookie', [`authToken=${adminToken}`]);
-      expect(book.body.sach.SoLuongTon).toBe(210);
+      expect(book.body.sach.SoLuongTon).toBe(220);
 
       // 2. Bây giờ thử xóa Phiếu A (150 cuốn).
-      // Tồn sau xóa: 210 - 150 = 60. (Dương -> Hợp lệ).
+      // Tồn sau xóa: 220 - 150 = 70. (Dương -> Hợp lệ).
       res = await request(app)
           .delete(`/api/import/delete/${phieuNhapId_A}`)
           .set('Cookie', [`authToken=${adminToken}`]);
       
       expect(res.statusCode).toBe(200);
 
-      // Check stock = 60
+      // Check stock = 70
       book = await request(app).get(`/api/books/getSach/${bookId}`).set('Cookie', [`authToken=${adminToken}`]);
-      expect(book.body.sach.SoLuongTon).toBe(60);
+      expect(book.body.sach.SoLuongTon).toBe(70);
   });
 
 });

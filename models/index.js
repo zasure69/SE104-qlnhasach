@@ -19,10 +19,10 @@ const BaoCaoCongNo = require("./BaoCaoCongNo");
 const BaoCaoDoanhThu = require("./BaoCaoDoanhThu");
 
 // 1. User (NHANVIEN) Relationships
-User.hasMany(PhieuNhapSach, { foreignKey: "MaNhanVien" });
+User.hasMany(PhieuNhapSach, { foreignKey: "MaNhanVien", onDelete: 'RESTRICT' });
 PhieuNhapSach.belongsTo(User, { foreignKey: "MaNhanVien" });
 
-User.hasMany(HoaDon, { foreignKey: "MaNhanVien" });
+User.hasMany(HoaDon, { foreignKey: "MaNhanVien", onDelete: 'RESTRICT' });
 HoaDon.belongsTo(User, { foreignKey: "MaNhanVien" });
 
 // 2. TheLoai Relationships
@@ -33,10 +33,10 @@ TheLoai.hasMany(BaoCaoDoanhThu, { foreignKey: "MaTheLoai" });
 BaoCaoDoanhThu.belongsTo(TheLoai, { foreignKey: "MaTheLoai" });
 
 // 3. KhachHang Relationships
-KhachHang.hasMany(HoaDon, { foreignKey: "MaKhachHang" });
+KhachHang.hasMany(HoaDon, { foreignKey: "MaKhachHang", onDelete: 'RESTRICT' });
 HoaDon.belongsTo(KhachHang, { foreignKey: "MaKhachHang" });
 
-KhachHang.hasMany(PhieuThuTien, { foreignKey: "MaKhachHang" });
+KhachHang.hasMany(PhieuThuTien, { foreignKey: "MaKhachHang", onDelete: 'RESTRICT' });
 PhieuThuTien.belongsTo(KhachHang, { foreignKey: "MaKhachHang" });
 
 KhachHang.hasMany(BaoCaoCongNo, { foreignKey: "MaKhachHang" });

@@ -3,6 +3,7 @@ const app = require('../index');
 const resetAndSeedDatabase = require('./test_db_helper');
 const jwt = require('jsonwebtoken');
 const db = require('../models');
+const sequelize = require('../config/db');
 
 describe('Business Logic Module - Phase 3', () => {
   let adminToken;
@@ -56,6 +57,7 @@ describe('Business Logic Module - Phase 3', () => {
   afterAll(async () => {
     // Cleanup is handled by resetAndSeedDatabase in each suite.
     // We can add specific cleanup here if needed for resources created within this suite.
+    //await sequelize.close();
   });
 
   // ==========================================

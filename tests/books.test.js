@@ -1,7 +1,8 @@
 const request = require('supertest');
-const app = require('../index'); 
+const app = require('../index');
 const resetAndSeedDatabase = require('./test_db_helper');
 const jwt = require('jsonwebtoken');
+const sequelize = require('../config/db'); // Import sequelize instance
 
 describe('Books Module API Tests', () => {
   let adminToken;
@@ -11,7 +12,7 @@ describe('Books Module API Tests', () => {
   // Dữ liệu mẫu để test
   const testDauSach = {
     TenSach: "Dế Mèn Phiêu Lưu Ký Test",
-    TenTheLoai: "Truyện Thiếu Nhi", 
+    TenTheLoai: "Truyện Thiếu Nhi",
     tacGiaIds: ["Tô Hoài Test"]
   };
 
@@ -27,10 +28,10 @@ describe('Books Module API Tests', () => {
     // Generate token for the seeded admin user
     const adminUser = { id: 'NV001', username: 'admin_test', role: 'Admin' };
     adminToken = jwt.sign(adminUser, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
-  }, 30000); 
+  }, 30000);
 
   afterAll(async () => {
-    // No need to close sequelize here, as resetAndSeedDatabase handles it per suite
+    //await sequelize.close(); // Close the database connection
   });
 
   describe('1. Quản lý Đầu Sách (Titles)', () => {
@@ -45,8 +46,8 @@ describe('Books Module API Tests', () => {
         }
 
         expect(res.statusCode).toBe(201);
-        expect(res.body.dauSach).toHaveProperty('MaDauSach'); 
-        createdDauSachId = res.body.dauSach.MaDauSach; 
+        expect(res.body.dauSach).toHaveProperty('MaDauSach');
+        createdDauSachId = res.body.dauSach.MaDauSach;
     });
 
     it('GET /api/books/getDauSach/:id - Lấy thông tin đầu sách vừa tạo', async () => {
@@ -55,7 +56,7 @@ describe('Books Module API Tests', () => {
             .set('Cookie', [`authToken=${adminToken}`]);
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.dauSach.TenSach).toBe(testDauSach.TenSach); 
+        expect(res.body.dauSach.TenSach).toBe(testDauSach.TenSach);
     });
   });
 
@@ -76,7 +77,7 @@ describe('Books Module API Tests', () => {
         }
 
         expect(res.statusCode).toBe(201);
-        expect(res.body.sach).toHaveProperty('MaSach'); 
+        expect(res.body.sach).toHaveProperty('MaSach');
         createdBookId = res.body.sach.MaSach;
     });
 
@@ -86,7 +87,7 @@ describe('Books Module API Tests', () => {
             .set('Cookie', [`authToken=${adminToken}`]);
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.sach.NhaXB).toBe(testBook.NhaXB); 
+        expect(res.body.sach.NhaXB).toBe(testBook.NhaXB);
     });
 
     it('PATCH /api/books/updateSach/:id - Cập nhật thông tin sách', async () => {

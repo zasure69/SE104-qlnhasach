@@ -1,27 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="4" failures="2" errors="0" time="36.651">
-  <testsuite name="Phase 4: Reports &amp; System Settings" errors="0" failures="2" skipped="0" timestamp="2025-12-20T07:52:09" time="36.593" tests="4">
-    <testcase classname="Phase 4: Reports &amp; System Settings A. Report Generation GET /api/reports/api/report/inventory - Should calculate Inventory correctly" name="Phase 4: Reports &amp; System Settings A. Report Generation GET /api/reports/api/report/inventory - Should calculate Inventory correctly" time="0.434">
+<testsuites name="jest tests" tests="5" failures="4" errors="0" time="11.07">
+  <testsuite name="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4)" errors="0" failures="4" skipped="0" timestamp="2025-12-20T11:02:40" time="11.012" tests="5">
+    <testcase classname="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 1: Import 150 books (Phieu A)" name="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 1: Import 150 books (Phieu A)" time="1.405">
+    </testcase>
+    <testcase classname="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 2: Sell 140 books (Stock: 150 -&gt; 10)" name="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 2: Sell 140 books (Stock: 150 -&gt; 10)" time="0.433">
       <failure>Error: expect(received).toBe(expected) // Object.is equality
 
-Expected: 10
-Received: 0
-    at Object.toBe (/home/user/SE104-qlnhasach/tests/reports_rules.test.js:98:34)
+Expected: 200
+Received: 400
+    at Object.toBe (/home/user/SE104-qlnhasach/tests/logic_import_sell_delete.test.js:76:30)
     at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
     </testcase>
-    <testcase classname="Phase 4: Reports &amp; System Settings A. Report Generation GET /api/reports/api/report/debt - Should calculate Debt correctly" name="Phase 4: Reports &amp; System Settings A. Report Generation GET /api/reports/api/report/debt - Should calculate Debt correctly" time="0.585">
-      <failure>Error: expect(received).toBeTruthy()
+    <testcase classname="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 3: Try Delete Phieu A (150 books) -&gt; Should FAIL" name="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 3: Try Delete Phieu A (150 books) -&gt; Should FAIL" time="0.832">
+      <failure>Error: expect(received).not.toBe(expected) // Object.is equality
 
-Received: undefined
-    at Object.toBeTruthy (/home/user/SE104-qlnhasach/tests/reports_rules.test.js:113:30)
+Expected: not 200
+    at Object.toBe (/home/user/SE104-qlnhasach/tests/logic_import_sell_delete.test.js:96:34)
     at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
     </testcase>
-    <testcase classname="Phase 4: Reports &amp; System Settings B. System Rules (Admin Only) PATCH /api/change-rules/:tenThamSo - Admin can update rules" name="Phase 4: Reports &amp; System Settings B. System Rules (Admin Only) PATCH /api/change-rules/:tenThamSo - Admin can update rules" time="0.563">
+    <testcase classname="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 4: Try Update Phieu A -&gt; Should FAIL (Due to Delete Step)" name="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 4: Try Update Phieu A -&gt; Should FAIL (Due to Delete Step)" time="0.104">
+      <failure>Error: expect(received).toMatch(expected)
+
+Expected pattern: /âm/i
+Received string:  &quot;Không tìm thấy phiếu nhập&quot;
+    at Object.toMatch (/home/user/SE104-qlnhasach/tests/logic_import_sell_delete.test.js:121:30)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
     </testcase>
-    <testcase classname="Phase 4: Reports &amp; System Settings B. System Rules (Admin Only) PATCH /api/change-rules/:tenThamSo - Non-Admin should fail" name="Phase 4: Reports &amp; System Settings B. System Rules (Admin Only) PATCH /api/change-rules/:tenThamSo - Non-Admin should fail" time="0.021">
-    </testcase>
-    <testcase classname=" Test execution failure: could be caused by test hooks like &apos;afterAll&apos;." name=" Test execution failure: could be caused by test hooks like &apos;afterAll&apos;." time="0">
-      <failure>{&quot;message&quot;:&quot;&quot;,&quot;stack&quot;:&quot;Error: thrown: \&quot;Exceeded timeout of 5000 ms for a hook.\nAdd a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout.\&quot;\n    at afterAll (/home/user/SE104-qlnhasach/tests/reports_rules.test.js:69:3)\n    at _dispatchDescribe (/home/user/SE104-qlnhasach/node_modules/jest-circus/build/index.js:91:26)\n    at describe (/home/user/SE104-qlnhasach/node_modules/jest-circus/build/index.js:55:5)\n    at Object.describe (/home/user/SE104-qlnhasach/tests/reports_rules.test.js:7:1)\n    at Runtime._execModule (/home/user/SE104-qlnhasach/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/user/SE104-qlnhasach/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/user/SE104-qlnhasach/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/user/SE104-qlnhasach/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/user/SE104-qlnhasach/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/user/SE104-qlnhasach/node_modules/jest-runner/build/runTest.js:444:34)&quot;}</failure>
+    <testcase classname="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 5: Happy Path - Import more then Delete" name="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 5: Happy Path - Import more then Delete" time="1.085">
+      <failure>Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: 210
+Received: 200
+    at Object.toBe (/home/user/SE104-qlnhasach/tests/logic_import_sell_delete.test.js:141:41)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
     </testcase>
   </testsuite>
 </testsuites>
