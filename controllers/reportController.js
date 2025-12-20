@@ -33,7 +33,7 @@ module.exports = {
       return res.json({ data: [], totalRevenue: 0 });
     }
 
-    const startDate = new Date(year, month - 1, 1);
+    const startDate = new Date(year, month - 1, 1, 0, 0, 0);
     const endDate = new Date(year, month, 0, 23, 59, 59);
 
     const revenueByGenre = await CT_HD.findAll({
@@ -73,7 +73,7 @@ module.exports = {
     );
 
     const result = revenueByGenre.map(item => ({
-      MaTheLoai: item['Sach.DauSach.MaTheLoai'], // 🔥 FIX QUAN TRỌNG
+      MaTheLoai: item['Sach.DauSach.MaTheLoai'], 
       SoLuongBan: Number(item.SoLuongBan),
       ThanhTien: Number(item.ThanhTien),
       TiLe: totalRevenue > 0
@@ -95,22 +95,29 @@ module.exports = {
       let { month, year } = req.query;
       month = parseInt(month);
       year = parseInt(year);
-      const startDate = new Date(year, month - 1, 1);
+
+      const startDate = new Date(year, month - 1, 1, 0, 0, 0);
       const endDate = new Date(year, month, 0, 23, 59, 59);
+      
+      // For NgayThuTien, which is DATEONLY
+      const formattedStartDateOnly = `${year}-${String(month).padStart(2, '0')}-01`;
+      const formattedEndDateOnly = `${year}-${String(month).padStart(2, '0')}-${String(new Date(year, month, 0).getDate()).padStart(2, '0')}`;
+
       const listKH = await KhachHang.findAll();
+
       const result = await Promise.all(listKH.map(async (kh) => {
-        const tongHD_Truoc = await HoaDon.sum('ConLai', { 
+        const tongHD_Truoc = await HoaDon.sum('ConLai', {
           where: {
             MaKhachHang: kh.MaKhachHang,
-            NgayLapHoaDon: { [Op.lt]: startDate } 
+            NgayLapHoaDon: { [Op.lt]: startDate }
           }
         }) || 0;
-        const totalMua_Truoc = await HoaDon.sum('ConLai', { // Lấy cột tổng tiền hóa đơn
+        const totalMua_Truoc = await HoaDon.sum('ConLai', {
            where: { MaKhachHang: kh.MaKhachHang, NgayLapHoaDon: { [Op.lt]: startDate } }
         }) || 0;
         
         const totalTra_Truoc = await PhieuThuTien.sum('SoTienThu', {
-           where: { MaKhachHang: kh.MaKhachHang, NgayThuTien: { [Op.lt]: startDate } }
+           where: { MaKhachHang: kh.MaKhachHang, NgayThuTien: { [Op.lt]: formattedStartDateOnly } }
         }) || 0;
         const noDau = totalMua_Truoc - totalTra_Truoc;
         const noPhatSinh = await HoaDon.sum('ConLai', {
@@ -122,10 +129,11 @@ module.exports = {
         const daTra = await PhieuThuTien.sum('SoTienThu', {
           where: {
             MaKhachHang: kh.MaKhachHang,
-            NgayThuTien: { [Op.between]: [startDate, endDate] }
+            NgayThuTien: { [Op.between]: [formattedStartDateOnly, formattedEndDateOnly] }
           }
         }) || 0;
         const noCuoi = noDau + noPhatSinh - daTra;
+
         if (noDau !== 0 || noPhatSinh !== 0 || daTra !== 0) {
           return {
             MaKhachHang: kh.MaKhachHang,
@@ -157,7 +165,7 @@ async getTonKhoAPI(req, res) {
       return res.json({ data: [] });
     }
 
-    const startDate = new Date(year, month - 1, 1);
+    const startDate = new Date(year, month - 1, 1, 0, 0, 0);
     const endDate = new Date(year, month, 0, 23, 59, 59);
 
     const listSach = await Sach.findAll({

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="5" failures="4" errors="0" time="11.07">
+  <testsuite name="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4)" errors="0" failures="4" skipped="0" timestamp="2025-12-20T11:02:40" time="11.012" tests="5">
+    <testcase classname="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 1: Import 150 books (Phieu A)" name="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 1: Import 150 books (Phieu A)" time="1.405">
+    </testcase>
+    <testcase classname="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 2: Sell 140 books (Stock: 150 -&gt; 10)" name="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 2: Sell 140 books (Stock: 150 -&gt; 10)" time="0.433">
+      <failure>Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: 200
+Received: 400
+    at Object.toBe (/home/user/SE104-qlnhasach/tests/logic_import_sell_delete.test.js:76:30)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    </testcase>
+    <testcase classname="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 3: Try Delete Phieu A (150 books) -&gt; Should FAIL" name="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 3: Try Delete Phieu A (150 books) -&gt; Should FAIL" time="0.832">
+      <failure>Error: expect(received).not.toBe(expected) // Object.is equality
+
+Expected: not 200
+    at Object.toBe (/home/user/SE104-qlnhasach/tests/logic_import_sell_delete.test.js:96:34)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    </testcase>
+    <testcase classname="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 4: Try Update Phieu A -&gt; Should FAIL (Due to Delete Step)" name="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 4: Try Update Phieu A -&gt; Should FAIL (Due to Delete Step)" time="0.104">
+      <failure>Error: expect(received).toMatch(expected)
+
+Expected pattern: /âm/i
+Received string:  &quot;Không tìm thấy phiếu nhập&quot;
+    at Object.toMatch (/home/user/SE104-qlnhasach/tests/logic_import_sell_delete.test.js:121:30)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    </testcase>
+    <testcase classname="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 5: Happy Path - Import more then Delete" name="Logic: Import-Sell-Delete Constraint (Theo hình ảnh TH4) Step 5: Happy Path - Import more then Delete" time="1.085">
+      <failure>Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: 210
+Received: 200
+    at Object.toBe (/home/user/SE104-qlnhasach/tests/logic_import_sell_delete.test.js:141:41)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

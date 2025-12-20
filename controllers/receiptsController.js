@@ -55,6 +55,14 @@ const createReceipt = async (req, res) => {
         if (!customer) { await t.rollback(); return res.status(404).json({ message: 'Không tìm thấy khách hàng.' }); }
         if (thuTien <= 0) { await t.rollback(); return res.status(400).json({ message: 'Số tiền thu phải lớn hơn 0.' }); }
 
+        // --- CHECK LOGIC MỚI: KHÔNG ĐƯỢC THU QUÁ SỐ NỢ ---
+        const currentDebt = parseFloat(customer.TongNo);
+        if (thuTien > currentDebt) {
+            await t.rollback();
+            return res.status(400).json({ message: `Số tiền thu (${thuTien}) không được vượt quá số nợ hiện tại (${currentDebt}).` });
+        }
+        // ------------------------------------------------
+
         // 2. Tạo Phiếu Thu Tiền
         await PhieuThuTien.create({
             MaPhieuThu,

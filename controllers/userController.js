@@ -164,12 +164,12 @@ const updateEmployee = async (req, res) => {
           return res.status(404).json({ error: 'Không tìm thấy nhân viên.' });
       }
 
-      // Cập nhật thông tin
-      user.HoTen = hoTen;
-      user.NgaySinh = ngaySinh;
-      user.SoDienThoai = soDienThoai;
-      user.ChucVu = chucVu;
-      user.NgayNhanViec = ngayNhanViec;
+      // Cập nhật thông tin: CHỈ UPDATE KHI CÓ DỮ LIỆU
+      if (typeof hoTen !== 'undefined') user.HoTen = hoTen;
+      if (typeof ngaySinh !== 'undefined') user.NgaySinh = ngaySinh;
+      if (typeof soDienThoai !== 'undefined') user.SoDienThoai = soDienThoai;
+      if (typeof chucVu !== 'undefined') user.ChucVu = chucVu;
+      if (typeof ngayNhanViec !== 'undefined') user.NgayNhanViec = ngayNhanViec;
 
       // Chỉ cập nhật mật khẩu NẾU nó được cung cấp
       if (password && password.length > 0) {
@@ -247,8 +247,12 @@ const deleteEmployee = async (req, res) => {
       res.status(200).json({ message: 'Xóa nhân viên thành công!' });
 
   } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Lỗi server nội bộ' });
+    // Xử lý lỗi nếu nhân viên này có Hóa đơn hoặc Phiếu nhập sách (không thể xóa)
+    if (err.name === 'SequelizeForeignKeyConstraintError') {
+        return res.status(400).json({ error: 'Xóa thất bại! Nhân viên này đã lập hóa đơn hoặc phiếu nhập sách.' });
+    }
+    console.error(err);
+    res.status(500).json({ error: 'Lỗi server nội bộ' });
   }
 };
 
