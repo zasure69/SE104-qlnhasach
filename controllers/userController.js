@@ -164,12 +164,12 @@ const updateEmployee = async (req, res) => {
           return res.status(404).json({ error: 'Không tìm thấy nhân viên.' });
       }
 
-      // Cập nhật thông tin
-      user.HoTen = hoTen;
-      user.NgaySinh = ngaySinh;
-      user.SoDienThoai = soDienThoai;
-      user.ChucVu = chucVu;
-      user.NgayNhanViec = ngayNhanViec;
+      // Cập nhật thông tin: CHỈ UPDATE KHI CÓ DỮ LIỆU
+      if (typeof hoTen !== 'undefined') user.HoTen = hoTen;
+      if (typeof ngaySinh !== 'undefined') user.NgaySinh = ngaySinh;
+      if (typeof soDienThoai !== 'undefined') user.SoDienThoai = soDienThoai;
+      if (typeof chucVu !== 'undefined') user.ChucVu = chucVu;
+      if (typeof ngayNhanViec !== 'undefined') user.NgayNhanViec = ngayNhanViec;
 
       // Chỉ cập nhật mật khẩu NẾU nó được cung cấp
       if (password && password.length > 0) {

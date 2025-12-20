@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="4" failures="2" errors="0" time="36.651">
+  <testsuite name="Phase 4: Reports &amp; System Settings" errors="0" failures="2" skipped="0" timestamp="2025-12-20T07:52:09" time="36.593" tests="4">
+    <testcase classname="Phase 4: Reports &amp; System Settings A. Report Generation GET /api/reports/api/report/inventory - Should calculate Inventory correctly" name="Phase 4: Reports &amp; System Settings A. Report Generation GET /api/reports/api/report/inventory - Should calculate Inventory correctly" time="0.434">
+      <failure>Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: 10
+Received: 0
+    at Object.toBe (/home/user/SE104-qlnhasach/tests/reports_rules.test.js:98:34)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    </testcase>
+    <testcase classname="Phase 4: Reports &amp; System Settings A. Report Generation GET /api/reports/api/report/debt - Should calculate Debt correctly" name="Phase 4: Reports &amp; System Settings A. Report Generation GET /api/reports/api/report/debt - Should calculate Debt correctly" time="0.585">
+      <failure>Error: expect(received).toBeTruthy()
+
+Received: undefined
+    at Object.toBeTruthy (/home/user/SE104-qlnhasach/tests/reports_rules.test.js:113:30)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    </testcase>
+    <testcase classname="Phase 4: Reports &amp; System Settings B. System Rules (Admin Only) PATCH /api/change-rules/:tenThamSo - Admin can update rules" name="Phase 4: Reports &amp; System Settings B. System Rules (Admin Only) PATCH /api/change-rules/:tenThamSo - Admin can update rules" time="0.563">
+    </testcase>
+    <testcase classname="Phase 4: Reports &amp; System Settings B. System Rules (Admin Only) PATCH /api/change-rules/:tenThamSo - Non-Admin should fail" name="Phase 4: Reports &amp; System Settings B. System Rules (Admin Only) PATCH /api/change-rules/:tenThamSo - Non-Admin should fail" time="0.021">
+    </testcase>
+    <testcase classname=" Test execution failure: could be caused by test hooks like &apos;afterAll&apos;." name=" Test execution failure: could be caused by test hooks like &apos;afterAll&apos;." time="0">
+      <failure>{&quot;message&quot;:&quot;&quot;,&quot;stack&quot;:&quot;Error: thrown: \&quot;Exceeded timeout of 5000 ms for a hook.\nAdd a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout.\&quot;\n    at afterAll (/home/user/SE104-qlnhasach/tests/reports_rules.test.js:69:3)\n    at _dispatchDescribe (/home/user/SE104-qlnhasach/node_modules/jest-circus/build/index.js:91:26)\n    at describe (/home/user/SE104-qlnhasach/node_modules/jest-circus/build/index.js:55:5)\n    at Object.describe (/home/user/SE104-qlnhasach/tests/reports_rules.test.js:7:1)\n    at Runtime._execModule (/home/user/SE104-qlnhasach/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/user/SE104-qlnhasach/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/user/SE104-qlnhasach/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/user/SE104-qlnhasach/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/user/SE104-qlnhasach/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/user/SE104-qlnhasach/node_modules/jest-runner/build/runTest.js:444:34)&quot;}</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

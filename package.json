@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "cross-env NODE_ENV=test jest --detectOpenHandles --reporters=default --reporters=jest-junit",
     "start": "nodemon index.js",
     "backup-db:ps": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backup_db.ps1",
     "backup-db:sh": "bash scripts/backup_db.sh"
@@ -23,6 +23,14 @@
     "sequelize": "^6.37.7"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "cross-env": "^7.0.3",
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.0.0"
+  },
+  "jest-junit": {
+    "outputDirectory": "reports",
+    "outputName": "junit.xml"
   }
 }

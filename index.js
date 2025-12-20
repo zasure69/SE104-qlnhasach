@@ -1,3 +1,4 @@
+// index.js
 const express = require("express");
 const path = require("path");
 const sequelize = require("./config/db"); // Import kết nối sequelize
@@ -45,65 +46,70 @@ app.get("/", (req, res) => {
 
 const userRoutes = require("./routes/userRoutes");
 app.use("/", userRoutes);
-app.use(authenticateToken); // Áp dụng middleware xác thực cho các route sau
-// route được bảo vệ
+const protectedRoutes = express.Router();
+protectedRoutes.use(authenticateToken);
+
 const dashboardRoutes = require("./routes/dashboardRoutes");
-app.use("/dashboard", dashboardRoutes);
+protectedRoutes.use("/dashboard", dashboardRoutes);
 
 const billRoutes = require('./routes/billRoutes');
-app.use('/api/bill', billRoutes);
+protectedRoutes.use('/api/bill', billRoutes);
 
 const customersRoutes = require('./routes/customersRoutes');
-app.use('/api/customers', customersRoutes);
+protectedRoutes.use('/api/customers', customersRoutes);
 
 const searchRoutes = require("./routes/searchRoutes");
-app.use("/api/search", searchRoutes);
+protectedRoutes.use("/api/search", searchRoutes);
 
 const changeruleRoutes = require("./routes/changeruleRoutes");
-app.use("/api/change-rules", changeruleRoutes);
+protectedRoutes.use("/api/change-rules", changeruleRoutes);
 
 const reportRoutes = require("./routes/reportRoutes");
-app.use("/api/reports", reportRoutes);
+protectedRoutes.use("/api/reports", reportRoutes);
 
 // Routes for book management (API)
 const booksRoutes = require("./routes/booksRoutes");
-app.use("/api/books", booksRoutes);
+protectedRoutes.use("/api/books", booksRoutes);
 
 const receiptsRoutes = require('./routes/receiptsRoutes');
-app.use('/api/receipts', receiptsRoutes);
+protectedRoutes.use('/api/receipts', receiptsRoutes);
 
 const booksimportRoutes = require('./routes/booksimportRoutes');
-app.use('/api/import', booksimportRoutes);
+protectedRoutes.use('/api/import', booksimportRoutes);
 
 // Route xử lý API của Admin
 const employeesRoutes = require("./routes/employeesRoutes");
-app.use("/api/employees", employeesRoutes);
+protectedRoutes.use("/api/employees", employeesRoutes);
+
+app.use(protectedRoutes);
+
 
 // --- Khởi động Server và Đồng bộ Database ---
 
 // Tạo một hàm async để khởi động
 const startServer = async () => {
   try {
-    // 1. Xác thực kết nối database
-    await sequelize.authenticate();
-    console.log("Kết nối MySQL thành công.");
+    // Chỉ chạy sequelize.authenticate và sequelize.sync khi ứng dụng được chạy trực tiếp (không phải trong môi trường test)
+    if (process.env.NODE_ENV !== 'test') {
+      await sequelize.authenticate();
+      console.log("Kết nối MySQL thành công.");
 
-    // 2. Đồng bộ models (tạo bảng nếu chưa có)
-    // { force: false } (mặc định) sẽ không xóa bảng nếu đã tồn tại
-    // { force: true } sẽ xóa bảng cũ và tạo lại (mất dữ liệu)
-    await sequelize.sync({ force: false });
-    console.log("Bảng đã được đồng bộ.");
+      await sequelize.sync({ force: false });
+      console.log("Bảng đã được đồng bộ.");
+    }
 
     // 3. Khởi động Express server
-    app.listen(PORT, () => {
-      console.log(`Server đang chạy tại http://localhost:${PORT}`);
-    });
+    if (require.main === module) {
+       app.listen(PORT, () => {
+        console.log(`Server đang chạy tại http://localhost:${PORT}`);
+      });
+    }
   } catch (err) {
     console.error("Lỗi không thể khởi động server:", err);
   }
 };
 
-
-
 // Gọi hàm để bắt đầu
 startServer();
+
+module.exports = app;
