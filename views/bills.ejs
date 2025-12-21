@@ -998,7 +998,41 @@
     </div>
 
     <script>
+        function setupPaymentValidation(prefix) {
+            const paidInput = document.getElementById(`${prefix}-amount-paid`);
+            // Giả sử tổng tiền được lưu trong input hidden hoặc span có id là total-amount
+            // Lưu ý: Nếu total-amount là thẻ <span> (text), dùng .textContent. Nếu là <input>, dùng .value
+            const totalElement = document.getElementById(`${prefix}-total-amount`); 
+
+            if (paidInput && totalElement) {
+                paidInput.addEventListener('input', function() {
+                    // Lấy giá trị tổng tiền hiện tại (Xử lý chuỗi format 100.000 -> 100000)
+                    let totalValue = 0;
+                    if (totalElement.tagName === 'INPUT') {
+                        totalValue = parseNumber(totalElement.value);
+                    } else {
+                        totalValue = parseNumber(totalElement.textContent);
+                    }
+
+                    // Lấy giá trị đang nhập
+                    let currentPaid = parseNumber(this.value);
+
+                    // Kiểm tra Logic
+                    if (currentPaid > totalValue) {
+                        showToast('Số tiền trả không được lớn hơn Tổng tiền!', 'warning');
+                        
+                        // Cách 1: Reset về bằng Tổng tiền
+                        this.value = formatNumber(totalValue); 
+                        
+                        // Cách 2: Hoặc chỉ đơn giản là không cho nhập số đó (hoàn tác)
+                        // Nhưng cách 1 UX tốt hơn vì giúp khách trả đủ ngay lập tức.
+                    }
+                });
+            }
+        }
         document.addEventListener('DOMContentLoaded', function () {
+            setupPaymentValidation('add');
+            setupPaymentValidation('edit');
             // --- 1. BIẾN TOÀN CỤC & TIỆN ÍCH ---
             const loader = document.getElementById('loader');
             const toastContainer = document.getElementById('toast-container');
@@ -1033,7 +1067,6 @@
                 const newTotal = currentTotal + amountDifference; 
                 totalInput.dataset.rawValue = newTotal; 
                 totalInput.textContent = formatNumber(newTotal)
-                showToast(totalInput.dataset.rawValue)
                 const prefix = totalAmountId.split('-')[0]; 
                 calculateRemaining(prefix);
             }
@@ -1095,7 +1128,8 @@
                 const debtEl = document.getElementById(`${prefix}-remaining-amount`);
                 
                 if(debtEl) {
-                    debtEl.textContent = formatNumber(remaining);
+                    const displayValue = remaining < 0 ? 0 : remaining;
+                    debtEl.textContent = formatNumber(displayValue);
                     debtEl.style.color = remaining > 0 ? 'var(--red-accent)' : 'var(--green-accent)';
                 }
             }
@@ -1346,11 +1380,20 @@
                         const detailTable = document.getElementById(`${prefix}-detail-table`);
                         const amountTable = `${prefix}-total-amount`;
                         
+                        const soLuongMoi = parseInt(soLuongInput.value);
+
                         if (!maSachInput.value || !tenSachInput.value || !theLoaiInput.value) {
                             showToast('Vui lòng nhập sách!', 'error');
                             return;
                         }
                         
+                        if (soLuongMoi <= 0 || isNaN(soLuongMoi)) {
+                            showToast('Số lượng sách phải lớn hơn 0!', 'error');
+                            soLuongInput.value = 1; // Reset về 1
+                            soLuongInput.focus();
+                            return; // Dừng lại, không cho thêm
+                        }
+
                         let found = false
 
                         for (let i = 1; i < detailTable.rows.length; i++) {
@@ -1729,26 +1772,32 @@
             }
             // Lưu & Đóng
             document.getElementById('btn-save-add').addEventListener('click', () => {
+                // 1. Lấy dữ liệu cơ bản
                 const MaHD = generateMaHD(lastBillMaHD); 
-                const addModal = document.getElementById('add-modal'); // Giả định ID của Modal thêm mới
-
-                // Lấy dữ liệu từ các trường input
+                const addModal = document.getElementById('add-modal');
                 const maKhachHang = document.getElementById('add-ma-kh').value.trim();
+                
+                // Lấy giá trị tiền (Dùng raw value để đảm bảo tính toán đúng với số thực)
                 const tongTien = parseNumber(document.getElementById('add-total-amount').dataset.rawValue);
-                const soTienTra = parseNumber(document.getElementById('add-amount-paid').value); // Giả định ID input
+                const soTienTra = parseNumber(document.getElementById('add-amount-paid').value);
                 
-                // Tính toán ConLai
-                const conLai = parseNumber(tongTien - soTienTra); 
-                showToast(conLai);
-                
-                // 2. Thu thập Chi tiết Sách (CT_HD)
+                // --- [QUAN TRỌNG] KIỂM TRA CHẶN LƯU ---
+                if (soTienTra > tongTien) {
+                    showToast(`Số tiền trả (${formatNumber(soTienTra)}) không được lớn hơn Tổng tiền (${formatNumber(tongTien)})!`, 'error');
+                    document.getElementById('add-amount-paid').focus(); // Đưa con trỏ về ô nhập tiền để sửa
+                    return; // DỪNG LẠI NGAY, KHÔNG THỰC HIỆN CÁC LỆNH BÊN DƯỚI
+                }
+                // --------------------------------------
+
+                // Tính toán ConLai (Lúc này chắc chắn >= 0 vì đã chặn ở trên)
+                const conLai = tongTien - soTienTra;
+
+                // 2. Thu thập Chi tiết Sách
                 const detailTable = document.getElementById('add-detail-table');
                 const detailBooks = [];
                 
-                // Giả sử: [1: Mã Sách] [4: Số Lượng] [5: Đơn Giá] [6: Thành Tiền]
                 for (let i = 1; i < detailTable.rows.length; i++) {
                     const row = detailTable.rows[i];
-                    
                     if (row.cells.length >= 7) {
                         const maSach = row.cells[1].textContent.trim();
                         const soLuongBan = parseInt(row.cells[4].textContent.trim());
@@ -1766,15 +1815,15 @@
                     }
                 }
                 
-                // Kiểm tra tính hợp lệ cơ bản
+                // Validate dữ liệu rỗng
                 if (!maKhachHang || detailBooks.length === 0) {
                     showToast('Vui lòng kiểm tra lại Khách hàng và chi tiết sách.', 'error');
                     return;
                 }
 
-                // 3. Tạo đối tượng dữ liệu gửi lên Server
+                // 3. Gửi API (Chỉ chạy xuống đây nếu các điều kiện trên đã thỏa)
                 const newData = {
-                    MaHoaDon: MaHD, // Mã Hóa Đơn vừa được tạo tự động
+                    MaHoaDon: MaHD,
                     MaKhachHang: maKhachHang,
                     TongTien: tongTien,
                     SoTienTra: soTienTra,
@@ -1782,9 +1831,6 @@
                     Details: detailBooks 
                 };
 
-                console.log(newData)
-
-                // 4. GỌI API POST
                 fetch('/api/bill/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1794,55 +1840,49 @@
                 .then(data => {
                     if (data.message && data.message.includes('thành công')) {
                         showToast(`Thêm hóa đơn ${MaHD} thành công!`, 'success');
-                        // Cập nhật biến lastBillMaHD để lần sau tạo Mã mới chính xác hơn
                         lastBillMaHD = MaHD; 
-                        
-                        // Tải lại bảng chính hoặc thêm dòng mới vào bảng master (tùy chọn)
-                        
-                        // Đóng Modal
                         addModal.style.display = 'none';
-
                         setTimeout(() => { location.reload(); }, 1000);
-
                     } else {
-                        showToast(`Thêm thất bại: ${data.message || 'Lỗi không xác định.'}`, 'error');
+                        showToast(`Thêm thất bại: ${data.message}`, 'error');
                     }
                 })
                 .catch(error => {
-                    console.error('Lỗi API thêm mới:', error);
-                    showToast('Lỗi kết nối server khi lưu hóa đơn.', 'error');
+                    console.error('Lỗi API:', error);
+                    showToast('Lỗi kết nối server.', 'error');
                 });
-            })
+            });
             document.getElementById('btn-save-edit').addEventListener('click', () => {
-                // *** 1. KHAI BÁO CÁC BIẾN QUAN TRỌNG ***
-                // Bạn cần đảm bảo biến 'currentEditingMaHD' chứa Mã Hóa Đơn đang được chỉnh sửa.
-                // Biến này phải được thiết lập khi Modal được mở (ví dụ: khi nhấn nút 'Chỉnh sửa')
+                // 1. Lấy dữ liệu cơ bản
                 const MaHD = document.getElementById('edit-ma-hd').value; 
-                const editModal = document.getElementById('edit-modal'); // Giả định ID của Modal chỉnh sửa
-
-                // 2. Lấy dữ liệu từ các trường input
+                const editModal = document.getElementById('edit-modal');
                 const maKhachHang = document.getElementById('edit-ma-kh').value;
+
                 const tongTien = parseNumber(document.getElementById('edit-total-amount').dataset.rawValue);
-                const soTienTra = parseNumber(document.getElementById('edit-amount-paid').value); // Giả định ID này
+                const soTienTra = parseNumber(document.getElementById('edit-amount-paid').value);
                 
-                // Tính toán ConLai
-                const conLai = parseNumber(tongTien-soTienTra); 
+                // --- [QUAN TRỌNG] KIỂM TRA CHẶN LƯU ---
+                if (soTienTra > tongTien) {
+                    showToast(`Số tiền trả (${formatNumber(soTienTra)}) không được lớn hơn Tổng tiền (${formatNumber(tongTien)})!`, 'error');
+                    document.getElementById('edit-amount-paid').focus();
+                    return; // DỪNG LẠI NGAY
+                }
+                // --------------------------------------
+
+                const conLai = tongTien - soTienTra;
                 
-                // 3. Thu thập Chi tiết Sách (CT_HD)
+                // 2. Thu thập Chi tiết Sách
                 const detailTable = document.getElementById('edit-detail-table');
                 const detailBooks = [];
                 
-                // Giả sử: [1: Mã Sách] [4: Số Lượng] [5: Đơn Giá] [6: Thành Tiền]
                 for (let i = 1; i < detailTable.rows.length; i++) {
                     const row = detailTable.rows[i];
-                    
                     if (row.cells.length >= 7) { 
                         const maSach = row.cells[1].textContent.trim();
                         const soLuongBan = parseInt(row.cells[4].textContent.trim());
                         const donGiaBan = parseNumber(row.cells[5].textContent.trim());
                         const thanhTien = parseNumber(row.cells[6].textContent.trim());
                         
-                        // Chỉ thêm các mục hợp lệ
                         if (maSach && soLuongBan > 0) {
                             detailBooks.push({
                                 MaSach: maSach,
@@ -1854,22 +1894,20 @@
                     }
                 }
                 
-                // Kiểm tra tính hợp lệ cơ bản
                 if (!MaHD || !maKhachHang || detailBooks.length === 0) {
-                    showToast('Vui lòng kiểm tra lại Mã hóa đơn, Khách hàng và chi tiết sách.', 'error');
+                    showToast('Vui lòng kiểm tra lại thông tin hóa đơn.', 'error');
                     return;
                 }
 
-                // 4. Tạo đối tượng dữ liệu gửi lên Server
+                // 3. Gửi API
                 const updateData = {
                     MaKhachHang: maKhachHang,
                     TongTien: tongTien,
                     SoTienTra: soTienTra,
                     ConLai: conLai,
-                    Details: detailBooks // Mảng chi tiết hóa đơn
+                    Details: detailBooks
                 };
 
-                // 5. GỌI API PUT
                 fetch(`/api/bill/${MaHD}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -1879,19 +1917,15 @@
                 .then(data => {
                     if (data.message && data.message.includes('thành công')) {
                         showToast('Cập nhật hóa đơn thành công!', 'success');
-
-                        setTimeout(() => { location.reload(); }, 1000);
-                        
                         editModal.style.display = 'none';
-
+                        setTimeout(() => { location.reload(); }, 1000); 
                     } else {
-                        // Hiển thị lỗi từ server (Ví dụ: Lỗi Tồn kho, Lỗi Quy định Nợ)
-                        showToast(`Cập nhật thất bại: ${data.message || 'Lỗi không xác định.'}`, 'error');
+                        showToast(`Cập nhật thất bại: ${data.message}`, 'error');
                     }
                 })
                 .catch(error => {
-                    console.error('Lỗi API cập nhật:', error);
-                    showToast('Lỗi kết nối server khi lưu hóa đơn.', 'error');
+                    console.error('Lỗi API:', error);
+                    showToast('Lỗi kết nối server.', 'error');
                 });
             });
 

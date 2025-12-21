@@ -1311,7 +1311,7 @@
                             });
 
                             // (Tùy chọn) Reload lại trang sau 1s để cập nhật bảng danh sách
-                            setTimeout(() => location.reload(), 1000); 
+                            location.reload();
 
                         } else {
                             showToast(`Lỗi: ${result.message}`, 'error');
