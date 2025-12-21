@@ -5,6 +5,16 @@ const { HoaDon, CT_HD, Sach, KhachHang, sequelize, DauSach, TheLoai, CT_PNS, Tha
 // =============================================================
 //  API: LẤY THÔNG TIN KHÁCH HÀNG (GET /api/bill/customer/:id)
 // =============================================================
+async function getMinStockRule() {
+    try {
+        // Giả sử tên tham số trong DB là 'SoLuongTonToiThieu'
+        const rule = await ThamSo.findOne({ where: { TenThamSo: 'SoLuongTonToiThieu' } });
+        return rule ? parseInt(rule.GiaTri) : 20; // Mặc định là 20 nếu chưa cấu hình
+    } catch (e) {
+        return 0; // Hoặc mặc định là 0 nếu lỗi
+    }
+}
+
 const getCustomerInfo = async (req, res) => {
     try {
         const customer = await KhachHang.findByPk(req.params.MaKH, {
@@ -71,102 +81,84 @@ const getBookInfo = async (req, res) => {
 //  API: TẠO HÓA ĐƠN MỚI (POST /api/bill/create)
 // =============================================================
 const create = async (req, res) => {
-    if (!req.body) {
-         return res.status(400).json({ message: 'Dữ liệu hóa đơn không được gửi lên (request body rỗng).' });
-    }
-    
-    const { 
-        MaHoaDon, 
-        MaKhachHang, 
-        TongTien, 
-        SoTienTra, 
-        ConLai, 
-        Details 
-    } = req.body;
-    
-    if (!MaHoaDon || !MaKhachHang || !Details || Details.length === 0) {
-        return res.status(400).json({ message: 'Thiếu Mã hóa đơn, Mã khách hàng hoặc chi tiết sách.' });
-    }
-
+    const { MaHoaDon, MaKhachHang, TongTien, SoTienTra, ConLai, Details } = req.body;
     const t = await sequelize.transaction();
 
     try {
-        // Lấy quy định từ bảng THAMSO
-        const minStockRule = await ThamSo.findOne({ where: { TenThamSo: 'SoLuongTonToiThieuSauKhiBan' }, transaction: t });
-        const minStockAfterSale = minStockRule ? minStockRule.GiaTri : 0; // Default 0 nếu không có quy định
+        const minStock = await getMinStockRule(); // Lấy quy định tồn tối thiểu
 
-        const maxDebtRule = await ThamSo.findOne({ where: { TenThamSo: 'SoTienNoToiDa' }, transaction: t });
-        const maxDebtAllowed = maxDebtRule ? maxDebtRule.GiaTri : Infinity; // Default Infinity nếu không có quy định
-
-        const khachHang = await KhachHang.findByPk(MaKhachHang, { attributes: ['TongNo'], transaction: t });
-        if (!khachHang) {
-            await t.rollback();
-            return res.status(404).json({ message: 'Không tìm thấy khách hàng.' });
-        }
-        
-        const newTongNo = parseFloat(khachHang.TongNo) + parseFloat(ConLai); 
-        
-        // Quy định 2: Số tiền nợ tối đa
-        if (newTongNo > maxDebtAllowed) {
-            await t.rollback();
-            return res.status(400).json({ message: `Khách hàng nợ vượt quá ${maxDebtAllowed}. Tổng nợ mới: ${newTongNo}` });
-        }
-
+        // 1. KIỂM TRA TỒN KHO VÀ QUY ĐỊNH
         for (const detail of Details) {
-            const sach = await Sach.findByPk(detail.MaSach, { attributes: ['SoLuongTon'], transaction: t });
+            const sach = await Sach.findByPk(detail.MaSach, { transaction: t });
+            
             if (!sach) {
-                await t.rollback();
-                return res.status(404).json({ message: `Không tìm thấy sách ${detail.MaSach}.` });
+                throw new Error(`Sách có mã ${detail.MaSach} không tồn tại.`);
             }
 
-            if (sach.SoLuongTon < detail.SoLuongBan) {
-                await t.rollback();
-                return res.status(400).json({ message: `Sách ${detail.MaSach} không đủ tồn kho. Tồn hiện tại: ${sach.SoLuongTon}, yêu cầu: ${detail.SoLuongBan}` });
+            const currentStock = sach.SoLuongTon;
+            const sellQty = parseInt(detail.SoLuongBan);
+            const remainingStock = currentStock - sellQty;
+
+            // Kiểm tra 1: Không đủ sách để bán
+            if (remainingStock < 0) {
+                throw new Error(`Sách "${sach.TenSach}" chỉ còn ${currentStock}, không đủ để bán ${sellQty}.`);
             }
-            
-            // Quy định 1: Tồn kho tối thiểu sau khi bán
-            const projectedStock = sach.SoLuongTon - detail.SoLuongBan;
-            if (projectedStock < minStockAfterSale) {
-                await t.rollback();
-                return res.status(400).json({ message: `Sách ${detail.MaSach} sẽ có tồn kho (${projectedStock}) thấp hơn quy định (${minStockAfterSale}) sau khi bán.` });
+
+            // Kiểm tra 2: Vi phạm quy định tồn tối thiểu (Sau khi bán phải còn >= minStock)
+            if (remainingStock < minStock) {
+                throw new Error(
+                    `Không thể bán sách "${sach.TenSach}". ` +
+                    `Tồn kho hiện tại: ${currentStock}. ` +
+                    `Sau khi bán ${sellQty} sẽ còn ${remainingStock}, thấp hơn quy định tối thiểu (${minStock}).`
+                );
             }
         }
 
+        // 2. TẠO HÓA ĐƠN
         await HoaDon.create({
-            MaHoaDon: MaHoaDon,
+            MaHoaDon,
             NgayLapHoaDon: new Date(),
-            MaKhachHang: MaKhachHang,
-            MaNhanVien: req.user ? req.user.id : 'NV001', // Lấy từ token nếu có
-            TongTien: TongTien,
-            SoTienTra: SoTienTra,
-            ConLai: ConLai
+            MaKhachHang,
+            TongTien,
+            SoTienTra,
+            ConLai
         }, { transaction: t });
 
-        const newDetails = Details.map(d => ({
-            MaHoaDon: MaHoaDon,
-            MaSach: d.MaSach,
-            SoLuongBan: d.SoLuongBan,
-            DonGiaBan: d.DonGiaBan,
-            ThanhTien: d.ThanhTien
-        }));
-        
-        await CT_HD.bulkCreate(newDetails, { transaction: t });
-
+        // 3. TẠO CHI TIẾT & TRỪ KHO
         for (const detail of Details) {
-            await Sach.increment('SoLuongTon', { by: -detail.SoLuongBan, where: { MaSach: detail.MaSach }, transaction: t });
+            // Tạo chi tiết
+            await CT_HD.create({
+                MaHoaDon,
+                MaSach: detail.MaSach,
+                SoLuongBan: detail.SoLuongBan,
+                DonGiaBan: detail.DonGiaBan,
+                ThanhTien: detail.ThanhTien
+            }, { transaction: t });
+
+            // Trừ kho (Đã kiểm tra an toàn ở bước 1)
+            await Sach.increment('SoLuongTon', { 
+                by: -parseInt(detail.SoLuongBan), 
+                where: { MaSach: detail.MaSach }, 
+                transaction: t 
+            });
         }
 
+        // 4. CẬP NHẬT NỢ KHÁCH HÀNG
         if (parseFloat(ConLai) > 0) {
-            await KhachHang.increment('TongNo', { by: parseFloat(ConLai), where: { MaKhachHang: MaKhachHang }, transaction: t });
+            await KhachHang.increment('TongNo', { 
+                by: parseFloat(ConLai), 
+                where: { MaKhachHang }, 
+                transaction: t 
+            });
         }
 
         await t.commit();
-        res.json({ message: `Hóa đơn ${MaHoaDon} đã được lập thành công.` });
+        res.json({ message: `Lập hóa đơn ${MaHoaDon} thành công!` });
 
     } catch (error) {
         await t.rollback();
-        console.error("Lỗi khi lập hóa đơn:", error);
-        res.status(500).json({ message: `Lỗi server khi lập hóa đơn: ${error.message}` });
+        console.error("Lỗi lập hóa đơn:", error);
+        res.status(400).json({ message: error.message }); // Trả về thông báo lỗi cụ thể (số lượng tồn...)
     }
 };
 
@@ -243,101 +235,106 @@ const getDetail = async (req, res) => {
 //  API: CHỈNH SỬA HÓA ĐƠN (PUT /api/bill/:id)
 // =============================================================
 const updateBill = async (req, res) => {
-    const MaHD = req.params.MaHD; 
+    const MaHD = req.params.MaHD;
     const { MaKhachHang, TongTien, SoTienTra, ConLai, Details } = req.body;
-
     const t = await sequelize.transaction();
 
     try {
-        // Lấy dữ liệu và quy định
+        const minStock = await getMinStockRule();
+
+        // --- BƯỚC 1: HOÀN TÁC DỮ LIỆU CŨ ---
         const oldBill = await HoaDon.findByPk(MaHD, { transaction: t });
-        if (!oldBill) { 
-            await t.rollback(); 
-            return res.status(404).json({ message: 'Không tìm thấy hóa đơn cần cập nhật.' }); 
-        }
-
+        if (!oldBill) throw new Error('Hóa đơn không tồn tại.');
+        
         const oldDetails = await CT_HD.findAll({ where: { MaHoaDon: MaHD }, transaction: t });
-        const minStockRule = await ThamSo.findOne({ where: { TenThamSo: 'SoLuongTonToiThieuSauKhiBan' }, transaction: t });
-        const minStockAfterSale = minStockRule ? minStockRule.GiaTri : 0;
-        const maxDebtRule = await ThamSo.findOne({ where: { TenThamSo: 'SoTienNoToiDa' }, transaction: t });
-        const maxDebtAllowed = maxDebtRule ? maxDebtRule.GiaTri : Infinity;
-        const khachHang = await KhachHang.findByPk(MaKhachHang, { attributes: ['TongNo'], transaction: t });
-        if (!khachHang) {
-            await t.rollback();
-            return res.status(404).json({ message: 'Không tìm thấy khách hàng.' });
+
+        // 1.1. Trả lại sách vào kho (Hoàn tác tồn kho)
+        for (const detail of oldDetails) {
+            await Sach.increment('SoLuongTon', { 
+                by: detail.SoLuongBan, // Cộng lại số lượng đã bán
+                where: { MaSach: detail.MaSach }, 
+                transaction: t 
+            });
         }
 
-        // --- BƯỚC 1: KIỂM TRA LOGIC TRƯỚC KHI THAY ĐỔI ---
-        const tempStockAdjustments = {}; 
-        for (const oldDetail of oldDetails) {
-            tempStockAdjustments[oldDetail.MaSach] = (tempStockAdjustments[oldDetail.MaSach] || 0) + oldDetail.SoLuongBan;
+        // 1.2. Hoàn tác nợ cũ
+        if (oldBill.ConLai > 0) {
+            await KhachHang.increment('TongNo', { 
+                by: -parseFloat(oldBill.ConLai), 
+                where: { MaKhachHang: oldBill.MaKhachHang }, 
+                transaction: t 
+            });
         }
 
-        for (const newDetail of Details) {
-            const sach = await Sach.findByPk(newDetail.MaSach, { attributes: ['SoLuongTon'], transaction: t });
-            if (!sach) {
-                await t.rollback();
-                return res.status(404).json({ message: `Không tìm thấy sách ${newDetail.MaSach}.` });
-            }
-
-            const currentStock = sach.SoLuongTon || 0;
-            const stockAfterOldRevert = currentStock + (tempStockAdjustments[newDetail.MaSach] || 0);
-            const projectedStock = stockAfterOldRevert - newDetail.SoLuongBan;
-            
-            if (projectedStock < 0) {
-                await t.rollback();
-                return res.status(400).json({ message: `Sách ${newDetail.MaSach} không đủ tồn kho sau khi cập nhật hóa đơn. Tồn dự kiến: ${projectedStock}.` });
-            }
-            if (projectedStock < minStockAfterSale) {
-                await t.rollback();
-                return res.status(400).json({ message: `Sách ${newDetail.MaSach} sẽ có tồn kho (${projectedStock}) thấp hơn quy định (${minStockAfterSale}) sau khi cập nhật.` });
-            }
-        }
-
-        const oldCustomerDebtWithoutOldBill = parseFloat(khachHang.TongNo) - parseFloat(oldBill.ConLai);
-        const newProjectedTotalDebt = oldCustomerDebtWithoutOldBill + parseFloat(ConLai);
-        if (newProjectedTotalDebt > maxDebtAllowed) {
-            await t.rollback();
-            return res.status(400).json({ message: `Khách hàng nợ vượt quá ${maxDebtAllowed}. Tổng nợ mới dự kiến: ${newProjectedTotalDebt}.` });
-        }
-
-        // --- BƯỚC 2: THỰC HIỆN THAY ĐỔI KHI ĐÃ HỢP LỆ ---
-        for (const oldDetail of oldDetails) {
-            await Sach.increment('SoLuongTon', { by: oldDetail.SoLuongBan, where: { MaSach: oldDetail.MaSach }, transaction: t });
-        }
-        const oldConLai = parseFloat(oldBill.ConLai);
-        if (oldConLai > 0) {
-            await KhachHang.increment('TongNo', { by: -oldConLai, where: { MaKhachHang: oldBill.MaKhachHang }, transaction: t });
-        }
+        // 1.3. Xóa chi tiết cũ
         await CT_HD.destroy({ where: { MaHoaDon: MaHD }, transaction: t });
 
-        await HoaDon.update(
-            { MaKhachHang, TongTien, SoTienTra, ConLai }, 
-            { where: { MaHoaDon: MaHD }, transaction: t }
-        );
+        // --- BƯỚC 2: KIỂM TRA & ÁP DỤNG DỮ LIỆU MỚI ---
+        // Lúc này, kho đã đầy đủ như chưa từng bán hóa đơn này. Ta kiểm tra quy định lại từ đầu.
 
-        const newDetails = Details.map(d => ({
-            MaHoaDon: MaHD, MaSach: d.MaSach, SoLuongBan: d.SoLuongBan,
-            DonGiaBan: d.DonGiaBan, ThanhTien: d.ThanhTien
-        }));
-        await CT_HD.bulkCreate(newDetails, { transaction: t });
+        for (const detail of Details) {
+            const sellQty = parseInt(detail.SoLuongBan);
+            
+            // Lấy lại thông tin sách mới nhất (sau khi đã được hoàn tác ở bước 1.1)
+            const sach = await Sach.findByPk(detail.MaSach, { transaction: t });
+            
+            if (!sach) throw new Error(`Sách ${detail.MaSach} không tồn tại.`);
 
-        for (const detail of newDetails) {
-            await Sach.increment('SoLuongTon', { by: -detail.SoLuongBan, where: { MaSach: detail.MaSach }, transaction: t });
+            const currentStock = sach.SoLuongTon; // Đây là tồn kho thực tế + số lượng vừa trả lại
+            const remainingStock = currentStock - sellQty;
+            const dausach = await DauSach.findByPk(sach.MaDauSach, { transaction: t });
+            const tensach = dausach.TenSach;
+
+            // Kiểm tra tồn tối thiểu
+            if (remainingStock < minStock) {
+                throw new Error(
+                    `Không thể cập nhật sách "${tensach}". ` +
+                    `Tồn kho thực tế: ${currentStock}. ` +
+                    `Bán ${sellQty} cuốn sẽ còn ${remainingStock} (Quy định tối thiểu: ${minStock}).`
+                );
+            }
+
+            // Nếu thỏa mãn -> Trừ kho lại
+            await Sach.increment('SoLuongTon', { 
+                by: -sellQty, 
+                where: { MaSach: detail.MaSach }, 
+                transaction: t 
+            });
         }
 
-        const newConLai = parseFloat(ConLai);
-        if (newConLai > 0) {
-            await KhachHang.increment('TongNo', { by: newConLai, where: { MaKhachHang: MaKhachHang }, transaction: t });
+        // --- BƯỚC 3: CẬP NHẬT HÓA ĐƠN & CHI TIẾT MỚI ---
+        
+        // 3.1. Tạo chi tiết mới
+        const newDetailsData = Details.map(d => ({
+            MaHoaDon: MaHD,
+            MaSach: d.MaSach,
+            SoLuongBan: d.SoLuongBan,
+            DonGiaBan: d.DonGiaBan,
+            ThanhTien: d.ThanhTien
+        }));
+        await CT_HD.bulkCreate(newDetailsData, { transaction: t });
+
+        // 3.2. Cập nhật thông tin chính Hóa Đơn
+        await HoaDon.update({
+            MaKhachHang, TongTien, SoTienTra, ConLai
+        }, { where: { MaHoaDon: MaHD }, transaction: t });
+
+        // 3.3. Cập nhật nợ mới
+        if (parseFloat(ConLai) > 0) {
+            await KhachHang.increment('TongNo', { 
+                by: parseFloat(ConLai), 
+                where: { MaKhachHang }, 
+                transaction: t 
+            });
         }
 
         await t.commit();
-        res.json({ message: `Hóa đơn ${MaHD} đã được cập nhật thành công.` });
+        res.json({ message: 'Cập nhật hóa đơn thành công!' });
 
     } catch (error) {
         await t.rollback();
         console.error("Lỗi cập nhật hóa đơn:", error);
-        res.status(500).json({ message: 'Lỗi server khi cập nhật hóa đơn. Vui lòng kiểm tra dữ liệu đầu vào và tồn kho.', error: error.message });
+        res.status(400).json({ message: error.message });
     }
 };
 
