@@ -539,7 +539,7 @@
                                             <td><%= book.TacGia || '' %></td>
                                             <td><%= book.NhaXB || '' %></td>
                                             <td><%= book.NamXB || '' %></td>
-                                            <td><%= book.SoLuongTon || 0 %></td>
+                                            <td><%= Math.max(0, book.SoLuongTon || 0) %></td>
                                             <td>
                                                 <i class="fas fa-pencil-alt action-icon open-sach-edit-modal"></i>
                                                 <i class="fas fa-trash action-icon delete-icon delete-sach-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
@@ -628,10 +628,12 @@
                         <div class="form-group"> 
                             <label for="add-ma-the-loai-ds" class="required">Thể loại</label> 
                             <select id="add-ma-the-loai-ds" required> 
-                                <option value="Truyện ngắn">Truyện ngắn</option> 
-                                <option value="Tiểu thuyết">Tiểu thuyết</option> 
-                                <option value="Kỹ năng sống">Kỹ năng sống</option> 
-                                <option value="Sách giáo khoa">Sách giáo khoa</option> 
+                                <option value="">-- Chọn thể loại --</option>
+                                <% if (types && types.length > 0) { %>
+                                    <% types.forEach(type => { %>
+                                    <option value="<%= type.TenTheLoai %>"><%= type.TenTheLoai %></option>
+                                    <% }); %>
+                                <% } %>
                             </select> 
                         </div>
                         <div class="form-group"> 
@@ -664,10 +666,12 @@
                         <div class="form-group"> 
                             <label for="edit-ma-the-loai-ds">Thể loại</label> 
                             <select id="edit-ma-the-loai-ds" required> 
-                                <option value="Truyện ngắn">Truyện ngắn</option> 
-                                <option value="Tiểu thuyết">Tiểu thuyết</option> 
-                                <option value="Kỹ năng sống">Kỹ năng sống</option> 
-                                <option value="Sách giáo khoa">Sách giáo khoa</option> 
+                                <option value="">-- Chọn thể loại --</option>
+                                <% if (types && types.length > 0) { %>
+                                    <% types.forEach(type => { %>
+                                    <option value="<%= type.TenTheLoai %>"><%= type.TenTheLoai %></option>
+                                    <% }); %>
+                                <% } %>
                             </select> 
                         </div>
                         <div class="form-group"> <label for="edit-mo-ta-ds">Mô tả</label> <textarea id="edit-mo-ta-ds" rows="3"></textarea> </div>
@@ -681,7 +685,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-warning" id="btn-reset-dausach">Đặt lại</button>
+                    <button type="button" class="btn btn-secondary" id="btn-reset-dausach">Đặt lại</button>
                     <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
             </form>
@@ -777,16 +781,12 @@
                         <div class="form-group"> <label for="edit-the-loai-s">Thể loại</label> <input type="text" id="edit-the-loai-s" readonly> </div>
                         <div class="form-group"> <label for="edit-nxb-s">Nhà XB</label> <input type="text" id="edit-nxb-s"> </div>
                         <div class="form-group"> <label for="edit-nam-xb-s">Năm XB</label> <input type="number" id="edit-nam-xb-s" min="1800" max="<%= currentYear %>"> </div>
-                        <div class="form-group"> <label for="edit-so-luong-ton-s">Số lượng tồn (Tự động tính)</label> <input type="number" min="0" id="edit-so-luong-ton-s" readonly> </div>
+                        <div class="form-group"> <label for="edit-so-luong-ton-s">Số lượng tồn</label> <input type="number" min="0" id="edit-so-luong-ton-s" readonly> </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger delete-sach-icon">Xóa sách</button>
-                    <div> 
-                        <button type="button" class="btn btn-warning" id="btn-reset-sach">Đặt lại</button>
-                        <button type="button" class="btn btn-secondary close-modal">Hủy</button> 
-                        <button type="submit" class="btn btn-primary">Lưu</button> 
-                    </div>
+                    <button type="button" class="btn btn-secondary" id="btn-reset-sach">Đặt lại</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
             </form>
         </div>
@@ -819,13 +819,9 @@
                         <div class="form-group"> <label>Mô tả</label> <textarea id="edit-mo-ta-tl"></textarea> </div>
                     </div>
                 </div>
-                <div class="modal-footer edit-modal-footer"> 
-                    <button type="button" class="btn btn-danger delete-theloai-icon">Xóa thể loại</button> 
-                    <div> 
-                        <button type="button" class="btn btn-warning" id="btn-reset-theloai">Đặt lại</button>
-                        <button type="button" class="btn btn-secondary close-modal">Hủy</button> 
-                        <button type="submit" class="btn btn-primary">Lưu</button> 
-                    </div>
+                <div class="modal-footer"> 
+                    <button type="button" class="btn btn-secondary" id="btn-reset-theloai">Đặt lại</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button> 
                 </div>
             </form>
         </div>
@@ -860,13 +856,9 @@
                         <div class="form-group"> <label>Năm sinh</label> <input type="number" id="edit-nam-sinh-tg" min="1800" max="<%= currentYear %>"> </div>
                     </div>
                 </div>
-                <div class="modal-footer edit-modal-footer"> 
-                    <button type="button" class="btn btn-danger delete-tacgia-icon">Xóa tác giả</button> 
-                    <div> 
-                        <button type="button" class="btn btn-warning" id="btn-reset-tacgia">Đặt lại</button>
-                        <button type="button" class="btn btn-secondary close-modal">Hủy</button> 
-                        <button type="submit" class="btn btn-primary">Lưu</button> 
-                    </div>
+                <div class="modal-footer"> 
+                    <button type="button" class="btn btn-secondary" id="btn-reset-tacgia">Đặt lại</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button> 
                 </div>
             </form>
         </div>
@@ -1362,16 +1354,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if(btnResetSach) {
         btnResetSach.addEventListener('click', () => {
             if(originalSachData) {
-                if(confirm('Bạn có muốn khôi phục lại dữ liệu ban đầu không?')) {
-                    document.getElementById('edit-ma-sach-s').value = originalSachData.maSach;
-                    document.getElementById('edit-ten-sach-s').value = originalSachData.tenSach;
-                    document.getElementById('edit-tac-gia-s').value = originalSachData.tacGia;
-                    document.getElementById('edit-the-loai-s').value = originalSachData.theLoai;
-                    document.getElementById('edit-nxb-s').value = originalSachData.nhaXB;
-                    document.getElementById('edit-nam-xb-s').value = originalSachData.namXB;
-                    document.getElementById('edit-so-luong-ton-s').value = originalSachData.soLuongTon;
-                    showToast('Đã khôi phục dữ liệu ban đầu!', 'success');
-                }
+                document.getElementById('edit-ma-sach-s').value = originalSachData.maSach;
+                document.getElementById('edit-ten-sach-s').value = originalSachData.tenSach;
+                document.getElementById('edit-tac-gia-s').value = originalSachData.tacGia;
+                document.getElementById('edit-the-loai-s').value = originalSachData.theLoai;
+                document.getElementById('edit-nxb-s').value = originalSachData.nhaXB;
+                document.getElementById('edit-nam-xb-s').value = originalSachData.namXB;
+                document.getElementById('edit-so-luong-ton-s').value = originalSachData.soLuongTon;
+                showToast('Đã đặt lại form về dữ liệu ban đầu', 'success');
+            } else {
+                showToast('Không thể đặt lại - chưa có dữ liệu gốc', 'error');
             }
         });
     }
@@ -1572,12 +1564,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if(btnResetTheLoai) {
         btnResetTheLoai.addEventListener('click', () => {
             if(originalTheLoaiData) {
-                if(confirm('Bạn có muốn khôi phục lại dữ liệu ban đầu không?')) {
-                    document.getElementById('edit-ma-the-loai').value = originalTheLoaiData.maTheLoai;
-                    document.getElementById('edit-ten-the-loai').value = originalTheLoaiData.tenTheLoai;
-                    document.getElementById('edit-mo-ta-tl').value = originalTheLoaiData.moTa;
-                    showToast('Đã khôi phục dữ liệu ban đầu!', 'success');
-                }
+                document.getElementById('edit-ma-the-loai').value = originalTheLoaiData.maTheLoai;
+                document.getElementById('edit-ten-the-loai').value = originalTheLoaiData.tenTheLoai;
+                document.getElementById('edit-mo-ta-tl').value = originalTheLoaiData.moTa;
+                showToast('Đã đặt lại form về dữ liệu ban đầu', 'success');
+            } else {
+                showToast('Không thể đặt lại - chưa có dữ liệu gốc', 'error');
             }
         });
     }
@@ -1774,12 +1766,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if(btnResetTacGia) {
         btnResetTacGia.addEventListener('click', () => {
             if(originalTacGiaData) {
-                if(confirm('Bạn có muốn khôi phục lại dữ liệu ban đầu không?')) {
-                    document.getElementById('edit-ma-tac-gia').value = originalTacGiaData.maTacGia;
-                    document.getElementById('edit-ho-ten-tg').value = originalTacGiaData.hoTen;
-                    document.getElementById('edit-nam-sinh-tg').value = originalTacGiaData.namSinh;
-                    showToast('Đã khôi phục dữ liệu ban đầu!', 'success');
-                }
+                document.getElementById('edit-ma-tac-gia').value = originalTacGiaData.maTacGia;
+                document.getElementById('edit-ho-ten-tg').value = originalTacGiaData.hoTen;
+                document.getElementById('edit-nam-sinh-tg').value = originalTacGiaData.namSinh;
+                showToast('Đã đặt lại form về dữ liệu ban đầu', 'success');
+            } else {
+                showToast('Không thể đặt lại - chưa có dữ liệu gốc', 'error');
             }
         });
     }
