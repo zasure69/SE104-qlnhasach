@@ -293,7 +293,7 @@ const getBooksPage = async (req, res) => {
             where: { MaSach: plain.MaSach },
           })) || 0;
 
-        const soLuongTonThucTe = tongNhap - tongBan;
+        const soLuongTonThucTe = Math.max(0, tongNhap - tongBan);
 
         return {
           MaSach: plain.MaSach,
@@ -682,8 +682,27 @@ const deleteDauSach = async (req, res) => {
       return res.status(404).json({ error: "Không tìm thấy Đầu sách" });
     }
 
+    // Kiểm tra xem có bản sách nào liên kết với đầu sách này không
+    const sachLienKet = await db.Sach.findOne({
+      where: { MaDauSach: maDS },
+    });
+
+    if (sachLienKet) {
+      return res.status(400).json({
+        error: `Không thể xóa đầu sách "${
+          dauSach.TenSach
+        }". Vẫn còn ${await db.Sach.count({
+          where: { MaDauSach: maDS },
+        })} bản sách liên kết với đầu sách này. Vui lòng xóa các bản sách trước.`,
+      });
+    }
+
+    // Xóa các liên kết tác giả
     await db.CT_TacGia.destroy({ where: { MaDauSach: maDS } });
+
+    // Xóa đầu sách
     await dauSach.destroy();
+
     return res.status(200).json({ message: "Xóa đầu sách thành công!" });
   } catch (err) {
     console.error("[bookController] deleteDauSach error", err);
@@ -834,7 +853,7 @@ const getSachById = async (req, res) => {
         where: { MaSach: maSach },
       })) || 0;
 
-    const soLuongTonThucTe = tongNhap - tongBan;
+    const soLuongTonThucTe = Math.max(0, tongNhap - tongBan);
 
     console.log(
       `[bookController] Tính toán: Nhập=${tongNhap}, Bán=${tongBan}, Tồn=${soLuongTonThucTe}`
