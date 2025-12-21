@@ -362,6 +362,113 @@
         }
         /* --- KẾT THÚC CSS --- */
 
+        /* --- CSS CHO BỘ LỌC TÌM KIẾM (STYLE MỚI) --- */
+.search-panel-container {
+    background-color: var(--white-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+.search-panel-header {
+    background-color: #f8f9fa;
+    padding: 0.75rem 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    border-bottom: 1px solid var(--border-color);
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+.search-panel-header i { margin-right: 0.5rem; color: var(--secondary-color); }
+
+.search-panel-body {
+    padding: 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+/* Grid input 3 cột */
+.search-inputs-grid {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+}
+
+/* Cột nút bấm bên phải */
+.search-actions-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 140px;
+    margin-top: 1.4rem; /* Căn thẳng hàng với input */
+}
+.search-actions-col .btn { width: 100%; display: flex; justify-content: center; gap: 0.5rem; }
+
+/* --- CSS CHO INPUT NHÓM (SỐ LƯỢNG TỒN) --- */
+#fg-sl-ton {
+    grid-column: 1 / -1; /* Chiếm trọn hàng ngang */
+    width: 100%;
+}
+#group-sl-ton {
+    display: flex !important;
+    width: 100%;
+}
+
+/* Style cho Select dấu (=, >, <) */
+.operator-select {
+    width: 115px !important;
+    min-width: 115px !important;
+    text-align: center;
+    background-color: #f8f9fa;
+    border: 1px solid var(--border-color);
+    border-right: none;
+    border-radius: 6px 0 0 6px;
+    font-weight: bold;
+    color: var(--primary-color);
+    cursor: pointer;
+}
+
+/* Style cho Input số */
+#group-sl-ton input {
+    flex-grow: 1;
+    border-radius: 0 6px 6px 0;
+    border-left: 1px solid var(--border-color);
+}
+
+/* Logic hiển thị 'Khoảng' (Between) */
+#group-sl-ton.mode-range .range-separator {
+    display: flex !important;
+    background-color: #f8f9fa;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 10px;
+    font-weight: bold;
+    color: #555;
+}
+#group-sl-ton.mode-range .input-2 { display: block !important; }
+
+/* Bo góc khi ở chế độ Khoảng */
+#group-sl-ton.mode-range input:first-of-type {
+    border-right: none;
+    border-radius: 0;
+}
+#group-sl-ton.mode-range .input-2 {
+    border-left: none;
+    border-radius: 0 6px 6px 0;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .search-panel-body { flex-direction: column; }
+    .search-inputs-grid { width: 100%; grid-template-columns: 1fr 1fr; }
+    .search-actions-col { width: 100%; flex-direction: row; margin-top: 0; }
+}
+@media (max-width: 576px) {
+    .search-inputs-grid { grid-template-columns: 1fr; }
+}
+
         .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.7); display: none; justify-content: center; align-items: center; z-index: 2000; }
 
         .loader-overlay.show { display: flex; }
@@ -516,6 +623,63 @@
 
                     <!-- Tab 2: Sách -->
                     <div class="tab-pane" id="tab-sach">
+                        <div class="search-panel-container" style="margin-bottom: 1.5rem;">
+                            <div class="search-panel-header">
+                                <i class="fas fa-filter"></i> Bộ lọc tìm kiếm
+                            </div>
+                        
+                            <form id="book-search-form">
+                                <div class="search-panel-body">
+                                    
+                                    <div class="search-inputs-grid">
+                                        
+                                        <div class="form-group"> 
+                                            <label for="search-book-ten">Tên sách</label> 
+                                            <input type="text" id="search-book-ten" placeholder="Nhập tên sách..."> 
+                                        </div>
+                        
+                                        <div class="form-group"> 
+                                            <label for="search-book-tacgia">Tác giả</label> 
+                                            <input type="text" id="search-book-tacgia" placeholder="Nhập tên tác giả..."> 
+                                        </div>
+                        
+                                        <div class="form-group"> 
+                                            <label for="search-book-theloai">Thể loại</label> 
+                                            <input type="text" id="search-book-theloai" placeholder="Nhập thể loại..."> 
+                                        </div>
+                        
+                                        <div class="form-group" id="fg-sl-ton"> 
+                                            <label>Số lượng tồn</label> 
+                                            <div class="input-group" id="group-sl-ton">
+                                                <select class="operator-select" id="op-sl-ton" onchange="toggleRange('group-sl-ton', this.value)">
+                                                    <option value="=">=</option>
+                                                    <option value="between">Khoảng</option> 
+                                                    <option value=">">></option>
+                                                    <option value=">=">≥</option>
+                                                    <option value="<"><</option>
+                                                    <option value="<=">≤</option>
+                                                </select>
+                                                
+                                                <input type="number" id="search-sl-ton-from" placeholder="Số lượng...">
+                                                <span class="range-separator" style="display:none; align-items:center; padding:0 0.5rem;">-</span>
+                                                <input type="number" id="search-sl-ton-to" class="input-2" style="display:none;" placeholder="Đến..."> 
+                                            </div>
+                                        </div>
+                        
+                                    </div>
+                        
+                                    <div class="search-actions-col">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-search"></i> Tìm kiếm
+                                        </button> 
+                                        <button type="button" class="btn btn-secondary" id="btn-reset-book-search">
+                                            <i class="fas fa-sync-alt"></i> Làm mới
+                                        </button>
+                                    </div>
+                        
+                                </div>
+                            </form>
+                        </div>
                         <div class="content-header">
                             <h2>Danh sách Sách</h2>
                             <button class="btn btn-primary" id="open-sach-add-modal"> <i class="fas fa-plus"></i> Thêm mới Sách </button>
@@ -872,7 +1036,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentEditingRow = null;
     
     // Lấy danh sách tác giả từ server-side data
-    const allAuthors = <%- JSON.stringify(authors) %>;
+    //const allAuthors = <%- JSON.stringify(authors) %>;
     
     function showLoader() { if(loader) loader.style.display = 'flex'; }
     function hideLoader() { if(loader) loader.style.display = 'none'; }
@@ -1990,6 +2154,115 @@ document.addEventListener('DOMContentLoaded', function() {
             else { container.classList.toggle('sidebar-collapsed'); }
         });
     }
+
+    // --- LOGIC TÌM KIẾM SÁCH ---
+
+// 1. Hàm bật tắt chế độ 'Khoảng' (dùng chung cho cả các trang khác nếu cần)
+window.toggleRange = function(groupId, value) {
+    const group = document.getElementById(groupId);
+    if (value === 'between') {
+        group.classList.add('mode-range');
+    } else {
+        group.classList.remove('mode-range');
+    }
+}
+
+const bookSearchForm = document.getElementById('book-search-form');
+const btnResetBook = document.getElementById('btn-reset-book-search');
+
+if (bookSearchForm) {
+    // Xử lý nút LÀM MỚI
+    if(btnResetBook) {
+        btnResetBook.addEventListener('click', () => {
+            bookSearchForm.reset();
+            document.getElementById('group-sl-ton').classList.remove('mode-range');
+            bookSearchForm.dispatchEvent(new Event('submit')); // Reload lại bảng
+        });
+    }
+
+    // Xử lý sự kiện TÌM KIẾM
+    bookSearchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        showLoader();
+
+        setTimeout(() => {
+            // A. Lấy giá trị input
+            const tenQuery = document.getElementById('search-book-ten').value.toLowerCase();
+            const tacGiaQuery = document.getElementById('search-book-tacgia').value.toLowerCase();
+            const theLoaiQuery = document.getElementById('search-book-theloai').value.toLowerCase();
+            
+            // Logic Số lượng tồn
+            const opSL = document.getElementById('op-sl-ton').value;
+            const valFrom = parseFloat(document.getElementById('search-sl-ton-from').value);
+            const valTo = parseFloat(document.getElementById('search-sl-ton-to').value);
+
+            // B. Lấy các hàng trong bảng Sách (#table-sach)
+            // Lưu ý: Loại bỏ hàng thông báo lỗi cũ nếu có
+            const tableBody = document.querySelector('#table-sach tbody');
+            const rows = Array.from(tableBody.querySelectorAll('tr:not(.no-results-row)'));
+            
+            let resultsFound = 0;
+
+            rows.forEach(row => {
+                // Cấu trúc cột trong books.ejs:
+                // 0: STT | 1: Mã | 2: Tên | 3: Thể loại | 4: Tác giả | 5: NXB | 6: Năm | 7: SL Tồn
+                
+                const tenCell = (row.cells[2]?.textContent || '').toLowerCase();
+                const theLoaiCell = (row.cells[3]?.textContent || '').toLowerCase();
+                const tacGiaCell = (row.cells[4]?.textContent || '').toLowerCase();
+                const slTonCell = parseFloat(row.cells[7]?.textContent || 0);
+
+                // C. So sánh chuỗi
+                const matchTen = tenCell.includes(tenQuery);
+                const matchTG = tacGiaCell.includes(tacGiaQuery);
+                const matchTL = theLoaiCell.includes(theLoaiQuery);
+                
+                // D. So sánh số (Số lượng tồn)
+                let matchSL = true;
+                if (!isNaN(valFrom)) {
+                    switch (opSL) {
+                        case '=': matchSL = slTonCell === valFrom; break;
+                        case '>': matchSL = slTonCell > valFrom; break;
+                        case '>=': matchSL = slTonCell >= valFrom; break;
+                        case '<': matchSL = slTonCell < valFrom; break;
+                        case '<=': matchSL = slTonCell <= valFrom; break;
+                        case 'between':
+                            if (!isNaN(valTo)) {
+                                matchSL = slTonCell >= valFrom && slTonCell <= valTo;
+                            } else {
+                                matchSL = slTonCell >= valFrom;
+                            }
+                            break;
+                    }
+                }
+
+                // E. Kết quả
+                if (matchTen && matchTG && matchTL && matchSL) {
+                    row.style.display = '';
+                    resultsFound++;
+                    row.cells[0].textContent = resultsFound; // Cập nhật lại STT
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // F. Xử lý khi không tìm thấy
+            const existingNo = tableBody.querySelector('.no-results-row');
+            if (existingNo) existingNo.remove();
+
+            if (resultsFound === 0) {
+                const noRow = tableBody.insertRow();
+                noRow.classList.add('no-results-row');
+                // Colspan = 9 vì bảng sách có 9 cột
+                noRow.innerHTML = `<td colspan="9" style="text-align: center; padding: 2rem;">Không tìm thấy sách nào phù hợp.</td>`;
+            }
+
+            hideLoader();
+            showToast(`Tìm thấy ${resultsFound} cuốn sách.`, 'success');
+
+        }, 300);
+    });
+}
 
     // --- LOGOUT ---
     const logoutBtn = document.getElementById('logout-button');
