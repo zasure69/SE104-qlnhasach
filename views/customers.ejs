@@ -740,7 +740,7 @@
                                         <td><%= customer.SoDienThoai %></td>
                                         <td><%= customer.GioiTinh %></td>
                                         <td><%= customer.DiaChi %></td>
-                                        <td><%= customer.TongNo %></td>
+                                        <td><%= new Intl.NumberFormat('vi-VN').format(customer.TongNo) %></td>
                                         <td>
                                             <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
                                             <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
@@ -1297,6 +1297,60 @@
             window.addEventListener('click', (e) => {
                 if (e.target.classList.contains('modal-overlay')) e.target.style.display = 'none';
             });
+
+            // --- 7. VALIDATE DỮ LIỆU ĐẦU VÀO (MỚI THÊM) ---
+            function setupInputValidation() {
+                // 1. Validate HỌ TÊN (Hỗ trợ tiếng Việt tốt)
+                const nameInputs = [document.getElementById('add-ho-ten-kh'), document.getElementById('edit-ho-ten-kh')];
+                
+                nameInputs.forEach(input => {
+                    if (input) {
+                        let isComposing = false; // Cờ kiểm tra đang gõ tiếng Việt
+
+                        // Bắt đầu gõ tổ hợp phím (ví dụ: a + a = â)
+                        input.addEventListener('compositionstart', () => { isComposing = true; });
+
+                        // Kết thúc tổ hợp phím
+                        input.addEventListener('compositionend', () => {
+                            isComposing = false;
+                            validateName(input);
+                        });
+
+                        // Sự kiện nhập liệu thông thường
+                        input.addEventListener('input', function() {
+                            if (!isComposing) validateName(this);
+                        });
+                    }
+                });
+
+                function validateName(el) {
+                    // Regex \p{L}: Chấp nhận mọi ký tự chữ cái Unicode (Tiếng Việt, Anh...)
+                    // Loại bỏ số và ký tự đặc biệt
+                    const validValue = el.value.replace(/[^\p{L}\s]/gu, '');
+                    if (el.value !== validValue) {
+                        el.value = validValue;
+                    }
+                }
+
+                // 2. Validate SỐ ĐIỆN THOẠI (Chỉ số, Max 10)
+                const phoneInputs = [document.getElementById('add-sdt-kh'), document.getElementById('edit-sdt-kh')];
+                
+                phoneInputs.forEach(input => {
+                    if (input) {
+                        input.addEventListener('input', function() {
+                            // Chỉ giữ lại số
+                            this.value = this.value.replace(/[^0-9]/g, '');
+                            // Cắt nếu dài hơn 10 ký tự
+                            if (this.value.length > 10) {
+                                this.value = this.value.slice(0, 10);
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Gọi hàm kích hoạt validation
+            setupInputValidation();
 
             // --- LOGOUT ---
     const logoutBtn = document.getElementById('logout-button');

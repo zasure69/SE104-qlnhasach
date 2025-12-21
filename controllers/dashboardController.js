@@ -82,25 +82,36 @@ const getUserInfo = (req) => {
       // 2. Lấy TẤT CẢ khách hàng
       const allCustomers = await db.KhachHang.findAll({ raw: true });
   
-      // // 3. Lấy TẤT CẢ sách (với join)
-      // const allBooks = await db.Sach.findAll({
-      //   include: [{
-      //     model: db.DauSach,
-      //     required: true,
-      //     include: [{
-      //       model: db.TheLoai,
-      //       required: false // Vẫn lấy sách dù chưa có thể loại
-      //     }]
-      //   }],
-      //   raw: true,
-      //   nest: true
-      // });
+      const allBooks = await db.Sach.findAll({
+        include: [{
+          model: db.DauSach,
+          required: true,
+          include: [
+            // 1. Join với bảng Thể Loại (Giữ nguyên)
+            {
+              model: db.TheLoai,
+              required: false
+            },
+            // 2. Join với bảng Tác Giả (Thông qua CT_TacGia)
+            {
+              model: db.TacGia,
+              as: 'TacGias',
+              required: false, // Để sách chưa có tác giả vẫn hiện ra
+              through: {
+                attributes: [] // (Tuỳ chọn) Ẩn các cột của bảng trung gian CT_TacGia để kết quả gọn hơn
+              }
+            }
+          ]
+        }],
+        raw: true,
+        nest: true
+      });
   
       // 4. Render trang VÀ gửi dữ liệu vào
       res.render('search', { 
           ...userInfo,
           customers: allCustomers, // Gửi danh sách khách hàng
-          //books: allBooks          // Gửi danh sách sách
+          books: allBooks          // Gửi danh sách sách
       });
   
     } catch (err) {

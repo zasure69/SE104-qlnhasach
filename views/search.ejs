@@ -528,12 +528,11 @@
                                         <% }); %>
                                     <% } else { %>
                                         <tr>
-                                            <td colspan="7" style="text-align: center;">Không có khách hàng nào.</td>
+                                            <td colspan="6" style="text-align: center;">Không có khách hàng nào.</td>
                                         </tr>
                                     <% } %>
                                 </tbody>
                             </table>
-                             <!-- XÓA: div .empty-table-rows -->
                         </div>
                     </div>
 
@@ -563,13 +562,35 @@
                         <div class="table-responsive">
                             <h3 class="table-caption">Kết quả tìm kiếm</h3>
                             <table class="data-table" id="book-results-table"> 
-                                <thead> <tr> <th>STT</th> <th>Tên sách</th> <th>Thể loại</th> <th>Tác giả</th> <th>Số lượng tồn</th> </tr> </thead>
+                                <thead> 
+                                    <tr> 
+                                        <th>STT</th>
+                                        <th>Mã sách</th> 
+                                        <th>Tên sách</th>   
+                                        <th>Thể loại</th> 
+                                        <th>Tác giả</th> 
+                                        <th>Số lượng tồn</th> 
+                                    </tr> 
+                                </thead>
                                 <tbody>
-                                    <tr> <td>1</td> <td>Mắt biếc</td> <td>Truyện ngắn</td> <td>Nguyễn Nhật Ánh</td> <td>50</td> </tr>
-                                     <!-- XÓA: Hàng trống -->
+                                    <% if (books && books.length > 0) { %>
+                                        <% books.forEach((book, index) => { %>
+                                            <tr>
+                                                <td><%= index + 1 %></td>
+                                                <td><%= book.MaSach%></td>
+                                                <td><%= book.DauSach.TenSach %></td>
+                                                <td><%= book.DauSach.TheLoai.TenTheLoai %></td>
+                                                <td><%= book.DauSach.TacGias.HoTen %></td>
+                                                <td><%= book.SoLuongTon %></td>
+                                            </tr>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="6" style="text-align: center;">Không có sách nào.</td>
+                                        </tr>
+                                    <% } %>
                                 </tbody>
                             </table>
-                            <!-- XÓA: div .empty-table-rows -->
                         </div>
                     </div>
 
@@ -758,27 +779,97 @@
 
             // Xử lý Tìm kiếm SÁCH
             const bookSearchForm = document.getElementById('book-search-form');
+            // Lấy tham chiếu đến bảng sách và các dòng dữ liệu (tương tự như bảng khách hàng)
+            const bookTableBody = document.getElementById('book-results-table').getElementsByTagName('tbody')[0];
+            const allBookRows = Array.from(bookTableBody.querySelectorAll('tr:not(.no-results-row)')); // Tránh chọn nhầm dòng thông báo lỗi cũ
+
             if(bookSearchForm){
                 bookSearchForm.addEventListener('submit', function(event){ 
                     event.preventDefault(); 
+
+                    // 1. Lấy giá trị từ các ô input tìm kiếm
+                    const tenSachQuery = document.getElementById('search-ten-sach').value.toLowerCase();
+                    const tacGiaQuery = document.getElementById('search-tac-gia').value.toLowerCase();
+                    const theLoaiQuery = document.getElementById('search-the-loai').value.toLowerCase();
+
+                    // Lấy giá trị tìm kiếm theo số lượng tồn (toán tử và số)
+                    const opSlTon = document.getElementById('op-sl-ton').value;
+                    const valFrom = parseFloat(document.getElementById('search-sl-ton-from').value);
+                    const valTo = parseFloat(document.getElementById('search-sl-ton-to').value);
+
+                    let resultsFound = 0;
                     
-                    const operator = document.getElementById('op-sl-ton').value;
-                    const valFrom = document.getElementById('search-sl-ton-from').value;
-                    const valTo = document.getElementById('search-sl-ton-to').value;
+                    // Hiển thị loader giả lập để người dùng thấy có phản hồi
+                    showLoader();
 
-                    let logMsg = `Tìm Sách: SL Tồn `;
-                    
-                    if(operator === 'between') {
-                        logMsg += `từ ${valFrom} đến ${valTo}`;
-                    } else {
-                        logMsg += `${operator} ${valFrom}`;
-                    }
+                    // Sử dụng setTimeout nhỏ để UI kịp hiển thị loader trước khi tính toán
+                    setTimeout(() => {
+                        // 2. Lặp qua tất cả các dòng trong bảng Sách
+                        allBookRows.forEach(row => {
+                            // Cấu trúc bảng Sách:
+                            // Cell 0: STT
+                            // Cell 1: Tên sách
+                            // Cell 2: Thể loại
+                            // Cell 3: Tác giả
+                            // Cell 4: Số lượng tồn
+                            
+                            const tenSachCell = (row.cells[1] ? row.cells[1].textContent : '').toLowerCase();
+                            const theLoaiCell = (row.cells[2] ? row.cells[2].textContent : '').toLowerCase();
+                            const tacGiaCell = (row.cells[3] ? row.cells[3].textContent : '').toLowerCase();
+                            const slTonCell = parseFloat(row.cells[4] ? row.cells[4].textContent : 0) || 0;
 
-                    console.log(logMsg);
+                            // 3. Kiểm tra điều kiện (Logic string giống khách hàng)
+                            const tenSachMatch = tenSachCell.includes(tenSachQuery);
+                            const tacGiaMatch = tacGiaCell.includes(tacGiaQuery);
+                            const theLoaiMatch = theLoaiCell.includes(theLoaiQuery);
+                            
+                            // Logic số (Số lượng tồn) - Copy từ logic Tổng nợ
+                            let slTonMatch = true; 
 
-                    simulateApiCall((success) => {
-                        if(success) showToast('Đã tìm thấy dữ liệu!', 'success');
-                    });
+                            if (!isNaN(valFrom)) {
+                                switch (opSlTon) {
+                                    case '=': slTonMatch = slTonCell === valFrom; break;
+                                    case '>': slTonMatch = slTonCell > valFrom; break;
+                                    case '>=': slTonMatch = slTonCell >= valFrom; break;
+                                    case '<': slTonMatch = slTonCell < valFrom; break;
+                                    case '<=': slTonMatch = slTonCell <= valFrom; break;
+                                    case 'between':
+                                        if (!isNaN(valTo)) {
+                                            slTonMatch = slTonCell >= valFrom && slTonCell <= valTo;
+                                        } else {
+                                            slTonMatch = slTonCell >= valFrom;
+                                        }
+                                        break;
+                                    default: slTonMatch = true;
+                                }
+                            }
+
+                            // 4. Ẩn/Hiện hàng dựa trên kết quả
+                            if (tenSachMatch && tacGiaMatch && theLoaiMatch && slTonMatch) {
+                                resultsFound++;
+                                // Cập nhật lại cột STT (Cell 0)
+                                row.cells[0].textContent = resultsFound;
+                                row.style.display = ''; // Hiện
+                            } else {
+                                row.style.display = 'none'; // Ẩn
+                            }
+                        });
+
+                        // 5. Xử lý trường hợp không tìm thấy kết quả
+                        const existingNoResults = bookTableBody.querySelector('.no-results-row');
+                        if (existingNoResults) existingNoResults.remove();
+
+                        if (resultsFound === 0) {
+                            const noResultsRow = bookTableBody.insertRow();
+                            noResultsRow.classList.add('no-results-row');
+                            // Colspan = 5 vì bảng sách có 5 cột
+                            noResultsRow.innerHTML = `<td colspan="5" style="text-align: center;">Không tìm thấy sách nào phù hợp.</td>`;
+                        }
+
+                        hideLoader();
+                        showToast(`Tìm thấy ${resultsFound} cuốn sách.`, 'success');
+
+                    }, 300); // Delay 300ms cho mượt
                 });
             }
 
