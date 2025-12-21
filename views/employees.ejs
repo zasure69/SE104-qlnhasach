@@ -1203,6 +1203,14 @@
                         password: document.getElementById('edit-password').value // Gửi cả password (trống hoặc mới)
                     };
 
+                    const ngaySinhInput = document.getElementById('edit-ngay-sinh').value;
+                    const ngayNhanViecInput = document.getElementById('edit-ngay-nhan-viec').value;
+
+                    if (!checkAgeRequirement(ngaySinhInput, ngayNhanViecInput)) {
+                        showToast('Nhân viên chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
+                        return; // Dừng lại, không gửi dữ liệu đi
+                    }
+
                     showLoader();
                     try {
                         // --- GỌI API 'update' ---
@@ -1302,6 +1310,15 @@
                         password: document.getElementById('add-password').value,
                         ngayNhanViec: document.getElementById('add-ngay-nhan-viec').value,
                     };
+
+                    const ngaySinhInput = document.getElementById('add-ngay-sinh').value;
+                    const ngayNhanViecInput = document.getElementById('add-ngay-nhan-viec').value;
+
+                    if (!checkAgeRequirement(ngaySinhInput, ngayNhanViecInput)) {
+                        showToast('Nhân viên chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
+                        return; // Dừng lại, không gửi dữ liệu đi
+                    }
+
                     try {
                         // --- SỬA: GỌI API 'register' ---
                         const response = await fetch('/api/employees/registerEmployee', {
@@ -1357,6 +1374,102 @@
                     }
                 });
             });
+
+            // --- 7. VALIDATE DỮ LIỆU ĐẦU VÀO (MỚI THÊM) ---
+            
+            function setupInputValidation() {
+                // 1. Validate HỌ TÊN: Fix lỗi gõ tiếng Việt
+                const nameInputs = [document.getElementById('add-ho-ten'), document.getElementById('edit-ho-ten')];
+                
+                nameInputs.forEach(input => {
+                    if (input) {
+                        // Cờ đánh dấu: Người dùng có đang gõ tổ hợp phím tiếng Việt không?
+                        let isComposing = false;
+
+                        // Khi bắt đầu gõ tổ hợp (ví dụ gõ chữ 'a' đầu tiên của 'â')
+                        input.addEventListener('compositionstart', () => {
+                            isComposing = true;
+                        });
+
+                        // Khi kết thúc tổ hợp (ví dụ đã hiện ra chữ 'â')
+                        input.addEventListener('compositionend', () => {
+                            isComposing = false;
+                            // Gọi validate ngay khi gõ xong chữ tiếng Việt
+                            validateName(input);
+                        });
+
+                        // Sự kiện nhập liệu thông thường
+                        input.addEventListener('input', function() {
+                            // Nếu đang gõ dở tiếng Việt thì KHÔNG can thiệp
+                            if (isComposing) return;
+                            
+                            validateName(this);
+                        });
+                    }
+                });
+
+                // Hàm xử lý chung cho Họ tên
+                function validateName(el) {
+                    // Regex: /[^\p{L}\s]/gu
+                    // \p{L}: Bất kỳ ký tự chữ cái nào (Unicode Letter) -> Bao gồm cả Tiếng Việt, Tiếng Anh, v.v.
+                    // \s: Khoảng trắng
+                    // ^: Phủ định (Không phải chữ và không phải khoảng trắng thì xóa)
+                    // u: Cờ unicode
+                    
+                    const validValue = el.value.replace(/[^\p{L}\s]/gu, '');
+                    
+                    // Chỉ cập nhật lại nếu giá trị thực sự thay đổi (để tránh nhảy con trỏ chuột không cần thiết)
+                    if (el.value !== validValue) {
+                        el.value = validValue;
+                    }
+                }
+
+                // 2. Validate SỐ ĐIỆN THOẠI (Giữ nguyên)
+                const phoneInputs = [document.getElementById('add-sdt'), document.getElementById('edit-sdt')];
+                phoneInputs.forEach(input => {
+                    if (input) {
+                        input.addEventListener('input', function() {
+                            this.value = this.value.replace(/[^0-9]/g, '');
+                            if (this.value.length > 10) this.value = this.value.slice(0, 10);
+                        });
+                    }
+                });
+
+                // 3. Validate USERNAME (Giữ nguyên)
+                const usernameInputs = [document.getElementById('add-username'), document.getElementById('edit-username')];
+                usernameInputs.forEach(input => {
+                    if (input) {
+                        input.addEventListener('input', function() {
+                            this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+                        });
+                    }
+                });
+            }
+
+            // Gọi hàm khởi tạo validation
+            setupInputValidation();
+
+            // --- 8. HÀM KIỂM TRA ĐỦ 18 TUỔI (MỚI) ---
+            function checkAgeRequirement(ngaySinhStr, ngayNhanViecStr) {
+                if (!ngaySinhStr || !ngayNhanViecStr) return true; // Để validator của HTML lo nếu rỗng
+
+                const ngaySinh = new Date(ngaySinhStr);
+                const ngayNhanViec = new Date(ngayNhanViecStr);
+
+                // Tính ngày sinh nhật thứ 18
+                const sinhNhatThu18 = new Date(ngaySinh);
+                sinhNhatThu18.setFullYear(ngaySinh.getFullYear() + 18);
+
+                // So sánh: Nếu ngày vào làm < ngày sinh nhật thứ 18 -> Chưa đủ tuổi
+                // setHours(0,0,0,0) để chỉ so sánh ngày, bỏ qua giờ giấc
+                ngayNhanViec.setHours(0,0,0,0);
+                sinhNhatThu18.setHours(0,0,0,0);
+
+                if (ngayNhanViec < sinhNhatThu18) {
+                    return false;
+                }
+                return true;
+            }
 
             // --- LOGOUT ---
     const logoutBtn = document.getElementById('logout-button');
