@@ -174,7 +174,69 @@ const create = async (req, res) => {
 //  API: LẤY CHI TIẾT HÓA ĐƠN (GET /api/bill/detail/:id)
 // =============================================================
 const getDetail = async (req, res) => {
-    // ... code cũ giữ nguyên
+    const MaHD = req.params.MaHD;
+
+    try {
+        const HoaDonData = await HoaDon.findOne({
+            where: { MaHoaDon: MaHD },
+            // Chọn các trường cụ thể của HoaDon để tránh lỗi
+            attributes: ['MaHoaDon', 'NgayLapHoaDon', 'MaKhachHang', 'TongTien', 'SoTienTra', 'ConLai'],
+            include: [
+                {
+                    model: KhachHang,
+                    // Chỉ lấy tên khách hàng
+                    attributes: ['HoVaTen'], 
+                },
+                {
+                    model: CT_HD,
+                    as: 'CT_HDs', // PHẢI KHỚP với alias đã định nghĩa trong index.js
+                    // Chỉ lấy các trường cần thiết của CT_HD
+                    attributes: ['MaSach', 'SoLuongBan', 'DonGiaBan', 'ThanhTien'],
+                    include: [
+                        {
+                            model: Sach,
+                            // Chỉ lấy thông tin Sách cần thiết (ví dụ: MaSach, giá)
+                            attributes: ['MaSach', 'SoLuongTon'], // Thêm các thuộc tính khác của Sach nếu cần
+                            include: [
+                                {
+                                    model: DauSach,
+                                    // CHỈ LẤY TRƯỜNG CỤ THỂ BẠN CẦN (TenDauSach)
+                                    attributes: ['TenSach'], 
+                                    required: true,
+                                    include: [
+                                        {
+                                            model: TheLoai,
+                                            attributes: ['TenTheLoai'],
+                                            required: true
+                                        }
+                                    ]
+                                }
+                            ],
+                            required: true // Bắt buộc phải có Sach
+                        }
+                    ],
+                    required: true // Bắt buộc phải có CT_HD
+                }
+            ]
+        });
+
+        if (!HoaDonData) {
+            return res.status(404).json({ message: 'Không tìm thấy hóa đơn.' });
+        }
+        
+        // Trả về dữ liệu
+        res.json({
+            HoaDon: HoaDonData,
+            Details: HoaDonData.Details 
+        });
+
+    } catch (error) {
+        console.error("Lỗi truy vấn chi tiết hóa đơn:", error);
+        res.status(500).json({ 
+            message: "Lỗi Server khi lấy chi tiết hóa đơn.",
+            error: error.message // Trả về thông báo lỗi chi tiết để debug
+        });
+    }
 };
 
 // =============================================================
@@ -283,11 +345,69 @@ const updateBill = async (req, res) => {
 //  API: XÓA HÓA ĐƠN (DELETE /api/bill/:id)
 // =============================================================
 const deleteBill = async (req, res) => {
-    // ... code cũ giữ nguyên
+    const MaHD = req.params.MaHD;
+    const t = await sequelize.transaction(); // Bắt đầu Transaction
+
+    try {
+        // 1. Tìm Hóa đơn và Chi tiết cũ
+        const bill = await HoaDon.findByPk(MaHD, { transaction: t });
+        if (!bill) {
+            await t.rollback();
+            return res.status(404).json({ message: 'Không tìm thấy hóa đơn.' });
+        }
+
+        const details = await CT_HD.findAll({ where: { MaHoaDon: MaHD }, transaction: t });
+
+        // 2. HOÀN TÁC TỒN KHO (Cộng lại số lượng sách đã bán vào kho)
+        for (const item of details) {
+            await Sach.increment('SoLuongTon', { 
+                by: item.SoLuongBan, 
+                where: { MaSach: item.MaSach }, 
+                transaction: t 
+            });
+        }
+
+        // 3. HOÀN TÁC NỢ KHÁCH HÀNG (Nếu hóa đơn này có ghi nợ, phải trừ nợ đi)
+        // Logic: Khi xóa hóa đơn, coi như giao dịch chưa từng xảy ra -> Trả lại trạng thái nợ cũ
+        const conLai = parseFloat(bill.ConLai);
+        if (conLai > 0) {
+            await KhachHang.increment('TongNo', { 
+                by: -conLai, // Giảm nợ
+                where: { MaKhachHang: bill.MaKhachHang }, 
+                transaction: t 
+            });
+        }
+
+        // 4. Xóa Chi tiết và Hóa đơn
+        await CT_HD.destroy({ where: { MaHoaDon: MaHD }, transaction: t });
+        await HoaDon.destroy({ where: { MaHoaDon: MaHD }, transaction: t });
+
+        await t.commit();
+        res.json({ message: `Đã xóa hóa đơn ${MaHD} và hoàn tác tồn kho/nợ thành công.` });
+
+    } catch (error) {
+        await t.rollback();
+        console.error("Lỗi khi xóa hóa đơn:", error);
+        res.status(500).json({ message: `Lỗi server: ${error.message}` });
+    }
 };
 
 const getLastMaHD = async (req, res) => {
-    // ... code cũ giữ nguyên
+    try {
+        const lastBill = await HoaDon.findOne({
+            attributes: ['MaHoaDon'],
+            // Sắp xếp giảm dần theo MaHoaDon (vì MaHD là chuỗi 'HD001', 'HD002',...)
+            order: [['MaHoaDon', 'DESC']], 
+            limit: 1,
+            raw: true
+        });
+
+        // Trả về MaHoaDon lớn nhất hoặc null nếu chưa có hóa đơn nào
+        res.json({ lastMaHD: lastBill ? lastBill.MaHoaDon : null });
+    } catch (error) {
+        console.error("Lỗi server khi lấy Mã Hóa Đơn cuối cùng:", error);
+        res.status(500).json({ message: 'Lỗi server khi lấy Mã Hóa Đơn cuối cùng.' });
+    }
 };
 
 module.exports = {

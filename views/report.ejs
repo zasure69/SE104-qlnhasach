@@ -506,9 +506,9 @@
                 const [year, month] = dateString.split('-');
                 
                 let url = '';
-                if (type === 'doanhthu') url = `/dashboard/api/report/revenue?month=${month}&year=${year}`;
-                else if (type === 'congno') url = `/dashboard/api/report/debt?month=${month}&year=${year}`;
-                else if (type === 'ton') url = `/dashboard/api/report/inventory?month=${month}&year=${year}`;
+                if (type === 'doanhthu') url = `/api/report/revenue?month=${month}&year=${year}`;
+                else if (type === 'congno') url = `/api/report/debt?month=${month}&year=${year}`;
+                else if (type === 'ton') url = `/api/report/inventory?month=${month}&year=${year}`;
 
                 const response = await fetch(url);
                 
