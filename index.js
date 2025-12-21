@@ -65,7 +65,7 @@ const changeruleRoutes = require("./routes/changeruleRoutes");
 protectedRoutes.use("/api/change-rules", changeruleRoutes);
 
 const reportRoutes = require("./routes/reportRoutes");
-protectedRoutes.use("/api/reports", reportRoutes);
+protectedRoutes.use("/", reportRoutes); // Changed this line
 
 // Routes for book management (API)
 const booksRoutes = require("./routes/booksRoutes");
