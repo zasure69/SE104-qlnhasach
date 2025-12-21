@@ -18,8 +18,8 @@ const ReportController = require('../controllers/reportController'); // Đườn
 router.get('/reports', ReportController.RenderReportPage);
 
 // 2. Các Route API (được gọi bởi Ajax/Fetch trong file EJS)
-router.get('/api/report/revenue', ReportController.getDoanhThuAPI);
-router.get('/api/report/debt', ReportController.getCongNoAPI);
-router.get('/api/report/inventory', ReportController.getTonKhoAPI);
+router.get('/revenue', ReportController.getDoanhThuAPI);
+router.get('/debt', ReportController.getCongNoAPI);
+router.get('/inventory', ReportController.getTonKhoAPI);
 
 module.exports = router;

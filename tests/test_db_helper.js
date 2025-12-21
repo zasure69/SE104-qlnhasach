@@ -28,7 +28,7 @@ const resetAndSeedDatabase = async () => {
     console.log("System parameters seeded.");
 
     // Seed an Admin User
-    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const hashedPassword = await bcrypt.hash('123', 10);
     await db.User.findOrCreate({
         where: { MaNhanVien: 'NV001' },
         defaults: {
@@ -63,7 +63,7 @@ const resetAndSeedDatabase = async () => {
     await db.TheLoai.bulkCreate([
       { MaTheLoai: 'TL001', TenTheLoai: 'Test Genre', MoTa: 'Thể loại dùng cho test' },
       { MaTheLoai: 'TL002', TenTheLoai: 'Fantasy', MoTa: 'Sách giả tưởng' },
-      { MaTheLoai: 'TL001_SACH', TenTheLoai: 'Test Genre for Sach', MoTa: 'Thể loại dùng cho test sách con' }
+      { MaTheLoai: 'TL003', TenTheLoai: 'Test Genre for Sach', MoTa: 'Thể loại dùng cho test sách con' }
     ], { ignoreDuplicates: true });
     console.log("Genres seeded.");
 
@@ -71,7 +71,7 @@ const resetAndSeedDatabase = async () => {
     await db.TacGia.bulkCreate([
       { MaTacGia: 'TG001', HoTen: 'Test Author', NamSinh: 1980 },
       { MaTacGia: 'TG002', HoTen: 'Nguyễn Nhật Ánh', NamSinh: 1955 },
-      { MaTacGia: 'TG001_SACH', HoTen: 'Test Author for Sach', NamSinh: 1990 }
+      { MaTacGia: 'TG003', HoTen: 'Test Author for Sach', NamSinh: 1990 }
     ], { ignoreDuplicates: true });
     console.log("Authors seeded.");
 
@@ -87,7 +87,7 @@ const resetAndSeedDatabase = async () => {
     await db.DauSach.bulkCreate([
         { MaDauSach: 'DS001', TenSach: 'Sách Đầu Sách Mới', MaTheLoai: 'TL001', MoTa: 'Mô tả đầu sách mới' },
         { MaDauSach: 'DS002', TenSach: 'Mắt Biếc', MaTheLoai: 'TL002', MoTa: 'Truyện dài của Nguyễn Nhật Ánh' },
-        { MaDauSach: 'DS001_SACH', TenSach: 'Test DauSach for Sach', MaTheLoai: 'TL001_SACH', MoTa: 'DauSach for Sach Instance Test' }
+        { MaDauSach: 'DS003', TenSach: 'Test DauSach for Sach', MaTheLoai: 'TL003', MoTa: 'DauSach for Sach Instance Test' }
     ], { ignoreDuplicates: true });
     console.log("Book Titles seeded.");
 
@@ -95,15 +95,15 @@ const resetAndSeedDatabase = async () => {
     await db.CT_TacGia.bulkCreate([
         { MaDauSach: 'DS001', MaTacGia: 'TG001' },
         { MaDauSach: 'DS002', MaTacGia: 'TG002' },
-        { MaDauSach: 'DS001_SACH', MaTacGia: 'TG001_SACH' }
+        { MaDauSach: 'DS003', MaTacGia: 'TG003' }
     ], { ignoreDuplicates: true });
     console.log("Book Authors linked.");
 
     // Seed Sach (Book Instances)
     await db.Sach.bulkCreate([
-        { MaSach: 'S001', MaDauSach: 'DS001', NhaXB: 'NXB Test', NamXB: 2023, SoLuongTon: 100 },
-        { MaSach: 'S002', MaDauSach: 'DS002', NhaXB: 'NXB Trẻ', NamXB: 2019, SoLuongTon: 50 },
-        { MaSach: 'S003', MaDauSach: 'DS001_SACH', NhaXB: 'NXB Khác', NamXB: 2020, SoLuongTon: 120 } // For Sach instance test
+        { MaSach: 'S001', MaDauSach: 'DS001', NhaXB: 'NXB Test', NamXB: 2023 },
+        { MaSach: 'S002', MaDauSach: 'DS002', NhaXB: 'NXB Trẻ', NamXB: 2019 },
+        { MaSach: 'S003', MaDauSach: 'DS003', NhaXB: 'NXB Khác', NamXB: 2020 } // For Sach instance test
     ], { ignoreDuplicates: true });
     console.log("Book Instances seeded.");
 
@@ -114,7 +114,7 @@ const resetAndSeedDatabase = async () => {
     await db.HoaDon.bulkCreate([
       { MaHoaDon: 'HD001', NgayLapHoaDon: ngayLapHoaDon_Jan2023, MaKhachHang: 'KH001', MaNhanVien: 'NV001', TongTien: 100000, SoTienTra: 100000, ConLai: 0 },
       { MaHoaDon: 'HD002', NgayLapHoaDon: ngayLapHoaDon_Jan2023, MaKhachHang: 'KH002', MaNhanVien: 'NV001', TongTien: 50000, SoTienTra: 50000, ConLai: 0 },
-      { MaHoaDon: 'HD003', NgayLapHoaDon: ngayLapHoaDon_Feb2023, MaKhachHang: 'KH001', MaNhanVien: 'NV001', TongTien: 200000, SoTienTra: 200000, ConLai: 0 }
+      { MaHoaDon: 'HD003', NgayLapHoaDon: ngayLapHoaDon_Feb2023, MaKhachHang: 'KH001', MaNhanVien: 'NV001', TongTien: 200000, SoTienTra: 100000, ConLai: 100000 }
     ], { ignoreDuplicates: true });
     console.log("Invoices seeded.");
 
