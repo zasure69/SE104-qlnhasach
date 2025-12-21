@@ -709,7 +709,11 @@
                                     <tr>
                                         <td><%= index + 1 %></td>
                                         <td><%= receipt.MaPhieuNhap %></td>
-                                        <td><%= new Date(receipt.NgayNhapPhieu).toLocaleDateString('vi-VN') %></td>
+                                        <td><%= new Date(receipt.NgayNhapPhieu).toLocaleDateString('vi-VN', { 
+                                            day: '2-digit', 
+                                            month: '2-digit', 
+                                            year: 'numeric' 
+                                        }) %></td>
                                         <td><%= new Intl.NumberFormat('vi-VN').format(receipt.TongTien) %></td>
                                         <td>
                                             <button class="btn btn-sm btn-secondary view-detail-btn" data-id="<%= receipt.MaPhieuNhap %>">

@@ -732,7 +732,12 @@
                                     <td><%= index + 1 %></td>
                                     <td><%= bill.MaHoaDon %></td>
                                     <td><%= bill.KhachHang.HoVaTen %></td>
-                                    <td><%= new Date(bill.NgayLapHoaDon).toLocaleDateString('vi-VN') %></td>
+                                    <td><%= new Date(bill.NgayLapHoaDon).toLocaleDateString('vi-VN', { 
+                                        day: '2-digit', 
+                                        month: '2-digit', 
+                                        year: 'numeric' 
+                                    }) %>
+                                    </td>
                                     <td class="text-right"><%= new Intl.NumberFormat('vi-VN').format(bill.TongTien) %></td>
                                     <td>
                                         <button class="btn btn-sm btn-secondary view-detail-btn" data-id="<%= bill.MaHoaDon %>"> <i

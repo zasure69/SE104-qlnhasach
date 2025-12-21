@@ -732,7 +732,11 @@
                                         <td><%= index + 1 %></td>
                                         <td><%= customer.MaKhachHang %></td>
                                         <td><%= customer.HoVaTen %></td>
-                                        <td><%= customer.NgaySinh %></td>
+                                        <td><%= new Date(customer.NgaySinh).toLocaleDateString('vi-VN', { 
+                                            day: '2-digit', 
+                                            month: '2-digit', 
+                                            year: 'numeric' 
+                                        }) %></td>
                                         <td><%= customer.SoDienThoai %></td>
                                         <td><%= customer.GioiTinh %></td>
                                         <td><%= customer.DiaChi %></td>

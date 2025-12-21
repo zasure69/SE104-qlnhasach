@@ -733,12 +733,20 @@
                                         <td><%= index + 1 %></td>
                                         <td><%= employee.MaNhanVien %></td>
                                         <td><%= employee.HoTen %></td>
-                                        <td><%= employee.NgaySinh %></td>
+                                        <td><%= new Date(employee.NgaySinh).toLocaleDateString('vi-VN', { 
+                                            day: '2-digit', 
+                                            month: '2-digit', 
+                                            year: 'numeric' 
+                                        }) %></td>
                                         <td><%= employee.SoDienThoai %></td>
                                         <td><%= employee.ChucVu %></td>
                                         <td><%= employee.Username %></td>
                                         <td>******</td> 
-                                        <td><%= employee.NgayNhanViec %></td>
+                                        <td><%= new Date(employee.NgayNhanViec).toLocaleDateString('vi-VN', { 
+                                            day: '2-digit', 
+                                            month: '2-digit', 
+                                            year: 'numeric' 
+                                        }) %></td>
                                         <td>
                                             <%# Kiểm tra xem Username có phải là 'admin' không %>
                                             <% if (employee.Username !== 'admin') { %>
