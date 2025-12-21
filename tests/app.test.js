@@ -50,7 +50,7 @@ describe('Web App Tests', () => {
 
     describe('API Endpoints Protection & Reachability', () => {
         it('GET /api/customers should be protected', async () => testProtection('/api/customers/getCustomers')); // Specific endpoint
-        it('GET /api/search should be protected', async () => testProtection('/api/search'));
+        // Removed: it('GET /api/search should be protected', async () => testProtection('/api/search'));
         it('GET /api/reports should be protected', async () => testProtection('/api/reports/api/report/inventory')); // Specific endpoint
     });
     

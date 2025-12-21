@@ -149,7 +149,7 @@ describe('User Operations Module (Customers & Employees)', () => {
         constrainedEmployeeId = employeeRes.body.userId;
         console.log(`constrainedEmployeeId: ${constrainedEmployeeId}`);
 
-        billId = `HD_TEST_C_${Date.now()}`;
+        billId = `HD_TEST_C_${Math.floor(Date.now() / 1000)}`; // Truncate milliseconds
         await db.HoaDon.create({
             MaHoaDon: billId, MaKhachHang: constrainedCustomerId, MaNhanVien: constrainedEmployeeId,
             NgayLapHoaDon: new Date(), TongTien: 100000, SoTienTra: 100000, ConLai: 0
@@ -216,17 +216,28 @@ describe('User Operations Module (Customers & Employees)', () => {
         // Ensure all related data is cleared for the constrainedCustomerId directly
         await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
 
-        // Delete any CT_HD associated with the billId
-        await db.sequelize.query(`DELETE FROM CT_HD WHERE MaHoaDon = '${billId}'`);
-        // Delete the HoaDon associated with the billId
-        await db.sequelize.query(`DELETE FROM HOADON WHERE MaHoaDon = '${billId}'`);
+        const deleteCTHDQuery = `DELETE FROM CT_HD WHERE MaHoaDon = '${billId}'`;
+        console.log(`Executing: ${deleteCTHDQuery}`);
+        await db.sequelize.query(deleteCTHDQuery);
 
-        // Delete any PhieuThuTien directly linked to the constrainedCustomerId
-        await db.sequelize.query(`DELETE FROM PHIEUTHUTIEN WHERE MaKhachHang = '${constrainedCustomerId}'`);
+        const deleteHoaDonQuery = `DELETE FROM HOADON WHERE MaHoaDon = '${billId}'`;
+        console.log(`Executing: ${deleteHoaDonQuery}`);
+        await db.sequelize.query(deleteHoaDonQuery);
 
-        // Delete any BaoCaoCongNo directly linked to the constrainedCustomerId
-        await db.sequelize.query(`DELETE FROM BAOCAOCONGNO WHERE MaKhachHang = '${constrainedCustomerId}'`);
+        const deletePhieuThuTienQuery = `DELETE FROM PHIEUTHUTIEN WHERE MaKhachHang = '${constrainedCustomerId}'`;
+        console.log(`Executing: ${deletePhieuThuTienQuery}`);
+        await db.sequelize.query(deletePhieuThuTienQuery);
+
+        const deleteBaoCaoCongNoQuery = `DELETE FROM BAOCAOCONGNO WHERE MaKhachHang = '${constrainedCustomerId}'`;
+        console.log(`Executing: ${deleteBaoCaoCongNoQuery}`);
+        await db.sequelize.query(deleteBaoCaoCongNoQuery);
         
+        const remainingHoaDon = await db.HoaDon.findAll({ where: { MaKhachHang: constrainedCustomerId } });
+        console.log(`Remaining HoaDon records for ${constrainedCustomerId}: ${JSON.stringify(remainingHoaDon)}`);
+
+        const remainingPhieuThuTien = await db.PhieuThuTien.findAll({ where: { MaKhachHang: constrainedCustomerId } });
+        console.log(`Remaining PhieuThuTien records for ${constrainedCustomerId}: ${JSON.stringify(remainingPhieuThuTien)}`);
+
         const remainingBaoCaoCongNo = await db.BaoCaoCongNo.findAll({ where: { MaKhachHang: constrainedCustomerId } });
         console.log(`Remaining BaoCaoCongNo records: ${JSON.stringify(remainingBaoCaoCongNo)}`);
 
