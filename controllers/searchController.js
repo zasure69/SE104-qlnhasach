@@ -45,11 +45,12 @@ const searchBooks = async (req, res) => {
     if (tacGia) whereDauSach.TacGia = { [Op.like]: `%${tacGia}%` };
     if (theLoai) whereTheLoai.TenTheLoai = { [Op.like]: `%${theLoai}%` };
 
+    // Lọc theo số lượng tồn trong DB (đã được maintain bởi import/bill operations)
     if (soLuongTon) {
       whereSach.SoLuongTon = { [Op.gte]: parseInt(soLuongTon) || 0 };
     }
 
-    const results = await db.Sach.findAll({
+    const sachsRaw = await db.Sach.findAll({
       where: whereSach,
       include: [
         {
@@ -61,12 +62,41 @@ const searchBooks = async (req, res) => {
               model: db.TheLoai,
               where: whereTheLoai,
               required: !!theLoai, // Chỉ yêu cầu join nếu có nhập thể loại
+              attributes: ["TenTheLoai"],
+            },
+            {
+              model: db.TacGia,
+              as: "TacGias",
+              through: { attributes: [] },
+              attributes: ["HoTen"],
+              required: false,
             },
           ],
+          attributes: ["TenSach", "MaTheLoai"],
         },
       ],
-      raw: true,
-      nest: true, // Gộp kết quả
+      raw: false,
+    });
+
+    // Transform data với SoLuongTon từ DB
+    const results = sachsRaw.map((s) => {
+      const plain = s.get({ plain: true });
+
+      return {
+        MaSach: plain.MaSach,
+        TenSach: plain.DauSach ? plain.DauSach.TenSach : "",
+        TenTheLoai:
+          plain.DauSach && plain.DauSach.TheLoai
+            ? plain.DauSach.TheLoai.TenTheLoai
+            : "",
+        TacGia:
+          plain.DauSach && plain.DauSach.TacGias
+            ? plain.DauSach.TacGias.map((tg) => tg.HoTen).join(", ")
+            : "",
+        NhaXB: plain.NhaXB || "",
+        NamXB: plain.NamXB || "",
+        SoLuongTon: plain.SoLuongTon || 0,
+      };
     });
 
     res.status(200).json(results);

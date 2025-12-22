@@ -665,7 +665,7 @@
                     <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
                     <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
                     <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="/dashboard/changerule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
+                    <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
         </aside>
@@ -776,7 +776,7 @@
                         </div>
                         <div class="form-group"> 
                             <label class="required">Số Lượng:</label> 
-                            <input type="number" id="add-input-so-luong" min="150" value="150" placeholder="150"> 
+                            <input type="number" id="add-input-so-luong" min="<%= soLuongNhapToiThieu %>" value="<%= soLuongNhapToiThieu %>" placeholder="<%= soLuongNhapToiThieu %>"> 
                         </div>
                         <div class="form-group"> 
                             <label class="required">Đơn Giá Nhập:</label> 
@@ -866,7 +866,7 @@
                         </div>
                         <div class="form-group"> 
                             <label class="required">Số Lượng:</label> 
-                            <input type="number" id="edit-input-so-luong" min="150" placeholder="150"> 
+                            <input type="number" id="edit-input-so-luong" min="<%= soLuongNhapToiThieu %>" placeholder="<%= soLuongNhapToiThieu %>"> 
                         </div>
                         <div class="form-group"> 
                             <label class="required">Đơn Giá Nhập:</label> 
@@ -931,7 +931,7 @@
                 </div>
                 <div class="form-group" style="margin-top: 1rem;">
                     <label class="required">Số Lượng:</label>
-                    <input type="number" id="item-edit-qty" min="150" style="font-weight: bold; color: var(--secondary-color);">
+                    <input type="number" id="item-edit-qty" min="<%= soLuongNhapToiThieu %>" style="font-weight: bold; color: var(--secondary-color);">
                 </div>
                 <div class="form-group" style="margin-top: 1rem;">
                     <label class="required">Đơn Giá Nhập:</label>
@@ -955,6 +955,9 @@
             // --- 1. BIẾN TOÀN CỤC & TIỆN ÍCH ---
             const loader = document.getElementById('loader');
             const toastContainer = document.getElementById('toast-container');
+            
+            // Tham số quy định từ database
+            const soLuongNhapToiThieu = <%= soLuongNhapToiThieu %>;
             
             // Biến dùng cho việc sửa dòng
             let currentRowToEdit = null;
@@ -1270,9 +1273,9 @@
                         }
                         
                         const soLuong = parseInt(soLuongInput.value);
-                        // QUY ĐỊNH: Số lượng nhập ít nhất là 150
-                        if (!soLuong || soLuong < 150) {
-                            showToast('Số lượng nhập phải từ 150 trở lên!', 'error');
+                        // QUY ĐỊNH: Số lượng nhập ít nhất là soLuongNhapToiThieu (từ database)
+                        if (!soLuong || soLuong < soLuongNhapToiThieu) {
+                            showToast(`Số lượng nhập phải từ ${soLuongNhapToiThieu} trở lên (theo quy định)!`, 'error');
                             return;
                         }
                         
@@ -1293,7 +1296,7 @@
                         // Reset
                         maSachInput.value = '';
                         tenSachInput.value = '';
-                        soLuongInput.value = '150';
+                        soLuongInput.value = '<%= soLuongNhapToiThieu %>';
                         donGiaInput.value = '';
                         donGiaBanInput.value = '';
                         maSachInput.focus();
@@ -1371,19 +1374,27 @@
                 });
             });
 
-            // Logic Reset/Restore
+            // --- LOGIC NÚT "THÊM MỚI" (SMART RESET) - MODAL ADD ---
             const btnResetAdd = document.getElementById('btn-custom-reset'); 
             if (btnResetAdd) {
                 btnResetAdd.addEventListener('click', () => {
-                    const hasData = document.getElementById('add-ma-nv').value.trim() !== '' || document.querySelector('#add-detail-table tbody').rows.length > 0;
+                    // Kiểm tra xem đã nhập gì chưa (Check mã NV hoặc có sách trong bảng)
+                    const hasData = document.getElementById('add-ma-nv').value.trim() !== '' || 
+                                    document.querySelector('#add-detail-table tbody').rows.length > 0;
+
                     if (hasData) {
-                        if (confirm('Lưu phiếu này không? OK: Lưu - Cancel: Xóa trắng')) {
+                        if (confirm('Bạn đang nhập dở phiếu nhập sách. Bạn có muốn LƯU phiếu này không?\n\n- OK: Lưu phiếu.\n- Cancel: Xóa trắng để nhập phiếu khác.')) {
+                            // Chọn OK -> Gọi submit form (Lưu)
                             document.getElementById('btn-save-add').click();
                         } else {
+                            // Chọn Cancel -> Reset form, KHÔNG ĐÓNG MODAL
                             resetAddForm();
+                            showToast('Đã làm mới form!', 'info');
                         }
                     } else {
+                        // Chưa nhập gì -> Reset
                         resetAddForm();
+                        showToast('Form đã sẵn sàng nhập mới.', 'info');
                     }
                 });
             }
@@ -1397,7 +1408,10 @@
                 document.getElementById('add-total-amount').textContent = '0';
             }
 
+            // --- LOGIC NÚT "ĐẶT LẠI" (SMART RESTORE) - MODAL EDIT ---
             const btnResetEdit = document.getElementById('btn-reset-edit');
+            
+            // Hàm lấy dữ liệu hiện tại để so sánh/lưu trữ
             function getEditState() {
                 return {
                     ngayNhap: document.getElementById('edit-ngay-nhap').value,
@@ -1409,12 +1423,27 @@
             if(btnResetEdit) {
                 btnResetEdit.addEventListener('click', () => {
                     if(!originalEditState) return;
-                    if (confirm("Khôi phục về ban đầu?")) {
+
+                    // 1. Kiểm tra thay đổi
+                    const currentState = getEditState();
+                    const isChanged = JSON.stringify(currentState) !== JSON.stringify(originalEditState);
+
+                    if (!isChanged) {
+                        showToast('Chưa có thay đổi nào để đặt lại!', 'info');
+                        return;
+                    }
+
+                    // 2. Hỏi xác nhận
+                    if (confirm("Dữ liệu đã thay đổi. Bạn có muốn LƯU LẠI không?\n\n- OK: Lưu thay đổi.\n- Cancel: Khôi phục lại dữ liệu gốc.")) {
+                        // Chọn OK -> Lưu
+                        document.getElementById('btn-save-edit').click();
+                    } else {
+                        // Chọn Cancel -> Khôi phục
                         document.getElementById('edit-ngay-nhap').value = originalEditState.ngayNhap;
                         document.getElementById('edit-ma-nv').value = originalEditState.maNV;
                         document.querySelector('#edit-detail-table tbody').innerHTML = originalEditState.tableHtml;
                         updateTotal('edit-detail-table', 'edit-total-amount');
-                        showToast('Đã khôi phục!');
+                        showToast('Đã khôi phục dữ liệu ban đầu!', 'info');
                     }
                 });
             }
