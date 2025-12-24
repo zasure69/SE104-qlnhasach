@@ -1270,7 +1270,7 @@
             const btnCustomReset = document.getElementById('btn-custom-reset');
             const addEmployeeForm = document.getElementById('add-employee-form');
             // const addModal = document.getElementById('add-modal'); // Không cần biến này ở đây nữa vì không đóng
-
+            let isSaveAndReset = false;
             if (btnCustomReset && addEmployeeForm) {
                 btnCustomReset.addEventListener('click', () => {
                     // Kiểm tra xem form có dữ liệu không (check tên nhân viên)
@@ -1281,6 +1281,7 @@
                         if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU Nhân viên này trước khi làm mới không?\n\n- OK: Lưu nhân viên này.\n- Cancel: Xóa trắng để nhập nhân viên khác.')) {
                             // Chọn OK -> Lưu
                             if (addEmployeeForm.checkValidity()) {
+                                isSaveAndReset = true;
                                 addEmployeeForm.requestSubmit(); 
                             } else {
                                 addEmployeeForm.reportValidity();
@@ -1300,7 +1301,7 @@
                 // Xử lý sự kiện Submit Form (Giữ nguyên)
                 addEmployeeForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    showLoader();
+                    
                     const data = {
                         hoTen: document.getElementById('add-ho-ten').value,
                         ngaySinh: document.getElementById('add-ngay-sinh').value,
@@ -1316,9 +1317,10 @@
 
                     if (!checkAgeRequirement(ngaySinhInput, ngayNhanViecInput)) {
                         showToast('Nhân viên chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
+                        isSaveAndReset = false;
                         return; // Dừng lại, không gửi dữ liệu đi
                     }
-
+                    showLoader();
                     try {
                         // --- SỬA: GỌI API 'register' ---
                         const response = await fetch('/api/employees/registerEmployee', {
@@ -1332,9 +1334,19 @@
 
                         if (response.ok) {
                             await showToast('Thêm nhân viên thành công!', 'success');
-                            document.getElementById('add-modal').style.display = 'none';
-                            // Tải lại trang để xem nhân viên mới
-                            //window.location.reload(); 
+
+                            if (isSaveAndReset) {
+                                // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
+                                addEmployeeForm.reset(); 
+                                showToast('Đã sẵn sàng nhập nhân viên tiếp theo.', 'info');
+                                
+                                // Reset cờ về false sau khi xong việc
+                                isSaveAndReset = false; 
+                            } else {
+                                // Trường hợp 2: Submit thường (Lưu -> Đóng form)
+                                document.getElementById('add-modal').style.display = 'none';
+                                addEmployeeForm.reset(); // Reset luôn cho sạch
+                            } 
                             fetchEmployees(); // tải lại danh sách nhân viên
                         } else {
                             showToast(`Thêm thất bại: ${result.error}`, 'error');
