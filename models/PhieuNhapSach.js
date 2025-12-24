@@ -15,7 +15,7 @@ const PhieuNhapSach = sequelize.define(
       allowNull: false,
     },
     TongTien: {
-      type: DataTypes.DECIMAL(18, 0),
+      type: DataTypes.DECIMAL(18, 2),
       allowNull: false,
     },
     MaNhanVien: {

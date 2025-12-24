@@ -20,15 +20,15 @@ const CT_PNS = sequelize.define(
       allowNull: false,
     },
     DonGiaNhap: {
-      type: DataTypes.DECIMAL(18, 0),
+      type: DataTypes.DECIMAL(18, 2),
       allowNull: false,
     },
     DonGiaBan: {
-      type: DataTypes.DECIMAL(18, 0),
+      type: DataTypes.DECIMAL(18, 2),
       allowNull: false,
     },
     ThanhTien: {
-      type: DataTypes.DECIMAL(18, 0),
+      type: DataTypes.DECIMAL(18, 2),
       allowNull: false,
     },
   },
