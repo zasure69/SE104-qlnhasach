@@ -6,7 +6,8 @@ const { Op } = require('sequelize');
 const getUserInfo = (req) => {
     return {
       username: req.user.username,
-      role: req.user.role
+      role: req.user.role,
+      MaNV: req.user.id
     };
   };
   
