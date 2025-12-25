@@ -1498,7 +1498,52 @@
                         resetAddForm(); 
                     }
                     
-                    setTimeout(() => location.reload(), 1000);
+                    // 1. Tính toán dữ liệu hiển thị
+                    const tbody = document.querySelector('#master-table tbody');
+                    
+                    // Xóa dòng "Chưa có phiếu nhập" nếu bảng đang trống
+                    // (Kiểm tra xem dòng đầu tiên có phải là dòng thông báo không)
+                    const firstRow = tbody.rows[0];
+                    if (firstRow && firstRow.cells.length === 1) {
+                        firstRow.remove();
+                    }
+
+                    const stt = tbody.rows.length + 1;
+                    
+                    // Format ngày: YYYY-MM-DD -> DD/MM/YYYY
+                    let dateDisplay = ngayNhap;
+                    if(ngayNhap && ngayNhap.includes('-')){
+                        const parts = ngayNhap.split('-');
+                        dateDisplay = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    }
+
+                    // Tính tổng tiền từ mảng chiTiet vừa gửi đi
+                    const tongTien = chiTiet.reduce((sum, item) => sum + (item.SoLuong * item.DonGiaNhap), 0);
+
+                    // Lấy Mã Phiếu từ phản hồi API (Giả sử API trả về object chứa MaPhieuNhap)
+                    // Bạn cần đảm bảo Backend trả về { success: true, data: { MaPhieuNhap: 'PN...', ... } }
+                    const newId = result.data.MaPhieuNhap || result.data.receipt?.MaPhieuNhap || '---';
+
+                    // 2. Tạo dòng HTML mới
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td>${stt}</td>
+                        <td>${newId}</td>
+                        <td>${dateDisplay}</td>
+                        <td>${new Intl.NumberFormat('vi-VN').format(tongTien)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary view-detail-btn" data-id="${newId}">
+                                <i class="fas fa-eye"></i> Chi tiết
+                            </button>
+                            <button class="btn btn-sm btn-print ml-2 print-btn" data-id="${newId}"> 
+                                <i class="fas fa-print"></i>
+                            </button>
+                            <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                        </td>
+                    `;
+
+                    // 3. Thêm vào cuối bảng
+                    tbody.appendChild(newRow);
                 } else {
                     showToast(result.error || 'Có lỗi xảy ra!', 'error');
                 }
