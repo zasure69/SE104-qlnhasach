@@ -1855,7 +1855,48 @@
                             resetAddForm ();
                         }
                         
-                        setTimeout(() => { location.reload(); }, 1000);
+                        // 1. Lấy dữ liệu từ form hiện tại để hiển thị
+                        const tenKH = document.getElementById('add-ten-kh').value;
+                        const rawDate = document.getElementById('add-ngay-lap').value; // YYYY-MM-DD
+                        
+                        // Format ngày: YYYY-MM-DD -> DD/MM/YYYY
+                        let dateDisplay = rawDate;
+                        if(rawDate && rawDate.includes('-')){
+                            const parts = rawDate.split('-');
+                            dateDisplay = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                        }
+
+                        // 2. Tạo dòng HTML mới
+                        const tbody = document.querySelector('#master-table tbody');
+                        
+                        // Xóa dòng "Không có dữ liệu" nếu bảng đang trống
+                        const noDataRow = tbody.querySelector('.no-data'); 
+                        if(noDataRow) noDataRow.remove();
+
+                        const stt = tbody.rows.length + 1; // Tính số thứ tự mới
+                        
+                        const newRow = document.createElement('tr');
+                        newRow.setAttribute('data-id', MaHD); // Để dùng cho nút xóa
+                        newRow.innerHTML = `
+                            <td>${stt}</td>
+                            <td>${MaHD}</td>
+                            <td>${tenKH}</td>
+                            <td>${dateDisplay}</td>
+                            <td class="text-right">${formatNumber(newData.TongTien)}</td>
+                            <td>
+                                <button class="btn btn-sm btn-secondary view-detail-btn" data-id="${MaHD}"> 
+                                    <i class="fas fa-eye"></i> Chi tiết 
+                                </button>
+                                <button class="btn btn-sm btn-print ml-2" data-id="${MaHD}"> 
+                                    <i class="fas fa-print"></i>
+                                </button>
+                                <i class="fas fa-trash action-icon delete-icon" 
+                                style="margin-left: 12px; color: var(--red-accent);"></i>
+                            </td>
+                        `;
+
+                        // 3. Chèn vào đầu bảng hoặc cuối bảng (ở đây là cuối bảng)
+                        tbody.appendChild(newRow);
                     } else {
                         showToast(`Thêm thất bại: ${data.message}`, 'error');
                     }

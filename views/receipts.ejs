@@ -1321,8 +1321,48 @@
                                 if (el) el.value = '';
                             });
 
-                            // (Tùy chọn) Reload lại trang sau 1s để cập nhật bảng danh sách
-                            location.reload();
+                            // 1. Lấy dữ liệu hiển thị
+                            const tenKhachHang = document.getElementById('add-ten-kh').value || '---';
+                            const tbody = document.querySelector('#receipt-table tbody');
+                            
+                            // Xóa dòng "Chưa có dữ liệu" nếu bảng đang trống
+                            const noDataRow = tbody.querySelector('.no-data');
+                            if (noDataRow) noDataRow.closest('tr').remove();
+
+                            const stt = tbody.rows.length + 1;
+
+                            // Format Ngày: YYYY-MM-DD -> DD/MM/YYYY
+                            let dateDisplay = ngayThuTien;
+                            if (ngayThuTien && ngayThuTien.includes('-')) {
+                                const parts = ngayThuTien.split('-');
+                                dateDisplay = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                            }
+
+                            // Format Tiền: 100000 -> 100.000
+                            const moneyDisplay = new Intl.NumberFormat('vi-VN').format(soTienThu);
+
+                            // 2. Tạo dòng HTML mới
+                            const newRow = document.createElement('tr');
+                            newRow.setAttribute('data-id', newMaPhieuThu); // Để dùng cho nút xóa/sửa
+                            newRow.innerHTML = `
+                                <td style="text-align: center;">${stt}</td>
+                                <td>${newMaPhieuThu}</td>
+                                <td>${tenKhachHang}</td>
+                                <td>${dateDisplay}</td>
+                                <td>${moneyDisplay}</td>
+                                <td class="action-column">
+                                    <i class="fas fa-pencil-alt action-icon open-edit-modal" 
+                                    data-id="${newMaPhieuThu}" title="Sửa"></i>
+                                    <button class="btn btn-sm btn-print ml-2" data-id="${newMaPhieuThu}"> 
+                                        <i class="fas fa-print"></i>
+                                    </button>
+                                    <i class="fas fa-trash action-icon delete-icon" 
+                                    style="margin-left: 12px; color: var(--red-accent);"></i>
+                                </td>
+                            `;
+
+                            // 3. Thêm vào bảng
+                            tbody.appendChild(newRow);
 
                         } else {
                             showToast(`Lỗi: ${result.message}`, 'error');

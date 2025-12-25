@@ -5,6 +5,7 @@ const { Op } = require('sequelize');
 // --- Lấy thông tin User (để hiển thị tên) ---
 const getUserInfo = (req) => {
     return {
+      id: req.user.id,
       username: req.user.username,
       role: req.user.role
     };
@@ -25,6 +26,7 @@ const getUserInfo = (req) => {
     try {
       // 1. Lấy thông tin user (để hiển thị "Chào, username")
       const userInfo = {
+          id: req.user.id,
           username: req.user.username,
           role: req.user.role
       };
@@ -51,6 +53,7 @@ const getUserInfo = (req) => {
     try {
       // 1. Lấy thông tin user (để hiển thị "Chào, username")
       const userInfo = {
+          id: req.user.id,
           username: req.user.username,
           role: req.user.role
       };
@@ -75,6 +78,7 @@ const getUserInfo = (req) => {
   const getSearchPage = async (req, res) => { // <-- 1. CHUYỂN THÀNH ASYNC
     try {
       const userInfo = {
+          id: req.user.id,
           username: req.user.username,
           role: req.user.role
       };
