@@ -1325,7 +1325,7 @@
                     addModal.style.display = 'flex';
                 });
             }
-
+            let isSaveAndReset = false;
             // Mở Modal Sửa
             const viewDetailBtns = document.querySelectorAll('.view-detail-btn');
             viewDetailBtns.forEach(btn => {
@@ -1385,6 +1385,7 @@
                     if (hasData) {
                         if (confirm('Bạn đang nhập dở phiếu nhập sách. Bạn có muốn LƯU phiếu này không?\n\n- OK: Lưu phiếu.\n- Cancel: Xóa trắng để nhập phiếu khác.')) {
                             // Chọn OK -> Gọi submit form (Lưu)
+                            isSaveAndReset = true;
                             document.getElementById('btn-save-add').click();
                         } else {
                             // Chọn Cancel -> Reset form, KHÔNG ĐÓNG MODAL
@@ -1482,8 +1483,21 @@
                 });
                 
                 if (result.success) {
-                    addModal.style.display = 'none';
+                    
                     showToast('Thêm phiếu nhập thành công!');
+                    if (isSaveAndReset) {
+                        // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
+                        resetAddForm();
+                        showToast('Đã sẵn sàng nhập phiếu nhập sách tiếp theo.', 'info');
+                        
+                        // Reset cờ về false sau khi xong việc
+                        isSaveAndReset = false; 
+
+                    } else {
+                        addModal.style.display = 'none';
+                        resetAddForm(); 
+                    }
+                    
                     setTimeout(() => location.reload(), 1000);
                 } else {
                     showToast(result.error || 'Có lỗi xảy ra!', 'error');
