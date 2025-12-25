@@ -998,6 +998,11 @@
     </div>
 
     <script>
+        const currentUserInfo = {
+            username: "<%= username %>",
+            role: "<%= role %>",
+            MaNV: "<%= MaNV %>" // Biến này lấy từ dashboardController
+        };
         function setupPaymentValidation(prefix) {
             const paidInput = document.getElementById(`${prefix}-amount-paid`);
             // Giả sử tổng tiền được lưu trong input hidden hoặc span có id là total-amount
@@ -1826,6 +1831,7 @@
                 const newData = {
                     MaHoaDon: MaHD,
                     MaKhachHang: maKhachHang,
+                    MaNhanVien: currentUserInfo.MaNV,
                     TongTien: tongTien,
                     SoTienTra: soTienTra,
                     ConLai: conLai,

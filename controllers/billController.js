@@ -97,7 +97,7 @@ const getBookInfo = async (req, res) => {
 //  API: TẠO HÓA ĐƠN MỚI (POST /api/bill/create)
 // =============================================================
 const create = async (req, res) => {
-  const { MaHoaDon, MaKhachHang, TongTien, SoTienTra, ConLai, Details } =
+  const { MaHoaDon, MaKhachHang, MaNhanVien, TongTien, SoTienTra, ConLai, Details } =
     req.body;
   const t = await sequelize.transaction();
 
@@ -139,6 +139,7 @@ const create = async (req, res) => {
         MaHoaDon,
         NgayLapHoaDon: new Date(),
         MaKhachHang,
+        MaNhanVien,
         TongTien,
         SoTienTra,
         ConLai,

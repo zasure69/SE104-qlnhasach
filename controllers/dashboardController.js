@@ -7,7 +7,8 @@ const getUserInfo = (req) => {
     return {
       id: req.user.id,
       username: req.user.username,
-      role: req.user.role
+      role: req.user.role,
+      MaNV: req.user.id
     };
   };
   
