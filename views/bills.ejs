@@ -1691,7 +1691,7 @@
                         });
                 });
             });
-
+            let isSaveAndReset = false
             // Logic Reset/Restore
             const btnResetAdd = document.getElementById('btn-custom-reset'); 
             if (btnResetAdd) {
@@ -1699,6 +1699,7 @@
                     const hasData = document.getElementById('add-ma-kh').value.trim() !== '' || document.querySelector('#add-detail-table tbody').rows.length > 0;
                     if (hasData) {
                         if (confirm('Lưu hóa đơn này không? OK: Lưu - Cancel: Xóa trắng')) {
+                            isSaveAndReset = true
                             document.getElementById('btn-save-add').click();
                         } else {
                             resetAddForm();
@@ -1841,7 +1842,19 @@
                     if (data.message && data.message.includes('thành công')) {
                         showToast(`Thêm hóa đơn ${MaHD} thành công!`, 'success');
                         lastBillMaHD = MaHD; 
-                        addModal.style.display = 'none';
+                        if (isSaveAndReset) {
+                            // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
+                            resetAddForm ();
+                            showToast('Đã sẵn sàng nhập hóa đơn tiếp theo.', 'info');
+                            
+                            // Reset cờ về false sau khi xong việc
+                            isSaveAndReset = false; 
+
+                        } else {
+                            addModal.style.display = 'none';
+                            resetAddForm ();
+                        }
+                        
                         setTimeout(() => { location.reload(); }, 1000);
                     } else {
                         showToast(`Thêm thất bại: ${data.message}`, 'error');
