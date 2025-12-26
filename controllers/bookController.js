@@ -213,7 +213,7 @@ const resolveTacGiaList = async (list, transaction) => {
 const getBooksPage = async (req, res) => {
   try {
     console.log("[bookController] getBooksPage called");
-    const userInfo = { username: req.user?.username, role: req.user?.role };
+    const userInfo = { id: req.user.id, username: req.user.username, role: req.user.role };
 
     // Fetch DauSach với JOIN TheLoai và TacGia
     console.log("[getBooksPage] Fetching DauSach with associations...");
@@ -277,42 +277,27 @@ const getBooksPage = async (req, res) => {
       raw: false,
     });
 
-    // Tính số lượng tồn cho tất cả sách
-    const books = await Promise.all(
-      sachsRaw.map(async (s) => {
-        const plain = s.get({ plain: true });
+    // Lấy thông tin sách với SoLuongTon từ DB (đã được maintain bởi import/bill operations)
+    const books = sachsRaw.map((s) => {
+      const plain = s.get({ plain: true });
 
-        // Tính số lượng tồn thực tế: Tổng nhập - Tổng bán
-        const tongNhap =
-          (await db.CT_PNS.sum("SoLuong", {
-            where: { MaSach: plain.MaSach },
-          })) || 0;
-
-        const tongBan =
-          (await db.CT_HD.sum("SoLuongBan", {
-            where: { MaSach: plain.MaSach },
-          })) || 0;
-
-        const soLuongTonThucTe = Math.max(0, tongNhap - tongBan);
-
-        return {
-          MaSach: plain.MaSach,
-          TenSach: plain.DauSach ? plain.DauSach.TenSach : "",
-          TenTheLoai:
-            plain.DauSach && plain.DauSach.TheLoai
-              ? plain.DauSach.TheLoai.TenTheLoai
-              : "",
-          TacGia:
-            plain.DauSach && plain.DauSach.TacGias
-              ? plain.DauSach.TacGias.map((tg) => tg.HoTen).join(", ")
-              : "",
-          NhaXB: plain.NhaXB || "",
-          NamXB: plain.NamXB || "",
-          MoTa: plain.MoTa || "",
-          SoLuongTon: soLuongTonThucTe,
-        };
-      })
-    );
+      return {
+        MaSach: plain.MaSach,
+        TenSach: plain.DauSach ? plain.DauSach.TenSach : "",
+        TenTheLoai:
+          plain.DauSach && plain.DauSach.TheLoai
+            ? plain.DauSach.TheLoai.TenTheLoai
+            : "",
+        TacGia:
+          plain.DauSach && plain.DauSach.TacGias
+            ? plain.DauSach.TacGias.map((tg) => tg.HoTen).join(", ")
+            : "",
+        NhaXB: plain.NhaXB || "",
+        NamXB: plain.NamXB || "",
+        MoTa: plain.MoTa || "",
+        SoLuongTon: plain.SoLuongTon || 0,
+      };
+    });
 
     const [authors, types] = await Promise.all([
       db.TacGia.findAll({ raw: true }),
@@ -420,6 +405,16 @@ const createDauSach = async (req, res) => {
       });
     }
 
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Thể loại phải tồn tại
+    const theLoaiExists = await db.TheLoai.findOne({
+      where: { TenTheLoai: TenTheLoai.trim() },
+    });
+    if (!theLoaiExists) {
+      return res.status(400).json({
+        error: `Thể loại "${TenTheLoai}" không tồn tại trong hệ thống. Vui lòng thêm thể loại trước.`,
+      });
+    }
+
     let newMaDauSach;
     let finalMaTheLoai;
     let finalTacGiaIds = [];
@@ -436,6 +431,80 @@ const createDauSach = async (req, res) => {
         );
       }
 
+      // Tác giả: tìm theo ID (TGxxx) hoặc tên; nếu chưa có thì thêm vào bảng TacGia
+      const maTacGiaSet = new Set();
+      for (const item of authors) {
+        if (!item) continue;
+        let maTacGia = null;
+
+        // Nếu là mã TGxxx
+        if (typeof item === "string" && /^TG\d+$/i.test(item)) {
+          const found = await db.TacGia.findByPk(item, { transaction: t });
+          if (found) {
+            maTacGia = found.MaTacGia;
+          } else {
+            throw new Error(`Mã tác giả ${item} không tồn tại`);
+          }
+        } else {
+          // Tên tác giả
+          const tenTG = String(item).trim();
+          let found = await db.TacGia.findOne({
+            where: { HoTen: tenTG },
+            transaction: t,
+          });
+          if (!found) {
+            // Tạo tác giả mới
+            const newMaTG = await generateNewMaTacGia();
+            found = await db.TacGia.create(
+              { MaTacGia: newMaTG, HoTen: tenTG },
+              { transaction: t }
+            );
+          }
+          maTacGia = found.MaTacGia;
+        }
+
+        if (maTacGia) maTacGiaSet.add(maTacGia);
+      }
+
+      finalTacGiaIds = Array.from(maTacGiaSet);
+      if (finalTacGiaIds.length === 0) {
+        throw new Error("Không thể xử lý danh sách tác giả");
+      }
+
+      // KIỂM TRA TRÙNG LẶP: Tìm đầu sách có cùng tên
+      const existingDauSachs = await db.DauSach.findAll({
+        where: { TenSach: TenSach.trim() },
+        include: [
+          {
+            model: db.TacGia,
+            as: "TacGias",
+            through: { attributes: [] },
+            attributes: ["MaTacGia"],
+            required: false,
+          },
+        ],
+        transaction: t,
+        raw: false,
+      });
+
+      // Kiểm tra xem có đầu sách nào có cùng tên và cùng danh sách tác giả không
+      for (const existingDS of existingDauSachs) {
+        const existingAuthorIds = existingDS.TacGias
+          ? existingDS.TacGias.map((tg) => tg.MaTacGia).sort()
+          : [];
+        const newAuthorIds = [...finalTacGiaIds].sort();
+
+        // So sánh 2 mảng tác giả
+        if (
+          existingAuthorIds.length === newAuthorIds.length &&
+          existingAuthorIds.every((id, idx) => id === newAuthorIds[idx])
+        ) {
+          throw new Error(
+            `Đầu sách "${TenSach}" với cùng danh sách tác giả đã tồn tại (Mã: ${existingDS.MaDauSach})`
+          );
+        }
+      }
+
       // Tạo đầu sách
       newMaDauSach = await generateNewDauSachId();
       await db.DauSach.create(
@@ -448,46 +517,7 @@ const createDauSach = async (req, res) => {
         { transaction: t }
       );
 
-      // Tác giả: tìm theo ID (TGxxx) hoặc tên; nếu chưa có thì thêm vào bảng TacGia
-      const maTacGiaSet = new Set();
-      for (const item of authors) {
-        let maTacGia = null;
-
-        if (typeof item === "string" && /^TG\d+$/i.test(item)) {
-          const found = await db.TacGia.findByPk(item, {
-            transaction: t,
-            raw: true,
-          });
-          if (found) maTacGia = found.MaTacGia;
-        }
-
-        if (!maTacGia && typeof item === "string") {
-          const foundByName = await db.TacGia.findOne({
-            where: { HoTen: item },
-            attributes: ["MaTacGia"],
-            transaction: t,
-            raw: true,
-          });
-          if (foundByName) {
-            maTacGia = foundByName.MaTacGia;
-          } else {
-            const newMaTG = await generateNewMaTacGia();
-            await db.TacGia.create(
-              { MaTacGia: newMaTG, HoTen: item, NamSinh: null },
-              { transaction: t }
-            );
-            maTacGia = newMaTG;
-          }
-        }
-
-        if (maTacGia) maTacGiaSet.add(maTacGia);
-      }
-
-      finalTacGiaIds = Array.from(maTacGiaSet);
-      if (finalTacGiaIds.length === 0) {
-        throw new Error("Danh sách tác giả không hợp lệ");
-      }
-
+      // Tạo liên kết CT_TacGia
       await db.CT_TacGia.bulkCreate(
         finalTacGiaIds.map((id) => ({ MaDauSach: newMaDauSach, MaTacGia: id })),
         { transaction: t }
@@ -731,9 +761,12 @@ const createSach = async (req, res) => {
       return res.status(400).json({ error: "Vui lòng chọn Đầu sách" });
     }
 
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Đầu sách phải tồn tại
     const dauSach = await db.DauSach.findByPk(MaDauSach);
     if (!dauSach) {
-      return res.status(404).json({ error: "Đầu sách không tồn tại" });
+      return res.status(404).json({
+        error: `Đầu sách với mã "${MaDauSach}" không tồn tại trong hệ thống`,
+      });
     }
 
     const newMaSach = await generateNewSachId();
@@ -752,6 +785,24 @@ const createSach = async (req, res) => {
         .json({ error: `Năm xuất bản không hợp lệ (1800-${currentYear})` });
     }
     const normalizedNamXB = parsedNamXB;
+
+    // KIỂM TRA TRÙNG LẶP: Sách có cùng đầu sách, NXB và năm XB
+    const existingSach = await db.Sach.findOne({
+      where: {
+        MaDauSach: MaDauSach,
+        NhaXB: NhaXB || null,
+        NamXB: normalizedNamXB,
+      },
+    });
+
+    if (existingSach) {
+      const tenSach = dauSach.TenSach || "";
+      return res.status(409).json({
+        error: `Sách "${tenSach}" (NXB: ${NhaXB || "không xác định"}, Năm: ${
+          normalizedNamXB || "không xác định"
+        }) đã tồn tại với mã ${existingSach.MaSach}`,
+      });
+    }
 
     // Số lượng tồn ban đầu là 0, sẽ được cập nhật khi có phiếu nhập
     const newSach = await db.Sach.create({
@@ -842,29 +893,15 @@ const getSachById = async (req, res) => {
       return res.status(404).json({ error: "Không tìm thấy sách" });
     }
 
-    // Tính số lượng tồn thực tế: Tổng nhập - Tổng bán
-    const tongNhap =
-      (await db.CT_PNS.sum("SoLuong", {
-        where: { MaSach: maSach },
-      })) || 0;
-
-    const tongBan =
-      (await db.CT_HD.sum("SoLuongBan", {
-        where: { MaSach: maSach },
-      })) || 0;
-
-    const soLuongTonThucTe = Math.max(0, tongNhap - tongBan);
-
-    console.log(
-      `[bookController] Tính toán: Nhập=${tongNhap}, Bán=${tongBan}, Tồn=${soLuongTonThucTe}`
-    );
+    // Lấy SoLuongTon từ DB (đã được maintain bởi import/bill operations)
+    console.log(`[bookController] SoLuongTon từ DB: ${sach.SoLuongTon}`);
 
     const result = {
       MaSach: sach.MaSach,
       TenSach: sach.DauSach ? sach.DauSach.TenSach : "",
       NhaXB: sach.NhaXB || "",
       NamXB: sach.NamXB || "",
-      SoLuongTon: soLuongTonThucTe,
+      SoLuongTon: sach.SoLuongTon || 0,
       DonGia: 0, // Giá nhập mặc định
       DonGiaBan: 0, // Giá bán mặc định
     };

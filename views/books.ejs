@@ -547,7 +547,7 @@
                     <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
                     <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
                     <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="/dashboard/changerule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
+                    <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
                 </ul>
             </nav>
         </aside>
@@ -842,7 +842,6 @@
                         <div class="form-group">
                              <label>Tác giả</label>
                              <div class="author-select-wrapper" id="edit-author-wrapper">
-                                 <span class="author-tag" data-id="TG001">Nguyễn Nhật Ánh <span class="remove-tag">×</span></span>
                                  <button type="button" class="author-select-btn open-author-select"><i class="fas fa-plus"></i> Chọn tác giả</button>
                              </div>
                         </div>
@@ -1036,7 +1035,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentEditingRow = null;
     
     // Lấy danh sách tác giả từ server-side data
-    //const allAuthors = <%- JSON.stringify(authors) %>;
+    const allAuthors = <%- JSON.stringify(authors) %>;
     
     function showLoader() { if(loader) loader.style.display = 'flex'; }
     function hideLoader() { if(loader) loader.style.display = 'none'; }
@@ -1093,49 +1092,36 @@ document.addEventListener('DOMContentLoaded', function() {
             addDauSachModal.style.display = 'flex';
         });
     }
-
-    // NÚt Thêm mới (lưu và refill form)
+    let isSaveAndResetDS = false
+    // NÚt Thêm mới (lưu và refill form) 
     const btnCustomDauSach = document.getElementById('btn-custom-dausach');
     if(btnCustomDauSach) {
-        btnCustomDauSach.addEventListener('click', async () => {
-            if(!confirm('Bạn có muốn lưu thông tin này và tiếp tục thêm mới?')) return;
+        btnCustomDauSach.addEventListener('click', () => {
+            // Kiểm tra xem form có dữ liệu không
+            const hasData = document.getElementById('add-ten-sach-ds').value.trim() !== '' ||
+                           document.getElementById('add-author-wrapper').querySelectorAll('.author-tag').length > 0;
             
-            const formData = {
-                TenSach: document.getElementById('add-ten-sach-ds').value.trim(),
-                TenTheLoai: document.getElementById('add-ma-the-loai-ds').value.trim(),
-                tacGiaIds: collectAuthorIds(document.getElementById('add-author-wrapper')),
-                MoTa: document.getElementById('add-mo-ta-ds').value.trim()
-            };
-
-            if (!formData.tacGiaIds || formData.tacGiaIds.length === 0) {
-                showToast('Vui lòng chọn ít nhất một tác giả!', 'error');
-                return;
-            }
-
-            showLoader();
-            try {
-                const response = await fetch('/api/books/createDauSach', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-                const data = await response.json();
-                hideLoader();
-                
-                if(response.ok) {
-                    showToast(data.message || 'Thêm đầu sách thành công!');
-                    // Refill form
+            if (hasData) {
+                // Nếu có dữ liệu -> Hỏi
+                if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU Đầu sách này trước khi làm mới không?\n\n- OK: Lưu đầu sách này.\n- Cancel: Xóa trắng để nhập đầu sách khác.')) {
+                    // Chọn OK -> Lưu
+                    if (addDauSachForm && addDauSachForm.checkValidity()) {
+                        isSaveAndResetDS = true;
+                        addDauSachForm.requestSubmit();
+                    } else if (addDauSachForm) {
+                        addDauSachForm.reportValidity();
+                    }
+                } else {
+                    // Chọn Cancel -> Chỉ Reset form, KHÔNG ĐÓNG modal
                     if(addDauSachForm) addDauSachForm.reset();
                     document.getElementById('add-author-wrapper').querySelectorAll('.author-tag').forEach(tag => tag.remove());
-                    // Focus vào ô nhập liệu đầu tiên
-                    document.getElementById('add-ten-sach-ds').focus();
-                } else {
-                    showToast(data.error || 'Có lỗi xảy ra!', 'error');
+                    showToast('Đã làm mới form!', 'info');
                 }
-            } catch(error) {
-                hideLoader();
-                console.error('[ERROR] createDauSach:', error);
-                showToast('Lỗi kết nối server!', 'error');
+            } else {
+                // Nếu chưa nhập gì -> Chỉ Reset cho chắc chắn
+                if(addDauSachForm) addDauSachForm.reset();
+                document.getElementById('add-author-wrapper').querySelectorAll('.author-tag').forEach(tag => tag.remove());
+                showToast('Form đã sẵn sàng nhập mới.', 'info');
             }
         });
     }
@@ -1168,9 +1154,38 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 console.log('[DEBUG] Response:', response.status, data);
                 if(response.ok) {
-                    showToast(data.message || 'Thêm đầu sách thành công!');
-                    addDauSachModal.style.display = 'none';
-                    location.reload();
+                    showToast(data.message || 'Thêm đầu sách thành công!','success');
+                    if (isSaveAndResetDS) {
+                        addDauSachForm.reset();
+                        showToast('Đã sẵn sàng nhập đầu sách tiếp theo.', 'info');
+                        isSaveAndResetDS = false;
+                    } else {
+                        addDauSachModal.style.display = 'none';
+                    }
+                    
+                    
+                    // Cập nhật UI trực tiếp - thêm row mới vào bảng
+                    const tbody = document.querySelector('#table-dau-sach tbody');
+                    const rowCount = tbody.querySelectorAll('tr').length;
+                    const newRow = document.createElement('tr');
+                    newRow.dataset.id = data.dauSach.MaDauSach || '';
+                    newRow.innerHTML = `
+                        <td>${rowCount + 1}</td>
+                        <td>${data.dauSach.MaDauSach || ''}</td>
+                        <td>${formData.TenSach}</td>
+                        <td>${formData.TenTheLoai}</td>
+                        <td>${formData.tacGiaIds.join(', ')}</td>
+                        <td>${formData.MoTa || ''}</td>
+                        <td>
+                            <i class="fas fa-pencil-alt action-icon open-dausach-edit-modal"></i>
+                            <i class="fas fa-trash action-icon delete-icon delete-dausach-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                        </td>
+                    `;
+                    tbody.appendChild(newRow);
+                    
+                    // Reset form
+                    addDauSachForm.reset();
+                    document.getElementById('add-author-wrapper').querySelectorAll('.author-tag').forEach(tag => tag.remove());
                 } else {
                     showToast(data.error || 'Có lỗi xảy ra!', 'error');
                 }
@@ -1236,12 +1251,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Xử lý nút "Đặt lại" cho modal edit đầu sách
+    // Xử lý nút "Đặt lại" cho modal edit đầu sách - Logic từ HTML
     const btnResetDauSach = document.getElementById('btn-reset-dausach');
     if(btnResetDauSach) {
         btnResetDauSach.addEventListener('click', () => {
-            if(originalDauSachData) {
-                // Khôi phục các trường về giá trị ban đầu
+            if(!originalDauSachData) {
+                showToast('Không thể đặt lại - chưa có dữ liệu gốc', 'error');
+                return;
+            }
+            
+            // So sánh dữ liệu hiện tại với dữ liệu gốc
+            const currentData = {
+                tenSach: document.getElementById('edit-ten-sach-ds').value,
+                theLoai: document.getElementById('edit-ma-the-loai-ds').value,
+                moTa: document.getElementById('edit-mo-ta-ds').value
+            };
+            const isChanged = currentData.tenSach !== originalDauSachData.tenSach || 
+                              currentData.theLoai !== originalDauSachData.theLoai ||
+                              currentData.moTa !== originalDauSachData.moTa;
+            
+            if (!isChanged) {
+                showToast('Chưa có thay đổi nào để đặt lại!', 'error');
+                return;
+            }
+
+            if (confirm('Dữ liệu đã thay đổi. Bạn có muốn LƯU LẠI không?\n\n- OK: Lưu thay đổi.\n- Cancel: Khôi phục lại dữ liệu gốc.')) {
+                // OK: Submit form (Đã có logic save bên dưới)
+                editDauSachForm.requestSubmit();
+            } else {
+                // Cancel: Khôi phục các trường về giá trị ban đầu
                 document.getElementById('edit-ma-ds').value = originalDauSachData.maDauSach;
                 document.getElementById('edit-ten-sach-ds').value = originalDauSachData.tenSach;
                 document.getElementById('edit-ma-the-loai-ds').value = originalDauSachData.theLoai;
@@ -1256,9 +1294,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     editWrapper.querySelector('.author-select-btn').insertAdjacentHTML('beforebegin', tagHTML);
                 });
                 
-                showToast('Đã đặt lại form về dữ liệu ban đầu', 'success');
-            } else {
-                showToast('Không thể đặt lại - chưa có dữ liệu gốc', 'error');
+                showToast('Đã khôi phục dữ liệu gốc!', 'success');
             }
         });
     }
@@ -1299,7 +1335,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 if(response.ok) {
                     showToast(data.message || 'Cập nhật thành công!');
                     editDauSachModal.style.display = 'none';
-                    location.reload();
+                    
+                    // Cập nhật UI trực tiếp - tìm và cập nhật row
+                    const row = document.querySelector(`#table-dau-sach tr[data-id="${maDS}"]`);
+                    if(row) {
+                        row.cells[2].textContent = formData.TenSach;
+                        row.cells[3].textContent = formData.TenTheLoai;
+                        row.cells[4].textContent = formData.tacGiaIds.join(', ');
+                        row.cells[5].textContent = formData.MoTa || '';
+                    }
                 } else {
                     showToast(data.error || 'Có lỗi xảy ra!', 'error');
                 }
@@ -1352,7 +1396,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const addSachModal = document.getElementById('sach-add-modal');
     const addSachForm = document.getElementById('add-sach-form');
     const addMaDauSachSelect = document.getElementById('add-ma-dau-sach-s');
-
+    let isSaveAndResetS = false;
     if(addSachBtn && addSachModal) {
         addSachBtn.addEventListener('click', () => {
             if(addSachForm) addSachForm.reset();
@@ -1363,50 +1407,39 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Nút Thêm mới (lưu và refill form) - Kiểm tra xem có nút không
+    // Nút Thêm mới (lưu và refill form) - Logic từ customers.ejs
     const btnCustomSach = document.getElementById('btn-custom-sach');
     if(btnCustomSach) {
-        btnCustomSach.addEventListener('click', async () => {
-            if(!confirm('Bạn có muốn lưu thông tin này và tiếp tục thêm mới?')) return;
+        btnCustomSach.addEventListener('click', () => {
+            // Kiểm tra xem form có dữ liệu không
+            const hasData = document.getElementById('add-ma-dau-sach-s').value.trim() !== '' ||
+                           document.getElementById('add-nxb-s').value.trim() !== '';
             
-            const formData = {
-                MaDauSach: document.getElementById('add-ma-dau-sach-s').value.trim(),
-                NhaXB: document.getElementById('add-nxb-s').value.trim(),
-                NamXB: document.getElementById('add-nam-xb-s').value.trim()
-                // Không gửi SoLuongTon - sẽ được tính tự động từ phiếu nhập
-            };
-
-            if (!formData.MaDauSach) {
-                showToast('Vui lòng chọn đầu sách!', 'error');
-                return;
-            }
-
-            showLoader();
-            try {
-                const response = await fetch('/api/books/createSach', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-                const data = await response.json();
-                hideLoader();
-                
-                if(response.ok) {
-                    showToast(data.message || 'Thêm sách thành công!');
-                    // Refill form
+            if (hasData) {
+                // Nếu có dữ liệu -> Hỏi
+                if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU Sách này trước khi làm mới không?\n\n- OK: Lưu sách này.\n- Cancel: Xóa trắng để nhập sách khác.')) {
+                    // Chọn OK -> Lưu
+                    if (addSachForm && addSachForm.checkValidity()) {
+                        isSaveAndResetS = true;
+                        addSachForm.requestSubmit();
+                    } else if (addSachForm) {
+                        addSachForm.reportValidity();
+                    }
+                } else {
+                    // Chọn Cancel -> Chỉ Reset form, KHÔNG ĐÓNG modal
                     if(addSachForm) addSachForm.reset();
                     document.getElementById('add-ten-sach-s').value = '';
                     document.getElementById('add-tac-gia-s').value = '';
                     document.getElementById('add-the-loai-s').value = '';
-                    // Focus vào select đầu sách
-                    document.getElementById('add-ma-dau-sach-s').focus();
-                } else {
-                    showToast(data.error || 'Có lỗi xảy ra!', 'error');
+                    showToast('Đã làm mới form!', 'info');
                 }
-            } catch(error) {
-                hideLoader();
-                console.error('[ERROR] createSach:', error);
-                showToast('Lỗi kết nối server!', 'error');
+            } else {
+                // Nếu chưa nhập gì -> Chỉ Reset cho chắc chắn
+                if(addSachForm) addSachForm.reset();
+                document.getElementById('add-ten-sach-s').value = '';
+                document.getElementById('add-tac-gia-s').value = '';
+                document.getElementById('add-the-loai-s').value = '';
+                showToast('Form đã sẵn sàng nhập mới.', 'info');
             }
         });
     }
@@ -1464,9 +1497,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 console.log('[DEBUG] Response:', response.status, data);
                 if(response.ok) {
-                    showToast(data.message || 'Thêm sách thành công!');
-                    addSachModal.style.display = 'none';
-                    location.reload();
+                    showToast(data.message || 'Thêm sách thành công!', 'success');
+                    if (isSaveAndResetS) {
+                        // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
+                        //addSachForm.reset(); 
+                        showToast('Đã sẵn sàng nhập sách tiếp theo.', 'info');
+                        
+                        // Reset cờ về false sau khi xong việc
+                        isSaveAndResetS = false; 
+                    } else {
+                        addSachModal.style.display = 'none';
+                    }
+                    
+                    
+                    // Cập nhật UI trực tiếp - thêm row mới vào bảng
+                    const tbody = document.querySelector('#table-sach tbody');
+                    const rowCount = tbody.querySelectorAll('tr').length;
+                    const newRow = document.createElement('tr');
+                    newRow.dataset.id = data.sach.MaSach || '';
+                    newRow.innerHTML = `
+                        <td>${rowCount + 1}</td>
+                        <td>${data.sach.MaSach || ''}</td>
+                        <td>${document.getElementById('add-ten-sach-s').value}</td>
+                        <td>${document.getElementById('add-the-loai-s').value}</td>
+                        <td>${document.getElementById('add-tac-gia-s').value}</td>
+                        <td>${formData.NhaXB || ''}</td>
+                        <td>${formData.NamXB || ''}</td>
+                        <td>0</td>
+                        <td>
+                            <i class="fas fa-pencil-alt action-icon open-sach-edit-modal"></i>
+                            <i class="fas fa-trash action-icon delete-icon delete-sach-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                        </td>
+                    `;
+                    tbody.appendChild(newRow);
+                    
+                    // Reset form
+                    addSachForm.reset();
+                    document.getElementById('add-ten-sach-s').value = '';
+                    document.getElementById('add-tac-gia-s').value = '';
+                    document.getElementById('add-the-loai-s').value = '';
                 } else {
                     showToast(data.error || 'Có lỗi xảy ra!', 'error');
                 }
@@ -1518,14 +1587,31 @@ document.addEventListener('DOMContentLoaded', function() {
     if(btnResetSach) {
         btnResetSach.addEventListener('click', () => {
             if(originalSachData) {
-                document.getElementById('edit-ma-sach-s').value = originalSachData.maSach;
-                document.getElementById('edit-ten-sach-s').value = originalSachData.tenSach;
-                document.getElementById('edit-tac-gia-s').value = originalSachData.tacGia;
-                document.getElementById('edit-the-loai-s').value = originalSachData.theLoai;
-                document.getElementById('edit-nxb-s').value = originalSachData.nhaXB;
-                document.getElementById('edit-nam-xb-s').value = originalSachData.namXB;
-                document.getElementById('edit-so-luong-ton-s').value = originalSachData.soLuongTon;
-                showToast('Đã đặt lại form về dữ liệu ban đầu', 'success');
+                // Kiểm tra xem dữ liệu có thay đổi không
+                const currentNhaXB = document.getElementById('edit-nxb-s').value;
+                const currentNamXB = document.getElementById('edit-nam-xb-s').value;
+                
+                const hasChanges = currentNhaXB !== originalSachData.nhaXB ||
+                                   currentNamXB !== originalSachData.namXB;
+                
+                if(hasChanges) {
+                    if(confirm('Dữ liệu đã thay đổi. Bạn có muốn LƯU LẠI không?\n\nOK: Lưu lại thay đổi\nCancel: Khôi phục dữ liệu ban đầu')) {
+                        // OK - Submit form để lưu
+                        editSachForm.requestSubmit();
+                    } else {
+                        // Cancel - Khôi phục dữ liệu ban đầu
+                        document.getElementById('edit-ma-sach-s').value = originalSachData.maSach;
+                        document.getElementById('edit-ten-sach-s').value = originalSachData.tenSach;
+                        document.getElementById('edit-tac-gia-s').value = originalSachData.tacGia;
+                        document.getElementById('edit-the-loai-s').value = originalSachData.theLoai;
+                        document.getElementById('edit-nxb-s').value = originalSachData.nhaXB;
+                        document.getElementById('edit-nam-xb-s').value = originalSachData.namXB;
+                        document.getElementById('edit-so-luong-ton-s').value = originalSachData.soLuongTon;
+                        showToast('Đã khôi phục dữ liệu ban đầu', 'info');
+                    }
+                } else {
+                    showToast('Dữ liệu chưa thay đổi', 'info');
+                }
             } else {
                 showToast('Không thể đặt lại - chưa có dữ liệu gốc', 'error');
             }
@@ -1557,7 +1643,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 if(response.ok) {
                     showToast(data.message || 'Cập nhật thành công!');
                     editSachModal.style.display = 'none';
-                    location.reload();
+                    
+                    // Cập nhật UI trực tiếp - tìm và cập nhật row
+                    const row = document.querySelector(`#table-sach tr[data-id="${maSach}"]`);
+                    if(row) {
+                        row.cells[5].textContent = formData.NhaXB || '';
+                        row.cells[6].textContent = formData.NamXB || '';
+                    }
                 } else {
                     showToast(data.error || 'Có lỗi xảy ra!', 'error');
                 }
@@ -1611,7 +1703,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const addTheLoaiBtn = document.getElementById('open-theloai-add-modal');
     const addTheLoaiModal = document.getElementById('theloai-add-modal');
     const addTheLoaiForm = document.getElementById('add-the-loai-form');
-
+    let isSaveAndResetTL = false;
     if(addTheLoaiBtn && addTheLoaiModal) {
         addTheLoaiBtn.addEventListener('click', () => {
             if(addTheLoaiForm) addTheLoaiForm.reset();
@@ -1619,45 +1711,32 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Nút Thêm mới (lưu và refill form)
+    // Nút Thêm mới (lưu và refill form) - Logic từ customers.ejs
     const btnCustomTheLoai = document.getElementById('btn-custom-theloai');
     if(btnCustomTheLoai) {
-        btnCustomTheLoai.addEventListener('click', async () => {
-            if(!confirm('Bạn có muốn lưu thông tin này và tiếp tục thêm mới?')) return;
+        btnCustomTheLoai.addEventListener('click', () => {
+            // Kiểm tra xem form có dữ liệu không
+            const hasData = document.getElementById('add-ten-the-loai').value.trim() !== '';
             
-            const formData = {
-                TenTheLoai: document.getElementById('add-ten-the-loai').value.trim(),
-                MoTa: document.getElementById('add-mo-ta-tl').value.trim()
-            };
-
-            if (!formData.TenTheLoai) {
-                showToast('Vui lòng nhập tên thể loại!', 'error');
-                return;
-            }
-
-            showLoader();
-            try {
-                const response = await fetch('/api/books/types/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-                const data = await response.json();
-                hideLoader();
-                
-                if(response.ok) {
-                    showToast(data.message || 'Thêm thể loại thành công!');
-                    // Refill form
-                    if(addTheLoaiForm) addTheLoaiForm.reset();
-                    // Focus vào ô tên thể loại
-                    document.getElementById('add-ten-the-loai').focus();
+            if (hasData) {
+                // Nếu có dữ liệu -> Hỏi
+                if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU Thể loại này trước khi làm mới không?\n\n- OK: Lưu thể loại này.\n- Cancel: Xóa trắng để nhập thể loại khác.')) {
+                    // Chọn OK -> Lưu
+                    if (addTheLoaiForm && addTheLoaiForm.checkValidity()) {
+                        isSaveAndResetTL = true;
+                        addTheLoaiForm.requestSubmit();
+                    } else if (addTheLoaiForm) {
+                        addTheLoaiForm.reportValidity();
+                    }
                 } else {
-                    showToast(data.error || 'Có lỗi xảy ra!', 'error');
+                    // Chọn Cancel -> Chỉ Reset form, KHÔNG ĐÓNG modal
+                    if(addTheLoaiForm) addTheLoaiForm.reset();
+                    showToast('Đã làm mới form!', 'info');
                 }
-            } catch(error) {
-                hideLoader();
-                console.error('[ERROR] createTheLoai:', error);
-                showToast('Lỗi kết nối server!', 'error');
+            } else {
+                // Nếu chưa nhập gì -> Chỉ Reset cho chắc chắn
+                if(addTheLoaiForm) addTheLoaiForm.reset();
+                showToast('Form đã sẵn sàng nhập mới.', 'info');
             }
         });
     }
@@ -1682,9 +1761,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 hideLoader();
                 
                 if(response.ok) {
-                    showToast(data.message || 'Thêm thể loại thành công!');
-                    addTheLoaiModal.style.display = 'none';
-                    location.reload();
+                    showToast(data.message || 'Thêm thể loại thành công!', 'success');
+                    if (isSaveAndResetTL) {
+                        // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
+                        addTheLoaiForm.reset(); 
+                        showToast('Đã sẵn sàng nhập thể loại tiếp theo.', 'info');
+                        
+                        // Reset cờ về false sau khi xong việc
+                        isSaveAndResetTL = false; 
+
+                    } else {
+                        addTheLoaiModal.style.display = 'none';
+                    }
+                    
+                    
+                    // Cập nhật UI trực tiếp - thêm row mới vào bảng
+                    const tbody = document.querySelector('#table-the-loai tbody');
+                    const rowCount = tbody.querySelectorAll('tr').length;
+                    const newRow = document.createElement('tr');
+                    newRow.dataset.id = data.data.MaTheLoai || '';
+                    newRow.innerHTML = `
+                        <td>${rowCount + 1}</td>
+                        <td>${data.data.MaTheLoai || ''}</td>
+                        <td>${formData.TenTheLoai}</td>
+                        <td>${formData.MoTa || ''}</td>
+                        <td>
+                            <i class="fas fa-pencil-alt action-icon open-theloai-edit-modal"></i>
+                            <i class="fas fa-trash action-icon delete-icon delete-theloai-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                        </td>
+                    `;
+                    tbody.appendChild(newRow);
+                    
+                    // Reset form
+                    addTheLoaiForm.reset();
                 } else {
                     showToast(data.error || 'Có lỗi xảy ra!', 'error');
                 }
@@ -1728,10 +1837,27 @@ document.addEventListener('DOMContentLoaded', function() {
     if(btnResetTheLoai) {
         btnResetTheLoai.addEventListener('click', () => {
             if(originalTheLoaiData) {
-                document.getElementById('edit-ma-the-loai').value = originalTheLoaiData.maTheLoai;
-                document.getElementById('edit-ten-the-loai').value = originalTheLoaiData.tenTheLoai;
-                document.getElementById('edit-mo-ta-tl').value = originalTheLoaiData.moTa;
-                showToast('Đã đặt lại form về dữ liệu ban đầu', 'success');
+                // Kiểm tra xem dữ liệu có thay đổi không
+                const currentTenTheLoai = document.getElementById('edit-ten-the-loai').value;
+                const currentMoTa = document.getElementById('edit-mo-ta-tl').value;
+                
+                const hasChanges = currentTenTheLoai !== originalTheLoaiData.tenTheLoai ||
+                                   currentMoTa !== originalTheLoaiData.moTa;
+                
+                if(hasChanges) {
+                    if(confirm('Dữ liệu đã thay đổi. Bạn có muốn LƯU LẠI không?\n\nOK: Lưu lại thay đổi\nCancel: Khôi phục dữ liệu ban đầu')) {
+                        // OK - Submit form để lưu
+                        editTheLoaiForm.requestSubmit();
+                    } else {
+                        // Cancel - Khôi phục dữ liệu ban đầu
+                        document.getElementById('edit-ma-the-loai').value = originalTheLoaiData.maTheLoai;
+                        document.getElementById('edit-ten-the-loai').value = originalTheLoaiData.tenTheLoai;
+                        document.getElementById('edit-mo-ta-tl').value = originalTheLoaiData.moTa;
+                        showToast('Đã khôi phục dữ liệu ban đầu', 'info');
+                    }
+                } else {
+                    showToast('Dữ liệu chưa thay đổi', 'info');
+                }
             } else {
                 showToast('Không thể đặt lại - chưa có dữ liệu gốc', 'error');
             }
@@ -1761,7 +1887,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 if(response.ok) {
                     showToast(data.message || 'Cập nhật thành công!');
                     editTheLoaiModal.style.display = 'none';
-                    location.reload();
+                    
+                    // Cập nhật UI trực tiếp - tìm và cập nhật row
+                    const row = document.querySelector(`#table-the-loai tr[data-id="${maTheLoai}"]`);
+                    if(row) {
+                        row.cells[2].textContent = formData.TenTheLoai;
+                        row.cells[3].textContent = formData.MoTa || '';
+                    }
                 } else {
                     showToast(data.error || 'Có lỗi xảy ra!', 'error');
                 }
@@ -1813,7 +1945,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const addTacGiaBtn = document.getElementById('open-tacgia-add-modal');
     const addTacGiaModal = document.getElementById('tacgia-add-modal');
     const addTacGiaForm = document.getElementById('add-tacgia-form');
-
+    let isSaveAndResetTG = false;
     if(addTacGiaBtn && addTacGiaModal) {
         addTacGiaBtn.addEventListener('click', () => {
             if(addTacGiaForm) addTacGiaForm.reset();
@@ -1821,45 +1953,32 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Nút Thêm mới (lưu và refill form)
+    // Nút Thêm mới (lưu và refill form) - Logic từ customers.ejs
     const btnCustomTacGia = document.getElementById('btn-custom-tacgia');
     if(btnCustomTacGia) {
-        btnCustomTacGia.addEventListener('click', async () => {
-            if(!confirm('Bạn có muốn lưu thông tin này và tiếp tục thêm mới?')) return;
+        btnCustomTacGia.addEventListener('click', () => {
+            // Kiểm tra xem form có dữ liệu không
+            const hasData = document.getElementById('add-ho-ten-tg').value.trim() !== '';
             
-            const formData = {
-                HoTen: document.getElementById('add-ho-ten-tg').value.trim(),
-                NamSinh: document.getElementById('add-nam-sinh-tg').value.trim()
-            };
-
-            if (!formData.HoTen) {
-                showToast('Vui lòng nhập họ tên tác giả!', 'error');
-                return;
-            }
-
-            showLoader();
-            try {
-                const response = await fetch('/api/books/authors/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-                const data = await response.json();
-                hideLoader();
-                
-                if(response.ok) {
-                    showToast(data.message || 'Thêm tác giả thành công!');
-                    // Refill form
-                    if(addTacGiaForm) addTacGiaForm.reset();
-                    // Focus vào ô họ tên
-                    document.getElementById('add-ho-ten-tg').focus();
+            if (hasData) {
+                // Nếu có dữ liệu -> Hỏi
+                if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU Tác giả này trước khi làm mới không?\n\n- OK: Lưu tác giả này.\n- Cancel: Xóa trắng để nhập tác giả khác.')) {
+                    // Chọn OK -> Lưu
+                    if (addTacGiaForm && addTacGiaForm.checkValidity()) {
+                        isSaveAndResetTG = true;
+                        addTacGiaForm.requestSubmit();
+                    } else if (addTacGiaForm) {
+                        addTacGiaForm.reportValidity();
+                    }
                 } else {
-                    showToast(data.error || 'Có lỗi xảy ra!', 'error');
+                    // Chọn Cancel -> Chỉ Reset form, KHÔNG ĐÓNG modal
+                    if(addTacGiaForm) addTacGiaForm.reset();
+                    showToast('Đã làm mới form!', 'info');
                 }
-            } catch(error) {
-                hideLoader();
-                console.error('[ERROR] createTacGia:', error);
-                showToast('Lỗi kết nối server!', 'error');
+            } else {
+                // Nếu chưa nhập gì -> Chỉ Reset cho chắc chắn
+                if(addTacGiaForm) addTacGiaForm.reset();
+                showToast('Form đã sẵn sàng nhập mới.', 'info');
             }
         });
     }
@@ -1884,9 +2003,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 hideLoader();
                 
                 if(response.ok) {
-                    showToast(data.message || 'Thêm tác giả thành công!');
-                    addTacGiaModal.style.display = 'none';
-                    location.reload();
+                    showToast(data.message || 'Thêm tác giả thành công!', 'success');
+                    if (isSaveAndResetTG) {
+                        // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
+                        addTacGiaForm.reset(); 
+                        showToast('Đã sẵn sàng nhập tác giả tiếp theo.', 'info');
+                        
+                        // Reset cờ về false sau khi xong việc
+                        isSaveAndResetTG = false; 
+
+                    } else {
+                        addTacGiaModal.style.display = 'none';
+                        addTacGiaForm.reset(); 
+                    }
+                    
+                    
+                    // Cập nhật UI trực tiếp - thêm row mới vào bảng
+                    const tbody = document.querySelector('#table-tac-gia tbody');
+                    const rowCount = tbody.querySelectorAll('tr').length;
+                    const newRow = document.createElement('tr');
+                    newRow.dataset.id = data.data.MaTacGia || '';
+                    newRow.innerHTML = `
+                        <td>${rowCount + 1}</td>
+                        <td>${data.data.MaTacGia || ''}</td>
+                        <td>${formData.HoTen}</td>
+                        <td>${formData.NamSinh || ''}</td>
+                        <td>
+                            <i class="fas fa-pencil-alt action-icon open-tacgia-edit-modal"></i>
+                            <i class="fas fa-trash action-icon delete-icon delete-tacgia-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                        </td>
+                    `;
+                    tbody.appendChild(newRow);
+                    
+                    // Cập nhật danh sách allAuthors để modal chọn tác giả có data mới
+                    allAuthors.push({ MaTacGia: data.tacGia?.MaTacGia, HoTen: formData.HoTen, NamSinh: formData.NamSinh });
+                    
+                    // Reset form
+                    addTacGiaForm.reset();
                 } else {
                     showToast(data.error || 'Có lỗi xảy ra!', 'error');
                 }
@@ -1930,10 +2083,27 @@ document.addEventListener('DOMContentLoaded', function() {
     if(btnResetTacGia) {
         btnResetTacGia.addEventListener('click', () => {
             if(originalTacGiaData) {
-                document.getElementById('edit-ma-tac-gia').value = originalTacGiaData.maTacGia;
-                document.getElementById('edit-ho-ten-tg').value = originalTacGiaData.hoTen;
-                document.getElementById('edit-nam-sinh-tg').value = originalTacGiaData.namSinh;
-                showToast('Đã đặt lại form về dữ liệu ban đầu', 'success');
+                // Kiểm tra xem dữ liệu có thay đổi không
+                const currentHoTen = document.getElementById('edit-ho-ten-tg').value;
+                const currentNamSinh = document.getElementById('edit-nam-sinh-tg').value;
+                
+                const hasChanges = currentHoTen !== originalTacGiaData.hoTen ||
+                                   currentNamSinh !== originalTacGiaData.namSinh;
+                
+                if(hasChanges) {
+                    if(confirm('Dữ liệu đã thay đổi. Bạn có muốn LƯU LẠI không?\n\nOK: Lưu lại thay đổi\nCancel: Khôi phục dữ liệu ban đầu')) {
+                        // OK - Submit form để lưu
+                        editTacGiaForm.requestSubmit();
+                    } else {
+                        // Cancel - Khôi phục dữ liệu ban đầu
+                        document.getElementById('edit-ma-tac-gia').value = originalTacGiaData.maTacGia;
+                        document.getElementById('edit-ho-ten-tg').value = originalTacGiaData.hoTen;
+                        document.getElementById('edit-nam-sinh-tg').value = originalTacGiaData.namSinh;
+                        showToast('Đã khôi phục dữ liệu ban đầu', 'info');
+                    }
+                } else {
+                    showToast('Dữ liệu chưa thay đổi', 'info');
+                }
             } else {
                 showToast('Không thể đặt lại - chưa có dữ liệu gốc', 'error');
             }
@@ -1963,7 +2133,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 if(response.ok) {
                     showToast(data.message || 'Cập nhật thành công!');
                     editTacGiaModal.style.display = 'none';
-                    location.reload();
+                    
+                    // Cập nhật UI trực tiếp - tìm và cập nhật row
+                    const row = document.querySelector(`#table-tac-gia tr[data-id="${maTacGia}"]`);
+                    if(row) {
+                        row.cells[2].textContent = formData.HoTen;
+                        row.cells[3].textContent = formData.NamSinh || '';
+                    }
+                    
+                    // Cập nhật allAuthors
+                    const authorIndex = allAuthors.findIndex(a => a.MaTacGia === maTacGia);
+                    if(authorIndex >= 0) {
+                        allAuthors[authorIndex].HoTen = formData.HoTen;
+                        allAuthors[authorIndex].NamSinh = formData.NamSinh;
+                    }
                 } else {
                     showToast(data.error || 'Có lỗi xảy ra!', 'error');
                 }

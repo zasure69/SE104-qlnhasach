@@ -1470,7 +1470,7 @@
             
             const btnCustomReset = document.getElementById('btn-custom-reset');
             const addKhForm = document.getElementById('add-kh-form');
-            
+            let isSaveAndReset = false;
             if (btnCustomReset && addKhForm) {
                 btnCustomReset.addEventListener('click', () => {
                     // Kiểm tra xem form có dữ liệu không (check tên KH)
@@ -1481,6 +1481,7 @@
                         if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU Khách hàng này trước khi làm mới không?\n\n- OK: Lưu khách hàng này.\n- Cancel: Xóa trắng để nhập khách hàng khác.')) {
                             // Chọn OK -> Lưu
                             if (addKhForm.checkValidity()) {
+                                isSaveAndReset = true;
                                 addKhForm.requestSubmit(); 
                             } else {
                                 addKhForm.reportValidity();
@@ -1519,13 +1520,26 @@
                         const result = await response.json();
                         hideLoader();
                         if (response.ok) {
-                            showToast('Thêm khách hàng thành công!', 'success');
-                            document.getElementById('add-modal').style.display = 'none';
+                            await showToast('Thêm khách hàng thành công!', 'success');
+                            if (isSaveAndReset) {
+                                // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
+                                addKhForm.reset(); 
+                                showToast('Đã sẵn sàng nhập khách hàng tiếp theo.', 'info');
+                                
+                                // Reset cờ về false sau khi xong việc
+                                isSaveAndReset = false; 
+
+                            } else {
+                                document.getElementById('add-modal').style.display = 'none';
+                                addKhForm.reset(); 
+                            }
+                            
+                            
                             fetchCustomers(); // Tải lại danh sách khách hàng
                         } else {
                             // Chọn Cancel -> Chỉ Reset form, KHÔNG ĐÓNG modal
                             addKhForm.reset();
-                            showToast('Đã làm mới form!', 'info');
+                            showToast('Thêm khách hàng thất bại!', 'error');
                         }
                     } catch (err) {
                         hideLoader();

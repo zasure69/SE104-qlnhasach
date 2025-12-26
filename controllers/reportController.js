@@ -13,7 +13,7 @@ module.exports = {
   async RenderReportPage(req, res) {
     try {
             res.render("report", { 
-                username: req.session?.username,
+                username: req.user.username,
                 bcton: [], 
                 bccongno: [],
                 bcdoanhthu: []
