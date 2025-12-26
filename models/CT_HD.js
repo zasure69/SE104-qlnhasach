@@ -20,11 +20,11 @@ const CT_HD = sequelize.define(
       allowNull: false,
     },
     DonGiaBan: {
-      type: DataTypes.DECIMAL(18, 0),
+      type: DataTypes.DECIMAL(18, 2),
       allowNull: false,
     },
     ThanhTien: {
-      type: DataTypes.DECIMAL(18, 0),
+      type: DataTypes.DECIMAL(18, 2),
       allowNull: false,
     },
   },

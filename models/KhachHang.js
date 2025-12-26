@@ -28,7 +28,7 @@ const KhachHang = sequelize.define(
       type: DataTypes.STRING(255),
     },
     TongNo: {
-      type: DataTypes.DECIMAL(18, 0),
+      type: DataTypes.DECIMAL(18, 2),
       defaultValue: 0,
     },
   },

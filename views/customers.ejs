@@ -848,7 +848,7 @@
             <nav class="sidebar-nav">
                 <ul>
                     <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
-                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
+                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Người dùng</a></li>
                     <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
                     <li><a href="#" class="active" class="active"><i class="fas fa-id-card"></i>QL Khách hàng</a></li>
                     <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
@@ -1049,7 +1049,7 @@
                          <div class="form-group">
                             <label for="add-ngay-sinh-kh" class="required">Ngày sinh</label>
                             <div class="date-input-wrapper">
-                                <input type="date" id="add-ngay-sinh-kh">
+                                <input type="date" id="add-ngay-sinh-kh" max="<%= new Date().toISOString().split('T')[0] %>">
                             </div>
                         </div>
                         <div class="form-group">
@@ -1096,7 +1096,7 @@
                          <div class="form-group">
                             <label for="edit-ngay-sinh-kh">Ngày sinh</label>
                             <div class="date-input-wrapper">
-                                <input type="date" id="edit-ngay-sinh-kh" value="1990-01-01">
+                                <input type="date" id="edit-ngay-sinh-kh" value="1990-01-01" max="<%= new Date().toISOString().split('T')[0] %>">
                             </div>
                         </div>
                         <div class="form-group">

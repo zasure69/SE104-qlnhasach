@@ -21,15 +21,15 @@ const HoaDon = sequelize.define(
       type: DataTypes.STRING(20),
     },
     TongTien: {
-      type: DataTypes.DECIMAL(18, 0),
+      type: DataTypes.DECIMAL(18, 2),
       allowNull: false,
     },
     SoTienTra: {
-      type: DataTypes.DECIMAL(18, 0),
+      type: DataTypes.DECIMAL(18, 2),
       allowNull: false,
     },
     ConLai: {
-      type: DataTypes.DECIMAL(18, 0),
+      type: DataTypes.DECIMAL(18, 2),
       allowNull: false,
     },
   },
