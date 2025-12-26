@@ -37,7 +37,7 @@ async function generateNewPhieuNhapId() {
 const getImportPage = async (req, res) => {
   try {
     console.log("[importController] getImportPage called");
-    const userInfo = { username: req.user?.username, role: req.user?.role };
+    const userInfo = { id: req.user.id, username: req.user?.username, role: req.user?.role };
 
     let importReceipts = [];
 
