@@ -877,6 +877,8 @@
                         </div>
                         <div class="form-group"> <label class="required">Mã Khách Hàng</label> <input type="text" id="add-ma-kh"
                                 placeholder="Nhập Mã KH..." required> </div>
+                        <div class="form-group"> <label class="required">Mã Nhân Viên Lập Phiếu</label> <input type="text" id="add-ma-nv"
+                            placeholder="<%=id%>" value="<%=id%>" readonly> </div>
                         <div class="form-group"> <label>Họ Tên</label> <input type="text" id="add-ten-kh" readonly>
                         </div>
                         <div class="form-group"> <label>Địa Chỉ</label> <input type="text" id="add-dia-chi" readonly>
@@ -912,6 +914,8 @@
                         </div>
                         <div class="form-group"> <label class="required">Mã Khách Hàng</label> <input type="text" id="edit-ma-kh"
                                 required> </div>
+                        <div class="form-group"> <label class="required">Mã Nhân Viên Lập Phiếu</label> <input type="text" id="edit-ma-nv"
+                            readonly placeholder="<%=id%>" value="<%=id%>" > </div>
                         <div class="form-group"> <label>Họ Tên</label> <input type="text" id="edit-ten-kh" readonly>
                         </div>
                         <div class="form-group"> <label>Địa Chỉ</label> <input type="text" id="edit-dia-chi" readonly>
@@ -1258,10 +1262,12 @@
 
                     // 1. Thu thập dữ liệu từ Form
                     const maKhInput = document.getElementById('add-ma-kh');
+                    const maNvInput = document.getElementById('add-ma-nv');
                     const ngayThuInput = document.getElementById('add-ngay-thu');
                     const soTienInput = document.getElementById('add-so-tien'); // Input tiền định dạng (VD: 100.000)
 
                     const maKhachHang = maKhInput.value.trim();
+                    const maNhanVien = maNvInput.value.trim();
                     const ngayThuTien = ngayThuInput.value;
                     const soTienThu = parseNumber(soTienInput.value); // Chuyển "100.000" -> 100000
 
@@ -1284,6 +1290,7 @@
                         const payload = {
                             MaPhieuThu: newMaPhieuThu,
                             MaKhachHang: maKhachHang,
+                            MaNhanVien: maNhanVien,
                             NgayThuTien: ngayThuTien,
                             SoTienThu: soTienThu
                         };
@@ -1312,18 +1319,20 @@
                             }
                             // 5. Đóng Modal và Reset form
                             
-                            addForm.reset();
                             
+                            
+                            
+
+                            // 1. Lấy dữ liệu hiển thị
+                            const tenKhachHang = document.getElementById('add-ten-kh').value || '---';
+                            const tbody = document.querySelector('#receipt-table tbody');
+                            addForm.reset();
                             // Reset các trường thông tin khách hàng (nếu có auto-fill)
                             const infoFields = ['ten-kh', 'dia-chi', 'sdt', 'email', 'tong-no'];
                             infoFields.forEach(id => {
                                 const el = document.getElementById(`add-${id}`);
                                 if (el) el.value = '';
                             });
-
-                            // 1. Lấy dữ liệu hiển thị
-                            const tenKhachHang = document.getElementById('add-ten-kh').value || '---';
-                            const tbody = document.querySelector('#receipt-table tbody');
                             
                             // Xóa dòng "Chưa có dữ liệu" nếu bảng đang trống
                             const noDataRow = tbody.querySelector('.no-data');

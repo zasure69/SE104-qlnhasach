@@ -25,6 +25,9 @@ PhieuNhapSach.belongsTo(User, { foreignKey: "MaNhanVien" });
 User.hasMany(HoaDon, { foreignKey: "MaNhanVien", onDelete: 'RESTRICT' });
 HoaDon.belongsTo(User, { foreignKey: "MaNhanVien" });
 
+User.hasMany(PhieuThuTien, { foreignKey: "MaNhanVien", onDelete: 'RESTRICT' });
+PhieuThuTien.belongsTo(User, { foreignKey: "MaNhanVien" });
+
 // 2. TheLoai Relationships
 TheLoai.hasMany(DauSach, { foreignKey: "MaTheLoai" });
 DauSach.belongsTo(TheLoai, { foreignKey: "MaTheLoai" });
