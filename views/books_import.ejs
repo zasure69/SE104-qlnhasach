@@ -757,7 +757,7 @@
                         </div>
                         <div class="form-group"> 
                             <label class="required">Mã Nhân Viên:</label> 
-                            <input type="text" id="add-ma-nv" placeholder="Nhập mã NV..."> 
+                            <input type="text" id="add-ma-nv" value="<%= id %>" readonly placeholder="<%= id %>"> 
                         </div>
                         <div class="form-group"></div> 
                     </div>
@@ -848,7 +848,7 @@
                         </div>
                         <div class="form-group"> 
                             <label class="required">Mã Nhân Viên:</label> 
-                            <input type="text" id="edit-ma-nv"> 
+                            <input type="text" id="edit-ma-nv" readonly> 
                         </div>
                     </div>
                 </div>
@@ -1325,7 +1325,7 @@
                     addModal.style.display = 'flex';
                 });
             }
-
+            let isSaveAndReset = false;
             // Mở Modal Sửa
             const viewDetailBtns = document.querySelectorAll('.view-detail-btn');
             viewDetailBtns.forEach(btn => {
@@ -1385,6 +1385,7 @@
                     if (hasData) {
                         if (confirm('Bạn đang nhập dở phiếu nhập sách. Bạn có muốn LƯU phiếu này không?\n\n- OK: Lưu phiếu.\n- Cancel: Xóa trắng để nhập phiếu khác.')) {
                             // Chọn OK -> Gọi submit form (Lưu)
+                            isSaveAndReset = true;
                             document.getElementById('btn-save-add').click();
                         } else {
                             // Chọn Cancel -> Reset form, KHÔNG ĐÓNG MODAL
@@ -1482,9 +1483,67 @@
                 });
                 
                 if (result.success) {
-                    addModal.style.display = 'none';
+                    
                     showToast('Thêm phiếu nhập thành công!');
-                    setTimeout(() => location.reload(), 1000);
+                    if (isSaveAndReset) {
+                        // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
+                        resetAddForm();
+                        showToast('Đã sẵn sàng nhập phiếu nhập sách tiếp theo.', 'info');
+                        
+                        // Reset cờ về false sau khi xong việc
+                        isSaveAndReset = false; 
+
+                    } else {
+                        addModal.style.display = 'none';
+                        resetAddForm(); 
+                    }
+                    
+                    // 1. Tính toán dữ liệu hiển thị
+                    const tbody = document.querySelector('#master-table tbody');
+                    
+                    // Xóa dòng "Chưa có phiếu nhập" nếu bảng đang trống
+                    // (Kiểm tra xem dòng đầu tiên có phải là dòng thông báo không)
+                    const firstRow = tbody.rows[0];
+                    if (firstRow && firstRow.cells.length === 1) {
+                        firstRow.remove();
+                    }
+
+                    const stt = tbody.rows.length + 1;
+                    
+                    // Format ngày: YYYY-MM-DD -> DD/MM/YYYY
+                    let dateDisplay = ngayNhap;
+                    if(ngayNhap && ngayNhap.includes('-')){
+                        const parts = ngayNhap.split('-');
+                        dateDisplay = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    }
+
+                    // Tính tổng tiền từ mảng chiTiet vừa gửi đi
+                    const tongTien = chiTiet.reduce((sum, item) => sum + (item.SoLuong * item.DonGiaNhap), 0);
+
+                    // Lấy Mã Phiếu từ phản hồi API (Giả sử API trả về object chứa MaPhieuNhap)
+                    // Bạn cần đảm bảo Backend trả về { success: true, data: { MaPhieuNhap: 'PN...', ... } }
+                    const newId = result.data.MaPhieuNhap || result.data.receipt?.MaPhieuNhap || '---';
+
+                    // 2. Tạo dòng HTML mới
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td>${stt}</td>
+                        <td>${newId}</td>
+                        <td>${dateDisplay}</td>
+                        <td>${new Intl.NumberFormat('vi-VN').format(tongTien)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary view-detail-btn" data-id="${newId}">
+                                <i class="fas fa-eye"></i> Chi tiết
+                            </button>
+                            <button class="btn btn-sm btn-print ml-2 print-btn" data-id="${newId}"> 
+                                <i class="fas fa-print"></i>
+                            </button>
+                            <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                        </td>
+                    `;
+
+                    // 3. Thêm vào cuối bảng
+                    tbody.appendChild(newRow);
                 } else {
                     showToast(result.error || 'Có lỗi xảy ra!', 'error');
                 }

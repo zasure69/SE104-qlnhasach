@@ -44,7 +44,7 @@ const getLastMaPhieuThu = async (req, res) => {
 //  API: TẠO PHIẾU THU MỚI (POST /api/receipts/create)
 // =============================================================
 const createReceipt = async (req, res) => {
-    const { MaPhieuThu, MaKhachHang, NgayThuTien, SoTienThu } = req.body;
+    const { MaPhieuThu, MaNhanVien, MaKhachHang, NgayThuTien, SoTienThu } = req.body;
     const t = await sequelize.transaction();
 
     try {
@@ -67,6 +67,7 @@ const createReceipt = async (req, res) => {
         await PhieuThuTien.create({
             MaPhieuThu,
             MaKhachHang,
+            MaNhanVien,
             NgayThuTien,
             SoTienThu: thuTien
         }, { transaction: t });

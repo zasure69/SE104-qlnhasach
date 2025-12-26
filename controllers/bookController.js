@@ -213,7 +213,7 @@ const resolveTacGiaList = async (list, transaction) => {
 const getBooksPage = async (req, res) => {
   try {
     console.log("[bookController] getBooksPage called");
-    const userInfo = { username: req.user?.username, role: req.user?.role };
+    const userInfo = { id: req.user.id, username: req.user.username, role: req.user.role };
 
     // Fetch DauSach với JOIN TheLoai và TacGia
     console.log("[getBooksPage] Fetching DauSach with associations...");

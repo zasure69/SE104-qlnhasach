@@ -778,6 +778,10 @@
                             <label>Tên Khách Hàng:</label> 
                             <input type="text" id="add-ten-kh" placeholder="Tự động điền..." readonly style="background-color: #e9ecef;"> 
                         </div>
+                        <div class="form-group"> 
+                            <label>Mã Nhân Viên Lập Hoá Đơn:</label> 
+                            <input type="text" id="add-ma-nv" placeholder="<%=id%>" readonly style="background-color: #e9ecef;"> 
+                        </div>
                     </div>
                 </div>
 
@@ -886,6 +890,10 @@
                         <div class="form-group"> 
                             <label>Tên Khách Hàng:</label> 
                             <input type="text" id="edit-ten-kh" readonly style="background-color: #e9ecef;"> 
+                        </div>
+                        <div class="form-group"> 
+                            <label>Mã Nhân Viên Lập Hoá Đơn:</label> 
+                            <input type="text" id="edit-ma-nv" placeholder="<%=id%>" readonly style="background-color: #e9ecef;"> 
                         </div>
                     </div>
                 </div>
@@ -998,6 +1006,11 @@
     </div>
 
     <script>
+        const currentUserInfo = {
+            username: "<%= username %>",
+            role: "<%= role %>",
+            MaNV: "<%= MaNV %>" // Biến này lấy từ dashboardController
+        };
         function setupPaymentValidation(prefix) {
             const paidInput = document.getElementById(`${prefix}-amount-paid`);
             // Giả sử tổng tiền được lưu trong input hidden hoặc span có id là total-amount
@@ -1691,7 +1704,7 @@
                         });
                 });
             });
-
+            let isSaveAndReset = false
             // Logic Reset/Restore
             const btnResetAdd = document.getElementById('btn-custom-reset'); 
             if (btnResetAdd) {
@@ -1699,6 +1712,7 @@
                     const hasData = document.getElementById('add-ma-kh').value.trim() !== '' || document.querySelector('#add-detail-table tbody').rows.length > 0;
                     if (hasData) {
                         if (confirm('Lưu hóa đơn này không? OK: Lưu - Cancel: Xóa trắng')) {
+                            isSaveAndReset = true
                             document.getElementById('btn-save-add').click();
                         } else {
                             resetAddForm();
@@ -1825,6 +1839,7 @@
                 const newData = {
                     MaHoaDon: MaHD,
                     MaKhachHang: maKhachHang,
+                    MaNhanVien: currentUserInfo.MaNV,
                     TongTien: tongTien,
                     SoTienTra: soTienTra,
                     ConLai: conLai,
@@ -1841,8 +1856,61 @@
                     if (data.message && data.message.includes('thành công')) {
                         showToast(`Thêm hóa đơn ${MaHD} thành công!`, 'success');
                         lastBillMaHD = MaHD; 
-                        addModal.style.display = 'none';
-                        setTimeout(() => { location.reload(); }, 1000);
+                        if (isSaveAndReset) {
+                            // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
+                            resetAddForm ();
+                            showToast('Đã sẵn sàng nhập hóa đơn tiếp theo.', 'info');
+                            
+                            // Reset cờ về false sau khi xong việc
+                            isSaveAndReset = false; 
+
+                        } else {
+                            addModal.style.display = 'none';
+                            resetAddForm ();
+                        }
+                        
+                        // 1. Lấy dữ liệu từ form hiện tại để hiển thị
+                        const tenKH = document.getElementById('add-ten-kh').value;
+                        const rawDate = document.getElementById('add-ngay-lap').value; // YYYY-MM-DD
+                        
+                        // Format ngày: YYYY-MM-DD -> DD/MM/YYYY
+                        let dateDisplay = rawDate;
+                        if(rawDate && rawDate.includes('-')){
+                            const parts = rawDate.split('-');
+                            dateDisplay = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                        }
+
+                        // 2. Tạo dòng HTML mới
+                        const tbody = document.querySelector('#master-table tbody');
+                        
+                        // Xóa dòng "Không có dữ liệu" nếu bảng đang trống
+                        const noDataRow = tbody.querySelector('.no-data'); 
+                        if(noDataRow) noDataRow.remove();
+
+                        const stt = tbody.rows.length + 1; // Tính số thứ tự mới
+                        
+                        const newRow = document.createElement('tr');
+                        newRow.setAttribute('data-id', MaHD); // Để dùng cho nút xóa
+                        newRow.innerHTML = `
+                            <td>${stt}</td>
+                            <td>${MaHD}</td>
+                            <td>${tenKH}</td>
+                            <td>${dateDisplay}</td>
+                            <td class="text-right">${formatNumber(newData.TongTien)}</td>
+                            <td>
+                                <button class="btn btn-sm btn-secondary view-detail-btn" data-id="${MaHD}"> 
+                                    <i class="fas fa-eye"></i> Chi tiết 
+                                </button>
+                                <button class="btn btn-sm btn-print ml-2" data-id="${MaHD}"> 
+                                    <i class="fas fa-print"></i>
+                                </button>
+                                <i class="fas fa-trash action-icon delete-icon" 
+                                style="margin-left: 12px; color: var(--red-accent);"></i>
+                            </td>
+                        `;
+
+                        // 3. Chèn vào đầu bảng hoặc cuối bảng (ở đây là cuối bảng)
+                        tbody.appendChild(newRow);
                     } else {
                         showToast(`Thêm thất bại: ${data.message}`, 'error');
                     }
