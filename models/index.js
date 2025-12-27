@@ -1,7 +1,7 @@
 const sequelize = require("../config/db");
 
 // Import tất cả models
-const User = require("./User");
+const NhanVien = require("./NhanVien");
 const ThamSo = require("./ThamSo");
 const TheLoai = require("./TheLoai");
 const TacGia = require("./TacGia");
@@ -18,15 +18,15 @@ const BaoCaoTon = require("./BaoCaoTon");
 const BaoCaoCongNo = require("./BaoCaoCongNo");
 const BaoCaoDoanhThu = require("./BaoCaoDoanhThu");
 
-// 1. User (NHANVIEN) Relationships
-User.hasMany(PhieuNhapSach, { foreignKey: "MaNhanVien", onDelete: 'RESTRICT' });
-PhieuNhapSach.belongsTo(User, { foreignKey: "MaNhanVien" });
+// 1. NhanVien Relationships
+NhanVien.hasMany(PhieuNhapSach, { foreignKey: "MaNhanVien", onDelete: 'RESTRICT' });
+PhieuNhapSach.belongsTo(NhanVien, { foreignKey: "MaNhanVien" });
 
-User.hasMany(HoaDon, { foreignKey: "MaNhanVien", onDelete: 'RESTRICT' });
-HoaDon.belongsTo(User, { foreignKey: "MaNhanVien" });
+NhanVien.hasMany(HoaDon, { foreignKey: "MaNhanVien", onDelete: 'RESTRICT' });
+HoaDon.belongsTo(NhanVien, { foreignKey: "MaNhanVien" });
 
-User.hasMany(PhieuThuTien, { foreignKey: "MaNhanVien", onDelete: 'RESTRICT' });
-PhieuThuTien.belongsTo(User, { foreignKey: "MaNhanVien" });
+NhanVien.hasMany(PhieuThuTien, { foreignKey: "MaNhanVien", onDelete: 'RESTRICT' });
+PhieuThuTien.belongsTo(NhanVien, { foreignKey: "MaNhanVien" });
 
 // 2. TheLoai Relationships
 TheLoai.hasMany(DauSach, { foreignKey: "MaTheLoai" });
@@ -95,7 +95,7 @@ CT_HD.belongsTo(Sach, { foreignKey: "MaSach" });
 // Export tất cả models và sequelize instance
 module.exports = {
   sequelize,
-  User,
+  NhanVien,
   ThamSo,
   TheLoai,
   TacGia,

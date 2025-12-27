@@ -20,6 +20,11 @@ const DauSach = sequelize.define(
     MoTa: {
       type: DataTypes.STRING(1000),
     },
+    isDeleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+    },
   },
   {
     tableName: "DAUSACH",

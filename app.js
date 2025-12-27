@@ -5,7 +5,7 @@ const app = express();
 const port = 3000;
 
 // Import routes
-const userRoutes = require("./routes/userRoutes");
+const loginRoutes = require("./routes/loginRoutes");
 const customerRoutes = require("./routes/customersRoutes");
 const booksRoutes = require("./routes/booksRoutes");
 const booksImportRoutes = require("./routes/booksimportRoutes");
@@ -36,7 +36,7 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 
 // === MOUNT ROUTES ===
-app.use("/", userRoutes);
+app.use("/", loginRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/books", booksRoutes); // ✅ Prefix /api/books
 app.use("/api/import", booksImportRoutes); // ✅ Prefix /api/import

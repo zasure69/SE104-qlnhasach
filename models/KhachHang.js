@@ -31,6 +31,11 @@ const KhachHang = sequelize.define(
       type: DataTypes.DECIMAL(18, 2),
       defaultValue: 0,
     },
+    isDeleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+    },
   },
   {
     tableName: "KHACHHANG",

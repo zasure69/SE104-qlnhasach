@@ -23,6 +23,11 @@ const Sach = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
+    isDeleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+    },
   },
   {
     tableName: "SACH",

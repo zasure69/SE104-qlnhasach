@@ -30,7 +30,8 @@ async function getMinStockRule() {
 
 const getCustomerInfo = async (req, res) => {
   try {
-    const customer = await KhachHang.findByPk(req.params.MaKH, {
+    const customer = await KhachHang.findOne({
+      where: { MaKhachHang: req.params.MaKH, isDeleted: false },
       attributes: ["HoVaTen", "TongNo"],
     });
     if (!customer) {
@@ -58,11 +59,12 @@ const getBookInfo = async (req, res) => {
 
     const latestPrice = latestPriceRecord ? latestPriceRecord.DonGiaBan : 0;
     const book = await Sach.findOne({
-      where: { MaSach: MaSach },
+      where: { MaSach: MaSach, isDeleted: false },
       attributes: ["MaSach", "SoLuongTon"],
       include: [
         {
           model: DauSach,
+          where: { isDeleted: false },
           attributes: ["TenSach"],
           required: true,
           include: [
@@ -380,7 +382,7 @@ const updateBill = async (req, res) => {
 };
 
 // =============================================================
-//  API: XÓA HÓA ĐƠN (DELETE /api/bill/:id)
+//  API: XÓA HÓA ĐƠN (SOFT DELETE)
 // =============================================================
 const deleteBill = async (req, res) => {
   const MaHD = req.params.MaHD;
@@ -392,6 +394,12 @@ const deleteBill = async (req, res) => {
     if (!bill) {
       await t.rollback();
       return res.status(404).json({ message: "Không tìm thấy hóa đơn." });
+    }
+
+    // Kiểm tra nếu hóa đơn đã bị xóa rồi
+    if (bill.isDeleted) {
+      await t.rollback();
+      return res.status(400).json({ message: "Hóa đơn này đã bị xóa trước đó." });
     }
 
     const details = await CT_HD.findAll({
@@ -419,9 +427,11 @@ const deleteBill = async (req, res) => {
       });
     }
 
-    // 4. Xóa Chi tiết và Hóa đơn
-    await CT_HD.destroy({ where: { MaHoaDon: MaHD }, transaction: t });
-    await HoaDon.destroy({ where: { MaHoaDon: MaHD }, transaction: t });
+    // 4. Soft delete: đánh dấu isDeleted = true thay vì xóa thật
+    await HoaDon.update(
+      { isDeleted: true },
+      { where: { MaHoaDon: MaHD }, transaction: t }
+    );
 
     await t.commit();
     res.json({

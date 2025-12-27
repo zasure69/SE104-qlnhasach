@@ -13,6 +13,11 @@ const TacGia = sequelize.define('TacGia', {
   },
   NamSinh: {
     type: DataTypes.INTEGER
+  },
+  isDeleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false
   }
 }, {
   tableName: 'TACGIA',

@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-// Định nghĩa model 'User' (Ánh xạ tới bảng NHANVIEN)
-const User = sequelize.define('User', {
+// Định nghĩa model 'NhanVien' (Ánh xạ tới bảng NHANVIEN)
+const NhanVien = sequelize.define('NhanVien', {
   MaNhanVien: {
     type: DataTypes.STRING(20),
     primaryKey: true,
@@ -34,10 +34,15 @@ const User = sequelize.define('User', {
   NgayNhanViec: {
     type: DataTypes.DATEONLY, // Dùng DATEONLY
     allowNull: false
+  },
+  isDeleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false
   }
 }, {
   tableName: 'NHANVIEN', // Chỉ định rõ tên bảng trong DB 
   timestamps: false 
 });
 
-module.exports = User;
+module.exports = NhanVien;

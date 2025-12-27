@@ -43,8 +43,8 @@ app.get("/", (req, res) => {
   });
 });
 
-const userRoutes = require("./routes/userRoutes");
-app.use("/", userRoutes);
+const loginRoutes = require("./routes/loginRoutes");
+app.use("/", loginRoutes);
 app.use(authenticateToken); // Áp dụng middleware xác thực cho các route sau
 // route được bảo vệ
 const dashboardRoutes = require("./routes/dashboardRoutes");

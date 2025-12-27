@@ -8,7 +8,8 @@ const { Op } = require('sequelize'); // Cần cho các truy vấn phức tạp
 // =============================================================
 const getCustomerInfo = async (req, res) => {
     try {
-        const customer = await KhachHang.findByPk(req.params.MaKH, {
+        const customer = await KhachHang.findOne({
+            where: { MaKhachHang: req.params.MaKH, isDeleted: false },
             attributes: ['MaKhachHang', 'HoVaTen','DiaChi','SoDienThoai', 'TongNo']
         });
         if (!customer) {
@@ -131,7 +132,7 @@ const updateReceipt = async (req, res) => {
 };
 
 // =============================================================
-//  API: XÓA PHIẾU THU (DELETE /api/receipts/:MaPhieuThu)
+//  API: XÓA PHIẾU THU (SOFT DELETE)
 // =============================================================
 const deleteReceipt = async (req, res) => {
     const MaPhieuThu = req.params.MaPhieuThu;
@@ -141,13 +142,22 @@ const deleteReceipt = async (req, res) => {
         const receiptToDelete = await PhieuThuTien.findByPk(MaPhieuThu, { transaction: t });
         if (!receiptToDelete) { await t.rollback(); return res.status(404).json({ message: 'Không tìm thấy phiếu thu.' }); }
         
+        // Kiểm tra nếu phiếu thu đã bị xóa rồi
+        if (receiptToDelete.isDeleted) {
+            await t.rollback();
+            return res.status(400).json({ message: 'Phiếu thu này đã bị xóa trước đó.' });
+        }
+        
         const soTienThu = parseFloat(receiptToDelete.SoTienThu);
         
-        // 1. Xóa Phiếu Thu
-        await PhieuThuTien.destroy({ where: { MaPhieuThu }, transaction: t });
-
-        // 2. Hoàn tác Nợ (Tăng nợ trở lại cho khách hàng)
+        // 1. Hoàn tác Nợ (Tăng nợ trở lại cho khách hàng)
         await KhachHang.increment('TongNo', { by: soTienThu, where: { MaKhachHang: receiptToDelete.MaKhachHang }, transaction: t });
+
+        // 2. Soft delete: đánh dấu isDeleted = true thay vì xóa thật
+        await PhieuThuTien.update(
+            { isDeleted: true },
+            { where: { MaPhieuThu }, transaction: t }
+        );
 
         await t.commit();
         res.json({ message: `Phiếu thu ${MaPhieuThu} đã được xóa thành công.` });
