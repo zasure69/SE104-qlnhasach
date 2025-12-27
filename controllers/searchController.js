@@ -7,7 +7,7 @@ const { Op } = require("sequelize"); // Import Operator
 const searchCustomers = async (req, res) => {
   try {
     const { hoTen, sdt, diaChi, tongNo } = req.body;
-    let whereClause = {}; // Xây dựng điều kiện lọc động
+    let whereClause = { isDeleted: false }; // Xây dựng điều kiện lọc động - chỉ lấy chưa bị xóa
 
     if (hoTen) whereClause.HoVaTen = { [Op.like]: `%${hoTen}%` };
     if (sdt) whereClause.SoDienThoai = { [Op.like]: `%${sdt}%` };
@@ -37,9 +37,9 @@ const searchBooks = async (req, res) => {
   try {
     const { tenSach, tacGia, theLoai, soLuongTon } = req.body;
 
-    let whereDauSach = {}; // Điều kiện cho bảng DAUSACH
-    let whereSach = {}; // Điều kiện cho bảng SACH
-    let whereTheLoai = {}; // Điều kiện cho bảng THELOAI
+    let whereDauSach = { isDeleted: false }; // Điều kiện cho bảng DAUSACH - chỉ lấy chưa bị xóa
+    let whereSach = { isDeleted: false }; // Điều kiện cho bảng SACH - chỉ lấy chưa bị xóa
+    let whereTheLoai = { isDeleted: false }; // Điều kiện cho bảng THELOAI - chỉ lấy chưa bị xóa
 
     if (tenSach) whereDauSach.TenSach = { [Op.like]: `%${tenSach}%` };
     if (tacGia) whereDauSach.TacGia = { [Op.like]: `%${tacGia}%` };

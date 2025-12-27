@@ -9,7 +9,7 @@ async function seedAdmin() {
   try {
     await db.sequelize.authenticate();
 
-    const existingUser = await db.User.findOne({
+    const existingUser = await db.NhanVien.findOne({
       where: { Username: DEFAULT_USERNAME },
     });
     const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, 10);
@@ -24,7 +24,7 @@ async function seedAdmin() {
       // Simple helper to fabricate IDs if none exist
       const prefix = "NV";
       const paddingLength = 3;
-      const lastUser = await db.User.findOne({
+      const lastUser = await db.NhanVien.findOne({
         order: [
           [
             db.sequelize.literal(
@@ -45,7 +45,7 @@ async function seedAdmin() {
         "0"
       )}`;
 
-      await db.User.create({
+      await db.NhanVien.create({
         MaNhanVien: newId,
         HoTen: "Quản trị viên",
         NgaySinh: "1990-01-01",

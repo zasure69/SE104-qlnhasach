@@ -46,6 +46,7 @@ module.exports = {
           model: HoaDon,
           attributes: [],
           where: {
+            isDeleted: false,
             NgayLapHoaDon: { [Op.between]: [startDate, endDate] }
           },
           required: true
@@ -103,32 +104,35 @@ module.exports = {
       const formattedStartDateOnly = `${year}-${String(month).padStart(2, '0')}-01`;
       const formattedEndDateOnly = `${year}-${String(month).padStart(2, '0')}-${String(new Date(year, month, 0).getDate()).padStart(2, '0')}`;
 
-      const listKH = await KhachHang.findAll();
+      const listKH = await KhachHang.findAll({ where: { isDeleted: false } });
 
       const result = await Promise.all(listKH.map(async (kh) => {
         const tongHD_Truoc = await HoaDon.sum('ConLai', {
           where: {
             MaKhachHang: kh.MaKhachHang,
+            isDeleted: false,
             NgayLapHoaDon: { [Op.lt]: startDate }
           }
         }) || 0;
         const totalMua_Truoc = await HoaDon.sum('ConLai', {
-           where: { MaKhachHang: kh.MaKhachHang, NgayLapHoaDon: { [Op.lt]: startDate } }
+           where: { MaKhachHang: kh.MaKhachHang, isDeleted: false, NgayLapHoaDon: { [Op.lt]: startDate } }
         }) || 0;
         
         const totalTra_Truoc = await PhieuThuTien.sum('SoTienThu', {
-           where: { MaKhachHang: kh.MaKhachHang, NgayThuTien: { [Op.lt]: formattedStartDateOnly } }
+           where: { MaKhachHang: kh.MaKhachHang, isDeleted: false, NgayThuTien: { [Op.lt]: formattedStartDateOnly } }
         }) || 0;
         const noDau = totalMua_Truoc - totalTra_Truoc;
         const noPhatSinh = await HoaDon.sum('ConLai', {
           where: {
             MaKhachHang: kh.MaKhachHang,
+            isDeleted: false,
             NgayLapHoaDon: { [Op.between]: [startDate, endDate] }
           }
         }) || 0;
         const daTra = await PhieuThuTien.sum('SoTienThu', {
           where: {
             MaKhachHang: kh.MaKhachHang,
+            isDeleted: false,
             NgayThuTien: { [Op.between]: [formattedStartDateOnly, formattedEndDateOnly] }
           }
         }) || 0;
@@ -169,7 +173,8 @@ async getTonKhoAPI(req, res) {
     const endDate = new Date(year, month, 0, 23, 59, 59);
 
     const listSach = await Sach.findAll({
-      include: [{ model: DauSach }]
+      where: { isDeleted: false },
+      include: [{ model: DauSach, where: { isDeleted: false }, required: false }]
     });
 
     const result = await Promise.all(
@@ -179,7 +184,7 @@ async getTonKhoAPI(req, res) {
         const nhapTruoc = await CT_PNS.sum("SoLuong", {
           include: [{
             model: PhieuNhapSach,
-            where: { NgayNhapPhieu: { [Op.lt]: startDate } }
+            where: { isDeleted: false, NgayNhapPhieu: { [Op.lt]: startDate } }
           }],
           where: { MaSach: sach.MaSach }
         }) || 0;
@@ -188,7 +193,7 @@ async getTonKhoAPI(req, res) {
         const banTruoc = await CT_HD.sum("SoLuongBan", {
           include: [{
             model: HoaDon,
-            where: { NgayLapHoaDon: { [Op.lt]: startDate } }
+            where: { isDeleted: false, NgayLapHoaDon: { [Op.lt]: startDate } }
           }],
           where: { MaSach: sach.MaSach }
         }) || 0;
@@ -199,7 +204,7 @@ async getTonKhoAPI(req, res) {
         const nhapTrongThang = await CT_PNS.sum("SoLuong", {
           include: [{
             model: PhieuNhapSach,
-            where: { NgayNhapPhieu: { [Op.between]: [startDate, endDate] } }
+            where: { isDeleted: false, NgayNhapPhieu: { [Op.between]: [startDate, endDate] } }
           }],
           where: { MaSach: sach.MaSach }
         }) || 0;
@@ -208,7 +213,7 @@ async getTonKhoAPI(req, res) {
         const banTrongThang = await CT_HD.sum("SoLuongBan", {
           include: [{
             model: HoaDon,
-            where: { NgayLapHoaDon: { [Op.between]: [startDate, endDate] } }
+            where: { isDeleted: false, NgayLapHoaDon: { [Op.between]: [startDate, endDate] } }
           }],
           where: { MaSach: sach.MaSach }
         }) || 0;

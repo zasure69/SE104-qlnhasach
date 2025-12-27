@@ -32,6 +32,11 @@ const HoaDon = sequelize.define(
       type: DataTypes.DECIMAL(18, 2),
       allowNull: false,
     },
+    isDeleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+    },
   },
   {
     tableName: "HOADON",

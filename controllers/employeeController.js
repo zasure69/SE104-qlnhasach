@@ -1,4 +1,4 @@
-// controllers/userController.js
+// controllers/employeeController.js
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
@@ -6,8 +6,8 @@ require("dotenv").config();
 // --- SỬA LẠI IMPORT ---
 // Import tất cả models và sequelize từ file trung tâm
 const db = require("../models");
-// Giờ đây, 'db.User' là model User, 'db.sequelize' là instance sequelize
-// --- KẾT THÚC SỬA ---
+// Giờ đây, 'db.NhanVien' là model NhanVien, 'db.sequelize' là instance sequelize
+// --- KẾT THÚC SỬa ---
 
 // =============================================================
 // HÀM HELPER: TẠO MÃ NHÂN VIÊN MỚI
@@ -16,8 +16,8 @@ async function generateNewEmployeeId() {
   const prefix = "NV";
   const paddingLength = 3;
 
-  // SỬA: Dùng db.User và db.sequelize
-  const lastEmployee = await db.User.findOne({
+  // SỬa: Dùng db.NhanVien và db.sequelize
+  const lastEmployee = await db.NhanVien.findOne({
     order: [
       [
         db.sequelize.literal(
@@ -89,8 +89,8 @@ const registerEmployee = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     console.log("hoTen:", hoTen);
-    // SỬA: Dùng db.User
-    const newUser = await db.User.create({
+    // SỬa: Dùng db.NhanVien
+    const newUser = await db.NhanVien.create({
       MaNhanVien: newMaNhanVien,
       HoTen: hoTen,
       NgaySinh: ngaySinh,
@@ -127,9 +127,9 @@ const login = async (req, res) => {
         .json({ error: "Vui lòng nhập username và password" });
     }
 
-    // SỬA: Dùng db.User
-    const user = await db.User.findOne({
-      where: { Username: username },
+    // SỬA: Dùng db.NhanVien - chỉ tìm nhân viên chưa bị xóa
+    const user = await db.NhanVien.findOne({
+      where: { Username: username, isDeleted: false },
     });
 
     if (!user) {
@@ -180,7 +180,7 @@ const updateEmployee = async (req, res) => {
     req.body;
 
   try {
-    const user = await db.User.findByPk(maNhanVien);
+    const user = await db.NhanVien.findByPk(maNhanVien);
     if (!user) {
       return res.status(404).json({ error: "Không tìm thấy nhân viên." });
     }
@@ -213,7 +213,8 @@ const updateEmployee = async (req, res) => {
 // =============================================================
 const getEmployees = async (req, res) => {
   try {
-    const employees = await db.User.findAll({
+    const employees = await db.NhanVien.findAll({
+      where: { isDeleted: false }, // Chỉ lấy những nhân viên chưa bị xóa
       raw: true, // Lấy dữ liệu dạng JSON thuần
     });
     res.status(200).json(employees);
@@ -235,7 +236,7 @@ const checkEmployeeExists = async (req, res) => {
         .json({ exists: false, message: "Vui lòng cung cấp Mã Nhân viên." });
     }
 
-    const employee = await db.User.findOne({
+    const employee = await db.NhanVien.findOne({
       where: { MaNhanVien: maNhanVien },
     });
 
@@ -256,15 +257,20 @@ const checkEmployeeExists = async (req, res) => {
 };
 
 // =============================================================
-// HÀM XÓA NHÂN VIÊN (DELETE)
+// HÀM XÓA NHÂN VIÊN (SOFT DELETE)
 // =============================================================
 const deleteEmployee = async (req, res) => {
   const maNhanVien = req.params.maNV;
 
   try {
-    const user = await db.User.findByPk(maNhanVien);
+    const user = await db.NhanVien.findByPk(maNhanVien);
     if (!user) {
       return res.status(404).json({ error: "Không tìm thấy nhân viên." });
+    }
+
+    // Kiểm tra nếu nhân viên đã bị xóa rồi
+    if (user.isDeleted) {
+      return res.status(400).json({ error: "Nhân viên này đã bị xóa trước đó." });
     }
 
     // (Thêm logic kiểm tra an toàn ở đây, ví dụ: không cho xóa chính mình)
@@ -272,18 +278,12 @@ const deleteEmployee = async (req, res) => {
     //     return res.status(403).json({ error: 'Bạn không thể tự xóa chính mình.' });
     // }
 
-    await user.destroy();
+    // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
+    user.isDeleted = true;
+    await user.save();
+    
     res.status(200).json({ message: "Xóa nhân viên thành công!" });
   } catch (err) {
-    // Xử lý lỗi nếu nhân viên này có Hóa đơn hoặc Phiếu nhập sách (không thể xóa)
-    if (err.name === "SequelizeForeignKeyConstraintError") {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Xóa thất bại! Nhân viên này đã lập hóa đơn hoặc phiếu nhập sách.",
-        });
-    }
     console.error(err);
     res.status(500).json({ error: "Lỗi server nội bộ" });
   }

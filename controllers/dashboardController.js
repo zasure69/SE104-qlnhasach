@@ -32,9 +32,10 @@ const getUserInfo = (req) => {
           role: req.user.role
       };
   
-      // 2. Lấy TẤT CẢ nhân viên từ database
-      //    Chúng ta dùng db.User vì nó ánh xạ đến bảng NHANVIEN
-      const allEmployees = await db.User.findAll({
+      // 2. Lấy nhân viên chưa bị xóa từ database
+      //    Chúng ta dùng db.NhanVien vì nó ánh xạ đến bảng NHANVIEN
+      const allEmployees = await db.NhanVien.findAll({
+          where: { isDeleted: false },
           raw: true // Lấy dữ liệu dạng JSON thuần
       });
   
@@ -59,8 +60,9 @@ const getUserInfo = (req) => {
           role: req.user.role
       };
   
-      // 2. Lấy TẤT CẢ khách hàng từ database
+      // 2. Lấy khách hàng chưa bị xóa từ database
       const allCustomers = await db.KhachHang.findAll({
+          where: { isDeleted: false },
           raw: true // Lấy dữ liệu dạng JSON thuần
       });
   
@@ -84,23 +86,27 @@ const getUserInfo = (req) => {
           role: req.user.role
       };
   
-      // 2. Lấy TẤT CẢ khách hàng
-      const allCustomers = await db.KhachHang.findAll({ raw: true });
+      // 2. Lấy khách hàng chưa bị xóa
+      const allCustomers = await db.KhachHang.findAll({ where: { isDeleted: false }, raw: true });
   
       const allBooks = await db.Sach.findAll({
+        where: { isDeleted: false },
         include: [{
           model: db.DauSach,
+          where: { isDeleted: false },
           required: true,
           include: [
             // 1. Join với bảng Thể Loại (Giữ nguyên)
             {
               model: db.TheLoai,
+              where: { isDeleted: false },
               required: false
             },
             // 2. Join với bảng Tác Giả (Thông qua CT_TacGia)
             {
               model: db.TacGia,
               as: 'TacGias',
+              where: { isDeleted: false },
               required: false, // Để sách chưa có tác giả vẫn hiện ra
               through: {
                 attributes: [] // (Tuỳ chọn) Ẩn các cột của bảng trung gian CT_TacGia để kết quả gọn hơn
@@ -129,8 +135,9 @@ const getUserInfo = (req) => {
     try {
         const userInfo = getUserInfo(req);
 
-        // 1. Lấy danh sách hóa đơn, JOIN với Khách hàng (bước này thay thế billController.index)
+        // 1. Lấy danh sách hóa đơn chưa bị xóa, JOIN với Khách hàng
         const bills = await db.HoaDon.findAll({
+            where: { isDeleted: false },
             include: [{ 
                 model: db.KhachHang, 
                 as: 'KhachHang',
@@ -178,7 +185,8 @@ const getReportPage = async (req, res) => {
            1. BÁO CÁO TỒN KHO
         ============================= */
         const dataTon = await db.Sach.findAll({
-            include: [{ model: db.DauSach }]
+            where: { isDeleted: false },
+            include: [{ model: db.DauSach, where: { isDeleted: false }, required: false }]
         });
 
         const ton = dataTon.map(item => ({
@@ -193,9 +201,10 @@ const getReportPage = async (req, res) => {
            2. BÁO CÁO CÔNG NỢ
         ============================= */
         const listKH = await db.KhachHang.findAll({
+            where: { isDeleted: false },
             include: [
-                { model: db.HoaDon },
-                { model: db.PhieuThuTien }
+                { model: db.HoaDon, where: { isDeleted: false }, required: false },
+                { model: db.PhieuThuTien, where: { isDeleted: false }, required: false }
             ]
         });
 
@@ -226,6 +235,7 @@ const getReportPage = async (req, res) => {
 
         const listHD = await db.HoaDon.findAll({
             where: {
+                isDeleted: false,
                 NgayLapHoaDon: {
                     [Op.between]: [
                         `${year}-${month}-01`,
@@ -281,8 +291,9 @@ const getReportPage = async (req, res) => {
     try {
         const userInfo = getUserInfo(req);
         
-        // 1. Lấy danh sách phiếu thu, JOIN với Khách hàng
+        // 1. Lấy danh sách phiếu thu chưa bị xóa, JOIN với Khách hàng
         const receipts = await db.PhieuThuTien.findAll({
+            where: { isDeleted: false },
             // PhieuThuTien.belongsTo(KhachHang) đã được thiết lập trong index.js
             include: [{ 
                 model: db.KhachHang, 

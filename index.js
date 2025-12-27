@@ -44,8 +44,8 @@ app.get("/", (req, res) => {
   });
 });
 
-const userRoutes = require("./routes/userRoutes");
-app.use("/", userRoutes);
+const loginRoutes = require("./routes/loginRoutes");
+app.use("/", loginRoutes);
 const protectedRoutes = express.Router();
 protectedRoutes.use(authenticateToken);
 

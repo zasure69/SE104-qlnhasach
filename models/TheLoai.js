@@ -15,6 +15,11 @@ const TheLoai = sequelize.define('TheLoai', {
   },
   MoTa: {
     type: DataTypes.STRING(500)
+  },
+  isDeleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false
   }
 }, {
   tableName: 'THELOAI',

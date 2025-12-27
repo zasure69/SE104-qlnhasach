@@ -43,6 +43,7 @@ const getImportPage = async (req, res) => {
 
     try {
       importReceipts = await db.PhieuNhapSach.findAll({
+        where: { isDeleted: false },
         include: [{ model: db.CT_PNS, as: "ChiTiet", required: false }],
         order: [["NgayNhapPhieu", "DESC"]],
         raw: false,
@@ -80,6 +81,7 @@ const getImportPage = async (req, res) => {
 const getAllImportReceipts = async (req, res) => {
   try {
     const receipts = await db.PhieuNhapSach.findAll({
+      where: { isDeleted: false },
       include: [{ model: db.CT_PNS, as: "ChiTiet", required: false }],
       order: [["NgayNhapPhieu", "DESC"]],
       raw: false,
@@ -421,7 +423,7 @@ const updateImportReceipt = async (req, res) => {
   }
 };
 
-// API: Xóa phiếu nhập sách
+// API: Xóa phiếu nhập sách (SOFT DELETE)
 const deleteImportReceipt = async (req, res) => {
   try {
     const maPhieu = req.params.maPhieu;
@@ -429,6 +431,11 @@ const deleteImportReceipt = async (req, res) => {
 
     if (!receipt) {
       return res.status(404).json({ error: "Không tìm thấy phiếu nhập" });
+    }
+
+    // Kiểm tra nếu phiếu nhập đã bị xóa rồi
+    if (receipt.isDeleted) {
+      return res.status(400).json({ error: "Phiếu nhập này đã bị xóa trước đó." });
     }
 
     // --- LOGIC MỚI: CHECK TỒN KHO TRƯỚC KHI XÓA ---
@@ -466,12 +473,8 @@ const deleteImportReceipt = async (req, res) => {
         }
       }
 
-      await db.CT_PNS.destroy({
-        where: { MaPhieuNhap: maPhieu },
-        transaction: t,
-      });
-
-      await receipt.destroy({ transaction: t });
+      // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
+      await receipt.update({ isDeleted: true }, { transaction: t });
     });
 
     return res.status(200).json({ message: "Xóa phiếu nhập thành công!" });

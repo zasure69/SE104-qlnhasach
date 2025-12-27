@@ -61,8 +61,9 @@ const createCustomer = async (req, res) => {
 // =============================================================
 const getCustomers = async (req, res) => {
   try {
-    // 1. Lấy TẤT CẢ khách hàng từ database (Giữ nguyên logic Sequelize của bạn)
+    // 1. Lấy khách hàng chưa bị xóa từ database
     const allCustomers = await db.KhachHang.findAll({
+        where: { isDeleted: false }, // Chỉ lấy những khách hàng chưa bị xóa
         raw: true // Lấy dữ liệu dạng JSON thuần
     });
 
@@ -107,7 +108,7 @@ const updateCustomer = async (req, res) => {
 };
 
 // =============================================================
-// HÀM XÓA KHÁCH HÀNG (DELETE)
+// HÀM XÓA KHÁCH HÀNG (SOFT DELETE)
 // =============================================================
 const deleteCustomer = async (req, res) => {
   const maKH = req.params.maKH;
@@ -118,14 +119,18 @@ const deleteCustomer = async (req, res) => {
       return res.status(404).json({ error: 'Không tìm thấy khách hàng.' });
     }
 
-    await customer.destroy();
+    // Kiểm tra nếu khách hàng đã bị xóa rồi
+    if (customer.isDeleted) {
+      return res.status(400).json({ error: 'Khách hàng này đã bị xóa trước đó.' });
+    }
+
+    // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
+    customer.isDeleted = true;
+    await customer.save();
+    
     res.status(200).json({ message: 'Xóa khách hàng thành công!' });
 
   } catch (err) {
-    // Xử lý lỗi nếu khách hàng này có Hóa đơn (không thể xóa)
-    if (err.name === 'SequelizeForeignKeyConstraintError') {
-        return res.status(400).json({ error: 'Xóa thất bại! Khách hàng này đã có hóa đơn hoặc phiếu thu.' });
-    }
     console.error(err);
     res.status(500).json({ error: 'Lỗi server nội bộ' });
   }

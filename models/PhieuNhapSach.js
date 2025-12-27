@@ -21,6 +21,11 @@ const PhieuNhapSach = sequelize.define(
     MaNhanVien: {
       type: DataTypes.STRING(20),
     },
+    isDeleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+    },
   },
   {
     tableName: "PHIEUNHAPSACH",

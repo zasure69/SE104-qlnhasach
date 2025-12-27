@@ -215,14 +215,16 @@ const getBooksPage = async (req, res) => {
     console.log("[bookController] getBooksPage called");
     const userInfo = { id: req.user.id, username: req.user.username, role: req.user.role };
 
-    // Fetch DauSach với JOIN TheLoai và TacGia
+    // Fetch DauSach với JOIN TheLoai và TacGia (chỉ lấy chưa bị xóa)
     console.log("[getBooksPage] Fetching DauSach with associations...");
     const dauSachsRaw = await db.DauSach.findAll({
+      where: { isDeleted: false },
       include: [
         {
           model: db.TheLoai,
           attributes: ["TenTheLoai"],
           required: false,
+          where: { isDeleted: false },
         },
         {
           model: db.TacGia,
@@ -230,6 +232,7 @@ const getBooksPage = async (req, res) => {
           through: { attributes: [] }, // Không lấy thông tin bảng trung gian
           attributes: ["MaTacGia", "HoTen"],
           required: false,
+          where: { isDeleted: false },
         },
       ],
       raw: false, // Để lấy được associations
@@ -251,12 +254,15 @@ const getBooksPage = async (req, res) => {
       };
     });
 
-    // Fetch Sach với JOIN DauSach, TheLoai, TacGia
+    // Fetch Sach với JOIN DauSach, TheLoai, TacGia (chỉ lấy chưa bị xóa)
     const sachsRaw = await db.Sach.findAll({
+      where: { isDeleted: false },
       include: [
         {
           model: db.DauSach,
           attributes: ["TenSach", "MaTheLoai"],
+          where: { isDeleted: false },
+          required: false,
           include: [
             {
               model: db.TheLoai,
@@ -271,7 +277,6 @@ const getBooksPage = async (req, res) => {
               required: false,
             },
           ],
-          required: false,
         },
       ],
       raw: false,
@@ -300,8 +305,8 @@ const getBooksPage = async (req, res) => {
     });
 
     const [authors, types] = await Promise.all([
-      db.TacGia.findAll({ raw: true }),
-      db.TheLoai.findAll({ raw: true }),
+      db.TacGia.findAll({ where: { isDeleted: false }, raw: true }),
+      db.TheLoai.findAll({ where: { isDeleted: false }, raw: true }),
     ]);
 
     console.log("[bookController] Fetched data:", {
@@ -333,7 +338,10 @@ const getBooksPage = async (req, res) => {
 // =====================================================
 const getAllDauSach = async (req, res) => {
   try {
-    const dauSachs = await db.DauSach.findAll({ raw: true });
+    const dauSachs = await db.DauSach.findAll({ 
+      where: { isDeleted: false },
+      raw: true 
+    });
     return res.status(200).json(dauSachs);
   } catch (err) {
     console.error("[bookController] getAllDauSach error", err);
@@ -712,9 +720,14 @@ const deleteDauSach = async (req, res) => {
       return res.status(404).json({ error: "Không tìm thấy Đầu sách" });
     }
 
-    // Kiểm tra xem có bản sách nào liên kết với đầu sách này không
+    // Kiểm tra nếu đầu sách đã bị xóa rồi
+    if (dauSach.isDeleted) {
+      return res.status(400).json({ error: "Đầu sách này đã bị xóa trước đó." });
+    }
+
+    // Kiểm tra xem có bản sách nào liên kết với đầu sách này không (chỉ tính sách chưa xóa)
     const sachLienKet = await db.Sach.findOne({
-      where: { MaDauSach: maDS },
+      where: { MaDauSach: maDS, isDeleted: false },
     });
 
     if (sachLienKet) {
@@ -722,16 +735,14 @@ const deleteDauSach = async (req, res) => {
         error: `Không thể xóa đầu sách "${
           dauSach.TenSach
         }". Vẫn còn ${await db.Sach.count({
-          where: { MaDauSach: maDS },
+          where: { MaDauSach: maDS, isDeleted: false },
         })} bản sách liên kết với đầu sách này. Vui lòng xóa các bản sách trước.`,
       });
     }
 
-    // Xóa các liên kết tác giả
-    await db.CT_TacGia.destroy({ where: { MaDauSach: maDS } });
-
-    // Xóa đầu sách
-    await dauSach.destroy();
+    // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
+    dauSach.isDeleted = true;
+    await dauSach.save();
 
     return res.status(200).json({ message: "Xóa đầu sách thành công!" });
   } catch (err) {
@@ -745,7 +756,10 @@ const deleteDauSach = async (req, res) => {
 // =====================================================
 const getAllSach = async (req, res) => {
   try {
-    const sachList = await db.Sach.findAll({ raw: true });
+    const sachList = await db.Sach.findAll({ 
+      where: { isDeleted: false },
+      raw: true 
+    });
     return res.status(200).json(sachList);
   } catch (err) {
     console.error("[bookController] getAllSach error", err);
@@ -923,11 +937,15 @@ const deleteSach = async (req, res) => {
       return res.status(404).json({ error: "Không tìm thấy Sách" });
     }
 
-    // Xóa các bản ghi liên quan trước khi xóa sách
-    await db.CT_PNS.destroy({ where: { MaSach: maSach } });
-    await db.CT_HD.destroy({ where: { MaSach: maSach } });
+    // Kiểm tra nếu sách đã bị xóa rồi
+    if (sach.isDeleted) {
+      return res.status(400).json({ error: "Sách này đã bị xóa trước đó." });
+    }
 
-    await sach.destroy();
+    // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
+    sach.isDeleted = true;
+    await sach.save();
+    
     return res.status(200).json({ message: "Xóa sách thành công!" });
   } catch (err) {
     console.error("[bookController] deleteSach error", err);
@@ -1021,9 +1039,14 @@ const deleteTheLoai = async (req, res) => {
       return res.status(404).json({ error: "Không tìm thấy thể loại" });
     }
 
-    // Check if category is used in DauSach
+    // Kiểm tra nếu thể loại đã bị xóa rồi
+    if (theLoai.isDeleted) {
+      return res.status(400).json({ error: "Thể loại này đã bị xóa trước đó." });
+    }
+
+    // Check if category is used in DauSach (chỉ tính đầu sách chưa xóa)
     const usedInDauSach = await db.DauSach.findOne({
-      where: { MaTheLoai: maTheLoai },
+      where: { MaTheLoai: maTheLoai, isDeleted: false },
     });
     if (usedInDauSach) {
       return res.status(400).json({
@@ -1031,7 +1054,10 @@ const deleteTheLoai = async (req, res) => {
       });
     }
 
-    await theLoai.destroy();
+    // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
+    theLoai.isDeleted = true;
+    await theLoai.save();
+    
     return res.status(200).json({ message: "Xóa thể loại thành công!" });
   } catch (err) {
     console.error("[bookController] deleteTheLoai error", err);
@@ -1151,9 +1177,19 @@ const deleteTacGia = async (req, res) => {
       return res.status(404).json({ error: "Không tìm thấy tác giả" });
     }
 
-    // Check if author is used in CT_TacGia
+    // Kiểm tra nếu tác giả đã bị xóa rồi
+    if (tacGia.isDeleted) {
+      return res.status(400).json({ error: "Tác giả này đã bị xóa trước đó." });
+    }
+
+    // Check if author is used in CT_TacGia (liên kết với đầu sách chưa xóa)
     const usedInCT = await db.CT_TacGia.findOne({
       where: { MaTacGia: maTacGia },
+      include: [{
+        model: db.DauSach,
+        where: { isDeleted: false },
+        required: true,
+      }],
     });
     if (usedInCT) {
       return res.status(400).json({
@@ -1161,7 +1197,10 @@ const deleteTacGia = async (req, res) => {
       });
     }
 
-    await tacGia.destroy();
+    // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
+    tacGia.isDeleted = true;
+    await tacGia.save();
+    
     return res.status(200).json({ message: "Xóa tác giả thành công!" });
   } catch (err) {
     console.error("[bookController] deleteTacGia error", err);

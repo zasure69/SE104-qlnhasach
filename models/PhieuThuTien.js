@@ -20,6 +20,11 @@ const PhieuThuTien = sequelize.define('PhieuThuTien', {
   SoTienThu: {
     type: DataTypes.INTEGER,
     allowNull: false
+  },
+  isDeleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false
   }
 }, {
   tableName: 'PHIEUTHUTIEN',

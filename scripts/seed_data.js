@@ -172,7 +172,7 @@ const seedData = async () => {
 
     // Seed Users
     const hashedPasswordAdmin = await bcrypt.hash('123', 10);
-    await db.User.create({
+    await db.NhanVien.create({
         MaNhanVien: 'NV001',
         HoTen: 'Admin User',
         NgaySinh: '1990-01-01',
@@ -183,7 +183,7 @@ const seedData = async () => {
         NgayNhanViec: '2022-01-01'
     });
     const hashedPasswordStaff = await bcrypt.hash('staff123', 10);
-    await db.User.create({
+    await db.NhanVien.create({
         MaNhanVien: 'NV002',
         HoTen: 'Staff User',
         NgaySinh: '1995-05-10',
