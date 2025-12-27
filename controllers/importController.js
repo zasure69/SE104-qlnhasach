@@ -484,11 +484,116 @@ const deleteImportReceipt = async (req, res) => {
   }
 };
 
+// =====================================================
+// ADMIN ONLY: LẤY DANH SÁCH PHIẾU NHẬP ĐÃ XÓA
+// =====================================================
+const getDeletedImportReceipts = async (req, res) => {
+  try {
+    const receipts = await db.PhieuNhapSach.findAll({
+      where: { isDeleted: true },
+      include: [{ model: db.CT_PNS, as: "ChiTiet", required: false }],
+      order: [["NgayNhapPhieu", "DESC"]],
+      raw: false,
+    });
+    return res.status(200).json({ receipts });
+  } catch (err) {
+    console.error("[importController] getDeletedImportReceipts error", err);
+    return res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
+// =====================================================
+// ADMIN ONLY: KHÔI PHỤC PHIẾU NHẬP ĐÃ XÓA
+// =====================================================
+const restoreImportReceipt = async (req, res) => {
+  try {
+    const maPhieu = req.params.maPhieu;
+    const receipt = await db.PhieuNhapSach.findByPk(maPhieu);
+
+    if (!receipt) {
+      return res.status(404).json({ error: "Không tìm thấy phiếu nhập" });
+    }
+
+    if (!receipt.isDeleted) {
+      return res.status(400).json({ error: "Phiếu nhập này chưa bị xóa." });
+    }
+
+    // Khôi phục phiếu nhập và cộng lại tồn kho
+    await db.sequelize.transaction(async (t) => {
+      const details = await db.CT_PNS.findAll({
+        where: { MaPhieuNhap: maPhieu },
+        transaction: t,
+      });
+
+      for (const detail of details) {
+        const sach = await db.Sach.findByPk(detail.MaSach, { transaction: t });
+        if (sach) {
+          await sach.update(
+            { SoLuongTon: sach.SoLuongTon + detail.SoLuong },
+            { transaction: t }
+          );
+        }
+      }
+
+      await receipt.update({ isDeleted: false }, { transaction: t });
+    });
+
+    return res.status(200).json({ message: "Khôi phục phiếu nhập thành công!" });
+  } catch (err) {
+    console.error("[importController] restoreImportReceipt error", err);
+    return res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
+// =====================================================
+// ADMIN ONLY: XÓA VĨNH VIỄN PHIẾU NHẬP (HARD DELETE)
+// =====================================================
+const hardDeleteImportReceipt = async (req, res) => {
+  try {
+    const maPhieu = req.params.maPhieu;
+    const receipt = await db.PhieuNhapSach.findByPk(maPhieu);
+
+    if (!receipt) {
+      return res.status(404).json({ error: "Không tìm thấy phiếu nhập" });
+    }
+
+    if (!receipt.isDeleted) {
+      return res.status(400).json({ 
+        error: "Chỉ có thể xóa vĩnh viễn phiếu nhập đã được xóa mềm trước đó." 
+      });
+    }
+
+    await db.sequelize.transaction(async (t) => {
+      // Xóa chi tiết phiếu nhập trước
+      await db.CT_PNS.destroy({
+        where: { MaPhieuNhap: maPhieu },
+        transaction: t,
+      });
+
+      // Xóa phiếu nhập
+      await receipt.destroy({ transaction: t });
+    });
+
+    return res.status(200).json({ message: "Đã xóa vĩnh viễn phiếu nhập khỏi hệ thống!" });
+  } catch (err) {
+    if (err.name === "SequelizeForeignKeyConstraintError") {
+      return res.status(400).json({
+        error: "Xóa thất bại! Phiếu nhập này có dữ liệu liên quan trong hệ thống.",
+      });
+    }
+    console.error("[importController] hardDeleteImportReceipt error", err);
+    return res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
 module.exports = {
   getImportPage,
   getAllImportReceipts,
+  getDeletedImportReceipts,
   getImportReceiptById,
   createImportReceipt,
   updateImportReceipt,
   deleteImportReceipt,
+  restoreImportReceipt,
+  hardDeleteImportReceipt,
 };

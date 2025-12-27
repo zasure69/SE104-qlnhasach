@@ -136,9 +136,86 @@ const deleteCustomer = async (req, res) => {
   }
 };
 
+// =============================================================
+// HÀM LẤY DANH SÁCH KHÁCH HÀNG ĐÃ XÓA (ADMIN ONLY)
+// =============================================================
+const getDeletedCustomers = async (req, res) => {
+  try {
+    const customers = await db.KhachHang.findAll({
+      where: { isDeleted: true },
+      raw: true,
+    });
+    res.status(200).json(customers);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Lỗi server nội bộ' });
+  }
+};
+
+// =============================================================
+// HÀM KHÔI PHỤC KHÁCH HÀNG ĐÃ XÓA (ADMIN ONLY)
+// =============================================================
+const restoreCustomer = async (req, res) => {
+  const maKH = req.params.maKH;
+
+  try {
+    const customer = await db.KhachHang.findByPk(maKH);
+    if (!customer) {
+      return res.status(404).json({ error: 'Không tìm thấy khách hàng.' });
+    }
+
+    if (!customer.isDeleted) {
+      return res.status(400).json({ error: 'Khách hàng này chưa bị xóa.' });
+    }
+
+    customer.isDeleted = false;
+    await customer.save();
+    
+    res.status(200).json({ message: 'Khôi phục khách hàng thành công!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Lỗi server nội bộ' });
+  }
+};
+
+// =============================================================
+// HÀM XÓA VĨNH VIỄN KHÁCH HÀNG (ADMIN ONLY - HARD DELETE)
+// =============================================================
+const hardDeleteCustomer = async (req, res) => {
+  const maKH = req.params.maKH;
+
+  try {
+    const customer = await db.KhachHang.findByPk(maKH);
+    if (!customer) {
+      return res.status(404).json({ error: 'Không tìm thấy khách hàng.' });
+    }
+
+    // Chỉ cho phép xóa vĩnh viễn những khách hàng đã soft delete
+    if (!customer.isDeleted) {
+      return res.status(400).json({ 
+        error: 'Chỉ có thể xóa vĩnh viễn khách hàng đã được xóa mềm trước đó.' 
+      });
+    }
+
+    await customer.destroy();
+    res.status(200).json({ message: 'Đã xóa vĩnh viễn khách hàng khỏi hệ thống!' });
+  } catch (err) {
+    if (err.name === 'SequelizeForeignKeyConstraintError') {
+      return res.status(400).json({
+        error: 'Xóa thất bại! Khách hàng này có dữ liệu liên quan trong hệ thống.',
+      });
+    }
+    console.error(err);
+    res.status(500).json({ error: 'Lỗi server nội bộ' });
+  }
+};
+
 module.exports = {
   createCustomer,
   getCustomers,
+  getDeletedCustomers,
   updateCustomer,
-  deleteCustomer
+  deleteCustomer,
+  restoreCustomer,
+  hardDeleteCustomer
 };

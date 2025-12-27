@@ -13,6 +13,10 @@ router.post('/registerEmployee', authorizeAdmin, employeeController.registerEmpl
 router.patch('/updateEmployee/:maNV', authorizeAdmin, employeeController.updateEmployee);
 router.delete('/deleteEmployee/:maNV', authorizeAdmin, employeeController.deleteEmployee);
 router.get('/check-employee/:maNV', employeeController.checkEmployeeExists);
-// (thêm các route admin khác ở đây)
+
+// === ADMIN ONLY: Quản lý dữ liệu đã xóa ===
+router.get('/deleted', authorizeAdmin, employeeController.getDeletedEmployees);
+router.patch('/restore/:maNV', authorizeAdmin, employeeController.restoreEmployee);
+router.delete('/hard-delete/:maNV', authorizeAdmin, employeeController.hardDeleteEmployee);
 
 module.exports = router;

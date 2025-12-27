@@ -316,6 +316,71 @@ const getReportPage = async (req, res) => {
     }
 };
 
+// =============================================================
+//  ADMIN: Trang quản lý dữ liệu đã xóa
+// =============================================================
+const getTrashPage = async (req, res) => {
+  try {
+    const userInfo = getUserInfo(req);
+
+    // Lấy tất cả dữ liệu đã xóa mềm
+    const [
+      deletedEmployees,
+      deletedCustomers,
+      deletedDauSach,
+      deletedSach,
+      deletedTheLoai,
+      deletedTacGia,
+      deletedImports,
+      deletedBills,
+      deletedReceipts
+    ] = await Promise.all([
+      db.NhanVien.findAll({ where: { isDeleted: true }, raw: true }),
+      db.KhachHang.findAll({ where: { isDeleted: true }, raw: true }),
+      db.DauSach.findAll({ 
+        where: { isDeleted: true }, 
+        include: [{ model: db.TheLoai, attributes: ['TenTheLoai'], required: false }],
+        raw: false 
+      }),
+      db.Sach.findAll({ 
+        where: { isDeleted: true },
+        include: [{ model: db.DauSach, attributes: ['TenSach'], required: false }],
+        raw: false
+      }),
+      db.TheLoai.findAll({ where: { isDeleted: true }, raw: true }),
+      db.TacGia.findAll({ where: { isDeleted: true }, raw: true }),
+      db.PhieuNhapSach.findAll({ where: { isDeleted: true }, raw: true }),
+      db.HoaDon.findAll({ 
+        where: { isDeleted: true },
+        include: [{ model: db.KhachHang, attributes: ['HoVaTen'], required: false }],
+        raw: false
+      }),
+      db.PhieuThuTien.findAll({ 
+        where: { isDeleted: true },
+        include: [{ model: db.KhachHang, as: 'KhachHang', attributes: ['HoVaTen'], required: false }],
+        raw: false
+      })
+    ]);
+
+    res.render('admin_trash', {
+      ...userInfo,
+      deletedEmployees,
+      deletedCustomers,
+      deletedDauSach: deletedDauSach.map(d => d.get({ plain: true })),
+      deletedSach: deletedSach.map(s => s.get({ plain: true })),
+      deletedTheLoai,
+      deletedTacGia,
+      deletedImports,
+      deletedBills: deletedBills.map(b => b.get({ plain: true })),
+      deletedReceipts: deletedReceipts.map(r => r.get({ plain: true }))
+    });
+
+  } catch (err) {
+    console.error('Lỗi render trang thùng rác:', err);
+    res.status(500).send('Lỗi Server: ' + err.message);
+  }
+};
+
   // Xuất tất cả các hàm
 module.exports = {
     getDashboardPage,
@@ -325,5 +390,6 @@ module.exports = {
     getChangeRulePage,
     getBillsPage,
     getReceiptsPage,
-    getReportPage 
+    getReportPage,
+    getTrashPage
   };

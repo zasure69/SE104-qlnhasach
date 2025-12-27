@@ -289,6 +289,80 @@ const deleteEmployee = async (req, res) => {
   }
 };
 
+// =============================================================
+// HÀM LẤY DANH SÁCH NHÂN VIÊN ĐÃ XÓA (ADMIN ONLY)
+// =============================================================
+const getDeletedEmployees = async (req, res) => {
+  try {
+    const employees = await db.NhanVien.findAll({
+      where: { isDeleted: true },
+      raw: true,
+    });
+    res.status(200).json(employees);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
+// =============================================================
+// HÀM KHÔI PHỤC NHÂN VIÊN ĐÃ XÓA (ADMIN ONLY)
+// =============================================================
+const restoreEmployee = async (req, res) => {
+  const maNhanVien = req.params.maNV;
+
+  try {
+    const user = await db.NhanVien.findByPk(maNhanVien);
+    if (!user) {
+      return res.status(404).json({ error: "Không tìm thấy nhân viên." });
+    }
+
+    if (!user.isDeleted) {
+      return res.status(400).json({ error: "Nhân viên này chưa bị xóa." });
+    }
+
+    user.isDeleted = false;
+    await user.save();
+    
+    res.status(200).json({ message: "Khôi phục nhân viên thành công!" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
+// =============================================================
+// HÀM XÓA VĨNH VIỄN NHÂN VIÊN (ADMIN ONLY - HARD DELETE)
+// =============================================================
+const hardDeleteEmployee = async (req, res) => {
+  const maNhanVien = req.params.maNV;
+
+  try {
+    const user = await db.NhanVien.findByPk(maNhanVien);
+    if (!user) {
+      return res.status(404).json({ error: "Không tìm thấy nhân viên." });
+    }
+
+    // Chỉ cho phép xóa vĩnh viễn những nhân viên đã soft delete
+    if (!user.isDeleted) {
+      return res.status(400).json({ 
+        error: "Chỉ có thể xóa vĩnh viễn nhân viên đã được xóa mềm trước đó." 
+      });
+    }
+
+    await user.destroy();
+    res.status(200).json({ message: "Đã xóa vĩnh viễn nhân viên khỏi hệ thống!" });
+  } catch (err) {
+    if (err.name === "SequelizeForeignKeyConstraintError") {
+      return res.status(400).json({
+        error: "Xóa thất bại! Nhân viên này có dữ liệu liên quan trong hệ thống.",
+      });
+    }
+    console.error(err);
+    res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
 // --- THÊM: HÀM ĐĂNG XUẤT ---
 const logout = (req, res) => {
   res.clearCookie("authToken"); // Xóa cookie
@@ -298,9 +372,12 @@ const logout = (req, res) => {
 module.exports = {
   getLoginPage,
   getEmployees,
+  getDeletedEmployees,
   registerEmployee,
   updateEmployee,
   deleteEmployee,
+  restoreEmployee,
+  hardDeleteEmployee,
   checkEmployeeExists,
   login,
   logout,

@@ -386,6 +386,13 @@
                 ><i class="fas fa-gavel"></i>Thay đổi quy định</a
               >
             </li>
+            <% if (role === 'Admin' || role === 'Owner') { %>
+            <li>
+              <a href="/dashboard/trash"
+                ><i class="fas fa-trash-alt"></i> Thùng rác</a
+              >
+            </li>
+            <% } %>
           </ul>
         </nav>
       </aside>

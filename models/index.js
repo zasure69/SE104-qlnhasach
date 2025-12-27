@@ -61,6 +61,12 @@ TacGia.belongsToMany(DauSach, {
   as: "DauSachs", // Đặt alias rõ ràng
 });
 
+// 5a. CT_TacGia <-> DauSach và TacGia (One-to-Many để hỗ trợ include trực tiếp)
+CT_TacGia.belongsTo(DauSach, { foreignKey: "MaDauSach" });
+DauSach.hasMany(CT_TacGia, { foreignKey: "MaDauSach" });
+CT_TacGia.belongsTo(TacGia, { foreignKey: "MaTacGia" });
+TacGia.hasMany(CT_TacGia, { foreignKey: "MaTacGia" });
+
 // 6. Sach Relationships
 Sach.hasMany(BaoCaoTon, { foreignKey: "MaSach" });
 BaoCaoTon.belongsTo(Sach, { foreignKey: "MaSach" });
