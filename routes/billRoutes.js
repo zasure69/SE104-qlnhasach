@@ -2,22 +2,28 @@
 const express = require('express');
 const router = express.Router();
 const billController = require('../controllers/billController');
+const authorizeAdmin = require('../middleware/authAdminMiddleware');
 
-//LẤY THÔNG TIN (GET)
+// LAY THONG TIN (GET)
 router.get('/customer/:MaKH', billController.getCustomerInfo);  
 router.get('/book/:MaSach', billController.getBookInfo);          
 router.get('/detail/:MaHD', billController.getDetail);          
 
-//TẠO HÓA ĐƠN (POST)
+// TAO HOA DON (POST)
 router.post('/create', billController.create);                
 
-//HỈNH SỬA HÓA ĐƠN (PUT)
+// CHINH SUA HOA DON (PUT)
 router.put('/:MaHD', billController.updateBill); 
 
-//XÓA HÓA ĐƠN (DELETE)
+// XOA HOA DON (DELETE - SOFT)
 router.delete('/:MaHD', billController.deleteBill); 
 
-//LẤY HÓA ĐƠN GẦN NHẤT
+// LAY HOA DON GAN NHAT
 router.get('/lastMaHD', billController.getLastMaHD);
+
+// === ADMIN ONLY: Quan ly du lieu da xoa ===
+router.get('/admin/deleted', authorizeAdmin, billController.getDeletedBills);
+router.patch('/admin/restore/:MaHD', authorizeAdmin, billController.restoreBill);
+router.delete('/admin/hard-delete/:MaHD', authorizeAdmin, billController.hardDeleteBill);
 
 module.exports = router;

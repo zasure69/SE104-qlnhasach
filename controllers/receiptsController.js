@@ -191,11 +191,111 @@ const getReceiptDetail = async (req, res) => {
     }
 };
 
+// =====================================================
+// ADMIN ONLY: LẤY DANH SÁCH PHIẾU THU ĐÃ XÓA
+// =====================================================
+const getDeletedReceipts = async (req, res) => {
+    try {
+        const receipts = await PhieuThuTien.findAll({
+            where: { isDeleted: true },
+            include: [{ 
+                model: KhachHang, 
+                as: 'KhachHang', 
+                attributes: ['HoVaTen', 'TongNo'] 
+            }],
+            order: [['NgayThuTien', 'DESC']],
+        });
+        res.status(200).json({ receipts });
+    } catch (error) {
+        console.error("[receiptsController] getDeletedReceipts error:", error);
+        res.status(500).json({ message: 'Lỗi server nội bộ' });
+    }
+};
+
+// =====================================================
+// ADMIN ONLY: KHÔI PHỤC PHIẾU THU ĐÃ XÓA
+// =====================================================
+const restoreReceipt = async (req, res) => {
+    const MaPhieuThu = req.params.MaPhieuThu;
+    const t = await sequelize.transaction();
+
+    try {
+        const receipt = await PhieuThuTien.findByPk(MaPhieuThu, { transaction: t });
+        if (!receipt) {
+            await t.rollback();
+            return res.status(404).json({ message: 'Không tìm thấy phiếu thu.' });
+        }
+
+        if (!receipt.isDeleted) {
+            await t.rollback();
+            return res.status(400).json({ message: 'Phiếu thu này chưa bị xóa.' });
+        }
+
+        const soTienThu = parseFloat(receipt.SoTienThu);
+
+        // Khôi phục: Giảm nợ khách hàng (vì phiếu thu đã thu tiền)
+        await KhachHang.increment('TongNo', { 
+            by: -soTienThu, 
+            where: { MaKhachHang: receipt.MaKhachHang }, 
+            transaction: t 
+        });
+
+        // Khôi phục phiếu thu
+        await PhieuThuTien.update(
+            { isDeleted: false },
+            { where: { MaPhieuThu }, transaction: t }
+        );
+
+        await t.commit();
+        res.json({ message: `Đã khôi phục phiếu thu ${MaPhieuThu} thành công.` });
+    } catch (error) {
+        await t.rollback();
+        console.error("Lỗi khi khôi phục phiếu thu:", error);
+        res.status(500).json({ message: `Lỗi server: ${error.message}` });
+    }
+};
+
+// =====================================================
+// ADMIN ONLY: XÓA VĨNH VIỄN PHIẾU THU (HARD DELETE)
+// =====================================================
+const hardDeleteReceipt = async (req, res) => {
+    const MaPhieuThu = req.params.MaPhieuThu;
+    const t = await sequelize.transaction();
+
+    try {
+        const receipt = await PhieuThuTien.findByPk(MaPhieuThu, { transaction: t });
+        if (!receipt) {
+            await t.rollback();
+            return res.status(404).json({ message: 'Không tìm thấy phiếu thu.' });
+        }
+
+        if (!receipt.isDeleted) {
+            await t.rollback();
+            return res.status(400).json({ 
+                message: 'Chỉ có thể xóa vĩnh viễn phiếu thu đã được xóa mềm trước đó.' 
+            });
+        }
+
+        // Xóa phiếu thu
+        await receipt.destroy({ transaction: t });
+
+        await t.commit();
+        res.json({ message: `Đã xóa vĩnh viễn phiếu thu ${MaPhieuThu} khỏi hệ thống.` });
+    } catch (error) {
+        await t.rollback();
+        console.error("Lỗi khi xóa vĩnh viễn phiếu thu:", error);
+        res.status(500).json({ message: `Lỗi server: ${error.message}` });
+    }
+};
+
 module.exports = {
     getCustomerInfo,
     getLastMaPhieuThu,
     createReceipt,
     updateReceipt,
     deleteReceipt,
+    getDeletedReceipts,
+    restoreReceipt,
+    hardDeleteReceipt,
     getReceiptDetail
 };

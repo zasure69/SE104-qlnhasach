@@ -5,6 +5,7 @@ const dashboardController = require("../controllers/dashboardController");
 const bookController = require("../controllers/bookController");
 const importController = require("../controllers/importController");
 const reportRoutes = require("./reportRoutes");
+const authorizeAdmin = require("../middleware/authAdminMiddleware");
 
 // GET /dashboard/ -> Trang tổng quan
 router.get('/', dashboardController.getDashboardPage);
@@ -20,5 +21,8 @@ router.use('/', reportRoutes);
 router.get("/books", bookController.getBooksPage);
 // Render import books page
 router.get("/books_import", importController.getImportPage);
+
+// ADMIN: Trang quản lý dữ liệu đã xóa (Thùng rác)
+router.get('/trash', authorizeAdmin, dashboardController.getTrashPage);
 
 module.exports = router;
