@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="vi">
+ 
+
 <head>
+       <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+       <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Báo cáo tổng kết</title> 
@@ -200,7 +205,16 @@
             margin-top: 0; /* Xóa margin top */
             border-top: none; /* Xóa border top */
         }
+        /* ====== GIỚI HẠN KÍCH THƯỚC BIỂU ĐỒ TRÒN ====== */
+.chart-small {
+    width: 450px;        /*chỉnh nhỏ / to tại đây */
+    margin: 25px auto;   /* căn giữa */
+}
 
+.chart-small canvas {
+    width: 100% !important;
+    height: auto !important;
+}
         /* --- CSS NHÃN BẢNG KẾT QUẢ --- */
         .table-caption {
             font-size: 1.1rem;         /* Cỡ chữ vừa phải */
@@ -223,6 +237,34 @@
         .toast.error { border-left-color: var(--red-accent); }
         .toast.error .toast-icon { color: var(--red-accent); }
         .toast-message { font-size: 0.9rem; font-weight: 500; color: var(--text-dark); }
+        .report-filter-and-buttons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.btn-green {
+    background-color: #1abc9c;
+    color: white;
+    padding: 12px 0;
+    flex: 1;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-green:hover {
+    background-color: #17a589;
+}
         /* --- HẾT CSS MỚI --- */
 
         /* --- Responsive Design --- */
@@ -248,6 +290,30 @@
             .tab-content { padding: 1rem; }
             .report-filter { flex-direction: column; align-items: flex-start; } /* Xếp chồng bộ lọc */
         }
+        @media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .tab-pane.active, .tab-pane.active * {
+        visibility: visible;
+    }
+
+    .tab-pane.active {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    .sidebar,
+    .top-bar,
+    .tab-nav,
+    .btn-green {
+        display: none !important;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -322,7 +388,15 @@
                              <div class="date-input-wrapper">
                                  <input type="month" id="month-ton" value="1999-01"> <!-- Giá trị mẫu YYYY-MM -->
                              </div>
+                             <button class="btn-green" id="btn-xem-bieudo-ton">XEM BIỂU ĐỒ</button>
+                            <button class="btn-green" id="btn-xuat-ton">XUẤT BÁO CÁO</button>
+                            <button class="btn-green" id="btn-in-ton">IN BÁO CÁO</button>
                         </div>
+                        <div id="chart-ton-wrapper" style="margin-top:30px; display:none;">
+    <h3 style="text-align:center;">Biểu đồ tồn kho</h3>
+    <canvas id="chart-ton-kho" height="120"></canvas>
+</div>
+
                         <div class="table-responsive">
                             <h3 class="table-caption">Chi tiết báo cáo</h3>
                             <table class="data-table" id="inventory-report-table"> 
@@ -339,9 +413,9 @@
                                 <tbody>
                                     <% if (bcton && bcton.length > 0) { %>
                                 <% bcton.forEach((bcton, index) => { %>
-                                    <tr data-id="<%= bcton.TenThamSo %>"">
+                                    <tr data-id="<%= bcton.TenThamSo %>">
                                         <td><%= index + 1 %></td>
-                                        <td><%= bcton.MaSach %></td>
+                                        <td><%= bcton.TenSach %></td>
                                         <td><%= bcton.TonDau %></td>
                                         <td><%= bcton.NhapTrongThang %></td>
                                         <td><%= bcton.BanTrongThang %></td>
@@ -362,12 +436,19 @@
 
                     <!-- Tab Pane: Báo cáo công nợ -->
                     <div class="tab-pane" id="tab-cong-no">
-                         <div class="report-filter">
+                         <div class="report-filter-and-buttons">
                              <label for="month-cong-no">Tháng Năm</label>
                              <div class="date-input-wrapper">
                                  <input type="month" id="month-cong-no" value="1999-01">
                              </div>
+                              <button class="btn-green" id="btn-xem-bieudo-congno">XEM BIỂU ĐỒ</button>
+        <button class="btn-green" id="btn-xuat-congno">XUẤT BÁO CÁO</button>
+        <button class="btn-green" id="btn-in-congno">IN BÁO CÁO</button>
                         </div>
+                        <div id="chart-congno-wrapper" style="margin-top:30px; display:none;">
+    <h3 style="text-align:center;">Biểu đồ công nợ (Nợ cuối)</h3>
+    <canvas id="chart-congno" height="120"></canvas>
+</div>
                         <div class="table-responsive">
                             <h3 class="table-caption">Chi tiết báo cáo</h3>
                             <table class="data-table" id="debt-report-table"> 
@@ -382,8 +463,8 @@
                                     </tr> 
                                 </thead>
                                 <tbody>
-                                    <% if (bccongno && bccongno.length > 0) { %>
-                                <% bcongno.forEach((bccongno, index) => { %>
+                                   <% if (bccongno && bccongno.length > 0) { %> <% bcongno.forEach((bccongno, index) => { %>
+
                                     <tr data-id="<%= bcton.TenThamSo %>"">
                                         <td><%= index + 1 %></td>
                                         <td><%= bccongno.MaKhachHang %></td>
@@ -413,7 +494,16 @@
                              <div class="date-input-wrapper">
                                  <input type="month" id="month-doanh-thu" value="1999-01">
                              </div>
+                             <button class="btn-green" id="btn-xem-bieudo-doanhthu">XEM BIỂU ĐỒ</button>
+        <button class="btn-green" id="btn-xuat-doanhthu">XUẤT BÁO CÁO</button>
+        <button class="btn-green" id="btn-in-doanhthu">IN BÁO CÁO</button>
                         </div>
+                       <div id="chart-doanhthu-wrapper" class="chart-small" style="display:none;">
+    <h3 style="text-align:center;">Tỉ lệ doanh thu theo thể loại</h3>
+    <canvas id="chart-doanhthu"></canvas>
+</div>
+
+
                         <div class="table-responsive">
                             <h3 class="table-caption">Chi tiết báo cáo</h3>
                             <div class="report-summary" id="display-tong-doanh-thu">
@@ -460,6 +550,20 @@
     </div>
 
 <script>
+    function tableHasNoData(rows) {
+    return (
+        rows.length === 0 ||
+        (rows.length === 1 &&
+         rows[0].innerText.toLowerCase().includes("không có"))
+    );
+}
+
+function confirmPrint(title = "báo cáo") {
+    const ok = confirm(`Bạn có muốn in ${title} không?`);
+    if (ok) {
+        window.print();
+    }
+}
     document.addEventListener('DOMContentLoaded', function() {
 
         // ============================================================
@@ -633,24 +737,95 @@
         const inputTon = document.getElementById('month-ton');
 
         // --- Sự kiện khi chọn ngày (Thay đổi Input) ---
-        if(inputDoanhThu) {
-            inputDoanhThu.addEventListener('change', async function() {
-                const result = await fetchReportData('doanhthu', this.value);
-                if (result) renderRevenueTable(result.data, result.totalRevenue);
-            });
-        }
+        if (inputDoanhThu) {
+    inputDoanhThu.addEventListener('change', async function () {
+        const result = await fetchReportData('doanhthu', this.value);
+        if (!result) return;
 
-        if(inputCongNo) {
-            inputCongNo.addEventListener('change', async function() {
-                const result = await fetchReportData('congno', this.value);
-                if (result) renderDebtTable(result.data);
-            });
-        }
+        // 1. Render lại bảng
+        renderRevenueTable(result.data, result.totalRevenue);
 
-        if(inputTon) {
-            inputTon.addEventListener('change', async function() {
-                const result = await fetchReportData('ton', this.value);
-                if (result) renderInventoryTable(result.data);
+        // 2. NẾU biểu đồ doanh thu đang tồn tại → UPDATE
+        if (doanhThuChart) {
+            const rows = document.querySelectorAll("#revenue-report-table tbody tr");
+            const labels = [];
+            const data = [];
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("td");
+                if (cells.length >= 5) {
+                    labels.push(cells[1].innerText.trim()); // Thể loại
+                    data.push(
+                        Number(cells[3].innerText.replace(/[^\d]/g, "")) || 0
+                    ); // Thành tiền
+                }
+            });
+
+            doanhThuChart.data.labels = labels;
+            doanhThuChart.data.datasets[0].data = data;
+            doanhThuChart.update();
+        }
+    });
+}
+
+        if (inputCongNo) {
+    inputCongNo.addEventListener('change', async function () {
+        const result = await fetchReportData('congno', this.value);
+        if (!result) return;
+
+        renderDebtTable(result.data);
+
+        // Nếu biểu đồ đang mở → cập nhật
+        const wrapper = document.getElementById("chart-congno-wrapper");
+        if (congNoChart && wrapper.style.display === "block") {
+            const rows = document.querySelectorAll("#debt-report-table tbody tr");
+            const labels = [];
+            const data = [];
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("td");
+                if (cells.length >= 6) {
+                    labels.push(cells[2].innerText.trim());
+                    data.push(Number(
+                        cells[5].innerText.replace(/[^\d]/g, "")
+                    ) || 0);
+                }
+            });
+
+            congNoChart.data.labels = labels;
+            congNoChart.data.datasets[0].data = data;
+            congNoChart.update();
+        }
+    });
+}
+
+        if (inputTon) {
+    inputTon.addEventListener('change', async function () {
+        const result = await fetchReportData('ton', this.value);
+        if (!result) return;
+
+        renderInventoryTable(result.data);
+
+        // Nếu biểu đồ đang tồn tại & đang hiện → update
+        const wrapper = document.getElementById("chart-ton-wrapper");
+        if (tonKhoChart && wrapper.style.display === "block") {
+            const rows = document.querySelectorAll("#inventory-report-table tbody tr");
+            const labels = [];
+            const data = [];
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("td");
+                if (cells.length >= 6) {
+                    labels.push(cells[1].innerText.trim());
+                    data.push(Number(cells[5].innerText) || 0);
+                }
+            });
+
+            tonKhoChart.data.labels = labels;
+            tonKhoChart.data.datasets[0].data = data;
+            tonKhoChart.update();
+        }
+    
             });
         }
 
@@ -706,6 +881,249 @@
     }
 
     });
+  
+    let tonKhoChart = null;
+    let congNoChart = null;
+    let doanhThuChart = null;
+document.addEventListener("DOMContentLoaded", function () {
+document.getElementById("btn-xem-bieudo-ton")
+.addEventListener("click", function () {
+
+    const wrapper = document.getElementById("chart-ton-wrapper");
+    const ctx = document.getElementById("chart-ton-kho").getContext("2d");
+
+    if (wrapper.style.display === "block") {
+        wrapper.style.display = "none";
+        return;
+    }
+
+    const rows = document.querySelectorAll("#inventory-report-table tbody tr");
+
+    //KHÔNG CÓ DỮ LIỆU
+    if (tableHasNoData(rows)) {
+        alert("Không có dữ liệu tồn kho tháng này");
+        return;
+    }
+
+    const labels = [];
+    const data = [];
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        labels.push(cells[1].innerText.trim());
+        data.push(Number(cells[5].innerText) || 0);
+    });
+
+    if (tonKhoChart) tonKhoChart.destroy();
+
+    tonKhoChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels,
+            datasets: [{
+                label: "Tồn cuối",
+                data,
+                backgroundColor: "#1abc9c"
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    wrapper.style.display = "block";
+});
+
+document.getElementById("btn-xem-bieudo-congno")
+.addEventListener("click", function () {
+
+    const wrapper = document.getElementById("chart-congno-wrapper");
+    const ctx = document.getElementById("chart-congno").getContext("2d");
+
+    if (wrapper.style.display === "block") {
+        wrapper.style.display = "none";
+        return;
+    }
+
+    const rows = document.querySelectorAll("#debt-report-table tbody tr");
+
+    // KHÔNG CÓ DỮ LIỆU
+    if (tableHasNoData(rows)) {
+        alert("Không có dữ liệu công nợ tháng này");
+        return;
+    }
+
+    const labels = [];
+    const data = [];
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        labels.push(cells[2].innerText.trim());
+        data.push(Number(cells[5].innerText.replace(/[^\d]/g, "")) || 0);
+    });
+
+    if (congNoChart) congNoChart.destroy();
+
+    congNoChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels,
+            datasets: [{
+                label: "Nợ cuối",
+                data,
+                backgroundColor: "#3498db"
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    wrapper.style.display = "block";
+});
+
+document.getElementById("btn-xem-bieudo-doanhthu")
+.addEventListener("click", function () {
+
+    const wrapper = document.getElementById("chart-doanhthu-wrapper");
+    const ctx = document.getElementById("chart-doanhthu").getContext("2d");
+
+    if (wrapper.style.display === "block") {
+        wrapper.style.display = "none";
+        return;
+    }
+
+    const rows = document.querySelectorAll("#revenue-report-table tbody tr");
+
+    // KHÔNG CÓ DỮ LIỆU
+    if (tableHasNoData(rows)) {
+        alert("Không có dữ liệu doanh thu tháng này");
+        return;
+    }
+
+    const labels = [];
+    const data = [];
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        labels.push(cells[1].innerText.trim());
+        data.push(Number(cells[4].innerText.replace('%', '')) || 0);
+    });
+
+    if (doanhThuChart) doanhThuChart.destroy();
+
+    doanhThuChart = new Chart(ctx, {
+        type: "pie",
+        data: {
+            labels,
+            datasets: [{
+                data,
+                backgroundColor: [
+                    "#1abc9c", "#3498db", "#9b59b6",
+                    "#f1c40f", "#e67e22", "#e74c3c"
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: "right" }
+            }
+        }
+    });
+
+    wrapper.style.display = "block";
+});
+
+
+
+    document.getElementById("btn-xuat-ton").addEventListener("click", function () {
+    const table = document.getElementById("inventory-report-table");
+
+    if (!table) {
+        alert("Không tìm thấy bảng dữ liệu!");
+        return;
+    }
+
+    // Lấy tháng năm để đặt tên file
+    const monthValue = document.getElementById("month-ton").value || "baocao";
+    const fileName = `Bao_cao_ton_${monthValue}.xlsx`;
+
+    // Chuyển HTML table → worksheet
+    const worksheet = XLSX.utils.table_to_sheet(table);
+
+    // Tạo workbook
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "BaoCaoTon");
+
+    // Xuất file Excel
+    XLSX.writeFile(workbook, fileName);
+});
+
+
+// In báo cáo tồn
+document.getElementById("btn-in-ton")?.addEventListener("click", function () {
+    confirmPrint("báo cáo tồn kho");
+});
+document.getElementById("btn-xuat-congno").addEventListener("click", function () {
+    const table = document.getElementById("debt-report-table");
+
+    if (!table) {
+        alert("Không tìm thấy bảng công nợ!");
+        return;
+    }
+
+    const monthValue = document.getElementById("month-cong-no").value || "baocao";
+    const fileName = `Bao_cao_cong_no_${monthValue}.xlsx`;
+
+    const worksheet = XLSX.utils.table_to_sheet(table);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "BaoCaoCongNo");
+
+    XLSX.writeFile(workbook, fileName);
+});
+
+// In báo cáo công nợ
+document.getElementById("btn-in-congno")?.addEventListener("click", function () {
+    
+    confirmPrint("báo cáo công nợ");
+});
+// ==============================
+// XUẤT BÁO CÁO DOANH THU
+// ==============================
+document.getElementById("btn-xuat-doanhthu")?.addEventListener("click", function () {
+    const table = document.getElementById("revenue-report-table");
+
+    if (!table) {
+        alert("Không tìm thấy bảng doanh thu!");
+        return;
+    }
+
+    // Lấy tháng năm
+    const monthValue = document.getElementById("month-doanh-thu").value || "baocao";
+    const fileName = `Bao_cao_doanh_thu_${monthValue}.xlsx`;
+
+    // Chuyển table → worksheet
+    const worksheet = XLSX.utils.table_to_sheet(table);
+
+    // Tạo workbook
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "BaoCaoDoanhThu");
+
+    // Xuất file
+    XLSX.writeFile(workbook, fileName);
+});
+
+
+// In báo cáo doanh thu
+document.getElementById("btn-in-doanhthu")?.addEventListener("click", function () {
+    confirmPrint("báo cáo doanh thu");
+});
+
+
+});
 </script>
 
 </body>
