@@ -338,6 +338,16 @@ const deleteEmployee = async (req, res) => {
       });
     }
 
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có phiếu kiểm kê liên kết không (chỉ phiếu chưa xóa)
+    const phieuKiemKeLienKet = await db.PhieuKiemKe.findOne({
+      where: { MaNhanVien: maNhanVien, isDeleted: false },
+    });
+    if (phieuKiemKeLienKet) {
+      return res.status(400).json({
+        error: `Không thể xóa nhân viên "${user.HoTen}". Vẫn còn phiếu kiểm kê liên kết với nhân viên này.`,
+      });
+    }
+
     // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
     // Thêm suffix vào các trường unique để tránh trùng khi thêm mới
     const deletedSuffix = `_deleted_${Date.now()}`;
