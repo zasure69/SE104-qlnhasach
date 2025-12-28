@@ -756,7 +756,7 @@
             <nav class="sidebar-nav">
                 <ul>
                     <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
-                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Người dùng</a></li>
+                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân viên</a></li>
                     <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
                     <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
                     <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
@@ -1126,7 +1126,7 @@
                     // Lấy Mã Phiếu Thu: Ưu tiên lấy từ data-id (chuẩn xác hơn), nếu không có thì lấy từ cột
                     const maPhieu = row.dataset.id || row.cells[0].textContent.trim(); 
                     
-                    // Cảnh báo người dùng (Thêm thông tin về việc hoàn tác nợ)
+                    // Cảnh báo Nhân viên (Thêm thông tin về việc hoàn tác nợ)
                     if (confirm(`Bạn có chắc chắn muốn XÓA vĩnh viễn phiếu thu ${maPhieu}?\n\nLưu ý: Tổng nợ của khách hàng sẽ tăng trở lại tương ứng với số tiền của phiếu này.`)) {
                         try {
                             // 1. GỌI API DELETE
@@ -1204,7 +1204,7 @@
                             const soTienThu = parseFloat(data.SoTienThu).toLocaleString('vi-VN');
                             document.getElementById('edit-so-tien').value = soTienThu; 
                             
-                            // Cập nhật nợ hiện tại để người dùng dễ theo dõi
+                            // Cập nhật nợ hiện tại để Nhân viên dễ theo dõi
                             const tongNo = parseFloat(data.KhachHang.TongNo).toLocaleString('vi-VN');
                             // document.getElementById('edit-tong-no').value = tongNo;
                             

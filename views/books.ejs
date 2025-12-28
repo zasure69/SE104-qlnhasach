@@ -539,7 +539,7 @@
             <nav class="sidebar-nav">
                 <ul>
                     <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
-                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân Viên</a></li>
+                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân viên</a></li>
                     <li><a href="#" class="active"><i class="fas fa-book"></i>QL Sách</a></li>
                     <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
                     <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
@@ -1092,7 +1092,7 @@ document.addEventListener('DOMContentLoaded', function() {
             addDauSachModal.style.display = 'flex';
         });
     }
-    let isSaveAndResetDS = false
+
     // NÚt Thêm mới (lưu và refill form) 
     const btnCustomDauSach = document.getElementById('btn-custom-dausach');
     if(btnCustomDauSach) {
@@ -1106,7 +1106,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU Đầu sách này trước khi làm mới không?\n\n- OK: Lưu đầu sách này.\n- Cancel: Xóa trắng để nhập đầu sách khác.')) {
                     // Chọn OK -> Lưu
                     if (addDauSachForm && addDauSachForm.checkValidity()) {
-                        isSaveAndResetDS = true;
                         addDauSachForm.requestSubmit();
                     } else if (addDauSachForm) {
                         addDauSachForm.reportValidity();
@@ -1154,24 +1153,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 console.log('[DEBUG] Response:', response.status, data);
                 if(response.ok) {
-                    showToast(data.message || 'Thêm đầu sách thành công!','success');
-                    if (isSaveAndResetDS) {
-                        addDauSachForm.reset();
-                        showToast('Đã sẵn sàng nhập đầu sách tiếp theo.', 'info');
-                        isSaveAndResetDS = false;
-                    } else {
-                        addDauSachModal.style.display = 'none';
-                    }
-                    
+                    showToast(data.message || 'Thêm đầu sách thành công!');
+                    addDauSachModal.style.display = 'none';
                     
                     // Cập nhật UI trực tiếp - thêm row mới vào bảng
                     const tbody = document.querySelector('#table-dau-sach tbody');
                     const rowCount = tbody.querySelectorAll('tr').length;
                     const newRow = document.createElement('tr');
-                    newRow.dataset.id = data.dauSach.MaDauSach || '';
+                    newRow.dataset.id = data.dauSach?.MaDauSach || '';
                     newRow.innerHTML = `
                         <td>${rowCount + 1}</td>
-                        <td>${data.dauSach.MaDauSach || ''}</td>
+                        <td>${data.dauSach?.MaDauSach || ''}</td>
                         <td>${formData.TenSach}</td>
                         <td>${formData.TenTheLoai}</td>
                         <td>${formData.tacGiaIds.join(', ')}</td>
@@ -1396,7 +1388,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const addSachModal = document.getElementById('sach-add-modal');
     const addSachForm = document.getElementById('add-sach-form');
     const addMaDauSachSelect = document.getElementById('add-ma-dau-sach-s');
-    let isSaveAndResetS = false;
+
     if(addSachBtn && addSachModal) {
         addSachBtn.addEventListener('click', () => {
             if(addSachForm) addSachForm.reset();
@@ -1420,7 +1412,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU Sách này trước khi làm mới không?\n\n- OK: Lưu sách này.\n- Cancel: Xóa trắng để nhập sách khác.')) {
                     // Chọn OK -> Lưu
                     if (addSachForm && addSachForm.checkValidity()) {
-                        isSaveAndResetS = true;
                         addSachForm.requestSubmit();
                     } else if (addSachForm) {
                         addSachForm.reportValidity();
@@ -1497,27 +1488,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 console.log('[DEBUG] Response:', response.status, data);
                 if(response.ok) {
-                    showToast(data.message || 'Thêm sách thành công!', 'success');
-                    if (isSaveAndResetS) {
-                        // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
-                        //addSachForm.reset(); 
-                        showToast('Đã sẵn sàng nhập sách tiếp theo.', 'info');
-                        
-                        // Reset cờ về false sau khi xong việc
-                        isSaveAndResetS = false; 
-                    } else {
-                        addSachModal.style.display = 'none';
-                    }
-                    
+                    showToast(data.message || 'Thêm sách thành công!');
+                    addSachModal.style.display = 'none';
                     
                     // Cập nhật UI trực tiếp - thêm row mới vào bảng
                     const tbody = document.querySelector('#table-sach tbody');
                     const rowCount = tbody.querySelectorAll('tr').length;
                     const newRow = document.createElement('tr');
-                    newRow.dataset.id = data.sach.MaSach || '';
+                    newRow.dataset.id = data.sach?.MaSach || '';
                     newRow.innerHTML = `
                         <td>${rowCount + 1}</td>
-                        <td>${data.sach.MaSach || ''}</td>
+                        <td>${data.sach?.MaSach || ''}</td>
                         <td>${document.getElementById('add-ten-sach-s').value}</td>
                         <td>${document.getElementById('add-the-loai-s').value}</td>
                         <td>${document.getElementById('add-tac-gia-s').value}</td>
@@ -1703,7 +1684,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const addTheLoaiBtn = document.getElementById('open-theloai-add-modal');
     const addTheLoaiModal = document.getElementById('theloai-add-modal');
     const addTheLoaiForm = document.getElementById('add-the-loai-form');
-    let isSaveAndResetTL = false;
+
     if(addTheLoaiBtn && addTheLoaiModal) {
         addTheLoaiBtn.addEventListener('click', () => {
             if(addTheLoaiForm) addTheLoaiForm.reset();
@@ -1723,7 +1704,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU Thể loại này trước khi làm mới không?\n\n- OK: Lưu thể loại này.\n- Cancel: Xóa trắng để nhập thể loại khác.')) {
                     // Chọn OK -> Lưu
                     if (addTheLoaiForm && addTheLoaiForm.checkValidity()) {
-                        isSaveAndResetTL = true;
                         addTheLoaiForm.requestSubmit();
                     } else if (addTheLoaiForm) {
                         addTheLoaiForm.reportValidity();
@@ -1761,28 +1741,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 hideLoader();
                 
                 if(response.ok) {
-                    showToast(data.message || 'Thêm thể loại thành công!', 'success');
-                    if (isSaveAndResetTL) {
-                        // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
-                        addTheLoaiForm.reset(); 
-                        showToast('Đã sẵn sàng nhập thể loại tiếp theo.', 'info');
-                        
-                        // Reset cờ về false sau khi xong việc
-                        isSaveAndResetTL = false; 
-
-                    } else {
-                        addTheLoaiModal.style.display = 'none';
-                    }
-                    
+                    showToast(data.message || 'Thêm thể loại thành công!');
+                    addTheLoaiModal.style.display = 'none';
                     
                     // Cập nhật UI trực tiếp - thêm row mới vào bảng
                     const tbody = document.querySelector('#table-the-loai tbody');
                     const rowCount = tbody.querySelectorAll('tr').length;
                     const newRow = document.createElement('tr');
-                    newRow.dataset.id = data.data.MaTheLoai || '';
+                    newRow.dataset.id = data.theLoai?.MaTheLoai || '';
                     newRow.innerHTML = `
                         <td>${rowCount + 1}</td>
-                        <td>${data.data.MaTheLoai || ''}</td>
+                        <td>${data.theLoai?.MaTheLoai || ''}</td>
                         <td>${formData.TenTheLoai}</td>
                         <td>${formData.MoTa || ''}</td>
                         <td>
@@ -1945,7 +1914,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const addTacGiaBtn = document.getElementById('open-tacgia-add-modal');
     const addTacGiaModal = document.getElementById('tacgia-add-modal');
     const addTacGiaForm = document.getElementById('add-tacgia-form');
-    let isSaveAndResetTG = false;
+
     if(addTacGiaBtn && addTacGiaModal) {
         addTacGiaBtn.addEventListener('click', () => {
             if(addTacGiaForm) addTacGiaForm.reset();
@@ -1965,7 +1934,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU Tác giả này trước khi làm mới không?\n\n- OK: Lưu tác giả này.\n- Cancel: Xóa trắng để nhập tác giả khác.')) {
                     // Chọn OK -> Lưu
                     if (addTacGiaForm && addTacGiaForm.checkValidity()) {
-                        isSaveAndResetTG = true;
                         addTacGiaForm.requestSubmit();
                     } else if (addTacGiaForm) {
                         addTacGiaForm.reportValidity();
@@ -2003,29 +1971,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 hideLoader();
                 
                 if(response.ok) {
-                    showToast(data.message || 'Thêm tác giả thành công!', 'success');
-                    if (isSaveAndResetTG) {
-                        // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
-                        addTacGiaForm.reset(); 
-                        showToast('Đã sẵn sàng nhập tác giả tiếp theo.', 'info');
-                        
-                        // Reset cờ về false sau khi xong việc
-                        isSaveAndResetTG = false; 
-
-                    } else {
-                        addTacGiaModal.style.display = 'none';
-                        addTacGiaForm.reset(); 
-                    }
-                    
+                    showToast(data.message || 'Thêm tác giả thành công!');
+                    addTacGiaModal.style.display = 'none';
                     
                     // Cập nhật UI trực tiếp - thêm row mới vào bảng
                     const tbody = document.querySelector('#table-tac-gia tbody');
                     const rowCount = tbody.querySelectorAll('tr').length;
                     const newRow = document.createElement('tr');
-                    newRow.dataset.id = data.data.MaTacGia || '';
+                    newRow.dataset.id = data.tacGia?.MaTacGia || '';
                     newRow.innerHTML = `
                         <td>${rowCount + 1}</td>
-                        <td>${data.data.MaTacGia || ''}</td>
+                        <td>${data.tacGia?.MaTacGia || ''}</td>
                         <td>${formData.HoTen}</td>
                         <td>${formData.NamSinh || ''}</td>
                         <td>
