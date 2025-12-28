@@ -134,6 +134,26 @@ const deleteCustomer = async (req, res) => {
       return res.status(400).json({ error: 'Khách hàng này đã bị xóa trước đó.' });
     }
 
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có hóa đơn liên kết không (chỉ hóa đơn chưa xóa)
+    const hoaDonLienKet = await db.HoaDon.findOne({
+      where: { MaKhachHang: maKH, isDeleted: false },
+    });
+    if (hoaDonLienKet) {
+      return res.status(400).json({
+        error: `Không thể xóa khách hàng "${customer.HoVaTen}". Vẫn còn hóa đơn liên kết với khách hàng này.`,
+      });
+    }
+
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có phiếu thu tiền liên kết không (chỉ phiếu chưa xóa)
+    const phieuThuLienKet = await db.PhieuThuTien.findOne({
+      where: { MaKhachHang: maKH, isDeleted: false },
+    });
+    if (phieuThuLienKet) {
+      return res.status(400).json({
+        error: `Không thể xóa khách hàng "${customer.HoVaTen}". Vẫn còn phiếu thu tiền liên kết với khách hàng này.`,
+      });
+    }
+
     // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
     // Thêm suffix vào trường unique để tránh trùng khi thêm mới
     const deletedSuffix = `_deleted_${Date.now()}`;

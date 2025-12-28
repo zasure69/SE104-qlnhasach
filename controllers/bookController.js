@@ -936,7 +936,9 @@ const getSachById = async (req, res) => {
 const deleteSach = async (req, res) => {
   try {
     const maSach = req.params.maSach;
-    const sach = await db.Sach.findByPk(maSach);
+    const sach = await db.Sach.findByPk(maSach, {
+      include: [{ model: db.DauSach, attributes: ['TenSach'] }]
+    });
     if (!sach) {
       return res.status(404).json({ error: "Không tìm thấy Sách" });
     }
@@ -944,6 +946,38 @@ const deleteSach = async (req, res) => {
     // Kiểm tra nếu sách đã bị xóa rồi
     if (sach.isDeleted) {
       return res.status(400).json({ error: "Sách này đã bị xóa trước đó." });
+    }
+
+    const tenSach = sach.DauSach?.TenSach || maSach;
+
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có chi tiết hóa đơn liên kết không
+    const ctHoaDonLienKet = await db.CT_HD.findOne({
+      where: { MaSach: maSach },
+      include: [{
+        model: db.HoaDon,
+        where: { isDeleted: false },
+        required: true,
+      }],
+    });
+    if (ctHoaDonLienKet) {
+      return res.status(400).json({
+        error: `Không thể xóa sách "${tenSach}". Sách này đã có trong hóa đơn bán hàng.`,
+      });
+    }
+
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có chi tiết phiếu nhập liên kết không
+    const ctPhieuNhapLienKet = await db.CT_PNS.findOne({
+      where: { MaSach: maSach },
+      include: [{
+        model: db.PhieuNhapSach,
+        where: { isDeleted: false },
+        required: true,
+      }],
+    });
+    if (ctPhieuNhapLienKet) {
+      return res.status(400).json({
+        error: `Không thể xóa sách "${tenSach}". Sách này đã có trong phiếu nhập sách.`,
+      });
     }
 
     // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
