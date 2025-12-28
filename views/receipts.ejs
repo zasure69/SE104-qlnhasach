@@ -1,1359 +1,1548 @@
 <!DOCTYPE html>
 <html lang="vi">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Phiếu thu tiền</title>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
 
     <style>
-        /* * --- PHẦN CSS (Tái sử dụng style chuẩn từ các file trước) --- */
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --green-accent: #1EE4AC;
-            --green-accent-hover: #1ac096;
-            --red-accent: #e74c3c;
-            --red-accent-hover: #c0392b;
-            --blue-accent: #3498db;
-            --blue-accent-hover: #2980b9;
-            --light-bg: #f0f4f8;
-            --white-bg: #ffffff;
-            --text-dark: #222;
-            --text-light: #555;
-            --text-white: #ecf0f1;
-            --border-color: #e0e0e0;
-            --disabled-bg: #e9ecef;
+      /* * --- PHẦN CSS (Tái sử dụng style chuẩn từ các file trước) --- */
+      :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --green-accent: #1ee4ac;
+        --green-accent-hover: #1ac096;
+        --red-accent: #e74c3c;
+        --red-accent-hover: #c0392b;
+        --blue-accent: #3498db;
+        --blue-accent-hover: #2980b9;
+        --light-bg: #f0f4f8;
+        --white-bg: #ffffff;
+        --text-dark: #222;
+        --text-light: #555;
+        --text-white: #ecf0f1;
+        --border-color: #e0e0e0;
+        --disabled-bg: #e9ecef;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+      }
+
+      body {
+        background-color: var(--light-bg);
+        color: var(--text-dark);
+      }
+
+      /* Layout */
+      .dashboard-container {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        min-height: 100vh;
+        transition: grid-template-columns 0.3s ease-in-out;
+      }
+
+      .sidebar {
+        background-color: var(--primary-color);
+        color: var(--text-white);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s ease-in-out;
+        overflow-x: hidden;
+      }
+
+      .sidebar-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+      }
+
+      .sidebar-header i {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .sidebar-header h2 {
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+      }
+
+      .sidebar-nav ul {
+        list-style: none;
+      }
+
+      .sidebar-nav li {
+        margin-bottom: 0.5rem;
+      }
+
+      .sidebar-nav a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.85rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--text-white);
+        font-weight: 500;
+        transition: background-color 0.2s ease;
+      }
+
+      .sidebar-nav a i {
+        width: 20px;
+        text-align: center;
+      }
+
+      .sidebar-nav a:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar-nav a.active {
+        background-color: var(--secondary-color);
+        color: white;
+      }
+
+      .main-content {
+        background-color: var(--light-bg);
+        padding: 1.5rem;
+        overflow-y: auto;
+      }
+
+      .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background-color: var(--white-bg);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+      }
+
+      .top-bar-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .top-bar-left h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      .user-menu {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-light);
+        cursor: pointer;
+        position: relative;
+      }
+
+      .user-menu .user-trigger {
+        cursor: pointer;
+        display: inline-block; /* Giúp dễ click hơn */
+      }
+
+      .user-menu .dropdown-menu {
+        display: none; /* Ẩn ban đầu */
+        position: absolute;
+        top: 100%; /* Hiển thị ngay bên dưới */
+        right: 0;
+        background-color: var(--white-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        min-width: 150px; /* Độ rộng tối thiểu */
+        z-index: 1000;
+        overflow: hidden; /* Để bo góc */
+      }
+
+      /* Hiển thị menu khi di chuột vào .user-menu */
+      .user-menu:hover .dropdown-menu {
+        display: block;
+      }
+
+      .user-menu .dropdown-menu a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        text-decoration: none;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+        transition: background-color 0.2s ease;
+      }
+
+      .user-menu .dropdown-menu a:hover {
+        background-color: var(--light-bg);
+        color: var(--red-accent, #e74c3c); /* Dùng màu đỏ cho logout */
+      }
+
+      .user-menu .dropdown-menu a i {
+        width: 16px;
+        text-align: center;
+        color: var(--text-light);
+        transition: color 0.2s ease;
+      }
+
+      .user-menu .dropdown-menu a:hover i {
+        color: var(--red-accent, #e74c3c);
+      }
+
+      .menu-toggle {
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        color: var(--text-dark);
+        cursor: pointer;
+        padding: 0.25rem;
+        line-height: 1;
+      }
+
+      /* Content */
+      .content-wrapper {
+        padding: 1.5rem;
+        background-color: var(--white-bg);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+
+      .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .content-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      /* Buttons */
+      .btn {
+        padding: 0.75rem 1.25rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        justify-content: center;
+        min-width: 100px;
+      }
+
+      .btn-primary {
+        background-color: var(--green-accent);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--green-accent-hover);
+      }
+
+      .btn-secondary {
+        background-color: #f0f0f0;
+        color: var(--text-light);
+      }
+
+      .btn-secondary:hover {
+        background-color: #e0e0e0;
+      }
+
+      .btn-danger {
+        background-color: var(--red-accent);
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background-color: var(--red-accent-hover);
+      }
+
+      .btn-print {
+        background-color: var(--blue-accent);
+        color: white;
+      }
+
+      .btn-print:hover {
+        background-color: var(--blue-accent-hover);
+      }
+
+      .btn-sm {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+        min-width: auto;
+      }
+
+      .btn-warning {
+        background-color: #f39c12; /* Màu cam */
+        color: white;
+      }
+      .btn-warning:hover {
+        background-color: #d35400;
+      }
+
+      #btn-custom-reset {
+        background-color: #6c757d; /* Màu xám đậm chuẩn UI */
+        color: #ffffff; /* Chữ màu trắng */
+      }
+
+      #btn-custom-reset:hover {
+        background-color: #5a6268; /* Màu hover đậm hơn chút */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Thêm bóng đổ nhẹ khi di chuột */
+      }
+
+      /* Table */
+      .table-responsive {
+        overflow-x: auto;
+        margin-bottom: 1rem;
+      }
+
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 800px;
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 0.85rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+        vertical-align: middle;
+      }
+
+      .data-table thead th {
+        background-color: #f9f9f9;
+        font-weight: 600;
+        color: var(--text-light);
+      }
+
+      .data-table tbody tr:hover {
+        background-color: #f5f5f5;
+      }
+
+      /* SỬA: Style cho icon hành động */
+      .action-icon {
+        color: var(--secondary-color);
+        cursor: pointer;
+        font-size: 1rem;
+        margin-right: 0.75rem;
+        /* Tăng khoảng cách giữa các icon */
+        padding: 0.25rem;
+        /* Thêm vùng đệm để dễ click */
+        transition: color 0.2s;
+      }
+
+      .action-icon:hover {
+        color: var(--blue-accent-hover);
+      }
+
+      /* Filter */
+      .report-filter {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .report-filter label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-light);
+      }
+
+      .date-input-wrapper {
+        position: relative;
+        display: inline-block;
+      }
+
+      .date-input-wrapper input[type="date"] {
+        padding: 0.6rem 0.75rem 0.6rem 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 0.9rem;
+        min-width: 150px;
+      }
+
+      .date-input-wrapper input[type="date"]:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+      }
+
+      .date-input-wrapper .calendar-icon {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-light);
+        pointer-events: none;
+      }
+
+      /* Modal */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        padding: 1rem;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .modal-content {
+        background-color: var(--white-bg);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 700px;
+        animation: slideIn 0.3s ease;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .modal-header h2 {
+        font-size: 1.3rem;
+        font-weight: 700;
+      }
+
+      .close-modal {
+        font-size: 1.5rem;
+        color: var(--text-light);
+        cursor: pointer;
+        background: none;
+        border: none;
+      }
+
+      .modal-body {
+        padding: 1.5rem;
+        flex-grow: 1;
+      }
+
+      /* Modal Form */
+      .modal-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      .form-group label {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--text-dark);
+      }
+
+      .form-group input,
+      .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 0.9rem;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+      }
+
+      .form-group input:disabled {
+        background-color: var(--disabled-bg);
+        color: #777;
+      }
+
+      /* --- CSS CHO INPUT KHÔNG ĐƯỢC NHẬP (Disabled & Readonly) --- */
+      .form-group input:disabled,
+      .form-group select:disabled,
+      .form-group textarea:disabled,
+      .form-group input:read-only,
+      .form-group textarea:read-only {
+        background-color: var(--disabled-bg); /* Màu nền xám (#e9ecef) */
+        color: #6c757d; /* Màu chữ xám đậm cho cảm giác "chìm" đi */
+        cursor: not-allowed; /* Đổi con trỏ chuột để báo hiệu */
+        border-color: #d6d8db; /* Viền nhạt hơn chút */
+      }
+
+      /* Tinh chỉnh riêng cho Read-only (vẫn cho phép bôi đen copy nhưng không sửa) */
+      .form-group input:read-only,
+      .form-group textarea:read-only {
+        cursor: default; /* Con trỏ chuột bình thường */
+      }
+
+      .form-group label.required::after {
+        content: "*"; /* Thêm dấu sao */
+        color: var(--red-accent); /* Màu đỏ (lấy từ biến màu đỏ của bạn) */
+        font-weight: bold; /* In đậm */
+        margin-left: 4px; /* Cách ra một chút cho đẹp */
+      }
+
+      /* Hiệu ứng cho icon xóa ở bảng */
+      .action-icon.delete-icon:hover {
+        color: #c0392b !important; /* Đỏ đậm hơn khi hover */
+        transform: scale(1.2); /* Phóng to nhẹ */
+        transition: all 0.2s;
+      }
+
+      .action-icon.open-edit-modal:hover {
+        color: #2980b9; /* Màu xanh dương khi hover */
+        transform: scale(1.2); /* Phóng to nhẹ */
+        transition: all 0.2s;
+      }
+
+      /* Modal Footer (Standardized) */
+      .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.25rem 1.5rem;
+        border-top: 1px solid var(--border-color);
+        background-color: #fff;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+      }
+
+      .modal-footer .btn {
+        flex: 1;
+        justify-content: center;
+        font-size: 1rem;
+        font-weight: 700;
+        padding: 0.75rem 2rem;
+        text-transform: uppercase;
+        border-radius: 8px;
+      }
+
+      /* Ghost Button (Hủy) */
+      .modal-footer .btn-secondary {
+        background-color: transparent;
+        color: #6c757d;
+        border: none;
+        box-shadow: none;
+      }
+
+      .modal-footer .btn-secondary:hover {
+        background-color: #e2e6ea;
+        color: #343a40;
+      }
+
+      /* Primary Button (Lưu) */
+      .modal-footer .btn-primary {
+        background-color: var(--green-accent);
+        color: white;
+        box-shadow: 0 4px 6px rgba(30, 228, 172, 0.2);
+      }
+
+      .modal-footer .btn-primary:hover {
+        background-color: var(--green-accent-hover);
+      }
+
+      /* Footer Modal Sửa Layout */
+      #edit-modal .modal-footer {
+        justify-content: space-between;
+      }
+
+      #edit-modal .modal-footer > .btn-danger {
+        flex: 1;
+        margin-right: 1rem;
+      }
+
+      #edit-modal .modal-footer > div {
+        flex: 1;
+        display: flex;
+        gap: 1rem;
+      }
+
+      #edit-modal .modal-footer > div .btn {
+        flex: 1;
+        width: 100%;
+      }
+
+      /* Loader & Toast */
+      .loader-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.7);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+      }
+
+      .loader-overlay.show {
+        display: flex;
+      }
+
+      .loader {
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid var(--secondary-color);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        100% {
+          transform: rotate(360deg);
         }
+      }
 
-        body {
-            background-color: var(--light-bg);
-            color: var(--text-dark);
-        }
+      .toast-container {
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        z-index: 2001;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
 
-        /* Layout */
+      .toast {
+        background-color: var(--white-bg);
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+        border-left: 5px solid;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .toast.success {
+        border-left-color: var(--green-accent);
+      }
+
+      .toast.success .toast-icon {
+        color: var(--green-accent);
+      }
+
+      .toast.error {
+        border-left-color: var(--red-accent);
+      }
+
+      .toast.error .toast-icon {
+        color: var(--red-accent);
+      }
+
+      .toast-message {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-dark);
+      }
+
+      /* Responsive */
+      @media (max-width: 992px) {
         .dashboard-container {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            min-height: 100vh;
-            transition: grid-template-columns 0.3s ease-in-out;
+          grid-template-columns: 1fr;
         }
 
         .sidebar {
-            background-color: var(--primary-color);
-            color: var(--text-white);
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s ease-in-out;
-            overflow-x: hidden;
+          position: fixed;
+          left: -260px;
+          top: 0;
+          height: 100vh;
+          z-index: 1050;
         }
 
-        .sidebar-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
-
-        .sidebar-header i {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .sidebar-header h2 {
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        .sidebar-nav ul {
-            list-style: none;
-        }
-
-        .sidebar-nav li {
-            margin-bottom: 0.5rem;
-        }
-
-        .sidebar-nav a {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.85rem 1rem;
-            border-radius: 8px;
-            text-decoration: none;
-            color: var(--text-white);
-            font-weight: 500;
-            transition: background-color 0.2s ease;
-        }
-
-        .sidebar-nav a i {
-            width: 20px;
-            text-align: center;
-        }
-
-        .sidebar-nav a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .sidebar-nav a.active {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-
-        .main-content {
-            background-color: var(--light-bg);
-            padding: 1.5rem;
-            overflow-y: auto;
-        }
-
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            background-color: var(--white-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            margin-bottom: 1.5rem;
-        }
-
-        .top-bar-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .top-bar-left h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .user-menu {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-light);
-            cursor: pointer;
-            position: relative;
-        }
-
-        .user-menu .user-trigger {
-            cursor: pointer;
-            display: inline-block; /* Giúp dễ click hơn */
-        }
-
-        .user-menu .dropdown-menu {
-            display: none; /* Ẩn ban đầu */
-            position: absolute;
-            top: 100%; /* Hiển thị ngay bên dưới */
-            right: 0;
-            background-color: var(--white-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            min-width: 150px; /* Độ rộng tối thiểu */
-            z-index: 1000;
-            overflow: hidden; /* Để bo góc */
-        }
-
-        /* Hiển thị menu khi di chuột vào .user-menu */
-        .user-menu:hover .dropdown-menu {
-            display: block;
-        }
-
-        .user-menu .dropdown-menu a {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            text-decoration: none;
-            color: var(--text-dark);
-            font-size: 0.9rem;
-            transition: background-color 0.2s ease;
-        }
-
-        .user-menu .dropdown-menu a:hover {
-            background-color: var(--light-bg);
-            color: var(--red-accent, #e74c3c); /* Dùng màu đỏ cho logout */
-        }
-
-        .user-menu .dropdown-menu a i {
-            width: 16px;
-            text-align: center;
-            color: var(--text-light);
-            transition: color 0.2s ease;
-        }
-
-        .user-menu .dropdown-menu a:hover i {
-            color: var(--red-accent, #e74c3c);
+        .sidebar.active {
+          left: 0;
         }
 
         .menu-toggle {
-            font-size: 1.5rem;
-            background: none;
-            border: none;
-            color: var(--text-dark);
-            cursor: pointer;
-            padding: 0.25rem;
-            line-height: 1;
+          display: block;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .receipt-form {
+          grid-template-columns: 1fr;
         }
 
-        /* Content */
+        .top-bar {
+          gap: 0.5rem;
+        }
+
+        .top-bar-left h1 {
+          font-size: 1.25rem;
+        }
+
+        .user-menu {
+          font-size: 0.8rem;
+        }
+
         .content-wrapper {
-            padding: 1.5rem;
-            background-color: var(--white-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          border-radius: 8px;
+          padding: 1rem;
         }
 
-        .content-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
+        .content-wrapper h1 {
+          font-size: 1.5rem;
         }
 
-        .content-header h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
+        .button-group {
+          flex-direction: column;
+          align-items: stretch;
         }
 
-        /* Buttons */
-        .btn {
-            padding: 0.75rem 1.25rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            justify-content: center;
-            min-width: 100px;
+        .button-group .btn {
+          width: 100%;
         }
-
-        .btn-primary {
-            background-color: var(--green-accent);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--green-accent-hover);
-        }
-
-        .btn-secondary {
-            background-color: #f0f0f0;
-            color: var(--text-light);
-        }
-
-        .btn-secondary:hover {
-            background-color: #e0e0e0;
-        }
-
-        .btn-danger {
-            background-color: var(--red-accent);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: var(--red-accent-hover);
-        }
-
-        .btn-print {
-            background-color: var(--blue-accent);
-            color: white;
-        }
-
-        .btn-print:hover {
-            background-color: var(--blue-accent-hover);
-        }
-
-        .btn-sm {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
-            min-width: auto;
-        }
-
-        .btn-warning {
-            background-color: #f39c12; /* Màu cam */
-            color: white;
-        }
-        .btn-warning:hover {
-            background-color: #d35400;
-        }
-
-        #btn-custom-reset {
-            background-color: #6c757d; /* Màu xám đậm chuẩn UI */
-            color: #ffffff;            /* Chữ màu trắng */
-        }
-
-        #btn-custom-reset:hover {
-            background-color: #5a6268; /* Màu hover đậm hơn chút */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Thêm bóng đổ nhẹ khi di chuột */
-        }
-
-        /* Table */
-        .table-responsive {
-            overflow-x: auto;
-            margin-bottom: 1rem;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 800px;
-        }
-
-        .data-table th,
-        .data-table td {
-            padding: 0.85rem 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.9rem;
-            vertical-align: middle;
-        }
-
-        .data-table thead th {
-            background-color: #f9f9f9;
-            font-weight: 600;
-            color: var(--text-light);
-        }
-
-        .data-table tbody tr:hover {
-            background-color: #f5f5f5;
-        }
-        
-
-        /* SỬA: Style cho icon hành động */
-        .action-icon {
-            color: var(--secondary-color);
-            cursor: pointer;
-            font-size: 1rem;
-            margin-right: 0.75rem;
-            /* Tăng khoảng cách giữa các icon */
-            padding: 0.25rem;
-            /* Thêm vùng đệm để dễ click */
-            transition: color 0.2s;
-        }
-
-        .action-icon:hover {
-            color: var(--blue-accent-hover);
-        }
-
-        /* Filter */
-        .report-filter {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .report-filter label {
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--text-light);
-        }
-
-        .date-input-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-
-        .date-input-wrapper input[type="date"] {
-            padding: 0.6rem 0.75rem 0.6rem 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.9rem;
-            min-width: 150px;
-        }
-
-        .date-input-wrapper input[type="date"]:focus {
-            outline: none;
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-        }
-
-        .date-input-wrapper .calendar-icon {
-            position: absolute;
-            right: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-light);
-            pointer-events: none;
-        }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 1rem;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal-content {
-            background-color: var(--white-bg);
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 700px;
-            animation: slideIn 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .modal-header h2 {
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .close-modal {
-            font-size: 1.5rem;
-            color: var(--text-light);
-            cursor: pointer;
-            background: none;
-            border: none;
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-            flex-grow: 1;
-        }
-
-        /* Modal Form */
-        .modal-form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.25rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-
-        .form-group label {
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--text-dark);
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.9rem;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-        }
-
-        .form-group input:disabled {
-            background-color: var(--disabled-bg);
-            color: #777;
-        }
-
-        /* --- CSS CHO INPUT KHÔNG ĐƯỢC NHẬP (Disabled & Readonly) --- */
-        .form-group input:disabled,
-        .form-group select:disabled,
-        .form-group textarea:disabled,
-        .form-group input:read-only, 
-        .form-group textarea:read-only {
-            background-color: var(--disabled-bg); /* Màu nền xám (#e9ecef) */
-            color: #6c757d;                       /* Màu chữ xám đậm cho cảm giác "chìm" đi */
-            cursor: not-allowed;                  /* Đổi con trỏ chuột để báo hiệu */
-            border-color: #d6d8db;                /* Viền nhạt hơn chút */
-        }
-
-        /* Tinh chỉnh riêng cho Read-only (vẫn cho phép bôi đen copy nhưng không sửa) */
-        .form-group input:read-only,
-        .form-group textarea:read-only {
-            cursor: default; /* Con trỏ chuột bình thường */
-        }
-
-        .form-group label.required::after {
-            content: "*";               /* Thêm dấu sao */
-            color: var(--red-accent);    /* Màu đỏ (lấy từ biến màu đỏ của bạn) */
-            font-weight: bold;           /* In đậm */
-            margin-left: 4px;            /* Cách ra một chút cho đẹp */
-        }
-
-        /* Hiệu ứng cho icon xóa ở bảng */
-        .action-icon.delete-icon:hover {
-            color: #c0392b !important; /* Đỏ đậm hơn khi hover */
-            transform: scale(1.2); /* Phóng to nhẹ */
-            transition: all 0.2s;
-        }
-
-        .action-icon.open-edit-modal:hover {
-            color: #2980b9; /* Màu xanh dương khi hover */
-            transform: scale(1.2); /* Phóng to nhẹ */
-            transition: all 0.2s;
-        }
-
-        /* Modal Footer (Standardized) */
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 1rem;
-            padding: 1.25rem 1.5rem;
-            border-top: 1px solid var(--border-color);
-            background-color: #fff;
-            border-bottom-left-radius: 12px;
-            border-bottom-right-radius: 12px;
-        }
-
-        .modal-footer .btn {
-            flex: 1;
-            justify-content: center;
-            font-size: 1rem;
-            font-weight: 700;
-            padding: 0.75rem 2rem;
-            text-transform: uppercase;
-            border-radius: 8px;
-        }
-
-        /* Ghost Button (Hủy) */
-        .modal-footer .btn-secondary {
-            background-color: transparent;
-            color: #6c757d;
-            border: none;
-            box-shadow: none;
-        }
-
-        .modal-footer .btn-secondary:hover {
-            background-color: #e2e6ea;
-            color: #343a40;
-        }
-
-        /* Primary Button (Lưu) */
-        .modal-footer .btn-primary {
-            background-color: var(--green-accent);
-            color: white;
-            box-shadow: 0 4px 6px rgba(30, 228, 172, 0.2);
-        }
-
-        .modal-footer .btn-primary:hover {
-            background-color: var(--green-accent-hover);
-        }
-
-        /* Footer Modal Sửa Layout */
-        #edit-modal .modal-footer {
-            justify-content: space-between;
-        }
-
-        #edit-modal .modal-footer>.btn-danger {
-            flex: 1;
-            margin-right: 1rem;
-        }
-
-        #edit-modal .modal-footer>div {
-            flex: 1;
-            display: flex;
-            gap: 1rem;
-        }
-
-        #edit-modal .modal-footer>div .btn {
-            flex: 1;
-            width: 100%;
-        }
-
-
-        /* Loader & Toast */
-        .loader-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.7);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-
-        .loader-overlay.show {
-            display: flex;
-        }
-
-        .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--secondary-color);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .toast-container {
-            position: fixed;
-            top: 1.5rem;
-            right: 1.5rem;
-            z-index: 2001;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .toast {
-            background-color: var(--white-bg);
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            opacity: 0;
-            transform: translateX(100%);
-            transition: all 0.3s ease;
-            border-left: 5px solid;
-        }
-
-        .toast.show {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .toast.success {
-            border-left-color: var(--green-accent);
-        }
-
-        .toast.success .toast-icon {
-            color: var(--green-accent);
-        }
-
-        .toast.error {
-            border-left-color: var(--red-accent);
-        }
-
-        .toast.error .toast-icon {
-            color: var(--red-accent);
-        }
-
-        .toast-message {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-dark);
-        }
-
-        /* Responsive */
-        @media (max-width: 992px) {
-            .dashboard-container {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                position: fixed;
-                left: -260px;
-                top: 0;
-                height: 100vh;
-                z-index: 1050;
-            }
-
-            .sidebar.active {
-                left: 0;
-            }
-
-            .menu-toggle {
-                display: block;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .receipt-form {
-                grid-template-columns: 1fr;
-            }
-
-            .top-bar {
-                gap: 0.5rem;
-            }
-
-            .top-bar-left h1 {
-                font-size: 1.25rem;
-            }
-
-            .user-menu {
-                font-size: 0.8rem;
-            }
-
-            .content-wrapper {
-                border-radius: 8px;
-                padding: 1rem;
-            }
-
-            .content-wrapper h1 {
-                font-size: 1.5rem;
-            }
-
-            .button-group {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .button-group .btn {
-                width: 100%;
-            }
-        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
-
+  <body>
     <div class="loader-overlay" id="loader">
-        <div class="loader"></div>
+      <div class="loader"></div>
     </div>
     <div class="toast-container" id="toast-container"></div>
 
     <div class="dashboard-container">
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header"> <i class="fas fa-book-open"></i>
-                <h2>QUẢN LÝ NHÀ SÁCH</h2>
-            </div>
-            <nav class="sidebar-nav">
-                <ul>
-                    <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
-                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân viên</a></li>
-                    <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
-                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
-                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
-                    <li><a href="#" class="active"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
-                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
-                    <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
-                </ul>
-            </nav>
-        </aside>
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <i class="fas fa-book-open"></i>
+          <h2>NHÀ SÁCH ABC</h2>
+        </div>
+        <nav class="sidebar-nav">
+          <ul>
+            <li>
+              <a href="/dashboard"
+                ><i class="fas fa-home"></i><span>Tổng quan</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/employees"
+                ><i class="fas fa-users"></i><span>QL Nhân viên</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/books"
+                ><i class="fas fa-book"></i><span>QL Sách</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/customers"
+                ><i class="fas fa-id-card"></i><span>QL Khách hàng</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/books_import"
+                ><i class="fas fa-file-invoice"></i
+                ><span>QL Phiếu nhập sách</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/inventory"
+                ><i class="fas fa-clipboard-check"></i
+                ><span>QL Phiếu kiểm kê</span></a
+              >
+            </li>
+            <li>
+              <a href="#" class="active"
+                ><i class="fas fa-receipt"></i><span>QL Phiếu thu tiền</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/bills"
+                ><i class="fa-solid fa-money-check-dollar"></i
+                ><span>QL Hóa đơn</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/search"
+                ><i class="fas fa-search"></i><span> Tra cứu</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/reports"
+                ><i class="fas fa-chart-line"></i
+                ><span> Báo cáo tổng kết</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/change-rule"
+                ><i class="fas fa-gavel"></i><span>Thay đổi quy định</span></a
+              >
+            </li>
+            <% if (role === 'Admin' || role === 'Owner') { %>
+            <li>
+              <a href="/dashboard/trash"
+                ><i class="fas fa-trash-alt"></i><span> Thùng rác</span></a
+              >
+            </li>
+            <% } %>
+          </ul>
+        </nav>
+      </aside>
 
-        <main class="main-content">
-            <header class="top-bar">
-                <div class="top-bar-left"> <button class="menu-toggle" id="menu-toggle"> <i class="fas fa-bars"></i>
+      <main class="main-content">
+        <header class="top-bar">
+          <div class="top-bar-left">
+            <button class="menu-toggle" id="menu-toggle">
+              <i class="fas fa-bars"></i>
+            </button>
+            <h1>Quản lý Phiếu thu tiền</h1>
+          </div>
+          <div class="user-menu">
+            <span class="user-trigger">
+              Chào, <strong><%= username %></strong>
+              <i class="fas fa-chevron-down"></i>
+            </span>
+
+            <div class="dropdown-menu">
+              <a href="#" id="logout-button">
+                <i class="fas fa-sign-out-alt"></i> Đăng xuất
+              </a>
+            </div>
+          </div>
+        </header>
+
+        <div class="content-wrapper">
+          <div class="content-header">
+            <h2>Danh sách Phiếu thu tiền</h2>
+            <button class="btn btn-primary btn-add-new" id="open-add-modal">
+              <i class="fas fa-plus"></i> LẬP PHIẾU THU TIỀN
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table" id="receipt-table">
+              <thead>
+                <tr>
+                  <th style="width: 50px; text-align: center">STT</th>
+                  <th>Mã Phiếu</th>
+                  <th>Khách Hàng</th>
+                  <th>Ngày Thu</th>
+                  <th>Số Tiền Thu</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (receipts && receipts.length > 0) { %> <%
+                receipts.forEach((receipt, index) => { %>
+                <tr data-id="<%= receipt.MaPhieuThu %>">
+                  <td style="text-align: center"><%= index +1 %></td>
+                  <td><%= receipt.MaPhieuThu %></td>
+                  <td><%= receipt.KhachHang.HoVaTen %></td>
+                  <td>
+                    <% const thuDate = new Date(receipt.NgayThuTien); %><%=
+                    thuDate.toLocaleDateString('vi-VN', { day: '2-digit', month:
+                    '2-digit', year: 'numeric' }) %>
+                  </td>
+
+                  <td>
+                    <%= parseFloat(receipt.SoTienThu).toLocaleString('vi-VN') %>
+                  </td>
+
+                  <td class="action-column">
+                    <i
+                      class="fas fa-pencil-alt action-icon open-edit-modal"
+                      data-id="<%= receipt.MaPhieuThu %>"
+                      title="Sửa"
+                    ></i>
+
+                    <button
+                      class="btn btn-sm btn-print ml-2"
+                      data-id="<%= receipt.MaPhieuThu %>"
+                    >
+                      <i class="fas fa-print"></i>
                     </button>
-                    <h1>Quản lý Phiếu thu tiền</h1>
-                </div>
-                <div class="user-menu">
-                    <span class="user-trigger">
-                        Chào, <strong><%= username %></strong> <i class="fas fa-chevron-down"></i>
-                    </span>
-
-                    <div class="dropdown-menu">
-                        <a href="#" id="logout-button">
-                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                        </a>
-                    </div>
-                </div>
-            </header>
-
-            <div class="content-wrapper">
-                <div class="content-header">
-                    <h2>Danh sách Phiếu thu tiền</h2>
-                    <button class="btn btn-primary btn-add-new" id="open-add-modal"> <i class="fas fa-plus"></i> LẬP
-                        PHIẾU THU TIỀN</button>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="data-table" id="receipt-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 50px; text-align: center;">STT</th>
-                                <th>Mã Phiếu</th>
-                                <th>Khách Hàng</th>
-                                <th>Ngày Thu</th>
-                                <th>Số Tiền Thu</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% 
-                            // 1. Kiểm tra xem biến 'receipts' có tồn tại và là mảng không
-                            if (receipts && receipts.length > 0) {
-                                // 2. Lặp qua từng phiếu thu trong mảng 'receipts'
-                                receipts.forEach((receipt, index) => {
-                            %>
-                                <tr data-id="<%= receipt.MaPhieuThu %>">
-                                    <td style="text-align: center;"><%= index +1 %></td>
-                                    <td><%= receipt.MaPhieuThu %></td>
-                                    <td><%= receipt.KhachHang.HoVaTen %></td>
-                                    <td>
-                                        <% 
-                                            // Định dạng ngày theo chuẩn Việt Nam (DD/MM/YYYY)
-                                            const thuDate = new Date(receipt.NgayThuTien); 
-                                        %>
-                                        <%= thuDate.toLocaleDateString('vi-VN', { 
-                                            day: '2-digit', 
-                                            month: '2-digit', 
-                                            year: 'numeric' 
-                                        }) %>
-                                    </td>
-                                    
-                                    <td>
-                                        <%= parseFloat(receipt.SoTienThu).toLocaleString('vi-VN') %>
-                                    </td>
-
-                                    <td class="action-column">
-                                        <i class="fas fa-pencil-alt action-icon open-edit-modal" data-id="<%= receipt.MaPhieuThu %>"
-                                        title="Sửa"></i>
-                                    
-                                        <button class="btn btn-sm btn-print ml-2" data-id="<%= receipt.MaPhieuThu %>"> <i class="fas fa-print"></i>
-                                        </button>
-                                        <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
-                                    </td>
-                                </tr>
-                            <% 
-                                }); 
-                            } else { 
-                            %>
-                                <tr>
-                                    <td colspan="6" class="no-data">Chưa có phiếu thu tiền nào được lập.</td>
-                                </tr>
-                            <% 
-                            } 
-                            %>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
+                    <i
+                      class="fas fa-trash action-icon delete-icon"
+                      style="margin-left: 12px; color: var(--red-accent)"
+                    ></i>
+                  </td>
+                </tr>
+                <% }); } else { %>
+                <tr>
+                  <td colspan="6" class="no-data">
+                    Chưa có phiếu thu tiền nào được lập.
+                  </td>
+                </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
     </div>
 
     <!-- Modal Thêm Mới -->
     <div class="modal-overlay" id="add-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Lập Phiếu Thu Tiền</h2>
-                <button class="close-modal"><i class="fas fa-times"></i></button>
-            </div>
-            <form id="add-receipt-form">
-                <div class="modal-body">
-                    <div class="modal-form-grid">
-                        <!-- <div class="form-group"> <label>Mã Phiếu:</label> <input type="text" value="Tự động" disabled>
-                        </div> -->
-                        <div class="form-group"> <label class="required">Ngày Thu</label>
-                            <div class="date-input-wrapper"> <input type="date" id="add-ngay-thu" required> </div>
-                        </div>
-                        <div class="form-group"> <label class="required">Mã Khách Hàng</label> <input type="text" id="add-ma-kh"
-                                placeholder="Nhập Mã KH..." required> </div>
-                        <div class="form-group"> <label class="required">Mã Nhân Viên Lập Phiếu</label> <input type="text" id="add-ma-nv"
-                            placeholder="<%=id%>" value="<%=id%>" readonly> </div>
-                        <div class="form-group"> <label>Họ Tên</label> <input type="text" id="add-ten-kh" readonly>
-                        </div>
-                        <div class="form-group"> <label>Địa Chỉ</label> <input type="text" id="add-dia-chi" readonly>
-                        </div>
-                        <div class="form-group"> <label>Số Điện Thoại</label> <input type="text" id="add-sdt" readonly>
-                        </div>
-                        <!-- <div class="form-group"> <label>Email</label> <input type="text" id="add-email" readonly>
-                        </div> -->
-                        <div class="form-group"> <label class="required">Số Tiền Thu</label> <input type="text" id="add-so-tien"
-                                required inputmode="numeric" placeholder="0" oninput="this.value = this.value.replace(/[^0-9]/g, '')"> </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="btn-custom-reset">Thêm mới</button>
-                    <button type="submit" class="btn btn-primary">LƯU</button>
-                </div>
-            </form>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Lập Phiếu Thu Tiền</h2>
+          <button class="close-modal"><i class="fas fa-times"></i></button>
         </div>
+        <form id="add-receipt-form">
+          <div class="modal-body">
+            <div class="modal-form-grid">
+              <!-- <div class="form-group"> <label>Mã Phiếu:</label> <input type="text" value="Tự động" disabled>
+                        </div> -->
+              <div class="form-group">
+                <label class="required">Ngày Thu</label>
+                <div class="date-input-wrapper">
+                  <input type="date" id="add-ngay-thu" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="required">Mã Khách Hàng</label>
+                <input
+                  type="text"
+                  id="add-ma-kh"
+                  placeholder="Nhập Mã KH..."
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="required">Mã Nhân Viên Lập Phiếu</label>
+                <input
+                  type="text"
+                  id="add-ma-nv"
+                  placeholder="<%=id%>"
+                  value="<%=id%>"
+                  readonly
+                />
+              </div>
+              <div class="form-group">
+                <label>Họ Tên</label>
+                <input type="text" id="add-ten-kh" readonly />
+              </div>
+              <div class="form-group">
+                <label>Địa Chỉ</label>
+                <input type="text" id="add-dia-chi" readonly />
+              </div>
+              <div class="form-group">
+                <label>Số Điện Thoại</label>
+                <input type="text" id="add-sdt" readonly />
+              </div>
+              <!-- <div class="form-group"> <label>Email</label> <input type="text" id="add-email" readonly>
+                        </div> -->
+              <div class="form-group">
+                <label class="required">Số Tiền Thu</label>
+                <input
+                  type="text"
+                  id="add-so-tien"
+                  required
+                  inputmode="numeric"
+                  placeholder="0"
+                  oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="btn-custom-reset"
+            >
+              Thêm mới
+            </button>
+            <button type="submit" class="btn btn-primary">LƯU</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Modal Chỉnh Sửa -->
     <div class="modal-overlay" id="edit-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Chỉnh Sửa Phiếu Thu</h2>
-                <button class="close-modal"><i class="fas fa-times"></i></button>
-            </div>
-            <form id="edit-receipt-form">
-                <div class="modal-body">
-                    <div class="modal-form-grid">
-                        <div class="form-group"> <label class="required">Ngày Thu</label>
-                            <div class="date-input-wrapper"> <input type="date" id="edit-ngay-thu" required></div>
-                        </div>
-                        <div class="form-group"> <label class="required">Mã Khách Hàng</label> <input type="text" id="edit-ma-kh"
-                                required> </div>
-                        <div class="form-group"> <label class="required">Mã Nhân Viên Lập Phiếu</label> <input type="text" id="edit-ma-nv"
-                            readonly placeholder="<%=id%>" value="<%=id%>" > </div>
-                        <div class="form-group"> <label>Họ Tên</label> <input type="text" id="edit-ten-kh" readonly>
-                        </div>
-                        <div class="form-group"> <label>Địa Chỉ</label> <input type="text" id="edit-dia-chi" readonly>
-                        </div>
-                        <div class="form-group"> <label>Số Điện Thoại</label> <input type="number" id="edit-sdt"
-                            readonly> </div>
-                        <!-- <div class="form-group"> <label>Email</label> <input type="text" id="edit-email" readonly>
-                        </div> -->
-                        <div class="form-group"> <label class="required">Số Tiền Thu</label> <input type="text" id="edit-so-tien"
-                                required inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')"> </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-warning" id="btn-reset-edit">Đặt lại</button>
-                    <button type="submit" class="btn btn-primary">LƯU</button>
-                </div>
-            </form>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Chỉnh Sửa Phiếu Thu</h2>
+          <button class="close-modal"><i class="fas fa-times"></i></button>
         </div>
+        <form id="edit-receipt-form">
+          <div class="modal-body">
+            <div class="modal-form-grid">
+              <div class="form-group">
+                <label class="required">Ngày Thu</label>
+                <div class="date-input-wrapper">
+                  <input type="date" id="edit-ngay-thu" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="required">Mã Khách Hàng</label>
+                <input type="text" id="edit-ma-kh" required />
+              </div>
+              <div class="form-group">
+                <label class="required">Mã Nhân Viên Lập Phiếu</label>
+                <input
+                  type="text"
+                  id="edit-ma-nv"
+                  readonly
+                  placeholder="<%=id%>"
+                  value="<%=id%>"
+                />
+              </div>
+              <div class="form-group">
+                <label>Họ Tên</label>
+                <input type="text" id="edit-ten-kh" readonly />
+              </div>
+              <div class="form-group">
+                <label>Địa Chỉ</label>
+                <input type="text" id="edit-dia-chi" readonly />
+              </div>
+              <div class="form-group">
+                <label>Số Điện Thoại</label>
+                <input type="number" id="edit-sdt" readonly />
+              </div>
+              <!-- <div class="form-group"> <label>Email</label> <input type="text" id="edit-email" readonly>
+                        </div> -->
+              <div class="form-group">
+                <label class="required">Số Tiền Thu</label>
+                <input
+                  type="text"
+                  id="edit-so-tien"
+                  required
+                  inputmode="numeric"
+                  oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-warning" id="btn-reset-edit">
+              Đặt lại
+            </button>
+            <button type="submit" class="btn btn-primary">LƯU</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            
-            // --- 1. CÁC HÀM TIỆN ÍCH (Loader, Toast, Format) ---
-            const loader = document.getElementById('loader');
-            const toastContainer = document.getElementById('toast-container');
-            
-            function showLoader() { loader.style.display = 'flex'; }
-            function hideLoader() { loader.style.display = 'none'; }
-            
-            function showToast(message, type = 'success') {
-                const toast = document.createElement('div');
-                toast.classList.add('toast', type);
-                toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i><span class="toast-message">${message}</span>`;
-                toastContainer.appendChild(toast);
-                setTimeout(() => { toast.classList.add('show'); }, 100);
-                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+      document.addEventListener("DOMContentLoaded", function () {
+        // --- 1. CÁC HÀM TIỆN ÍCH (Loader, Toast, Format) ---
+        const loader = document.getElementById("loader");
+        const toastContainer = document.getElementById("toast-container");
+
+        function showLoader() {
+          loader.style.display = "flex";
+        }
+        function hideLoader() {
+          loader.style.display = "none";
+        }
+
+        function showToast(message, type = "success") {
+          const toast = document.createElement("div");
+          toast.classList.add("toast", type);
+          const iconClass =
+            type === "success" ? "fa-check-circle" : "fa-exclamation-circle";
+          toast.innerHTML = `<i class="fas ${iconClass} toast-icon"></i><span class="toast-message">${message}</span>`;
+          toastContainer.appendChild(toast);
+          setTimeout(() => {
+            toast.classList.add("show");
+          }, 100);
+          setTimeout(() => {
+            toast.classList.remove("show");
+            setTimeout(() => toast.remove(), 300);
+          }, 3000);
+        }
+
+        async function simulateApiCall(callback) {
+          showLoader();
+          setTimeout(() => {
+            hideLoader();
+            callback(true);
+          }, 1000);
+        }
+
+        function formatNumber(num) {
+          if (!num) return "";
+          return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+        function parseNumber(str) {
+          if (!str) return 0;
+          return parseFloat(str.replace(/\./g, "")) || 0;
+        }
+
+        // --- 2. SIDEBAR ---
+        const menuToggle = document.getElementById("menu-toggle");
+        const sidebar = document.getElementById("sidebar");
+        const container = document.querySelector(".dashboard-container");
+        if (menuToggle)
+          menuToggle.addEventListener("click", () => {
+            if (window.innerWidth <= 992) sidebar.classList.toggle("active");
+            else container.classList.toggle("sidebar-collapsed");
+          });
+
+        // --- 3. AUTO-FILL LOGIC (MOCK DATA) ---
+        async function findCustomer(maKH) {
+          if (!maKH) return null;
+
+          try {
+            const response = await fetch(`/api/receipts/customer/${maKH}`);
+
+            if (!response.ok) {
+              // Nếu lỗi 404 (Không tìm thấy), vẫn trả về null
+              if (response.status === 404) return null;
+
+              // Nếu lỗi khác, ném lỗi
+              throw new Error(`Server error: ${response.statusText}`);
             }
 
-            async function simulateApiCall(callback) {
-                showLoader();
-                setTimeout(() => {
-                    hideLoader();
-                    callback(true);
-                }, 1000);
-            }
+            const data = await response.json();
+            return data; // Trả về đối tượng Khách Hàng
+          } catch (error) {
+            console.error("Lỗi khi tìm khách hàng:", error);
+            showToast("Lỗi kết nối khi tìm khách hàng.", "error");
+            return null;
+          }
+        }
 
-            function formatNumber(num) { if (!num) return ''; return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
-            function parseNumber(str) { if (!str) return 0; return parseFloat(str.replace(/\./g, '')) || 0; }
+        ["add", "edit"].forEach((prefix) => {
+          const maKhInput = document.getElementById(`${prefix}-ma-kh`);
 
+          if (maKhInput) {
+            // Tự động điền thông tin khách hàng khi rời khỏi ô input (blur)
+            maKhInput.addEventListener("blur", async function () {
+              const maKH = this.value.trim();
+              const customer = await findCustomer(maKH);
 
-            // --- 2. SIDEBAR ---
-            const menuToggle = document.getElementById('menu-toggle');
-            const sidebar = document.getElementById('sidebar');
-            const container = document.querySelector('.dashboard-container');
-            if (menuToggle) menuToggle.addEventListener('click', () => {
-                if (window.innerWidth <= 992) sidebar.classList.toggle('active');
-                else container.classList.toggle('sidebar-collapsed');
+              // Các trường cần cập nhật trong Modal Phiếu Thu (cần đảm bảo ID tồn tại)
+              const fieldsToUpdate = [
+                { id: "ten-kh", value: customer ? customer.HoVaTen : "" },
+                { id: "dia-chi", value: customer ? customer.DiaChi : "" },
+                { id: "sdt", value: customer ? customer.SoDienThoai : "" },
+              ];
+              // Cập nhật DOM
+              fieldsToUpdate.forEach((field) => {
+                const element = document.getElementById(
+                  `${prefix}-${field.id}`
+                );
+                if (element) {
+                  element.value = field.value;
+                }
+              });
+
+              if (!customer) {
+                showToast(
+                  `Không tìm thấy Khách hàng với Mã ${maKH}.`,
+                  "warning"
+                );
+              }
             });
+          }
+        });
 
+        // --- 4. LOGIC NÚT "THÊM MỚI" (SMART RESET) - MODAL ADD ---
+        const btnResetAdd = document.getElementById("btn-custom-reset");
+        const addForm = document.getElementById("add-receipt-form");
+        const addModal = document.getElementById("add-modal");
+        let isSaveAndReset = false;
+        if (btnResetAdd && addForm) {
+          btnResetAdd.addEventListener("click", () => {
+            // Kiểm tra xem đã nhập gì chưa (Check mã KH hoặc số tiền)
+            const hasData =
+              document.getElementById("add-ma-kh").value.trim() !== "" ||
+              document.getElementById("add-so-tien").value.trim() !== "";
 
-            // --- 3. AUTO-FILL LOGIC (MOCK DATA) ---
-            async function findCustomer(maKH) {
-                if (!maKH) return null;
+            if (hasData) {
+              if (
+                confirm(
+                  "Bạn đang nhập dở phiếu thu. Bạn có muốn LƯU phiếu này không?\n\n- OK: Lưu phiếu.\n- Cancel: Xóa trắng để nhập phiếu khác."
+                )
+              ) {
+                // Chọn OK -> Gọi submit form (Lưu)
+                isSaveAndReset = true;
+                addForm.requestSubmit();
+              } else {
+                // Chọn Cancel -> Reset form, KHÔNG ĐÓNG MODAL
+                resetAddForm();
+                showToast("Đã làm mới form!", "info");
+              }
+            } else {
+              // Chưa nhập gì -> Reset
+              resetAddForm();
+            }
+          });
+        }
 
+        function resetAddForm() {
+          addForm.reset();
+          document.getElementById("add-ngay-thu").valueAsDate = new Date();
+        }
+
+        // --- 5. LOGIC NÚT "ĐẶT LẠI" (SMART RESTORE) - MODAL EDIT ---
+        const btnResetEdit = document.getElementById("btn-reset-edit");
+        let originalEditState = null; // Biến lưu snapshot
+
+        // Hàm lấy dữ liệu hiện tại để so sánh/lưu trữ
+        function getEditState() {
+          return {
+            ngayThu: document.getElementById("edit-ngay-thu").value,
+            maKH: document.getElementById("edit-ma-kh").value,
+            soTien: document.getElementById("edit-so-tien").value,
+          };
+        }
+
+        if (btnResetEdit) {
+          btnResetEdit.addEventListener("click", () => {
+            if (!originalEditState) return;
+
+            // 1. Kiểm tra thay đổi
+            const currentState = getEditState();
+            const isChanged =
+              JSON.stringify(currentState) !==
+              JSON.stringify(originalEditState);
+
+            if (!isChanged) {
+              showToast("Chưa có thay đổi nào để đặt lại!", "error");
+              return;
+            }
+
+            // 2. Hỏi xác nhận
+            if (
+              confirm(
+                "Dữ liệu đã thay đổi. Bạn có muốn LƯU LẠI không?\n\n- OK (Yes): Lưu thay đổi.\n- Cancel (No): Khôi phục lại dữ liệu gốc."
+              )
+            ) {
+              // Chọn Yes -> Lưu
+              document.getElementById("edit-receipt-form").requestSubmit();
+            } else {
+              // Chọn No -> Khôi phục
+              document.getElementById("edit-ngay-thu").value =
+                originalEditState.ngayThu;
+              document.getElementById("edit-ma-kh").value =
+                originalEditState.maKH;
+              document.getElementById("edit-so-tien").value =
+                originalEditState.soTien;
+
+              // Trigger blur để load lại thông tin khách hàng tương ứng với mã KH cũ
+              document
+                .getElementById("edit-ma-kh")
+                .dispatchEvent(new Event("blur"));
+
+              showToast("Đã khôi phục dữ liệu gốc!", "success");
+            }
+          });
+        }
+
+        // --- 6. LOGIC ICON XÓA (NGOÀI BẢNG DANH SÁCH) ---
+        const receiptTable = document.getElementById("receipt-table");
+        if (receiptTable) {
+          receiptTable.addEventListener("click", async function (e) {
+            // Kiểm tra click vào icon xóa (hoặc phần tử con của nó)
+            const deleteBtn = e.target.classList.contains("delete-icon")
+              ? e.target
+              : e.target.closest(".delete-icon");
+
+            if (deleteBtn) {
+              const row = deleteBtn.closest("tr");
+
+              // Lấy Mã Phiếu Thu: Ưu tiên lấy từ data-id (chuẩn xác hơn), nếu không có thì lấy từ cột
+              const maPhieu = row.dataset.id || row.cells[0].textContent.trim();
+
+              // Cảnh báo người dùng (Thêm thông tin về việc hoàn tác nợ)
+              if (
+                confirm(
+                  `Bạn có chắc chắn muốn XÓA vĩnh viễn phiếu thu ${maPhieu}?\n\nLưu ý: Tổng nợ của khách hàng sẽ tăng trở lại tương ứng với số tiền của phiếu này.`
+                )
+              ) {
                 try {
-                    const response = await fetch(`/api/receipts/customer/${maKH}`);
-                    
-                    if (!response.ok) {
-                        // Nếu lỗi 404 (Không tìm thấy), vẫn trả về null
-                        if (response.status === 404) return null;
-                        
-                        // Nếu lỗi khác, ném lỗi
-                        throw new Error(`Server error: ${response.statusText}`);
+                  // 1. GỌI API DELETE
+                  const response = await fetch(`/api/receipts/${maPhieu}`, {
+                    method: "DELETE",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                  });
+
+                  const result = await response.json();
+
+                  // 2. XỬ LÝ KẾT QUẢ
+                  if (response.ok) {
+                    // Thành công: Xóa dòng khỏi bảng giao diện ngay lập tức
+                    row.remove();
+                    showToast(
+                      `Đã xóa phiếu thu ${maPhieu} thành công!`,
+                      "success"
+                    );
+
+                    // (Tùy chọn) Nếu bảng danh sách trống, hiển thị thông báo "Chưa có phiếu thu"
+                    const tbody = receiptTable.querySelector("tbody");
+                    if (tbody && tbody.children.length === 0) {
+                      tbody.innerHTML =
+                        '<tr><td colspan="5" class="no-data" style="text-align: center; padding: 20px;">Chưa có phiếu thu nào.</td></tr>';
                     }
-                    
-                    const data = await response.json();
-                    return data; // Trả về đối tượng Khách Hàng
-                    
+                  } else {
+                    // Thất bại: Hiển thị lỗi từ server
+                    showToast(`Xóa thất bại: ${result.message}`, "error");
+                  }
                 } catch (error) {
-                    console.error('Lỗi khi tìm khách hàng:', error);
-                    showToast('Lỗi kết nối khi tìm khách hàng.', 'error');
-                    return null;
+                  console.error("Lỗi khi xóa phiếu thu:", error);
+                  showToast("Lỗi kết nối server khi xóa.", "error");
                 }
+              }
+            }
+          });
+        }
+
+        // --- 7. XỬ LÝ MỞ/ĐÓNG MODAL ---
+
+        // Mở Modal Thêm
+        const openAddBtn = document.getElementById("open-add-modal");
+        if (openAddBtn) {
+          openAddBtn.addEventListener("click", () => {
+            resetAddForm(); // Luôn sạch sẽ khi mở
+            addModal.style.display = "flex";
+          });
+        }
+
+        // Mở Modal Sửa (Giả lập load dữ liệu)
+        const openEditBtns = document.querySelectorAll(".open-edit-modal");
+        const editModal = document.getElementById("edit-modal");
+        let currentEditingMaPhieuThu = null;
+
+        openEditBtns.forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const MaPhieuThu = this.dataset.id;
+            currentEditingMaPhieuThu = MaPhieuThu; // Lưu lại để dùng khi Lưu (btn-save-edit)
+            const editModal = document.getElementById("edit-modal"); // Giả định Modal có ID này
+
+            // 2. GỌI API LẤY CHI TIẾT PHIẾU THU
+            fetch(`/api/receipts/${MaPhieuThu}`)
+              .then((response) => {
+                if (!response.ok) throw new Error("Không tìm thấy phiếu thu.");
+                return response.json();
+              })
+              .then((data) => {
+                // 3. ĐIỀN DỮ LIỆU VÀO INPUTS
+                document.getElementById("edit-ngay-thu").value =
+                  data.NgayThuTien;
+                document.getElementById("edit-ma-kh").value = data.MaKhachHang;
+                document.getElementById("edit-ten-kh").value =
+                  data.KhachHang.HoVaTen;
+                document.getElementById("edit-dia-chi").value =
+                  data.KhachHang.DiaChi;
+                document.getElementById("edit-sdt").value =
+                  data.KhachHang.SoDienThoai;
+
+                // Định dạng số tiền
+                const soTienThu = parseFloat(data.SoTienThu).toLocaleString(
+                  "vi-VN"
+                );
+                document.getElementById("edit-so-tien").value = soTienThu;
+
+                // Cập nhật nợ hiện tại để người dùng dễ theo dõi
+                const tongNo = parseFloat(data.KhachHang.TongNo).toLocaleString(
+                  "vi-VN"
+                );
+                // document.getElementById('edit-tong-no').value = tongNo;
+
+                // 4. LƯU SNAPSHOT (Sau khi dữ liệu đã load xong)
+                setTimeout(() => {
+                  // Bạn cần hàm getEditState() định nghĩa trước đó
+                  originalEditState = getEditState();
+                }, 100);
+
+                // Hiển thị Modal ngay lập tức
+                editModal.style.display = "flex";
+                // showToast('Tải dữ liệu thành công!', 'success');
+              })
+              .catch((error) => {
+                console.error("Lỗi khi tải chi tiết phiếu thu:", error);
+                showToast(
+                  `Lỗi: ${
+                    error.message || "Không thể tải chi tiết phiếu thu."
+                  }`,
+                  "error"
+                );
+                editModal.style.display = "none"; // Đóng modal nếu lỗi nghiêm trọng
+              });
+          });
+        });
+
+        // Đóng Modal
+        const closeBtns = document.querySelectorAll(".close-modal");
+        closeBtns.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            if (addModal) addModal.style.display = "none";
+            if (editModal) editModal.style.display = "none";
+          });
+        });
+
+        // --- 8. SUBMIT FORM (LƯU) ---
+
+        function generateMaPhieuThu(lastMaPT) {
+          if (!lastMaPT) return "PT001"; // Mặc định nếu chưa có phiếu nào
+
+          // Lấy phần số: 'PT012' -> '012' -> 12
+          const lastNumberStr = lastMaPT.replace("PT", "");
+          const lastNumber = parseInt(lastNumberStr);
+
+          if (isNaN(lastNumber)) return "PT001";
+
+          const nextNumber = lastNumber + 1;
+
+          // Định dạng thành 3 chữ số (001, 099, 100...)
+          const nextNumberStr = nextNumber.toString().padStart(3, "0");
+
+          return `PT${nextNumberStr}`;
+        }
+
+        if (addForm) {
+          addForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            // 1. Thu thập dữ liệu từ Form
+            const maKhInput = document.getElementById("add-ma-kh");
+            const maNvInput = document.getElementById("add-ma-nv");
+            const ngayThuInput = document.getElementById("add-ngay-thu");
+            const soTienInput = document.getElementById("add-so-tien"); // Input tiền định dạng (VD: 100.000)
+
+            const maKhachHang = maKhInput.value.trim();
+            const maNhanVien = maNvInput.value.trim();
+            const ngayThuTien = ngayThuInput.value;
+            const soTienThu = parseNumber(soTienInput.value); // Chuyển "100.000" -> 100000
+
+            // Validate cơ bản
+            if (!maKhachHang || soTienThu <= 0 || !ngayThuTien) {
+              showToast(
+                "Vui lòng nhập đầy đủ thông tin và số tiền > 0",
+                "error"
+              );
+              return;
             }
 
-            ['add', 'edit'].forEach(prefix => {
-                const maKhInput = document.getElementById(`${prefix}-ma-kh`);
+            try {
+              // 2. Lấy Mã Phiếu Thu cuối cùng từ Server để tạo mã mới
+              // (Đảm bảo bạn đã có route GET /api/receipts/lastMaPhieuThu như hướng dẫn trước)
+              const resLastID = await fetch("/api/receipts/lastMaPhieuThu");
+              const dataLastID = await resLastID.json();
 
-                if (maKhInput) {
-                    // Tự động điền thông tin khách hàng khi rời khỏi ô input (blur)
-                    maKhInput.addEventListener('blur', async function () {
-                        const maKH = this.value.trim();
-                        const customer = await findCustomer(maKH);
-                        
-                        // Các trường cần cập nhật trong Modal Phiếu Thu (cần đảm bảo ID tồn tại)
-                        const fieldsToUpdate = [
-                            { id: 'ten-kh', value: customer ? customer.HoVaTen : '' },
-                            { id: 'dia-chi', value: customer ? customer.DiaChi : '' },
-                            { id: 'sdt', value: customer ? customer.SoDienThoai : '' },
-                        ];
-                        // Cập nhật DOM
-                        fieldsToUpdate.forEach(field => {
-                            const element = document.getElementById(`${prefix}-${field.id}`);
-                            if (element) {
-                                element.value = field.value;
-                            }
-                        });
-                        
-                        if (!customer) {
-                            showToast(`Không tìm thấy Khách hàng với Mã ${maKH}.`, 'warning');
-                        }
-                    });
+              // Tạo mã mới (VD: PT005)
+              const newMaPhieuThu = generateMaPhieuThu(
+                dataLastID.lastMaPhieuThu
+              );
+
+              // 3. Chuẩn bị dữ liệu gửi đi
+              const payload = {
+                MaPhieuThu: newMaPhieuThu,
+                MaKhachHang: maKhachHang,
+                MaNhanVien: maNhanVien,
+                NgayThuTien: ngayThuTien,
+                SoTienThu: soTienThu,
+              };
+
+              // 4. Gọi API POST để tạo phiếu thu
+              const response = await fetch("/api/receipts/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              });
+
+              const result = await response.json();
+
+              if (response.ok) {
+                showToast(
+                  `Lập phiếu thu ${newMaPhieuThu} thành công!`,
+                  "success"
+                );
+                if (isSaveAndReset) {
+                  // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
+                  addForm.reset();
+                  showToast("Đã sẵn sàng nhập phiếu thu tiếp theo.", "info");
+
+                  // Reset cờ về false sau khi xong việc
+                  isSaveAndReset = false;
+                } else {
+                  addModal.style.display = "none";
                 }
-            });
+                // 5. Đóng Modal và Reset form
 
-
-            // --- 4. LOGIC NÚT "THÊM MỚI" (SMART RESET) - MODAL ADD ---
-            const btnResetAdd = document.getElementById('btn-custom-reset');
-            const addForm = document.getElementById('add-receipt-form');
-            const addModal = document.getElementById('add-modal');
-            let isSaveAndReset = false;
-            if(btnResetAdd && addForm) {
-                btnResetAdd.addEventListener('click', () => {
-                    // Kiểm tra xem đã nhập gì chưa (Check mã KH hoặc số tiền)
-                    const hasData = document.getElementById('add-ma-kh').value.trim() !== '' || 
-                                    document.getElementById('add-so-tien').value.trim() !== '';
-
-                    if (hasData) {
-                        if (confirm('Bạn đang nhập dở phiếu thu. Bạn có muốn LƯU phiếu này không?\n\n- OK: Lưu phiếu.\n- Cancel: Xóa trắng để nhập phiếu khác.')) {
-                            // Chọn OK -> Gọi submit form (Lưu)
-                            isSaveAndReset = true;
-                            addForm.requestSubmit();
-                        } else {
-                            // Chọn Cancel -> Reset form, KHÔNG ĐÓNG MODAL
-                            resetAddForm();
-                            showToast('Đã làm mới form!', 'info');
-                        }
-                    } else {
-                        // Chưa nhập gì -> Reset
-                        resetAddForm();
-                    }
-                });
-            }
-
-            function resetAddForm() {
+                // 1. Lấy dữ liệu hiển thị
+                const tenKhachHang =
+                  document.getElementById("add-ten-kh").value || "---";
+                const tbody = document.querySelector("#receipt-table tbody");
                 addForm.reset();
-                document.getElementById('add-ngay-thu').valueAsDate = new Date();
-            }
-
-
-            // --- 5. LOGIC NÚT "ĐẶT LẠI" (SMART RESTORE) - MODAL EDIT ---
-            const btnResetEdit = document.getElementById('btn-reset-edit');
-            let originalEditState = null; // Biến lưu snapshot
-
-            // Hàm lấy dữ liệu hiện tại để so sánh/lưu trữ
-            function getEditState() {
-                return {
-                    ngayThu: document.getElementById('edit-ngay-thu').value,
-                    maKH: document.getElementById('edit-ma-kh').value,
-                    soTien: document.getElementById('edit-so-tien').value
-                };
-            }
-
-            if(btnResetEdit) {
-                btnResetEdit.addEventListener('click', () => {
-                    if(!originalEditState) return;
-
-                    // 1. Kiểm tra thay đổi
-                    const currentState = getEditState();
-                    const isChanged = JSON.stringify(currentState) !== JSON.stringify(originalEditState);
-
-                    if (!isChanged) {
-                        showToast('Chưa có thay đổi nào để đặt lại!', 'error');
-                        return;
-                    }
-
-                    // 2. Hỏi xác nhận
-                    if (confirm("Dữ liệu đã thay đổi. Bạn có muốn LƯU LẠI không?\n\n- OK (Yes): Lưu thay đổi.\n- Cancel (No): Khôi phục lại dữ liệu gốc.")) {
-                        // Chọn Yes -> Lưu
-                        document.getElementById('edit-receipt-form').requestSubmit();
-                    } else {
-                        // Chọn No -> Khôi phục
-                        document.getElementById('edit-ngay-thu').value = originalEditState.ngayThu;
-                        document.getElementById('edit-ma-kh').value = originalEditState.maKH;
-                        document.getElementById('edit-so-tien').value = originalEditState.soTien;
-                        
-                        // Trigger blur để load lại thông tin khách hàng tương ứng với mã KH cũ
-                        document.getElementById('edit-ma-kh').dispatchEvent(new Event('blur'));
-
-                        showToast('Đã khôi phục dữ liệu gốc!', 'success');
-                    }
+                // Reset các trường thông tin khách hàng (nếu có auto-fill)
+                const infoFields = [
+                  "ten-kh",
+                  "dia-chi",
+                  "sdt",
+                  "email",
+                  "tong-no",
+                ];
+                infoFields.forEach((id) => {
+                  const el = document.getElementById(`add-${id}`);
+                  if (el) el.value = "";
                 });
-            }
 
+                // Xóa dòng "Chưa có dữ liệu" nếu bảng đang trống
+                const noDataRow = tbody.querySelector(".no-data");
+                if (noDataRow) noDataRow.closest("tr").remove();
 
-            // --- 6. LOGIC ICON XÓA (NGOÀI BẢNG DANH SÁCH) ---
-            const receiptTable = document.getElementById('receipt-table');
-            if (receiptTable) {
-                receiptTable.addEventListener('click', async function(e) {
-        
-                // Kiểm tra click vào icon xóa (hoặc phần tử con của nó)
-                const deleteBtn = e.target.classList.contains('delete-icon') ? e.target : e.target.closest('.delete-icon');
-                
-                if (deleteBtn) {
-                    const row = deleteBtn.closest('tr');
-                    
-                    // Lấy Mã Phiếu Thu: Ưu tiên lấy từ data-id (chuẩn xác hơn), nếu không có thì lấy từ cột
-                    const maPhieu = row.dataset.id || row.cells[0].textContent.trim(); 
-                    
-                    // Cảnh báo Nhân viên (Thêm thông tin về việc hoàn tác nợ)
-                    if (confirm(`Bạn có chắc chắn muốn XÓA vĩnh viễn phiếu thu ${maPhieu}?\n\nLưu ý: Tổng nợ của khách hàng sẽ tăng trở lại tương ứng với số tiền của phiếu này.`)) {
-                        try {
-                            // 1. GỌI API DELETE
-                            const response = await fetch(`/api/receipts/${maPhieu}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }
-                            });
+                const stt = tbody.rows.length + 1;
 
-                            const result = await response.json();
-
-                            // 2. XỬ LÝ KẾT QUẢ
-                            if (response.ok) {
-                                // Thành công: Xóa dòng khỏi bảng giao diện ngay lập tức
-                                row.remove();
-                                showToast(`Đã xóa phiếu thu ${maPhieu} thành công!`, 'success');
-                                
-                                // (Tùy chọn) Nếu bảng danh sách trống, hiển thị thông báo "Chưa có phiếu thu"
-                                const tbody = receiptTable.querySelector('tbody');
-                                if (tbody && tbody.children.length === 0) {
-                                    tbody.innerHTML = '<tr><td colspan="5" class="no-data" style="text-align: center; padding: 20px;">Chưa có phiếu thu nào.</td></tr>';
-                                }
-                            } else {
-                                // Thất bại: Hiển thị lỗi từ server
-                                showToast(`Xóa thất bại: ${result.message}`, 'error');
-                            }
-                        } catch (error) {
-                            console.error('Lỗi khi xóa phiếu thu:', error);
-                            showToast('Lỗi kết nối server khi xóa.', 'error');
-                        }
-                    }
+                // Format Ngày: YYYY-MM-DD -> DD/MM/YYYY
+                let dateDisplay = ngayThuTien;
+                if (ngayThuTien && ngayThuTien.includes("-")) {
+                  const parts = ngayThuTien.split("-");
+                  dateDisplay = `${parts[2]}/${parts[1]}/${parts[0]}`;
                 }
-            });
-            }
 
+                // Format Tiền: 100000 -> 100.000
+                const moneyDisplay = new Intl.NumberFormat("vi-VN").format(
+                  soTienThu
+                );
 
-            // --- 7. XỬ LÝ MỞ/ĐÓNG MODAL ---
-            
-            // Mở Modal Thêm
-            const openAddBtn = document.getElementById('open-add-modal');
-            if (openAddBtn) {
-                openAddBtn.addEventListener('click', () => {
-                    resetAddForm(); // Luôn sạch sẽ khi mở
-                    addModal.style.display = 'flex';
-                });
-            }
-
-            // Mở Modal Sửa (Giả lập load dữ liệu)
-            const openEditBtns = document.querySelectorAll('.open-edit-modal');
-            const editModal = document.getElementById('edit-modal');
-            let currentEditingMaPhieuThu = null;
-            
-            openEditBtns.forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const MaPhieuThu = this.dataset.id;
-                    currentEditingMaPhieuThu = MaPhieuThu; // Lưu lại để dùng khi Lưu (btn-save-edit)
-                    const editModal = document.getElementById('edit-modal'); // Giả định Modal có ID này
-
-                    // 2. GỌI API LẤY CHI TIẾT PHIẾU THU
-                    fetch(`/api/receipts/${MaPhieuThu}`)
-                        .then(response => {
-                            if (!response.ok) throw new Error('Không tìm thấy phiếu thu.');
-                            return response.json();
-                        })
-                        .then(data => {
-                            // 3. ĐIỀN DỮ LIỆU VÀO INPUTS
-                            document.getElementById('edit-ngay-thu').value = data.NgayThuTien;
-                            document.getElementById('edit-ma-kh').value = data.MaKhachHang;
-                            document.getElementById('edit-ten-kh').value = data.KhachHang.HoVaTen;
-                            document.getElementById('edit-dia-chi').value = data.KhachHang.DiaChi;
-                            document.getElementById('edit-sdt').value = data.KhachHang.SoDienThoai;
-
-                            // Định dạng số tiền
-                            const soTienThu = parseFloat(data.SoTienThu).toLocaleString('vi-VN');
-                            document.getElementById('edit-so-tien').value = soTienThu; 
-                            
-                            // Cập nhật nợ hiện tại để Nhân viên dễ theo dõi
-                            const tongNo = parseFloat(data.KhachHang.TongNo).toLocaleString('vi-VN');
-                            // document.getElementById('edit-tong-no').value = tongNo;
-                            
-                            // 4. LƯU SNAPSHOT (Sau khi dữ liệu đã load xong)
-                            setTimeout(() => {
-                                // Bạn cần hàm getEditState() định nghĩa trước đó
-                                originalEditState = getEditState(); 
-                            }, 100);
-
-                            // Hiển thị Modal ngay lập tức
-                            editModal.style.display = 'flex';
-                            // showToast('Tải dữ liệu thành công!', 'success');
-
-                        })
-                        .catch(error => {
-                            console.error("Lỗi khi tải chi tiết phiếu thu:", error);
-                            showToast(`Lỗi: ${error.message || 'Không thể tải chi tiết phiếu thu.'}`, 'error');
-                            editModal.style.display = 'none'; // Đóng modal nếu lỗi nghiêm trọng
-                        });
-                });
-            });
-
-            // Đóng Modal
-            const closeBtns = document.querySelectorAll('.close-modal');
-            closeBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if(addModal) addModal.style.display = 'none';
-                    if(editModal) editModal.style.display = 'none';
-                });
-            });
-
-
-            // --- 8. SUBMIT FORM (LƯU) ---
-
-            function generateMaPhieuThu(lastMaPT) {
-                if (!lastMaPT) return 'PT001'; // Mặc định nếu chưa có phiếu nào
-
-                // Lấy phần số: 'PT012' -> '012' -> 12
-                const lastNumberStr = lastMaPT.replace('PT', '');
-                const lastNumber = parseInt(lastNumberStr);
-
-                if (isNaN(lastNumber)) return 'PT001';
-
-                const nextNumber = lastNumber + 1;
-                
-                // Định dạng thành 3 chữ số (001, 099, 100...)
-                const nextNumberStr = nextNumber.toString().padStart(3, '0');
-
-                return `PT${nextNumberStr}`;
-            }
-
-            if (addForm) {
-                addForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-
-                    // 1. Thu thập dữ liệu từ Form
-                    const maKhInput = document.getElementById('add-ma-kh');
-                    const maNvInput = document.getElementById('add-ma-nv');
-                    const ngayThuInput = document.getElementById('add-ngay-thu');
-                    const soTienInput = document.getElementById('add-so-tien'); // Input tiền định dạng (VD: 100.000)
-
-                    const maKhachHang = maKhInput.value.trim();
-                    const maNhanVien = maNvInput.value.trim();
-                    const ngayThuTien = ngayThuInput.value;
-                    const soTienThu = parseNumber(soTienInput.value); // Chuyển "100.000" -> 100000
-
-                    // Validate cơ bản
-                    if (!maKhachHang || soTienThu <= 0 || !ngayThuTien) {
-                        showToast('Vui lòng nhập đầy đủ thông tin và số tiền > 0', 'error');
-                        return;
-                    }
-
-                    try {
-                        // 2. Lấy Mã Phiếu Thu cuối cùng từ Server để tạo mã mới
-                        // (Đảm bảo bạn đã có route GET /api/receipts/lastMaPhieuThu như hướng dẫn trước)
-                        const resLastID = await fetch('/api/receipts/lastMaPhieuThu');
-                        const dataLastID = await resLastID.json();
-                        
-                        // Tạo mã mới (VD: PT005)
-                        const newMaPhieuThu = generateMaPhieuThu(dataLastID.lastMaPhieuThu);
-
-                        // 3. Chuẩn bị dữ liệu gửi đi
-                        const payload = {
-                            MaPhieuThu: newMaPhieuThu,
-                            MaKhachHang: maKhachHang,
-                            MaNhanVien: maNhanVien,
-                            NgayThuTien: ngayThuTien,
-                            SoTienThu: soTienThu
-                        };
-
-                        // 4. Gọi API POST để tạo phiếu thu
-                        const response = await fetch('/api/receipts/create', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-
-                        const result = await response.json();
-
-                        if (response.ok) {
-                            showToast(`Lập phiếu thu ${newMaPhieuThu} thành công!`, 'success');
-                            if (isSaveAndReset) {
-                                // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
-                                addForm.reset(); 
-                                showToast('Đã sẵn sàng nhập phiếu thu tiếp theo.', 'info');
-                                
-                                // Reset cờ về false sau khi xong việc
-                                isSaveAndReset = false; 
-
-                            } else {
-                                addModal.style.display = 'none';
-                            }
-                            // 5. Đóng Modal và Reset form
-                            
-                            
-                            
-                            
-
-                            // 1. Lấy dữ liệu hiển thị
-                            const tenKhachHang = document.getElementById('add-ten-kh').value || '---';
-                            const tbody = document.querySelector('#receipt-table tbody');
-                            addForm.reset();
-                            // Reset các trường thông tin khách hàng (nếu có auto-fill)
-                            const infoFields = ['ten-kh', 'dia-chi', 'sdt', 'email', 'tong-no'];
-                            infoFields.forEach(id => {
-                                const el = document.getElementById(`add-${id}`);
-                                if (el) el.value = '';
-                            });
-                            
-                            // Xóa dòng "Chưa có dữ liệu" nếu bảng đang trống
-                            const noDataRow = tbody.querySelector('.no-data');
-                            if (noDataRow) noDataRow.closest('tr').remove();
-
-                            const stt = tbody.rows.length + 1;
-
-                            // Format Ngày: YYYY-MM-DD -> DD/MM/YYYY
-                            let dateDisplay = ngayThuTien;
-                            if (ngayThuTien && ngayThuTien.includes('-')) {
-                                const parts = ngayThuTien.split('-');
-                                dateDisplay = `${parts[2]}/${parts[1]}/${parts[0]}`;
-                            }
-
-                            // Format Tiền: 100000 -> 100.000
-                            const moneyDisplay = new Intl.NumberFormat('vi-VN').format(soTienThu);
-
-                            // 2. Tạo dòng HTML mới
-                            const newRow = document.createElement('tr');
-                            newRow.setAttribute('data-id', newMaPhieuThu); // Để dùng cho nút xóa/sửa
-                            newRow.innerHTML = `
+                // 2. Tạo dòng HTML mới
+                const newRow = document.createElement("tr");
+                newRow.setAttribute("data-id", newMaPhieuThu); // Để dùng cho nút xóa/sửa
+                newRow.innerHTML = `
                                 <td style="text-align: center;">${stt}</td>
                                 <td>${newMaPhieuThu}</td>
                                 <td>${tenKhachHang}</td>
@@ -1370,47 +1559,54 @@
                                 </td>
                             `;
 
-                            // 3. Thêm vào bảng
-                            tbody.appendChild(newRow);
-
-                        } else {
-                            showToast(`Lỗi: ${result.message}`, 'error');
-                        }
-
-                    } catch (error) {
-                        console.error('Lỗi khi lập phiếu thu:', error);
-                        showToast('Lỗi kết nối server.', 'error');
-                    }
-                });
+                // 3. Thêm vào bảng
+                tbody.appendChild(newRow);
+              } else {
+                showToast(`Lỗi: ${result.message}`, "error");
+              }
+            } catch (error) {
+              console.error("Lỗi khi lập phiếu thu:", error);
+              showToast("Lỗi kết nối server.", "error");
             }
-            document.addEventListener('click', function(e) {
-                const btn = e.target.closest('.btn-print'); // Tìm nút có class .btn-print
-                if (btn) {
-                    const row = btn.closest('tr');
-                    const maPhieu = btn.dataset.id || (row ? row.cells[1].innerText : null); 
-                    
-                    if (maPhieu) {
-                        printReceipt(maPhieu);
-                    }
-                }
-            });
+          });
+        }
+        document.addEventListener("click", function (e) {
+          const btn = e.target.closest(".btn-print"); // Tìm nút có class .btn-print
+          if (btn) {
+            const row = btn.closest("tr");
+            const maPhieu =
+              btn.dataset.id || (row ? row.cells[1].innerText : null);
 
-            async function printReceipt(maPhieu) {
-                // 1. Lấy dữ liệu phiếu từ Server
-                // Giả sử bạn đã có hàm apiCall hoặc dùng fetch trực tiếp
-                try {
-                    const response = await fetch(`/api/receipts/${maPhieu}`);
-                    if (!response.ok) throw new Error('Không tìm thấy phiếu thu');
-                    const data = await response.json(); // Dữ liệu trả về từ receiptsController.getReceiptDetail
+            if (maPhieu) {
+              printReceipt(maPhieu);
+            }
+          }
+        });
 
-                    // Xử lý dữ liệu
-                    const date = new Date(data.NgayThuTien);
-                    const dateStr = `Ngày ${date.getDate()} tháng ${date.getMonth() + 1} năm ${date.getFullYear()}`;
-                    const khachHang = data.KhachHang || { HoVaTen: 'Khách lẻ', DiaChi: '---', SoDienThoai: '---' };
-                    const soTienFormat = new Intl.NumberFormat('vi-VN').format(data.SoTienThu);
+        async function printReceipt(maPhieu) {
+          // 1. Lấy dữ liệu phiếu từ Server
+          // Giả sử bạn đã có hàm apiCall hoặc dùng fetch trực tiếp
+          try {
+            const response = await fetch(`/api/receipts/${maPhieu}`);
+            if (!response.ok) throw new Error("Không tìm thấy phiếu thu");
+            const data = await response.json(); // Dữ liệu trả về từ receiptsController.getReceiptDetail
 
-                    // 2. Tạo nội dung HTML
-                    const printContent = `
+            // Xử lý dữ liệu
+            const date = new Date(data.NgayThuTien);
+            const dateStr = `Ngày ${date.getDate()} tháng ${
+              date.getMonth() + 1
+            } năm ${date.getFullYear()}`;
+            const khachHang = data.KhachHang || {
+              HoVaTen: "Khách lẻ",
+              DiaChi: "---",
+              SoDienThoai: "---",
+            };
+            const soTienFormat = new Intl.NumberFormat("vi-VN").format(
+              data.SoTienThu
+            );
+
+            // 2. Tạo nội dung HTML
+            const printContent = `
                     <html>
                     <head>
                         <title>In Phiếu Thu - ${data.MaPhieuThu}</title>
@@ -1449,11 +1645,15 @@
                             </div>
                             <div class="row">
                                 <span class="label">Địa chỉ:</span>
-                                <span class="value">${khachHang.DiaChi || ''}</span>
+                                <span class="value">${
+                                  khachHang.DiaChi || ""
+                                }</span>
                             </div>
                             <div class="row">
                                 <span class="label">Số điện thoại:</span>
-                                <span class="value">${khachHang.SoDienThoai || ''}</span>
+                                <span class="value">${
+                                  khachHang.SoDienThoai || ""
+                                }</span>
                             </div>
                             <div class="row">
                                 <span class="label">Số tiền:</span>
@@ -1475,116 +1675,130 @@
                     </html>
                     `;
 
-                    // 3. Mở cửa sổ in
-                    const printWindow = window.open('', '', 'height=600,width=800');
-                    printWindow.document.write(printContent);
-                    printWindow.document.close();
-                    
-                    setTimeout(() => {
-                        printWindow.focus();
-                        printWindow.print();
-                    }, 500);
+            // 3. Mở cửa sổ in
+            const printWindow = window.open("", "", "height=600,width=800");
+            printWindow.document.write(printContent);
+            printWindow.document.close();
 
-                } catch (error) {
-                    console.error(error);
-                    alert('Lỗi khi tải dữ liệu in: ' + error.message);
-                }
-            }
-            const editForm = document.getElementById('edit-receipt-form');
-            if (editForm) {
-                editForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    simulateApiCall( async (success) => {
-                        const MaPhieuThu = currentEditingMaPhieuThu;
-                        const MaKhachHang = document.getElementById('edit-ma-kh').value.trim();
-                        const NgayThuTien = document.getElementById('edit-ngay-thu').value.trim();
-                        
-                        // Cần chuyển đổi số tiền từ định dạng VN (ví dụ: "500.000") sang số (500000)
-                        const SoTienThuVN = document.getElementById('edit-so-tien').value.trim();
-                        const SoTienThu = parseNumber(SoTienThuVN); // Dùng hàm parseNumber đã có
-
-                        if (!MaPhieuThu || !MaKhachHang || SoTienThu <= 0) {
-                            showToast('Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.', 'error');
-                            return;
-                        }
-
-                        const updateData = {
-                            MaKhachHang: MaKhachHang,
-                            NgayThuTien: NgayThuTien,
-                            SoTienThu: SoTienThu
-                        };
-                        
-                        // 2. GỌI API PUT
-                        try {
-                            const response = await fetch(`/api/receipts/${MaPhieuThu}`, {
-                                method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(updateData)
-                            });
-
-                            const data = await response.json();
-
-                            if (response.ok) {
-                                showToast('Cập nhật phiếu thu thành công!', 'success');
-                                
-                                // 3. CẬP NHẬT DỮ LIỆU TRÊN BẢNG (Frontend DOM)
-                                
-                                // Tìm hàng (row) tương ứng trong bảng chính
-                                const rowToUpdate = receiptTable.querySelector(`tr[data-id="${MaPhieuThu}"]`);
-                                if (rowToUpdate) {
-                                    // Cập nhật các ô (cells)
-                                    const cells = rowToUpdate.querySelectorAll('td');
-                                    // Giả định thứ tự cột: [0: Mã PT, 1: Tên KH, 2: Ngày Thu, 3: Số Tiền Thu, 4: Thao tác]
-                                    
-                                    // Lấy Tên KH mới (Lấy từ input Ten KH trong modal)
-                                    const newTenKH = document.getElementById('edit-ten-kh').value.trim();
-                                    
-                                    // Cập nhật Tên KH
-                                    if (cells[1]) cells[1].textContent = newTenKH; 
-                                    
-                                    // Cập nhật Ngày Thu (Chuyển đổi NgayThuTien từ YYYY-MM-DD sang DD/MM/YYYY)
-                                    if (cells[2]) {
-                                        const dateObj = new Date(NgayThuTien);
-                                        cells[2].textContent = dateObj.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                                    }
-                                    
-                                    // Cập nhật Số Tiền Thu (Sử dụng định dạng VN)
-                                    if (cells[3]) cells[3].textContent = SoTienThu.toLocaleString('vi-VN');
-                                }
-                                
-                                setTimeout(() => location.reload(), 1000);
-                                
-                                // 4. Đóng Modal
-                                editModal.style.display = 'none';
-
-                            } else {
-                                showToast(`Cập nhật thất bại: ${data.message || 'Lỗi không xác định.'}`, 'error');
-                            }
-
-                        } catch (error) {
-                            console.error('Lỗi khi cập nhật phiếu thu:', error);
-                            showToast('Lỗi kết nối server khi lưu phiếu thu.', 'error');
-                        }
-                    });
-                    });
-                
-                    
-            }
-
-            // --- LOGOUT ---
-    const logoutBtn = document.getElementById('logout-button');
-    if(logoutBtn) {
-        logoutBtn.addEventListener('click', async (e) => {
+            setTimeout(() => {
+              printWindow.focus();
+              printWindow.print();
+            }, 500);
+          } catch (error) {
+            console.error(error);
+            alert("Lỗi khi tải dữ liệu in: " + error.message);
+          }
+        }
+        const editForm = document.getElementById("edit-receipt-form");
+        if (editForm) {
+          editForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            if(confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-                window.location.href = '/logout';
+            simulateApiCall(async (success) => {
+              const MaPhieuThu = currentEditingMaPhieuThu;
+              const MaKhachHang = document
+                .getElementById("edit-ma-kh")
+                .value.trim();
+              const NgayThuTien = document
+                .getElementById("edit-ngay-thu")
+                .value.trim();
+
+              // Cần chuyển đổi số tiền từ định dạng VN (ví dụ: "500.000") sang số (500000)
+              const SoTienThuVN = document
+                .getElementById("edit-so-tien")
+                .value.trim();
+              const SoTienThu = parseNumber(SoTienThuVN); // Dùng hàm parseNumber đã có
+
+              if (!MaPhieuThu || !MaKhachHang || SoTienThu <= 0) {
+                showToast(
+                  "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.",
+                  "error"
+                );
+                return;
+              }
+
+              const updateData = {
+                MaKhachHang: MaKhachHang,
+                NgayThuTien: NgayThuTien,
+                SoTienThu: SoTienThu,
+              };
+
+              // 2. GỌI API PUT
+              try {
+                const response = await fetch(`/api/receipts/${MaPhieuThu}`, {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(updateData),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                  showToast("Cập nhật phiếu thu thành công!", "success");
+
+                  // 3. CẬP NHẬT DỮ LIỆU TRÊN BẢNG (Frontend DOM)
+
+                  // Tìm hàng (row) tương ứng trong bảng chính
+                  const rowToUpdate = receiptTable.querySelector(
+                    `tr[data-id="${MaPhieuThu}"]`
+                  );
+                  if (rowToUpdate) {
+                    // Cập nhật các ô (cells)
+                    const cells = rowToUpdate.querySelectorAll("td");
+                    // Giả định thứ tự cột: [0: Mã PT, 1: Tên KH, 2: Ngày Thu, 3: Số Tiền Thu, 4: Thao tác]
+
+                    // Lấy Tên KH mới (Lấy từ input Ten KH trong modal)
+                    const newTenKH = document
+                      .getElementById("edit-ten-kh")
+                      .value.trim();
+
+                    // Cập nhật Tên KH
+                    if (cells[1]) cells[1].textContent = newTenKH;
+
+                    // Cập nhật Ngày Thu (Chuyển đổi NgayThuTien từ YYYY-MM-DD sang DD/MM/YYYY)
+                    if (cells[2]) {
+                      const dateObj = new Date(NgayThuTien);
+                      cells[2].textContent = dateObj.toLocaleDateString(
+                        "vi-VN",
+                        { day: "2-digit", month: "2-digit", year: "numeric" }
+                      );
+                    }
+
+                    // Cập nhật Số Tiền Thu (Sử dụng định dạng VN)
+                    if (cells[3])
+                      cells[3].textContent = SoTienThu.toLocaleString("vi-VN");
+                  }
+
+                  setTimeout(() => location.reload(), 1000);
+
+                  // 4. Đóng Modal
+                  editModal.style.display = "none";
+                } else {
+                  showToast(
+                    `Cập nhật thất bại: ${
+                      data.message || "Lỗi không xác định."
+                    }`,
+                    "error"
+                  );
+                }
+              } catch (error) {
+                console.error("Lỗi khi cập nhật phiếu thu:", error);
+                showToast("Lỗi kết nối server khi lưu phiếu thu.", "error");
+              }
+            });
+          });
+        }
+
+        // --- LOGOUT ---
+        const logoutBtn = document.getElementById("logout-button");
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            if (confirm("Bạn có chắc chắn muốn đăng xuất?")) {
+              window.location.href = "/logout";
             }
-        });
-    }
-
-        });
+          });
+        }
+      });
     </script>
-
-</body>
-
+  </body>
 </html>

@@ -52,11 +52,11 @@ protectedRoutes.use(authenticateToken);
 const dashboardRoutes = require("./routes/dashboardRoutes");
 protectedRoutes.use("/dashboard", dashboardRoutes);
 
-const billRoutes = require('./routes/billRoutes');
-protectedRoutes.use('/api/bill', billRoutes);
+const billRoutes = require("./routes/billRoutes");
+protectedRoutes.use("/api/bill", billRoutes);
 
-const customersRoutes = require('./routes/customersRoutes');
-protectedRoutes.use('/api/customers', customersRoutes);
+const customersRoutes = require("./routes/customersRoutes");
+protectedRoutes.use("/api/customers", customersRoutes);
 
 const searchRoutes = require("./routes/searchRoutes");
 protectedRoutes.use("/api/search", searchRoutes);
@@ -71,11 +71,14 @@ protectedRoutes.use("/api/report", reportRoutes); // Changed this line
 const booksRoutes = require("./routes/booksRoutes");
 protectedRoutes.use("/api/books", booksRoutes);
 
-const receiptsRoutes = require('./routes/receiptsRoutes');
-protectedRoutes.use('/api/receipts', receiptsRoutes);
+const receiptsRoutes = require("./routes/receiptsRoutes");
+protectedRoutes.use("/api/receipts", receiptsRoutes);
 
-const booksimportRoutes = require('./routes/booksimportRoutes');
-protectedRoutes.use('/api/import', booksimportRoutes);
+const booksimportRoutes = require("./routes/booksimportRoutes");
+protectedRoutes.use("/api/import", booksimportRoutes);
+
+const inventoryRoutes = require("./routes/inventoryRoutes");
+protectedRoutes.use("/api/inventory", inventoryRoutes);
 
 // Route xử lý API của Admin
 const employeesRoutes = require("./routes/employeesRoutes");
@@ -83,14 +86,13 @@ protectedRoutes.use("/api/employees", employeesRoutes);
 
 app.use(protectedRoutes);
 
-
 // --- Khởi động Server và Đồng bộ Database ---
 
 // Tạo một hàm async để khởi động
 const startServer = async () => {
   try {
     // Chỉ chạy sequelize.authenticate và sequelize.sync khi ứng dụng được chạy trực tiếp (không phải trong môi trường test)
-    if (process.env.NODE_ENV !== 'test') {
+    if (process.env.NODE_ENV !== "test") {
       await sequelize.authenticate();
       console.log("Kết nối MySQL thành công.");
 
@@ -100,7 +102,7 @@ const startServer = async () => {
 
     // 3. Khởi động Express server
     if (require.main === module) {
-       app.listen(PORT, () => {
+      app.listen(PORT, () => {
         console.log(`Server đang chạy tại http://localhost:${PORT}`);
       });
     }

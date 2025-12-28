@@ -17,15 +17,23 @@ const PhieuThuTien = require("./PhieuThuTien");
 const BaoCaoTon = require("./BaoCaoTon");
 const BaoCaoCongNo = require("./BaoCaoCongNo");
 const BaoCaoDoanhThu = require("./BaoCaoDoanhThu");
+const PhieuKiemKe = require("./PhieuKiemKe");
+const ChiTietKiemKe = require("./ChiTietKiemKe");
 
 // 1. NhanVien Relationships
-NhanVien.hasMany(PhieuNhapSach, { foreignKey: "MaNhanVien", onDelete: 'RESTRICT' });
+NhanVien.hasMany(PhieuNhapSach, {
+  foreignKey: "MaNhanVien",
+  onDelete: "RESTRICT",
+});
 PhieuNhapSach.belongsTo(NhanVien, { foreignKey: "MaNhanVien" });
 
-NhanVien.hasMany(HoaDon, { foreignKey: "MaNhanVien", onDelete: 'RESTRICT' });
+NhanVien.hasMany(HoaDon, { foreignKey: "MaNhanVien", onDelete: "RESTRICT" });
 HoaDon.belongsTo(NhanVien, { foreignKey: "MaNhanVien" });
 
-NhanVien.hasMany(PhieuThuTien, { foreignKey: "MaNhanVien", onDelete: 'RESTRICT' });
+NhanVien.hasMany(PhieuThuTien, {
+  foreignKey: "MaNhanVien",
+  onDelete: "RESTRICT",
+});
 PhieuThuTien.belongsTo(NhanVien, { foreignKey: "MaNhanVien" });
 
 // 2. TheLoai Relationships
@@ -36,10 +44,13 @@ TheLoai.hasMany(BaoCaoDoanhThu, { foreignKey: "MaTheLoai" });
 BaoCaoDoanhThu.belongsTo(TheLoai, { foreignKey: "MaTheLoai" });
 
 // 3. KhachHang Relationships
-KhachHang.hasMany(HoaDon, { foreignKey: "MaKhachHang", onDelete: 'RESTRICT' });
+KhachHang.hasMany(HoaDon, { foreignKey: "MaKhachHang", onDelete: "RESTRICT" });
 HoaDon.belongsTo(KhachHang, { foreignKey: "MaKhachHang" });
 
-KhachHang.hasMany(PhieuThuTien, { foreignKey: "MaKhachHang", onDelete: 'RESTRICT' });
+KhachHang.hasMany(PhieuThuTien, {
+  foreignKey: "MaKhachHang",
+  onDelete: "RESTRICT",
+});
 PhieuThuTien.belongsTo(KhachHang, { foreignKey: "MaKhachHang" });
 
 KhachHang.hasMany(BaoCaoCongNo, { foreignKey: "MaKhachHang" });
@@ -60,6 +71,12 @@ TacGia.belongsToMany(DauSach, {
   foreignKey: "MaTacGia",
   as: "DauSachs", // Đặt alias rõ ràng
 });
+
+// 5a. CT_TacGia <-> DauSach và TacGia (One-to-Many để hỗ trợ include trực tiếp)
+CT_TacGia.belongsTo(DauSach, { foreignKey: "MaDauSach" });
+DauSach.hasMany(CT_TacGia, { foreignKey: "MaDauSach" });
+CT_TacGia.belongsTo(TacGia, { foreignKey: "MaTacGia" });
+TacGia.hasMany(CT_TacGia, { foreignKey: "MaTacGia" });
 
 // 6. Sach Relationships
 Sach.hasMany(BaoCaoTon, { foreignKey: "MaSach" });
@@ -92,6 +109,24 @@ CT_HD.belongsTo(HoaDon, { foreignKey: "MaHoaDon" });
 Sach.hasMany(CT_HD, { foreignKey: "MaSach" });
 CT_HD.belongsTo(Sach, { foreignKey: "MaSach" });
 
+// 11. PhieuKiemKe Relationships
+NhanVien.hasMany(PhieuKiemKe, {
+  foreignKey: "MaNhanVien",
+  onDelete: "RESTRICT",
+});
+PhieuKiemKe.belongsTo(NhanVien, { foreignKey: "MaNhanVien" });
+
+// 12. PhieuKiemKe <-> ChiTietKiemKe (One-to-Many)
+PhieuKiemKe.hasMany(ChiTietKiemKe, {
+  foreignKey: "MaPhieuKiem",
+  as: "ChiTiet",
+});
+ChiTietKiemKe.belongsTo(PhieuKiemKe, { foreignKey: "MaPhieuKiem" });
+
+// 13. Sach <-> ChiTietKiemKe
+Sach.hasMany(ChiTietKiemKe, { foreignKey: "MaSach" });
+ChiTietKiemKe.belongsTo(Sach, { foreignKey: "MaSach" });
+
 // Export tất cả models và sequelize instance
 module.exports = {
   sequelize,
@@ -111,4 +146,6 @@ module.exports = {
   BaoCaoTon,
   BaoCaoCongNo,
   BaoCaoDoanhThu,
+  PhieuKiemKe,
+  ChiTietKiemKe,
 };

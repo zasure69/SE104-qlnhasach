@@ -464,6 +464,133 @@ const getLastMaHD = async (req, res) => {
   }
 };
 
+// =====================================================
+// ADMIN ONLY: LẤY DANH SÁCH HÓA ĐƠN ĐÃ XÓA
+// =====================================================
+const getDeletedBills = async (req, res) => {
+  try {
+    const bills = await HoaDon.findAll({
+      where: { isDeleted: true },
+      include: [
+        { model: KhachHang, attributes: ["HoVaTen"] },
+        { model: CT_HD, as: "ChiTietHoaDon" },
+      ],
+      order: [["NgayLapHoaDon", "DESC"]],
+    });
+    res.status(200).json({ bills });
+  } catch (error) {
+    console.error("[billController] getDeletedBills error:", error);
+    res.status(500).json({ message: "Lỗi server nội bộ" });
+  }
+};
+
+// =====================================================
+// ADMIN ONLY: KHÔI PHỤC HÓA ĐƠN ĐÃ XÓA
+// =====================================================
+const restoreBill = async (req, res) => {
+  const MaHD = req.params.MaHD;
+  const t = await sequelize.transaction();
+
+  try {
+    const bill = await HoaDon.findByPk(MaHD, { transaction: t });
+    if (!bill) {
+      await t.rollback();
+      return res.status(404).json({ message: "Không tìm thấy hóa đơn." });
+    }
+
+    if (!bill.isDeleted) {
+      await t.rollback();
+      return res.status(400).json({ message: "Hóa đơn này chưa bị xóa." });
+    }
+
+    const details = await CT_HD.findAll({
+      where: { MaHoaDon: MaHD },
+      transaction: t,
+    });
+
+    // Khôi phục tồn kho (Trừ lại số lượng sách đã bán)
+    for (const item of details) {
+      const sach = await Sach.findByPk(item.MaSach, { transaction: t });
+      if (sach) {
+        const newStock = sach.SoLuongTon - item.SoLuongBan;
+        if (newStock < 0) {
+          await t.rollback();
+          return res.status(400).json({ 
+            message: `Không thể khôi phục. Sách ${item.MaSach} không đủ tồn kho.` 
+          });
+        }
+        await Sach.decrement("SoLuongTon", {
+          by: item.SoLuongBan,
+          where: { MaSach: item.MaSach },
+          transaction: t,
+        });
+      }
+    }
+
+    // Khôi phục nợ khách hàng
+    const conLai = parseFloat(bill.ConLai);
+    if (conLai > 0) {
+      await KhachHang.increment("TongNo", {
+        by: conLai,
+        where: { MaKhachHang: bill.MaKhachHang },
+        transaction: t,
+      });
+    }
+
+    // Khôi phục hóa đơn
+    await HoaDon.update(
+      { isDeleted: false },
+      { where: { MaHoaDon: MaHD }, transaction: t }
+    );
+
+    await t.commit();
+    res.json({ message: `Đã khôi phục hóa đơn ${MaHD} thành công.` });
+  } catch (error) {
+    await t.rollback();
+    console.error("Lỗi khi khôi phục hóa đơn:", error);
+    res.status(500).json({ message: `Lỗi server: ${error.message}` });
+  }
+};
+
+// =====================================================
+// ADMIN ONLY: XÓA VĨNH VIỄN HÓA ĐƠN (HARD DELETE)
+// =====================================================
+const hardDeleteBill = async (req, res) => {
+  const MaHD = req.params.MaHD;
+  const t = await sequelize.transaction();
+
+  try {
+    const bill = await HoaDon.findByPk(MaHD, { transaction: t });
+    if (!bill) {
+      await t.rollback();
+      return res.status(404).json({ message: "Không tìm thấy hóa đơn." });
+    }
+
+    if (!bill.isDeleted) {
+      await t.rollback();
+      return res.status(400).json({ 
+        message: "Chỉ có thể xóa vĩnh viễn hóa đơn đã được xóa mềm trước đó." 
+      });
+    }
+
+    // Xóa chi tiết hóa đơn trước
+    await CT_HD.destroy({
+      where: { MaHoaDon: MaHD },
+      transaction: t,
+    });
+
+    // Xóa hóa đơn
+    await bill.destroy({ transaction: t });
+
+    await t.commit();
+    res.json({ message: `Đã xóa vĩnh viễn hóa đơn ${MaHD} khỏi hệ thống.` });
+  } catch (error) {
+    await t.rollback();
+    console.error("Lỗi khi xóa vĩnh viễn hóa đơn:", error);
+    res.status(500).json({ message: `Lỗi server: ${error.message}` });
+  }
+};
+
 module.exports = {
   getCustomerInfo,
   getBookInfo,
@@ -471,5 +598,8 @@ module.exports = {
   getDetail,
   updateBill,
   deleteBill,
+  getDeletedBills,
+  restoreBill,
+  hardDeleteBill,
   getLastMaHD,
 };

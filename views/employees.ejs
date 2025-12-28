@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DS nhân viên - Quản lý</title>
+    <title>DS Nhân viên - Quản lý</title>
     
     <!-- Link Font Awesome để có icon --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -537,18 +537,43 @@
         }
 
 
+        /* --- Sidebar Collapsed State --- */
+        .dashboard-container.sidebar-collapsed {
+          grid-template-columns: 70px 1fr;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar {
+          width: 70px;
+          padding: 1rem 0.5rem;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar-header h2,
+        .dashboard-container.sidebar-collapsed .sidebar-nav a span {
+          display: none;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar-header {
+          margin-bottom: 1.5rem;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar-header i {
+          font-size: 2rem;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar-nav a {
+          justify-content: center;
+          padding: 0.85rem 0.5rem;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar-nav a i {
+          width: auto;
+          font-size: 1.2rem;
+        }
+
         /* --- Responsive Design --- */
 
         @media (min-width: 992.01px) {
-            .dashboard-container.sidebar-collapsed {
-                grid-template-columns: 0 1fr;
-            }
-            .dashboard-container.sidebar-collapsed .sidebar {
-                width: 0;
-                padding-left: 0;
-                padding-right: 0;
-                transform: translateX(-250px);
-            }
+            /* Collapsed state already defined above */
         }
         
         @media (max-width: 992px) {
@@ -651,20 +676,24 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <i class="fas fa-book-open"></i>
-                <h2>QUẢN LÝ NHÀ SÁCH</h2>
+                <h2>NHÀ SÁCH ABC</h2>
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
-                    <li><a href="#" class="active"><i class="fas fa-users"></i>QL nhân viên</a></li>
-                    <li><a href="/dashboard/books"><i class="fas fa-book"></i>QL Sách</a></li>
-                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li>
-                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
-                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
-                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
-                    <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li> 
+                    <li><a href="/dashboard"><i class="fas fa-home"></i><span>Tổng quan</span></a></li>
+                    <li><a href="#" class="active"><i class="fas fa-users"></i><span>QL Nhân viên</span></a></li>
+                    <li><a href="/dashboard/books"><i class="fas fa-book"></i><span>QL Sách</span></a></li>
+                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i><span>QL Khách hàng</span></a></li>
+                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i><span>QL Phiếu nhập sách</span></a></li>
+                    <li><a href="/dashboard/inventory"><i class="fas fa-clipboard-check"></i><span>QL Phiếu kiểm kê</span></a></li>
+                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i><span>QL Phiếu thu tiền</span></a></li>
+                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i><span>QL Hóa đơn</span></a></li>
+                    <li><a href="/dashboard/search"><i class="fas fa-search"></i><span> Tra cứu</span></a></li>
+                    <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i><span> Báo cáo tổng kết</span></a></li>
+                    <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i><span>Thay đổi quy định</span></a></li>
+                    <% if (role === 'Admin' || role === 'Owner') { %>
+                    <li><a href="/dashboard/trash"><i class="fas fa-trash-alt"></i><span> Thùng rác</span></a></li>
+                    <% } %>
                 </ul>
             </nav>
         </aside>
@@ -677,7 +706,7 @@
                     <button class="menu-toggle" id="menu-toggle">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <h1>Quản lý nhân viên</h1>
+                    <h1>Quản lý Nhân viên</h1>
                 </div>
                 <div class="user-menu">
                     <span class="user-trigger">
@@ -694,9 +723,9 @@
 
             <div class="content-wrapper">
                 <div class="content-header">
-                    <h2>Danh sách nhân viên</h2>
+                    <h2>Danh sách Nhân viên</h2>
                     <button class="btn btn-primary btn-add-new" id="open-add-modal">
-                        <i class="fas fa-plus"></i> Thêm mới nhân viên
+                        <i class="fas fa-plus"></i> Thêm mới Nhân viên
                     </button>
                 </div>
 
@@ -799,11 +828,11 @@
     </div>
 
 
-    <!-- --- MODAL THÊM MỚI nhân viên --- -->
+    <!-- --- MODAL THÊM MỚI NHÂN VIÊN --- -->
     <div class="modal-overlay" id="add-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Thêm mới thông tin nhân viên</h2>
+                <h2>Thêm mới thông tin Nhân viên</h2>
                 <button class="close-modal"><i class="fas fa-times"></i></button>
             </div>
             <form id="add-employee-form">
@@ -863,7 +892,7 @@
     <div class="modal-overlay" id="edit-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Chỉnh sửa thông tin nhân viên</h2>
+                <h2>Chỉnh sửa thông tin Nhân viên</h2>
                 <button class="close-modal"><i class="fas fa-times"></i></button>
             </div>
             <form id="edit-employee-form">
@@ -1209,7 +1238,7 @@
                     const ngayNhanViecInput = document.getElementById('edit-ngay-nhan-viec').value;
 
                     if (!checkAgeRequirement(ngaySinhInput, ngayNhanViecInput)) {
-                        showToast('nhân viên chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
+                        showToast('Nhân viên chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
                         return; // Dừng lại, không gửi dữ liệu đi
                     }
 
@@ -1250,7 +1279,7 @@
                 }
             }
     
-            // --- 4. GỌI HÀM SETUP CHO nhân viên ---
+            // --- 4. GỌI HÀM SETUP CHO NHÂN VIÊN ---
             setupSmartModal({
                 addBtnId: 'open-add-modal',
                 addModalId: 'add-modal',
@@ -1260,7 +1289,7 @@
                 editBtnClass: '.open-edit-modal',
                 resetBtnId: 'btn-reset-edit',      // ID nút Đặt lại
                 tableSelector: '#employee-table',  // ID bảng nhân viên
-                typeName: 'nhân viên'
+                typeName: 'Nhân viên'
             });
     
     
@@ -1280,7 +1309,7 @@
 
                     if (hasData) {
                         // Nếu có dữ liệu -> Hỏi
-                        if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU nhân viên này trước khi làm mới không?\n\n- OK: Lưu nhân viên này.\n- Cancel: Xóa trắng để nhập nhân viên khác.')) {
+                        if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU Nhân viên này trước khi làm mới không?\n\n- OK: Lưu nhân viên này.\n- Cancel: Xóa trắng để nhập nhân viên khác.')) {
                             // Chọn OK -> Lưu
                             if (addEmployeeForm.checkValidity()) {
                                 isSaveAndReset = true;

@@ -1,657 +1,798 @@
 <!DOCTYPE html>
 <html lang="vi">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quản lý phiếu nhập sách</title>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
 
     <style>
-        /* * --- PHẦN CSS --- */
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --green-accent: #1EE4AC;
-            --green-accent-hover: #1ac096;
-            --red-accent: #e74c3c;
-            --red-accent-hover: #c0392b;
-            --blue-accent: #3498db;
-            --blue-accent-hover: #2980b9;
-            --light-bg: #f0f4f8;
-            --white-bg: #ffffff;
-            --text-dark: #222;
-            --text-light: #555;
-            --text-white: #ecf0f1;
-            --border-color: #e0e0e0;
-            --disabled-bg: #e9ecef;
-        }
+      /* * --- PHẦN CSS --- */
+      :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --green-accent: #1ee4ac;
+        --green-accent-hover: #1ac096;
+        --red-accent: #e74c3c;
+        --red-accent-hover: #c0392b;
+        --blue-accent: #3498db;
+        --blue-accent-hover: #2980b9;
+        --light-bg: #f0f4f8;
+        --white-bg: #ffffff;
+        --text-dark: #222;
+        --text-light: #555;
+        --text-white: #ecf0f1;
+        --border-color: #e0e0e0;
+        --disabled-bg: #e9ecef;
+      }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+      }
 
-        body {
-            background-color: var(--light-bg);
-            color: var(--text-dark);
-        }
+      body {
+        background-color: var(--light-bg);
+        color: var(--text-dark);
+      }
 
-        /* Layout */
+      /* Layout */
+      .dashboard-container {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        min-height: 100vh;
+        transition: grid-template-columns 0.3s ease-in-out;
+      }
+
+      .sidebar {
+        background-color: var(--primary-color);
+        color: var(--text-white);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s ease-in-out;
+        overflow-x: hidden;
+      }
+
+      .sidebar-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+      }
+
+      .sidebar-header i {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .sidebar-header h2 {
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+      }
+
+      .sidebar-nav ul {
+        list-style: none;
+      }
+
+      .sidebar-nav li {
+        margin-bottom: 0.5rem;
+      }
+
+      .sidebar-nav a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.85rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--text-white);
+        font-weight: 500;
+        transition: background-color 0.2s ease;
+      }
+
+      .sidebar-nav a i {
+        width: 20px;
+        text-align: center;
+      }
+
+      .sidebar-nav a:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar-nav a.active {
+        background-color: var(--secondary-color);
+        color: white;
+      }
+
+      .main-content {
+        background-color: var(--light-bg);
+        padding: 1.5rem;
+        overflow-y: auto;
+      }
+
+      .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background-color: var(--white-bg);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+      }
+
+      .top-bar-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .top-bar-left h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      .user-menu {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-light);
+        cursor: pointer;
+        position: relative;
+      }
+
+      .user-menu .user-trigger {
+        cursor: pointer;
+        display: inline-block; /* Giúp dễ click hơn */
+      }
+
+      .user-menu .dropdown-menu {
+        display: none; /* Ẩn ban đầu */
+        position: absolute;
+        top: 100%; /* Hiển thị ngay bên dưới */
+        right: 0;
+        background-color: var(--white-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        min-width: 150px; /* Độ rộng tối thiểu */
+        z-index: 1000;
+        overflow: hidden; /* Để bo góc */
+      }
+
+      .user-menu:hover .dropdown-menu {
+        display: block;
+      }
+
+      .user-menu .dropdown-menu a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        text-decoration: none;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+        transition: background-color 0.2s ease;
+      }
+
+      .user-menu .dropdown-menu a:hover {
+        background-color: var(--light-bg);
+        color: var(--red-accent, #e74c3c);
+      }
+
+      .user-menu .dropdown-menu a i {
+        width: 16px;
+        text-align: center;
+        color: var(--text-light);
+        transition: color 0.2s ease;
+      }
+
+      .user-menu .dropdown-menu a:hover i {
+        color: var(--red-accent, #e74c3c);
+      }
+
+      .menu-toggle {
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        color: var(--text-dark);
+        cursor: pointer;
+        padding: 0.25rem;
+        line-height: 1;
+      }
+
+      /* Content */
+      .content-wrapper {
+        padding: 1.5rem;
+        background-color: var(--white-bg);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+
+      .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .content-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      /* Buttons */
+      .btn {
+        padding: 0.75rem 1.25rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        justify-content: center;
+        min-width: 100px;
+      }
+
+      .btn-primary {
+        background-color: var(--green-accent);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--green-accent-hover);
+      }
+
+      .btn-secondary {
+        background-color: #f0f0f0;
+        color: var(--text-light);
+      }
+
+      .btn-secondary:hover {
+        background-color: #e0e0e0;
+      }
+
+      .btn-danger {
+        background-color: var(--red-accent);
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background-color: var(--red-accent-hover);
+      }
+
+      .btn-print {
+        background-color: var(--blue-accent);
+        color: white;
+      }
+
+      .btn-print:hover {
+        background-color: var(--blue-accent-hover);
+      }
+
+      .btn-sm {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+        min-width: auto;
+      }
+
+      .btn-warning {
+        background-color: #f39c12;
+        color: white;
+      }
+      .btn-warning:hover {
+        background-color: #d35400;
+      }
+
+      #btn-custom-reset {
+        background-color: #6c757d;
+        color: #ffffff;
+      }
+
+      #btn-custom-reset:hover {
+        background-color: #5a6268;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Tables (Master) */
+      .table-responsive {
+        overflow-x: auto;
+        margin-bottom: 1rem;
+      }
+
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 800px;
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 0.85rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+        vertical-align: middle;
+      }
+
+      .data-table thead th {
+        background-color: #f9f9f9;
+        font-weight: 600;
+        color: var(--text-light);
+      }
+
+      .data-table tbody tr:hover {
+        background-color: #f5f5f5;
+      }
+
+      .action-icon {
+        color: var(--secondary-color);
+        cursor: pointer;
+        font-size: 1rem;
+      }
+
+      /* Detail Table Styles */
+      .detail-table-wrapper {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+      }
+
+      .detail-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .detail-table thead tr {
+        background-color: #f1f5f9;
+        width: 100%;
+      }
+
+      .detail-table th {
+        padding: 1rem;
+        font-size: 0.85rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--primary-color);
+        white-space: nowrap;
+      }
+
+      .detail-table th:last-child {
+        text-align: center;
+      }
+
+      .detail-table td {
+        padding: 1rem;
+        border-top: 1px solid var(--border-color);
+        font-size: 0.9rem;
+      }
+
+      /* Icon Styles */
+      .action-icon.delete-icon:hover,
+      .action-icon.delete-row-icon:hover {
+        color: #c0392b !important;
+        transform: scale(1.2);
+        transition: all 0.2s;
+      }
+
+      .action-icon.open-edit-modal:hover,
+      .action-icon.edit-row-icon:hover {
+        color: #2980b9;
+        transform: scale(1.2);
+        transition: all 0.2s;
+      }
+
+      .edit-row-icon {
+        margin-right: 10px;
+        cursor: pointer;
+      }
+
+      .delete-row-icon {
+        cursor: pointer;
+      }
+
+      /* Modal Styles */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        padding: 1rem;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .modal-content {
+        background-color: var(--white-bg);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 1000px; /* Tăng rộng lên chút để chứa thêm cột */
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        animation: slideIn 0.3s ease;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .modal-header h2 {
+        font-size: 1.3rem;
+        font-weight: 700;
+      }
+
+      .close-modal,
+      .close-modal-item {
+        font-size: 1.5rem;
+        color: var(--text-light);
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .close-modal-item:hover {
+        color: var(--red-accent);
+        transform: scale(1.1);
+      }
+
+      .modal-body {
+        padding: 1.5rem;
+        flex-grow: 1;
+        overflow-y: auto;
+      }
+
+      /* Sections & Grids */
+      .section-wrapper {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px dashed var(--border-color);
+      }
+
+      .section-wrapper:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .section-header-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+      }
+
+      /* --- GRID LAYOUTS --- */
+
+      .grid-general {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1.5rem;
+      }
+
+      /* SỬA: Grid cho Thêm Sách (Cần thêm chỗ cho Đơn giá bán) */
+      .grid-add-book {
+        display: grid;
+        /* Tỷ lệ mới: Mã(1.2) Tên(1.5) SL(0.8) GiáNhap(1) GiáBan(1) Nút(Auto) */
+        grid-template-columns: 1.2fr 1.5fr 0.8fr 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+      }
+
+      .grid-summary {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        padding-top: 1rem;
+      }
+
+      .summary-label {
+        font-size: 1rem;
+        color: var(--text-light);
+        margin-right: 1rem;
+      }
+
+      .summary-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--secondary-color);
+      }
+
+      /* Form Elements */
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      .form-group label {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--primary-color);
+        margin-bottom: 0.4rem;
+        display: block;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 0.6rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 0.9rem;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+      }
+
+      .form-group input:disabled,
+      .form-group input:read-only {
+        background-color: var(--disabled-bg);
+        color: #6c757d;
+        cursor: not-allowed;
+        border-color: #d6d8db;
+      }
+
+      .form-group input:read-only {
+        cursor: default;
+      }
+
+      .form-group label.required::after {
+        content: "*";
+        color: var(--red-accent);
+        font-weight: bold;
+        margin-left: 4px;
+      }
+
+      .modal-form-grid .date-input-wrapper {
+        display: block;
+        position: relative;
+      }
+      .modal-form-grid .date-input-wrapper input[type="date"] {
+        width: 100%;
+      }
+
+      /* Footer */
+      .modal-footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 1.5rem;
+        padding: 1.25rem 1.5rem;
+        border-top: 1px solid var(--border-color);
+        background-color: #fff;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+      }
+
+      .modal-footer .btn {
+        flex: 1;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1rem;
+        font-weight: 700;
+        padding: 0.75rem 1rem;
+        text-transform: uppercase;
+      }
+
+      #edit-modal .modal-footer > div {
+        flex: 1;
+        display: flex;
+        gap: 1.5rem;
+        width: 100%;
+      }
+
+      #add-modal .modal-footer .btn-primary,
+      #edit-modal .modal-footer .btn-primary {
+        background-color: var(--green-accent);
+        color: white;
+        box-shadow: 0 4px 6px rgba(30, 228, 172, 0.2);
+      }
+      #add-modal .modal-footer .btn-primary:hover,
+      #edit-modal .modal-footer .btn-primary:hover {
+        background-color: var(--green-accent-hover);
+      }
+
+      /* Loader & Toast */
+      .loader-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.7);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+      }
+      .loader-overlay.show {
+        display: flex;
+      }
+      .loader {
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid var(--secondary-color);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .toast-container {
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        z-index: 2001;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .toast {
+        background-color: var(--white-bg);
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+        border-left: 5px solid;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .toast.success {
+        border-left-color: var(--green-accent);
+      }
+      .toast.success .toast-icon {
+        color: var(--green-accent);
+      }
+      .toast.error {
+        border-left-color: var(--red-accent);
+      }
+      .toast.error .toast-icon {
+        color: var(--red-accent);
+      }
+      .toast-message {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-dark);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes slideIn {
+        from {
+          transform: translateY(-30px) scale(0.95);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0) scale(1);
+          opacity: 1;
+        }
+      }
+
+      /* --- Sidebar Collapsed State --- */
+      .dashboard-container.sidebar-collapsed {
+        grid-template-columns: 70px 1fr;
+      }
+
+      .dashboard-container.sidebar-collapsed .sidebar {
+        width: 70px;
+        padding: 1rem 0.5rem;
+      }
+
+      .dashboard-container.sidebar-collapsed .sidebar-header h2,
+      .dashboard-container.sidebar-collapsed .sidebar-nav a span {
+        display: none;
+      }
+
+      .dashboard-container.sidebar-collapsed .sidebar-header {
+        margin-bottom: 1.5rem;
+      }
+
+      .dashboard-container.sidebar-collapsed .sidebar-header i {
+        font-size: 2rem;
+      }
+
+      .dashboard-container.sidebar-collapsed .sidebar-nav a {
+        justify-content: center;
+        padding: 0.85rem 0.5rem;
+      }
+
+      .dashboard-container.sidebar-collapsed .sidebar-nav a i {
+        width: auto;
+        font-size: 1.2rem;
+      }
+
+      @media (max-width: 992px) {
         .dashboard-container {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            min-height: 100vh;
-            transition: grid-template-columns 0.3s ease-in-out;
+          grid-template-columns: 1fr;
         }
-
         .sidebar {
-            background-color: var(--primary-color);
-            color: var(--text-white);
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s ease-in-out;
-            overflow-x: hidden;
+          position: fixed;
+          left: -260px;
+          top: 0;
+          height: 100vh;
+          z-index: 1050;
         }
-
-        .sidebar-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
+        .sidebar.active {
+          left: 0;
         }
-
-        .sidebar-header i {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .sidebar-header h2 {
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        .sidebar-nav ul {
-            list-style: none;
-        }
-
-        .sidebar-nav li {
-            margin-bottom: 0.5rem;
-        }
-
-        .sidebar-nav a {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.85rem 1rem;
-            border-radius: 8px;
-            text-decoration: none;
-            color: var(--text-white);
-            font-weight: 500;
-            transition: background-color 0.2s ease;
-        }
-
-        .sidebar-nav a i {
-            width: 20px;
-            text-align: center;
-        }
-
-        .sidebar-nav a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .sidebar-nav a.active {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-
-        .main-content {
-            background-color: var(--light-bg);
-            padding: 1.5rem;
-            overflow-y: auto;
-        }
-
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            background-color: var(--white-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            margin-bottom: 1.5rem;
-        }
-
-        .top-bar-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .top-bar-left h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .user-menu {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-light);
-            cursor: pointer;
-            position: relative;
-        }
-
-        .user-menu .user-trigger {
-            cursor: pointer;
-            display: inline-block; /* Giúp dễ click hơn */
-        }
-
-        .user-menu .dropdown-menu {
-            display: none; /* Ẩn ban đầu */
-            position: absolute;
-            top: 100%; /* Hiển thị ngay bên dưới */
-            right: 0;
-            background-color: var(--white-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            min-width: 150px; /* Độ rộng tối thiểu */
-            z-index: 1000;
-            overflow: hidden; /* Để bo góc */
-        }
-
-        .user-menu:hover .dropdown-menu {
-            display: block;
-        }
-
-        .user-menu .dropdown-menu a {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            text-decoration: none;
-            color: var(--text-dark);
-            font-size: 0.9rem;
-            transition: background-color 0.2s ease;
-        }
-
-        .user-menu .dropdown-menu a:hover {
-            background-color: var(--light-bg);
-            color: var(--red-accent, #e74c3c);
-        }
-
-        .user-menu .dropdown-menu a i {
-            width: 16px;
-            text-align: center;
-            color: var(--text-light);
-            transition: color 0.2s ease;
-        }
-
-        .user-menu .dropdown-menu a:hover i {
-            color: var(--red-accent, #e74c3c);
-        }
-
         .menu-toggle {
-            font-size: 1.5rem;
-            background: none;
-            border: none;
-            color: var(--text-dark);
-            cursor: pointer;
-            padding: 0.25rem;
-            line-height: 1;
+          display: block;
         }
-
-        /* Content */
-        .content-wrapper {
-            padding: 1.5rem;
-            background-color: var(--white-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .content-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .content-header h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 0.75rem 1.25rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            justify-content: center;
-            min-width: 100px;
-        }
-
-        .btn-primary {
-            background-color: var(--green-accent);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--green-accent-hover);
-        }
-
-        .btn-secondary {
-            background-color: #f0f0f0;
-            color: var(--text-light);
-        }
-
-        .btn-secondary:hover {
-            background-color: #e0e0e0;
-        }
-
-        .btn-danger {
-            background-color: var(--red-accent);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: var(--red-accent-hover);
-        }
-
-        .btn-print {
-            background-color: var(--blue-accent);
-            color: white;
-        }
-
-        .btn-print:hover {
-            background-color: var(--blue-accent-hover);
-        }
-
-        .btn-sm {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
-            min-width: auto;
-        }
-
-        .btn-warning {
-            background-color: #f39c12;
-            color: white;
-        }
-        .btn-warning:hover {
-            background-color: #d35400;
-        }
-
-        #btn-custom-reset {
-            background-color: #6c757d;
-            color: #ffffff;
-        }
-
-        #btn-custom-reset:hover {
-            background-color: #5a6268;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        /* Tables (Master) */
-        .table-responsive {
-            overflow-x: auto;
-            margin-bottom: 1rem;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 800px;
-        }
-
-        .data-table th,
-        .data-table td {
-            padding: 0.85rem 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.9rem;
-            vertical-align: middle;
-        }
-
-        .data-table thead th {
-            background-color: #f9f9f9;
-            font-weight: 600;
-            color: var(--text-light);
-        }
-
-        .data-table tbody tr:hover {
-            background-color: #f5f5f5;
-        }
-
-        .action-icon {
-            color: var(--secondary-color);
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        /* Detail Table Styles */
-        .detail-table-wrapper {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 1rem;
-        }
-
-        .detail-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .detail-table thead tr {
-            background-color: #f1f5f9;
-            width: 100%;
-        }
-
-        .detail-table th {
-            padding: 1rem;
-            font-size: 0.85rem;
-            text-align: left;
-            font-weight: 600;
-            color: var(--primary-color);
-            white-space: nowrap;
-        }
-        
-        .detail-table th:last-child {
-            text-align: center;
-        }
-
-        .detail-table td {
-            padding: 1rem;
-            border-top: 1px solid var(--border-color);
-            font-size: 0.9rem;
-        }
-
-        /* Icon Styles */
-        .action-icon.delete-icon:hover, .action-icon.delete-row-icon:hover {
-            color: #c0392b !important;
-            transform: scale(1.2);
-            transition: all 0.2s;
-        }
-
-        .action-icon.open-edit-modal:hover,
-        .action-icon.edit-row-icon:hover {
-            color: #2980b9;
-            transform: scale(1.2);
-            transition: all 0.2s;
-        }
-        
-        .edit-row-icon {
-            margin-right: 10px;
-            cursor: pointer;
-        }
-        
-        .delete-row-icon {
-            cursor: pointer;
-        }
-
-        /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 1rem;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal-content {
-            background-color: var(--white-bg);
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 1000px; /* Tăng rộng lên chút để chứa thêm cột */
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            animation: slideIn 0.3s ease;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .modal-header h2 {
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .close-modal, .close-modal-item {
-            font-size: 1.5rem;
-            color: var(--text-light);
-            cursor: pointer;
-            background: none;
-            border: none;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .close-modal-item:hover {
-            color: var(--red-accent);
-            transform: scale(1.1);
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-
-        /* Sections & Grids */
-        .section-wrapper {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px dashed var(--border-color);
-        }
-        
-        .section-wrapper:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .section-header-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-        }
-
-        /* --- GRID LAYOUTS --- */
-
-        .grid-general {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr; 
-            gap: 1.5rem;
-        }
-
-        /* SỬA: Grid cho Thêm Sách (Cần thêm chỗ cho Đơn giá bán) */
+        .grid-general,
         .grid-add-book {
-            display: grid;
-            /* Tỷ lệ mới: Mã(1.2) Tên(1.5) SL(0.8) GiáNhap(1) GiáBan(1) Nút(Auto) */
-            grid-template-columns: 1.2fr 1.5fr 0.8fr 1fr 1fr auto; 
-            gap: 1rem;
-            align-items: end;
+          grid-template-columns: 1fr 1fr;
         }
-
-        .grid-summary {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            padding-top: 1rem;
+      }
+      @media (max-width: 768px) {
+        .grid-general,
+        .grid-add-book {
+          grid-template-columns: 1fr;
         }
-
-        .summary-label {
-            font-size: 1rem;
-            color: var(--text-light);
-            margin-right: 1rem;
-        }
-
-        .summary-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--secondary-color);
-        }
-
-        /* Form Elements */
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-
-        .form-group label {
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: var(--primary-color);
-            margin-bottom: 0.4rem;
-            display: block;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 0.6rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.9rem;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-        }
-
-        .form-group input:disabled, .form-group input:read-only {
-            background-color: var(--disabled-bg);
-            color: #6c757d;
-            cursor: not-allowed;
-            border-color: #d6d8db;
-        }
-        
-        .form-group input:read-only { cursor: default; }
-
-        .form-group label.required::after {
-            content: "*";
-            color: var(--red-accent);
-            font-weight: bold;
-            margin-left: 4px;
-        }
-
-        .modal-form-grid .date-input-wrapper {
-            display: block;
-            position: relative;
-        }
-        .modal-form-grid .date-input-wrapper input[type="date"] {
-            width: 100%;
-        }
-
-        /* Footer */
-        .modal-footer {
-            display: flex;
-            justify-content: space-between;
-            gap: 1.5rem;
-            padding: 1.25rem 1.5rem;
-            border-top: 1px solid var(--border-color);
-            background-color: #fff;
-            border-bottom-left-radius: 12px;
-            border-bottom-right-radius: 12px;
-        }
-
-        .modal-footer .btn {
-            flex: 1;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1rem;
-            font-weight: 700;
-            padding: 0.75rem 1rem;
-            text-transform: uppercase;
-        }
-
+        .modal-footer,
         #edit-modal .modal-footer > div {
-            flex: 1;
-            display: flex;
-            gap: 1.5rem;
-            width: 100%;
+          flex-direction: column;
         }
-
-        #add-modal .modal-footer .btn-primary,
-        #edit-modal .modal-footer .btn-primary {
-            background-color: var(--green-accent);
-            color: white;
-            box-shadow: 0 4px 6px rgba(30, 228, 172, 0.2);
-        }
-        #add-modal .modal-footer .btn-primary:hover,
-        #edit-modal .modal-footer .btn-primary:hover {
-            background-color: var(--green-accent-hover);
-        }
-
-        /* Loader & Toast */
-        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.7); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .loader-overlay.show { display: flex; }
-        .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--secondary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 2001; display: flex; flex-direction: column; gap: 0.5rem; }
-        .toast { background-color: var(--white-bg); padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 0.75rem; opacity: 0; transform: translateX(100%); transition: all 0.3s ease; border-left: 5px solid; }
-        .toast.show { opacity: 1; transform: translateX(0); }
-        .toast.success { border-left-color: var(--green-accent); }
-        .toast.success .toast-icon { color: var(--green-accent); }
-        .toast.error { border-left-color: var(--red-accent); }
-        .toast.error .toast-icon { color: var(--red-accent); }
-        .toast-message { font-size: 0.9rem; font-weight: 500; color: var(--text-dark); }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideIn { from { transform: translateY(-30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-
-        @media (max-width: 992px) {
-            .dashboard-container { grid-template-columns: 1fr; }
-            .sidebar { position: fixed; left: -260px; top: 0; height: 100vh; z-index: 1050; }
-            .sidebar.active { left: 0; }
-            .menu-toggle { display: block; }
-            .grid-general, .grid-add-book { grid-template-columns: 1fr 1fr; }
-        }
-        @media (max-width: 768px) {
-            .grid-general, .grid-add-book { grid-template-columns: 1fr; }
-            .modal-footer, #edit-modal .modal-footer > div { flex-direction: column; }
-        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
-
-    <div class="loader-overlay" id="loader"> <div class="loader"></div> </div>
+  <body>
+    <div class="loader-overlay" id="loader"><div class="loader"></div></div>
     <div class="toast-container" id="toast-container"></div>
 
     <div class="dashboard-container">
+<<<<<<< HEAD
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header"> <i class="fas fa-book-open"></i> <h2>QUẢN LÝ NHÀ SÁCH</h2> </div>
             <nav class="sidebar-nav">
@@ -669,1098 +810,1313 @@
                 </ul>
             </nav>
         </aside>
+=======
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <i class="fas fa-book-open"></i>
+          <h2>NHÀ SÁCH ABC</h2>
+        </div>
+        <nav class="sidebar-nav">
+          <ul>
+            <li>
+              <a href="/dashboard"
+                ><i class="fas fa-home"></i><span>Tổng quan</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/employees"
+                ><i class="fas fa-users"></i><span>QL Nhân viên</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/books"
+                ><i class="fas fa-book"></i><span>QL Sách</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/customers"
+                ><i class="fas fa-id-card"></i><span>QL Khách hàng</span></a
+              >
+            </li>
+            <li>
+              <a href="#" class="active"
+                ><i class="fas fa-file-invoice"></i
+                ><span>QL Phiếu nhập sách</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/inventory"
+                ><i class="fas fa-clipboard-check"></i
+                ><span>QL Phiếu kiểm kê</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/receipts"
+                ><i class="fas fa-receipt"></i><span>QL Phiếu thu tiền</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/bills"
+                ><i class="fa-solid fa-money-check-dollar"></i
+                ><span>QL Hóa đơn</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/search"
+                ><i class="fas fa-search"></i><span>Tra cứu</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/reports"
+                ><i class="fas fa-chart-line"></i
+                ><span>Báo cáo tổng kết</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/change-rule"
+                ><i class="fas fa-gavel"></i><span>Thay đổi quy định</span></a
+              >
+            </li>
+            <% if (role === 'Admin' || role === 'Owner') { %>
+            <li>
+              <a href="/dashboard/trash"
+                ><i class="fas fa-trash-alt"></i><span>Thùng rác</span></a
+              >
+            </li>
+            <% } %>
+          </ul>
+        </nav>
+      </aside>
+>>>>>>> main
 
-        <main class="main-content">
-            <header class="top-bar">
-                <div class="top-bar-left"> <button class="menu-toggle" id="menu-toggle"> <i class="fas fa-bars"></i> </button> <h1>Quản lý Phiếu nhập sách</h1> </div>
-                <div class="user-menu">
-                    <span class="user-trigger">
-                        Chào, <strong><%= username %></strong> <i class="fas fa-chevron-down"></i>
-                    </span>
+      <main class="main-content">
+        <header class="top-bar">
+          <div class="top-bar-left">
+            <button class="menu-toggle" id="menu-toggle">
+              <i class="fas fa-bars"></i>
+            </button>
+            <h1>Quản lý Phiếu nhập sách</h1>
+          </div>
+          <div class="user-menu">
+            <span class="user-trigger">
+              Chào, <strong><%= username %></strong>
+              <i class="fas fa-chevron-down"></i>
+            </span>
 
-                    <div class="dropdown-menu">
-                        <a href="#" id="logout-button">
-                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                        </a>
-                    </div>
-                </div>
-            </header>
-
-            <div class="content-wrapper">
-                <div class="content-header">
-                    <h2>Danh sách Phiếu nhập sách</h2>
-                    <button class="btn btn-primary btn-add-new" id="open-add-modal"> <i class="fas fa-plus"></i> LẬP PHIẾU NHẬP SÁCH </button>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="data-table" id="master-table">
-                        <thead>
-                            <tr>
-                                <th>STT</th>
-                                <th>Mã Phiếu</th>
-                                <th>Ngày Nhập</th>
-                                <th>Tổng Tiền</th>
-                                <th></th> 
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% if (importReceipts && importReceipts.length > 0) { %>
-                                <% importReceipts.forEach((receipt, index) => { %>
-                                    <tr>
-                                        <td><%= index + 1 %></td>
-                                        <td><%= receipt.MaPhieuNhap %></td>
-                                        <td><%= new Date(receipt.NgayNhapPhieu).toLocaleDateString('vi-VN', { 
-                                            day: '2-digit', 
-                                            month: '2-digit', 
-                                            year: 'numeric' 
-                                        }) %></td>
-                                        <td><%= new Intl.NumberFormat('vi-VN').format(receipt.TongTien) %></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-secondary view-detail-btn" data-id="<%= receipt.MaPhieuNhap %>">
-                                                <i class="fas fa-eye"></i> Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-print ml-2 print-btn" data-id="<%= receipt.MaPhieuNhap %>"> 
-                                                <i class="fas fa-print"></i>
-                                            </button>
-                                            <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
-                                        </td>
-                                    </tr>
-                                <% }) %>
-                            <% } else { %>
-                                <tr>
-                                    <td colspan="5" style="text-align: center;">
-                                        Chưa có phiếu nhập sách nào.
-                                    </td>
-                                </tr>
-                            <% } %>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="dropdown-menu">
+              <a href="#" id="logout-button">
+                <i class="fas fa-sign-out-alt"></i> Đăng xuất
+              </a>
             </div>
-        </main>
+          </div>
+        </header>
+
+        <div class="content-wrapper">
+          <div class="content-header">
+            <h2>Danh sách Phiếu nhập sách</h2>
+            <button class="btn btn-primary btn-add-new" id="open-add-modal">
+              <i class="fas fa-plus"></i> LẬP PHIẾU NHẬP SÁCH
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table" id="master-table">
+              <thead>
+                <tr>
+                  <th>STT</th>
+                  <th>Mã Phiếu</th>
+                  <th>Ngày Nhập</th>
+                  <th>Tổng Tiền</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (importReceipts && importReceipts.length > 0) { %> <%
+                importReceipts.forEach((receipt, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td><%= receipt.MaPhieuNhap %></td>
+                  <td>
+                    <%= new
+                    Date(receipt.NgayNhapPhieu).toLocaleDateString('vi-VN', {
+                    day: '2-digit', month: '2-digit', year: 'numeric' }) %>
+                  </td>
+                  <td>
+                    <%= new Intl.NumberFormat('vi-VN').format(receipt.TongTien)
+                    %>
+                  </td>
+                  <td>
+                    <button
+                      class="btn btn-sm btn-secondary view-detail-btn"
+                      data-id="<%= receipt.MaPhieuNhap %>"
+                    >
+                      <i class="fas fa-eye"></i> Chi tiết
+                    </button>
+                    <button
+                      class="btn btn-sm btn-print ml-2 print-btn"
+                      data-id="<%= receipt.MaPhieuNhap %>"
+                    >
+                      <i class="fas fa-print"></i>
+                    </button>
+                    <i
+                      class="fas fa-trash action-icon delete-icon"
+                      style="margin-left: 12px; color: var(--red-accent)"
+                    ></i>
+                  </td>
+                </tr>
+                <% }) %> <% } else { %>
+                <tr>
+                  <td colspan="5" style="text-align: center">
+                    Chưa có phiếu nhập sách nào.
+                  </td>
+                </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
     </div>
 
     <div class="modal-overlay" id="add-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Lập Phiếu Nhập Sách Mới</h2>
-                <button class="close-modal"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-body">
-                
-                <div class="section-wrapper">
-                    <h3 class="section-header-title">Thông tin chung</h3>
-                    <div class="grid-general">
-                        <div class="form-group"> 
-                            <label class="required">Ngày Nhập:</label>
-                            <div class="date-input-wrapper"> <input type="date" id="add-ngay-nhap" max="<%= currentDate %>" required> </div>
-                        </div>
-                        <div class="form-group"> 
-                            <label class="required">Mã Nhân Viên:</label> 
-                            <input type="text" id="add-ma-nv" value="<%= id %>" readonly placeholder="<%= id %>"> 
-                        </div>
-                        <div class="form-group"></div> 
-                    </div>
-                </div>
-
-                <div class="section-wrapper">
-                    <h3 class="section-header-title">Thêm sách vào phiếu</h3>
-                    <div class="grid-add-book">
-                        <div class="form-group"> 
-                            <label class="required">Mã Sách:</label> 
-                            <input type="text" id="add-input-ma-sach" placeholder="Mã sách..."> 
-                        </div>
-                        <div class="form-group"> 
-                            <label>Tên Sách:</label> 
-                            <input type="text" id="add-input-ten-sach" readonly style="background-color: #e9ecef;"> 
-                        </div>
-                        <div class="form-group"> 
-                            <label class="required">Số Lượng:</label> 
-                            <input type="number" id="add-input-so-luong" min="<%= soLuongNhapToiThieu %>" value="<%= soLuongNhapToiThieu %>" placeholder="<%= soLuongNhapToiThieu %>"> 
-                        </div>
-                        <div class="form-group"> 
-                            <label class="required">Đơn Giá Nhập:</label> 
-                            <input type="text" id="add-input-don-gia" placeholder="0"> 
-                        </div>
-                        <div class="form-group"> 
-                            <label>Đơn Giá Bán:</label> 
-                            <input type="text" id="add-input-don-gia-ban" placeholder="0" readonly style="background-color: #e9ecef;"> 
-                        </div>
-                        <div class="form-group">
-                            <button type="button" class="btn btn-primary" id="btn-add-to-list" style="width: 100%; white-space: nowrap;"> 
-                                <i class="fas fa-plus"></i> Thêm 
-                            </button> 
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section-wrapper">
-                    <h3 class="section-header-title">Chi tiết phiếu nhập</h3>
-                    <div class="detail-table-wrapper" style="border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
-                        <table class="detail-table" id="add-detail-table">
-                            <thead>
-                                <tr>
-                                    <th>STT</th>
-                                    <th>Mã Sách</th>
-                                    <th>Tên Sách</th>
-                                    <th>Số Lượng</th>
-                                    <th>Đơn Giá Nhập</th>
-                                    <th>Đơn Giá Bán</th> <th>Thành Tiền</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="grid-summary">
-                        <span class="summary-label">Tổng cộng:</span>
-                        <span class="summary-value" id="add-total-amount">0</span>
-                    </div>
-                </div>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="btn-custom-reset">Thêm mới</button>
-                <button type="button" class="btn btn-primary" id="btn-save-add">Lưu</button>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Lập Phiếu Nhập Sách Mới</h2>
+          <button class="close-modal"><i class="fas fa-times"></i></button>
         </div>
+        <div class="modal-body">
+          <div class="section-wrapper">
+            <h3 class="section-header-title">Thông tin chung</h3>
+            <div class="grid-general">
+              <div class="form-group">
+                <label class="required">Ngày Nhập:</label>
+                <div class="date-input-wrapper">
+                  <input
+                    type="date"
+                    id="add-ngay-nhap"
+                    max="<%= currentDate %>"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="required">Mã Nhân Viên:</label>
+                <input
+                  type="text"
+                  id="add-ma-nv"
+                  value="<%= id %>"
+                  readonly
+                  placeholder="<%= id %>"
+                />
+              </div>
+              <div class="form-group"></div>
+            </div>
+          </div>
+
+          <div class="section-wrapper">
+            <h3 class="section-header-title">Thêm sách vào phiếu</h3>
+            <div class="grid-add-book">
+              <div class="form-group">
+                <label class="required">Mã Sách:</label>
+                <input
+                  type="text"
+                  id="add-input-ma-sach"
+                  placeholder="Mã sách..."
+                />
+              </div>
+              <div class="form-group">
+                <label>Tên Sách:</label>
+                <input
+                  type="text"
+                  id="add-input-ten-sach"
+                  readonly
+                  style="background-color: #e9ecef"
+                />
+              </div>
+              <div class="form-group">
+                <label class="required">Số Lượng:</label>
+                <input
+                  type="number"
+                  id="add-input-so-luong"
+                  min="<%= soLuongNhapToiThieu %>"
+                  value="<%= soLuongNhapToiThieu %>"
+                  placeholder="<%= soLuongNhapToiThieu %>"
+                />
+              </div>
+              <div class="form-group">
+                <label class="required">Đơn Giá Nhập:</label>
+                <input type="text" id="add-input-don-gia" placeholder="0" />
+              </div>
+              <div class="form-group">
+                <label>Đơn Giá Bán:</label>
+                <input
+                  type="text"
+                  id="add-input-don-gia-ban"
+                  placeholder="0"
+                  readonly
+                  style="background-color: #e9ecef"
+                />
+              </div>
+              <div class="form-group">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  id="btn-add-to-list"
+                  style="width: 100%; white-space: nowrap"
+                >
+                  <i class="fas fa-plus"></i> Thêm
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-wrapper">
+            <h3 class="section-header-title">Chi tiết phiếu nhập</h3>
+            <div
+              class="detail-table-wrapper"
+              style="
+                border: 1px solid var(--border-color);
+                border-radius: 6px;
+                overflow: hidden;
+              "
+            >
+              <table class="detail-table" id="add-detail-table">
+                <thead>
+                  <tr>
+                    <th>STT</th>
+                    <th>Mã Sách</th>
+                    <th>Tên Sách</th>
+                    <th>Số Lượng</th>
+                    <th>Đơn Giá Nhập</th>
+                    <th>Đơn Giá Bán</th>
+                    <th>Thành Tiền</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+
+            <div class="grid-summary">
+              <span class="summary-label">Tổng cộng:</span>
+              <span class="summary-value" id="add-total-amount">0</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-custom-reset">
+            Thêm mới
+          </button>
+          <button type="button" class="btn btn-primary" id="btn-save-add">
+            Lưu
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="modal-overlay" id="edit-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Chi Tiết / Chỉnh Sửa Phiếu Nhập</h2>
-                <button class="close-modal"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-body">
-                
-                <div class="section-wrapper">
-                    <h3 class="section-header-title">Thông tin chung</h3>
-                    <div class="grid-general">
-                        <div class="form-group"> 
-                            <label>Mã Phiếu:</label> 
-                            <input type="text" id="edit-ma-phieu" readonly style="background-color: #e9ecef; font-weight: bold;">
-                        </div>
-                        <div class="form-group"> 
-                            <label class="required">Ngày Nhập:</label>
-                            <div class="date-input-wrapper"> <input type="date" id="edit-ngay-nhap" max="<%= currentDate %>"> </div>
-                        </div>
-                        <div class="form-group"> 
-                            <label class="required">Mã Nhân Viên:</label> 
-                            <input type="text" id="edit-ma-nv" readonly> 
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section-wrapper">
-                    <h3 class="section-header-title">Thêm sách trong phiếu</h3>
-                    <div class="grid-add-book">
-                        <div class="form-group"> 
-                            <label class="required">Mã Sách:</label> 
-                            <input type="text" id="edit-input-ma-sach" placeholder="Mã sách..."> 
-                        </div>
-                        <div class="form-group"> 
-                            <label>Tên Sách:</label> 
-                            <input type="text" id="edit-input-ten-sach" readonly style="background-color: #e9ecef;"> 
-                        </div>
-                        <div class="form-group"> 
-                            <label class="required">Số Lượng:</label> 
-                            <input type="number" id="edit-input-so-luong" min="<%= soLuongNhapToiThieu %>" placeholder="<%= soLuongNhapToiThieu %>"> 
-                        </div>
-                        <div class="form-group"> 
-                            <label class="required">Đơn Giá Nhập:</label> 
-                            <input type="text" id="edit-input-don-gia"> 
-                        </div>
-                        <div class="form-group"> 
-                            <label>Đơn Giá Bán:</label> 
-                            <input type="text" id="edit-input-don-gia-ban" readonly style="background-color: #e9ecef;"> 
-                        </div>
-                        <div class="form-group">
-                            <button type="button" class="btn btn-primary" id="btn-add-to-list-edit" style="width: 100%; white-space: nowrap;"> 
-                                <i class="fas fa-plus"></i> Thêm 
-                            </button> 
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section-wrapper">
-                    <h3 class="section-header-title">Chi tiết phiếu nhập</h3>
-                    <div class="detail-table-wrapper" style="border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
-                        <table class="detail-table" id="edit-detail-table">
-                            <thead>
-                                <tr>
-                                    <th>STT</th>
-                                    <th>Mã Sách</th>
-                                    <th>Tên Sách</th>
-                                    <th>Số Lượng</th>
-                                    <th>Đơn Giá Nhập</th>
-                                    <th>Đơn Giá Bán</th> <th>Thành Tiền</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-
-                    <div class="grid-summary">
-                        <span class="summary-label">Tổng cộng:</span>
-                        <span class="summary-value" id="edit-total-amount">0</span>
-                    </div>
-                </div>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-warning" id="btn-reset-edit">Đặt lại</button>
-                <button type="button" class="btn btn-primary" id="btn-save-edit">Lưu</button>
-            </div>
-            
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Chi Tiết / Chỉnh Sửa Phiếu Nhập</h2>
+          <button class="close-modal"><i class="fas fa-times"></i></button>
         </div>
+        <div class="modal-body">
+          <div class="section-wrapper">
+            <h3 class="section-header-title">Thông tin chung</h3>
+            <div class="grid-general">
+              <div class="form-group">
+                <label>Mã Phiếu:</label>
+                <input
+                  type="text"
+                  id="edit-ma-phieu"
+                  readonly
+                  style="background-color: #e9ecef; font-weight: bold"
+                />
+              </div>
+              <div class="form-group">
+                <label class="required">Ngày Nhập:</label>
+                <div class="date-input-wrapper">
+                  <input
+                    type="date"
+                    id="edit-ngay-nhap"
+                    max="<%= currentDate %>"
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="required">Mã Nhân Viên:</label>
+                <input type="text" id="edit-ma-nv" readonly />
+              </div>
+            </div>
+          </div>
+
+          <div class="section-wrapper">
+            <h3 class="section-header-title">Thêm sách trong phiếu</h3>
+            <div class="grid-add-book">
+              <div class="form-group">
+                <label class="required">Mã Sách:</label>
+                <input
+                  type="text"
+                  id="edit-input-ma-sach"
+                  placeholder="Mã sách..."
+                />
+              </div>
+              <div class="form-group">
+                <label>Tên Sách:</label>
+                <input
+                  type="text"
+                  id="edit-input-ten-sach"
+                  readonly
+                  style="background-color: #e9ecef"
+                />
+              </div>
+              <div class="form-group">
+                <label class="required">Số Lượng:</label>
+                <input
+                  type="number"
+                  id="edit-input-so-luong"
+                  min="<%= soLuongNhapToiThieu %>"
+                  placeholder="<%= soLuongNhapToiThieu %>"
+                />
+              </div>
+              <div class="form-group">
+                <label class="required">Đơn Giá Nhập:</label>
+                <input type="text" id="edit-input-don-gia" />
+              </div>
+              <div class="form-group">
+                <label>Đơn Giá Bán:</label>
+                <input
+                  type="text"
+                  id="edit-input-don-gia-ban"
+                  readonly
+                  style="background-color: #e9ecef"
+                />
+              </div>
+              <div class="form-group">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  id="btn-add-to-list-edit"
+                  style="width: 100%; white-space: nowrap"
+                >
+                  <i class="fas fa-plus"></i> Thêm
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-wrapper">
+            <h3 class="section-header-title">Chi tiết phiếu nhập</h3>
+            <div
+              class="detail-table-wrapper"
+              style="
+                border: 1px solid var(--border-color);
+                border-radius: 6px;
+                overflow: hidden;
+              "
+            >
+              <table class="detail-table" id="edit-detail-table">
+                <thead>
+                  <tr>
+                    <th>STT</th>
+                    <th>Mã Sách</th>
+                    <th>Tên Sách</th>
+                    <th>Số Lượng</th>
+                    <th>Đơn Giá Nhập</th>
+                    <th>Đơn Giá Bán</th>
+                    <th>Thành Tiền</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+
+            <div class="grid-summary">
+              <span class="summary-label">Tổng cộng:</span>
+              <span class="summary-value" id="edit-total-amount">0</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-warning" id="btn-reset-edit">
+            Đặt lại
+          </button>
+          <button type="button" class="btn btn-primary" id="btn-save-edit">
+            Lưu
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="modal-overlay" id="line-item-modal" style="z-index: 2200;"> 
-        <div class="modal-content" style="max-width: 450px;">
-            <div class="modal-header">
-                <h2 style="font-size: 1.1rem;">Cập nhật dòng sách</h2>
-                <button class="close-modal-item"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Tên Sách:</label>
-                    <input type="text" id="item-edit-name" disabled style="background-color: #e9ecef; font-weight: bold;">
-                </div>
-                <div class="form-group" style="margin-top: 1rem;">
-                    <label class="required">Số Lượng:</label>
-                    <input type="number" id="item-edit-qty" min="<%= soLuongNhapToiThieu %>" style="font-weight: bold; color: var(--secondary-color);">
-                </div>
-                <div class="form-group" style="margin-top: 1rem;">
-                    <label class="required">Đơn Giá Nhập:</label>
-                    <input type="text" id="item-edit-price" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="font-weight: bold;">
-                </div>
-                <div class="form-group" style="margin-top: 1rem;">
-                    <label>Đơn Giá Bán:</label>
-                    <input type="text" id="item-edit-sell-price" readonly style="font-weight: bold; background-color: #e9ecef;">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary close-modal-item">Hủy</button>
-                <button type="button" class="btn btn-primary" id="btn-save-line-item">Cập nhật</button>
-            </div>
+    <div class="modal-overlay" id="line-item-modal" style="z-index: 2200">
+      <div class="modal-content" style="max-width: 450px">
+        <div class="modal-header">
+          <h2 style="font-size: 1.1rem">Cập nhật dòng sách</h2>
+          <button class="close-modal-item"><i class="fas fa-times"></i></button>
         </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Tên Sách:</label>
+            <input
+              type="text"
+              id="item-edit-name"
+              disabled
+              style="background-color: #e9ecef; font-weight: bold"
+            />
+          </div>
+          <div class="form-group" style="margin-top: 1rem">
+            <label class="required">Số Lượng:</label>
+            <input
+              type="number"
+              id="item-edit-qty"
+              min="<%= soLuongNhapToiThieu %>"
+              style="font-weight: bold; color: var(--secondary-color)"
+            />
+          </div>
+          <div class="form-group" style="margin-top: 1rem">
+            <label class="required">Đơn Giá Nhập:</label>
+            <input
+              type="text"
+              id="item-edit-price"
+              inputmode="numeric"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+              style="font-weight: bold"
+            />
+          </div>
+          <div class="form-group" style="margin-top: 1rem">
+            <label>Đơn Giá Bán:</label>
+            <input
+              type="text"
+              id="item-edit-sell-price"
+              readonly
+              style="font-weight: bold; background-color: #e9ecef"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary close-modal-item">
+            Hủy
+          </button>
+          <button type="button" class="btn btn-primary" id="btn-save-line-item">
+            Cập nhật
+          </button>
+        </div>
+      </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            
-            // --- 1. BIẾN TOÀN CỤC & TIỆN ÍCH ---
-            const loader = document.getElementById('loader');
-            const toastContainer = document.getElementById('toast-container');
-            
-            // Tham số quy định từ database
-            const soLuongNhapToiThieu = <%= soLuongNhapToiThieu %>;
-            
-            // Biến dùng cho việc sửa dòng
-            let currentRowToEdit = null;
-            let currentTableId = null; 
-            
-            // Biến snapshot
-            let originalEditState = null;
-
-            function showLoader() { loader.style.display = 'flex'; }
-            function hideLoader() { loader.style.display = 'none'; }
-            function showToast(message, type = 'success') {
-                const toast = document.createElement('div');
-                toast.classList.add('toast', type);
-                toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i><span class="toast-message">${message}</span>`;
-                toastContainer.appendChild(toast);
-                setTimeout(() => { toast.classList.add('show'); }, 100);
-                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
-            }
-            // API Call Helper (Real API)
-            async function apiCall(url, method = 'GET', body = null) {
-                showLoader();
-                try {
-                    const options = {
-                        method,
-                        headers: { 'Content-Type': 'application/json' }
-                    };
-                    if (body) options.body = JSON.stringify(body);
-                    
-                    const response = await fetch(url, options);
-                    
-                    // KIỂM TRA response.ok TRƯỚC KHI parse JSON
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        hideLoader();
-                        throw new Error(`Server error ${response.status}: ${errorText.substring(0, 100)}`);
-                    }
-                    
-                    const data = await response.json();
-                    hideLoader();
-                    return { success: true, data };
-                } catch (error) {
-                    hideLoader();
-                    console.error('API Error:', error);
-                    return { success: false, error: error.message };
-                }
-            }
-            
-            function formatNumber(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
-            function parseNumber(str) { if (!str) return 0; return parseFloat(str.toString().replace(/\./g, '')) || 0; }
-
-
-            // --- 2. HÀM XỬ LÝ BẢNG ---
-
-            // Hàm tính tổng tiền
-            window.updateTotal = function(tableId, totalId) {
-                const rows = document.querySelectorAll(`#${tableId} tbody tr`);
-                let total = 0;
-                rows.forEach(row => {
-                    const totalCell = row.querySelector('.total-cell');
-                    if (totalCell && totalCell.dataset.value) {
-                        total += parseFloat(totalCell.dataset.value);
-                    }
-                });
-                
-                const totalEl = document.getElementById(totalId);
-                if (totalEl) totalEl.textContent = total;
-            }
-
-            // Hàm MỞ Modal Sửa Dòng (Được gọi khi bấm bút chì)
-            window.openItemEditModal = function(element, tableId) {
-                const row = element.closest('tr');
-                currentRowToEdit = row;
-                currentTableId = tableId; 
-
-                // Lấy dữ liệu từ dòng
-                const name = row.querySelector('.name-cell').textContent;
-                const qty = row.querySelector('.qty-cell').textContent;
-                const priceRaw = row.querySelector('.price-cell').dataset.raw;
-                const sellPriceRaw = row.querySelector('.sell-price-cell').dataset.raw; // Lấy giá bán
-
-                // Điền vào Modal nhỏ
-                document.getElementById('item-edit-name').value = name;
-                document.getElementById('item-edit-qty').value = qty;
-                document.getElementById('item-edit-price').value = priceRaw; 
-                document.getElementById('item-edit-sell-price').value = sellPriceRaw; // Điền giá bán
-
-                // Hiện Modal nhỏ
-                document.getElementById('line-item-modal').style.display = 'flex';
-            };
-
-            // Hàm XÓA Dòng
-            window.deleteItemRow = function(element, tableId, totalId) {
-                element.closest('tr').remove();
-                
-                const rows = document.querySelectorAll(`#${tableId} tbody tr`);
-                rows.forEach((row, index) => {
-                    row.querySelector('.stt-cell').textContent = index + 1;
-                });
-                
-                updateTotal(tableId, totalId);
-            };
-
-            // Hàm THÊM DÒNG vào bảng
-            window.addRowToDetailTable = function(tableId, totalId, data) {
-                const tbody = document.querySelector(`#${tableId} tbody`);
-                const row = tbody.insertRow();
-                const donGia = Math.round(data.donGia);
-                const donGiaBan = Math.round(data.donGiaBan);
-                const thanhTien = data.soLuong * donGia;
-                
-                row.innerHTML = `
-                    <td class="stt-cell text-center">${tbody.rows.length}</td>
-                    <td>${data.maSach}</td>
-                    <td class="name-cell">${data.tenSach}</td>
-                    <td class="qty-cell text-center">${data.soLuong}</td>
-                    <td class="price-cell text-right" data-raw="${donGia}">${donGia.toLocaleString('vi-VN')}</td>
-                    <td class="sell-price-cell text-right" data-raw="${donGiaBan}">${donGiaBan.toLocaleString('vi-VN')}</td> <td class="total-cell text-right" data-value="${thanhTien}">${thanhTien.toLocaleString('vi-VN')}</td>
-                    <td class="text-center">
-                        <i class="fas fa-pencil-alt action-icon edit-row-icon" 
-                           onclick="openItemEditModal(this, '${tableId}')"
-                           title="Sửa dòng này"></i>
-                        <i class="fas fa-trash action-icon delete-row-icon" 
-                           onclick="deleteItemRow(this, '${tableId}', '${totalId}')"
-                           style="color:var(--red-accent);" title="Xóa dòng này"></i>
-                    </td>
-                `;
-                updateTotal(tableId, totalId);
-            }
-
-
-            // --- 3. XỬ LÝ LOGIC TRONG MODAL NHỎ (Cập nhật dòng) ---
-            const btnSaveLineItem = document.getElementById('btn-save-line-item');
-            const itemEditModal = document.getElementById('line-item-modal');
-
-            if(btnSaveLineItem) {
-                btnSaveLineItem.addEventListener('click', () => {
-                    if (!currentRowToEdit) return;
-
-                    const newQty = parseInt(document.getElementById('item-edit-qty').value);
-                    const newPrice = parseNumber(document.getElementById('item-edit-price').value);
-                    const newSellPrice = Math.round(newPrice * 1.05); // Tự động tính giá bán = giá nhập * 1.05
-
-                    // QUY ĐỊNH: Số lượng nhập ít nhất là 150
-                    if (!newQty || newQty < 150) { showToast('Số lượng nhập phải từ 150 trở lên!', 'error'); return; }
-                    if (!newPrice || newPrice < 0) { showToast('Đơn giá nhập không hợp lệ!', 'error'); return; }
-
-                    // Cập nhật lại dòng trong bảng
-                    currentRowToEdit.querySelector('.qty-cell').textContent = newQty;
-                    
-                    const priceCell = currentRowToEdit.querySelector('.price-cell');
-                    priceCell.textContent = newPrice.toLocaleString('vi-VN');
-                    priceCell.dataset.raw = newPrice;
-
-                    const sellPriceCell = currentRowToEdit.querySelector('.sell-price-cell');
-                    sellPriceCell.textContent = newSellPrice.toLocaleString('vi-VN');
-                    sellPriceCell.dataset.raw = newSellPrice;
-
-                    const newTotal = newQty * newPrice; // Thành tiền tính theo giá nhập
-                    const totalCell = currentRowToEdit.querySelector('.total-cell');
-                    totalCell.textContent = newTotal.toLocaleString('vi-VN');
-                    totalCell.dataset.value = newTotal;
-
-                    // Cập nhật tổng
-                    const prefix = currentTableId.split('-')[0]; 
-                    updateTotal(currentTableId, `${prefix}-total-amount`);
-
-                    // Đóng modal
-                    itemEditModal.style.display = 'none';
-                    currentRowToEdit = null;
-                    showToast('Đã cập nhật dòng sách!', 'success');
-                });
-            }
-
-            // Đóng modal nhỏ
-            document.querySelectorAll('.close-modal-item').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    itemEditModal.style.display = 'none';
-                    currentRowToEdit = null;
-                });
-            });
-            
-            // Format input giá VÀ tự động tính giá bán
-            const itemEditPriceInput = document.getElementById('item-edit-price');
-            const itemEditSellPriceInput = document.getElementById('item-edit-sell-price');
-            
-            if(itemEditPriceInput) {
-                itemEditPriceInput.addEventListener('input', function() {
-                    const val = this.value.replace(/[^0-9]/g, '');
-                    this.value = val ? val : '';
-                    
-                    // Tự động tính đơn giá bán = đơn giá nhập * 1.05
-                    if(val && itemEditSellPriceInput) {
-                        const giaNhap = parseFloat(val);
-                        const giaBan = Math.round(giaNhap * 1.05);
-                        itemEditSellPriceInput.value = giaBan;
-                    }
-                });
-            }
-
-
-            // --- 4. AUTO-FILL SÁCH TỪ API ---
-            async function findBookInfo(maSach) {
-                try {
-                    console.log('[DEBUG] Fetching book info for:', maSach);
-                    const response = await fetch(`/api/books/getSach/${maSach}`);
-                    console.log('[DEBUG] Response status:', response.status);
-                    
-                    if (!response.ok) {
-                        const text = await response.text();
-                        console.error('[DEBUG] Response error:', text);
-                        return null;
-                    }
-                    
-                    const contentType = response.headers.get('content-type');
-                    console.log('[DEBUG] Content-Type:', contentType);
-                    
-                    if (!contentType || !contentType.includes('application/json')) {
-                        const text = await response.text();
-                        console.error('[DEBUG] Response is not JSON:', text.substring(0, 200));
-                        showToast('Lỗi server: Không nhận được JSON', 'error');
-                        return null;
-                    }
-                    
-                    const data = await response.json();
-                    console.log('[DEBUG] Book data:', data);
-                    return data.sach || null;
-                } catch (error) {
-                    console.error('[ERROR] Fetching book:', error);
-                    showToast('Lỗi kết nối: ' + error.message, 'error');
-                    return null;
-                }
-            }
-
-            ['add', 'edit'].forEach(prefix => {
-                const maSachInput = document.getElementById(`${prefix}-input-ma-sach`);
-                const tenSachInput = document.getElementById(`${prefix}-input-ten-sach`);
-                const donGiaInput = document.getElementById(`${prefix}-input-don-gia`);
-                const donGiaBanInput = document.getElementById(`${prefix}-input-don-gia-ban`);
-                const maNhanVienInput = document.getElementById(`${prefix}-ma-nv`);
-
-                if (maNhanVienInput) {
-                    maNhanVienInput.addEventListener('blur', async function() {
-                        const maNhanVien = this.value.trim();
-
-                        // Chỉ kiểm tra khi có giá trị
-                        if (maNhanVien) {
-                            try {
-                                // Gọi API để kiểm tra
-                                const response = await fetch(`/api/employees/check-employee/${maNhanVien}`);
-                                const data = await response.json();
-
-                                if (!data.exists) {
-                                    // Nếu không tồn tại, hiển thị toast lỗi
-                                    showToast(data.message || 'Mã nhân viên không tồn tại.', 'error');
-                                }
-                            } catch (error) {
-                                console.error('Lỗi khi kiểm tra mã nhân viên:', error);
-                                showToast('Không thể kết nối đến máy chủ để kiểm tra. Vui lòng thử lại.', 'error');
-                            }
-                        }
-                    });
-                }
-                if(maSachInput && tenSachInput){
-                    maSachInput.addEventListener('blur', async function() {
-                        const maSach = this.value.trim();
-                        if (!maSach) return;
-                        
-                        const book = await findBookInfo(maSach);
-                        if (book) {
-                            tenSachInput.value = book.TenSach || book.name || '';
-                            // Nếu có giá nhập từ DB, fill vào và tự động tính giá bán
-                            if(donGiaInput && !donGiaInput.value && book.DonGia) {
-                                const giaNhap = book.DonGia;
-                                donGiaInput.value = giaNhap;
-                                // Tự động tính giá bán
-                                if(donGiaBanInput) {
-                                    donGiaBanInput.value = Math.round(giaNhap * 1.05);
-                                }
-                            }
-                        } else {
-                            showToast('Không tìm thấy sách với mã: ' + maSach, 'error');
-                        }
-                    });
-                }
-                
-                // Format input khi nhập VÀ tự động tính giá bán
-                if(donGiaInput) {
-                    donGiaInput.addEventListener('input', function() {
-                        const val = this.value.replace(/[^0-9]/g, '');
-                        this.value = val ? val : '';
-                        
-                        // Tự động tính đơn giá bán = đơn giá nhập * 1.05
-                        if(val && donGiaBanInput) {
-                            const giaNhap = parseFloat(val);
-                            const giaBan = Math.round(giaNhap * 1.05);
-                            donGiaBanInput.value = giaBan;
-                        }
-                    });
-                }
-                // Không cần xử lý input cho giá bán nữa vì nó tự động
-
-                // Nút "Thêm" vào bảng
-                const btnId = `btn-add-to-list${prefix === 'edit' ? '-edit' : ''}`;
-                const addToBtn = document.getElementById(btnId);
-                
-                if(addToBtn) {
-                    addToBtn.addEventListener('click', function() {
-                        const soLuongInput = document.getElementById(`${prefix}-input-so-luong`);
-                        
-                        if (!maSachInput.value || !tenSachInput.value) {
-                            showToast('Vui lòng nhập sách!', 'error');
-                            return;
-                        }
-                        
-                        const soLuong = parseInt(soLuongInput.value);
-                        // QUY ĐỊNH: Số lượng nhập ít nhất là soLuongNhapToiThieu (từ database)
-                        if (!soLuong || soLuong < soLuongNhapToiThieu) {
-                            showToast(`Số lượng nhập phải từ ${soLuongNhapToiThieu} trở lên (theo quy định)!`, 'error');
-                            return;
-                        }
-                        
-                        const donGia = parseInt(donGiaInput.value);
-                        if (!donGia || donGia < 0) {
-                            showToast('Đơn giá nhập không hợp lệ!', 'error');
-                            return;
-                        }
-
-                        addRowToDetailTable(`${prefix}-detail-table`, `${prefix}-total-amount`, {
-                            maSach: maSachInput.value, 
-                            tenSach: tenSachInput.value, 
-                            soLuong: parseInt(soLuongInput.value), 
-                            donGia: Math.round(parseFloat(donGiaInput.value)),
-                            donGiaBan: Math.round(parseFloat(donGiaBanInput.value)) // Lấy giá bán đã làm tròn
-                        });
-
-                        // Reset
-                        maSachInput.value = '';
-                        tenSachInput.value = '';
-                        soLuongInput.value = '<%= soLuongNhapToiThieu %>';
-                        donGiaInput.value = '';
-                        donGiaBanInput.value = '';
-                        maSachInput.focus();
-                    });
-                }
-            });
-
-
-            // --- 5. QUẢN LÝ MODAL CHÍNH ---
-            const menuToggle = document.getElementById('menu-toggle');
-            const sidebar = document.getElementById('sidebar');
-            const container = document.querySelector('.dashboard-container');
-            if (menuToggle) menuToggle.addEventListener('click', () => {
-                if (window.innerWidth <= 992) sidebar.classList.toggle('active');
-                else container.classList.toggle('sidebar-collapsed');
-            });
-
-            const addModal = document.getElementById('add-modal');
-            const editModal = document.getElementById('edit-modal');
-
-            // Mở Modal Thêm
-            const openAddBtn = document.getElementById('open-add-modal');
-            if(openAddBtn) {
-                openAddBtn.addEventListener('click', () => {
-                    resetAddForm();
-                    addModal.style.display = 'flex';
-                });
-            }
-            let isSaveAndReset = false;
-            // Mở Modal Sửa
-            const viewDetailBtns = document.querySelectorAll('.view-detail-btn');
-            viewDetailBtns.forEach(btn => {
-                btn.addEventListener('click', async function () {
-                    const id = this.dataset.id;
-                    // 1. Gọi API lấy chi tiết phiếu
-                    const result = await apiCall(`/api/import/${id}`);
-                    
-                    if (!result.success) {
-                        showToast('Không thể tải dữ liệu phiếu nhập!', 'error');
-                        return;
-                    }
-
-                    const receipt = result.data.receipt;
-
-                    // 2. Điền thông tin chung (Header)
-                    document.getElementById('edit-ma-phieu').value = receipt.MaPhieuNhap;
-                    document.getElementById('edit-ngay-nhap').value = receipt.NgayNhapPhieu ? receipt.NgayNhapPhieu.substring(0, 10) : '';
-                    document.getElementById('edit-ma-nv').value = receipt.MaNhanVien || '';
-
-                    // 3. Điền chi tiết sách (Table)
-                    const tbody = document.querySelector('#edit-detail-table tbody');
-                    tbody.innerHTML = ''; // Xóa dữ liệu cũ/dummy
-
-                    if (receipt.ChiTiet && receipt.ChiTiet.length > 0) {
-                        receipt.ChiTiet.forEach(item => {
-                            // Lấy tên sách từ quan hệ lồng nhau: CT_PNS -> Sach -> DauSach -> TenSach
-                            // Cần kiểm tra null an toàn (optional chaining)
-                            const tenSach = item.Sach?.DauSach?.TenSach || "Không xác định";
-
-                            addRowToDetailTable('edit-detail-table', 'edit-total-amount', {
-                                maSach: item.MaSach, 
-                                tenSach: tenSach, 
-                                soLuong: item.SoLuong, 
-                                donGia: item.DonGiaNhap, 
-                                donGiaBan: item.DonGiaBan
-                            });
-                        });
-                    }
-
-                    // 4. Lưu trạng thái ban đầu để dùng cho nút "Đặt lại"
-                    setTimeout(() => { originalEditState = getEditState(); }, 100);
-                    
-                    // 5. Hiển thị Modal
-                    editModal.style.display = 'flex';
-                });
-            });
-
-            // --- LOGIC NÚT "THÊM MỚI" (SMART RESET) - MODAL ADD ---
-            const btnResetAdd = document.getElementById('btn-custom-reset'); 
-            if (btnResetAdd) {
-                btnResetAdd.addEventListener('click', () => {
-                    // Kiểm tra xem đã nhập gì chưa (Check mã NV hoặc có sách trong bảng)
-                    const hasData = document.getElementById('add-ma-nv').value.trim() !== '' || 
-                                    document.querySelector('#add-detail-table tbody').rows.length > 0;
-
-                    if (hasData) {
-                        if (confirm('Bạn đang nhập dở phiếu nhập sách. Bạn có muốn LƯU phiếu này không?\n\n- OK: Lưu phiếu.\n- Cancel: Xóa trắng để nhập phiếu khác.')) {
-                            // Chọn OK -> Gọi submit form (Lưu)
-                            isSaveAndReset = true;
-                            document.getElementById('btn-save-add').click();
-                        } else {
-                            // Chọn Cancel -> Reset form, KHÔNG ĐÓNG MODAL
-                            resetAddForm();
-                            showToast('Đã làm mới form!', 'info');
-                        }
-                    } else {
-                        // Chưa nhập gì -> Reset
-                        resetAddForm();
-                        showToast('Form đã sẵn sàng nhập mới.', 'info');
-                    }
-                });
-            }
-
-            function resetAddForm() {
-                document.getElementById('add-ma-nv').value = '';
-                document.getElementById('add-ngay-nhap').valueAsDate = new Date();
-                document.getElementById('add-input-ma-sach').value = '';
-                document.getElementById('add-input-ten-sach').value = '';
-                document.querySelector('#add-detail-table tbody').innerHTML = '';
-                document.getElementById('add-total-amount').textContent = '0';
-            }
-
-            // --- LOGIC NÚT "ĐẶT LẠI" (SMART RESTORE) - MODAL EDIT ---
-            const btnResetEdit = document.getElementById('btn-reset-edit');
-            
-            // Hàm lấy dữ liệu hiện tại để so sánh/lưu trữ
-            function getEditState() {
-                return {
-                    ngayNhap: document.getElementById('edit-ngay-nhap').value,
-                    maNV: document.getElementById('edit-ma-nv').value,
-                    tableHtml: document.querySelector('#edit-detail-table tbody').innerHTML
-                };
-            }
-
-            if(btnResetEdit) {
-                btnResetEdit.addEventListener('click', () => {
-                    if(!originalEditState) return;
-
-                    // 1. Kiểm tra thay đổi
-                    const currentState = getEditState();
-                    const isChanged = JSON.stringify(currentState) !== JSON.stringify(originalEditState);
-
-                    if (!isChanged) {
-                        showToast('Chưa có thay đổi nào để đặt lại!', 'info');
-                        return;
-                    }
-
-                    // 2. Hỏi xác nhận
-                    if (confirm("Dữ liệu đã thay đổi. Bạn có muốn LƯU LẠI không?\n\n- OK: Lưu thay đổi.\n- Cancel: Khôi phục lại dữ liệu gốc.")) {
-                        // Chọn OK -> Lưu
-                        document.getElementById('btn-save-edit').click();
-                    } else {
-                        // Chọn Cancel -> Khôi phục
-                        document.getElementById('edit-ngay-nhap').value = originalEditState.ngayNhap;
-                        document.getElementById('edit-ma-nv').value = originalEditState.maNV;
-                        document.querySelector('#edit-detail-table tbody').innerHTML = originalEditState.tableHtml;
-                        updateTotal('edit-detail-table', 'edit-total-amount');
-                        showToast('Đã khôi phục dữ liệu ban đầu!', 'info');
-                    }
-                });
-            }
-
-            // Lưu Thêm Mới
-            document.getElementById('btn-save-add').addEventListener('click', async () => {
-                const ngayNhap = document.getElementById('add-ngay-nhap').value;
-                const maNV = document.getElementById('add-ma-nv').value.trim();
-                
-                // Lấy chi tiết từ bảng
-                const rows = document.querySelectorAll('#add-detail-table tbody tr');
-                if (rows.length === 0) {
-                    showToast('Vui lòng thêm ít nhất một sách!', 'error');
-                    return;
-                }
-                
-                const chiTiet = Array.from(rows).map(row => {
-                    // Lấy giá trị từ data-raw attribute thay vì textContent
-                    const priceCell = row.querySelector('.price-cell');
-                    const sellPriceCell = row.querySelector('.sell-price-cell');
-                    
-                    return {
-                        MaSach: row.cells[1].textContent.trim(), // cells[0]=STT, cells[1]=Mã Sách
-                        SoLuong: parseInt(row.cells[3].textContent), // cells[3]=Số Lượng
-                        DonGiaNhap: parseFloat(priceCell.dataset.raw || priceCell.textContent.replace(/[^0-9]/g, '')), // Lấy từ data-raw
-                        DonGiaBan: parseFloat(sellPriceCell.dataset.raw || sellPriceCell.textContent.replace(/[^0-9]/g, '')) // Lấy từ data-raw
-                    };
-                });
-                
-                console.log('[DEBUG] Sending chiTiet:', chiTiet); // Debug log
-                
-                const result = await apiCall('/api/import/create', 'POST', {
-                    NgayNhapPhieu: ngayNhap,
-                    MaNhanVien: maNV || null,
-                    chiTiet
-                });
-                
-                if (result.success) {
-                    
-                    showToast('Thêm phiếu nhập thành công!');
-                    if (isSaveAndReset) {
-                        // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
-                        resetAddForm();
-                        showToast('Đã sẵn sàng nhập phiếu nhập sách tiếp theo.', 'info');
-                        
-                        // Reset cờ về false sau khi xong việc
-                        isSaveAndReset = false; 
-
-                    } else {
-                        addModal.style.display = 'none';
-                        resetAddForm(); 
-                    }
-                    
-                    // 1. Tính toán dữ liệu hiển thị
-                    const tbody = document.querySelector('#master-table tbody');
-                    
-                    // Xóa dòng "Chưa có phiếu nhập" nếu bảng đang trống
-                    // (Kiểm tra xem dòng đầu tiên có phải là dòng thông báo không)
-                    const firstRow = tbody.rows[0];
-                    if (firstRow && firstRow.cells.length === 1) {
-                        firstRow.remove();
-                    }
-
-                    const stt = tbody.rows.length + 1;
-                    
-                    // Format ngày: YYYY-MM-DD -> DD/MM/YYYY
-                    let dateDisplay = ngayNhap;
-                    if(ngayNhap && ngayNhap.includes('-')){
-                        const parts = ngayNhap.split('-');
-                        dateDisplay = `${parts[2]}/${parts[1]}/${parts[0]}`;
-                    }
-
-                    // Tính tổng tiền từ mảng chiTiet vừa gửi đi
-                    const tongTien = chiTiet.reduce((sum, item) => sum + (item.SoLuong * item.DonGiaNhap), 0);
-
-                    // Lấy Mã Phiếu từ phản hồi API (Giả sử API trả về object chứa MaPhieuNhap)
-                    // Bạn cần đảm bảo Backend trả về { success: true, data: { MaPhieuNhap: 'PN...', ... } }
-                    const newId = result.data.MaPhieuNhap || result.data.receipt?.MaPhieuNhap || '---';
-
-                    // 2. Tạo dòng HTML mới
-                    const newRow = document.createElement('tr');
-                    newRow.innerHTML = `
-                        <td>${stt}</td>
-                        <td>${newId}</td>
-                        <td>${dateDisplay}</td>
-                        <td>${new Intl.NumberFormat('vi-VN').format(tongTien)}</td>
-                        <td>
-                            <button class="btn btn-sm btn-secondary view-detail-btn" data-id="${newId}">
-                                <i class="fas fa-eye"></i> Chi tiết
-                            </button>
-                            <button class="btn btn-sm btn-print ml-2 print-btn" data-id="${newId}"> 
-                                <i class="fas fa-print"></i>
-                            </button>
-                            <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
-                        </td>
-                    `;
-
-                    // 3. Thêm vào cuối bảng
-                    tbody.appendChild(newRow);
-                } else {
-                    showToast(result.error || 'Có lỗi xảy ra!', 'error');
-                }
-            });
-            
-            // Lưu Cập Nhật
-            document.getElementById('btn-save-edit').addEventListener('click', async () => {
-                const maPhieu = document.getElementById('edit-ma-phieu').value;
-                const ngayNhap = document.getElementById('edit-ngay-nhap').value;
-                const maNV = document.getElementById('edit-ma-nv').value.trim();
-                
-                const rows = document.querySelectorAll('#edit-detail-table tbody tr');
-                if (rows.length === 0) {
-                    showToast('Vui lòng thêm ít nhất một sách!', 'error');
-                    return;
-                }
-                
-                const chiTiet = Array.from(rows).map(row => {
-                    // Lấy giá trị từ data-raw attribute thay vì textContent
-                    const priceCell = row.querySelector('.price-cell');
-                    const sellPriceCell = row.querySelector('.sell-price-cell');
-                    
-                    return {
-                        MaSach: row.cells[1].textContent.trim(), // cells[0]=STT, cells[1]=Mã Sách
-                        SoLuong: parseInt(row.cells[3].textContent), // cells[3]=Số Lượng
-                        DonGiaNhap: parseFloat(priceCell.dataset.raw || priceCell.textContent.replace(/[^0-9]/g, '')), // Lấy từ data-raw
-                        DonGiaBan: parseFloat(sellPriceCell.dataset.raw || sellPriceCell.textContent.replace(/[^0-9]/g, '')) // Lấy từ data-raw
-                    };
-                });
-                
-                console.log('[DEBUG] Sending chiTiet:', chiTiet); // Debug log
-                
-                const result = await apiCall(`/api/import/update/${maPhieu}`, 'PATCH', {
-                    NgayNhapPhieu: ngayNhap,
-                    MaNhanVien: maNV || null,
-                    chiTiet
-                });
-                
-                if (result.success) {
-                    editModal.style.display = 'none';
-                    showToast('Cập nhật phiếu nhập thành công!');
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    showToast(result.error || 'Có lỗi xảy ra!', 'error');
-                }
-            });
-
-            document.querySelectorAll('.close-modal').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    addModal.style.display = 'none';
-                    editModal.style.display = 'none';
-                });
-            });
-
-            // --- XỬ LÝ IN PHIẾU NHẬP ---
-            
-            // Bắt sự kiện click cho tất cả nút in
-            document.addEventListener('click', function(e) {
-                // Kiểm tra nếu click vào nút in hoặc icon bên trong nút in
-                const btn = e.target.closest('.print-btn');
-                if (btn) {
-                    const id = btn.dataset.id;
-                    printReceipt(id);
-                }
-            });
-
-            async function printReceipt(maPhieu) {
-                // 1. Lấy dữ liệu phiếu từ Server
-                const result = await apiCall(`/api/import/${maPhieu}`);
-                
-                if (!result.success) {
-                    showToast('Không thể lấy dữ liệu để in!', 'error');
-                    return;
-                }
-
-                const data = result.data.receipt;
-                const date = new Date(data.NgayNhapPhieu);
-                const dateStr = `Ngày ${date.getDate()} tháng ${date.getMonth() + 1} năm ${date.getFullYear()}`;
-
-                // 2. Tạo nội dung HTML cho hóa đơn (Template in)
-                // Bạn có thể sửa CSS trong thẻ <style> dưới đây để đẹp hơn
-                let itemsHtml = '';
-                let stt = 1;
-                
-                if (data.ChiTiet) {
-                    data.ChiTiet.forEach(item => {
-                        const tenSach = item.Sach?.DauSach?.TenSach || "Sách đã xóa";
-                        itemsHtml += `
-                            <tr>
-                                <td style="text-align: center;">${stt++}</td>
-                                <td>${tenSach}</td>
-                                <td style="text-align: center;">${item.SoLuong}</td>
-                                <td style="text-align: right;">${item.DonGiaNhap}</td>
-                                <td style="text-align: right;">${item.ThanhTien}</td>
-                            </tr>
-                        `;
-                    });
-                }
-
-                const printContent = `
-                <html>
-                <head>
-                    <title>In Phiếu Nhập - ${maPhieu}</title>
-                    <style>
-                        body { font-family: 'Times New Roman', Times, serif; font-size: 14px; margin: 20px; }
-                        .header { text-align: center; margin-bottom: 20px; }
-                        .store-name { font-size: 18px; font-weight: bold; text-transform: uppercase; }
-                        .title { font-size: 22px; font-weight: bold; margin-top: 10px; }
-                        .info { margin-bottom: 20px; }
-                        .info p { margin: 5px 0; }
-                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                        th, td { border: 1px solid #333; padding: 8px; }
-                        th { background-color: #f0f0f0; }
-                        .total-section { text-align: right; font-weight: bold; font-size: 16px; margin-bottom: 30px; }
-                        .signature-section { display: flex; justify-content: space-between; text-align: center; margin-top: 50px; }
-                        .signature-box { width: 30%; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <div class="store-name">NHÀ SÁCH CỦA BẠN</div>
-                        <div>Địa chỉ: 123 Đường ABC, TP.HCM</div>
-                        <div class="title">PHIẾU NHẬP SÁCH</div>
-                        <div>(${dateStr})</div>
-                    </div>
-
-                    <div class="info">
-                        <p><strong>Mã phiếu:</strong> ${data.MaPhieuNhap}</p>
-                        <p><strong>Nhân viên nhập:</strong> ${data.MaNhanVien || '---'}</p>
-                    </div>
-
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 50px;">STT</th>
-                                <th>Tên Sách</th>
-                                <th style="width: 80px;">SL</th>
-                                <th style="width: 120px;">Đơn Giá</th>
-                                <th style="width: 150px;">Thành Tiền</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${itemsHtml}
-                        </tbody>
-                    </table>
-
-                    <div class="total-section">
-                        Tổng cộng: ${data.TongTien} VNĐ
-                    </div>
-
-                    <div class="signature-section">
-                        <div class="signature-box">
-                            <strong>Người lập phiếu</strong><br>
-                            (Ký, họ tên)<br><br><br><br>
-                        </div>
-                        <div class="signature-box">
-                            <strong>Thủ kho</strong><br>
-                            (Ký, họ tên)<br><br><br><br>
-                        </div>
-                    </div>
-                </body>
-                </html>
-                `;
-
-                // 3. Mở cửa sổ in
-                const printWindow = window.open('', '', 'height=600,width=800');
-                printWindow.document.write(printContent);
-                printWindow.document.close(); // Quan trọng: Đóng luồng ghi để trình duyệt render
-                
-                // Đợi một chút để load nội dung rồi mới gọi lệnh in
-                setTimeout(() => {
-                    printWindow.focus();
-                    printWindow.print();
-                    // printWindow.close(); // Có thể bỏ comment nếu muốn tự đóng sau khi in
-                }, 500);
-            }
-            
-            // Xóa phiếu ngoài bảng
-            const masterTable = document.getElementById('master-table');
-            if (masterTable) {
-                masterTable.addEventListener('click', async function(e) {
-                    if (e.target.classList.contains('delete-icon') || e.target.closest('.delete-icon')) {
-                        const row = e.target.closest('tr');
-                        const maPhieu = row.cells[1].textContent.trim();
-                        
-                        if(confirm(`Xóa phiếu nhập ${maPhieu}?`)) {
-                            const result = await apiCall(`/api/import/delete/${maPhieu}`, 'DELETE');
-                            if (result.success) {
-                                row.remove();
-                                showToast('Xóa phiếu nhập thành công!');
-                                const tableBody = document.getElementById('master-table').getElementsByTagName('tbody')[0];
-                                if (tableBody.rows.length === 0) {
-                                    // Nếu <tbody> không còn hàng nào
-                                    const newRow = tableBody.insertRow(); // Thêm 1 hàng mới
-                                    // Thêm ô "Không có nhân viên nào"
-                                    newRow.innerHTML = `<td colspan="5" style="text-align: center;">Chưa có phiếu nhập sách nào.</td>`;
-                                }
-                            } else {
-                                showToast(result.error || 'Có lỗi xảy ra!', 'error');
-                            }
-                        }
-                    }
-                });
-            }
-
-            // --- LOGOUT ---
-    const logoutBtn = document.getElementById('logout-button');
-    if(logoutBtn) {
-        logoutBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            if(confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-                window.location.href = '/logout';
-            }
-        });
-    }
-
-        });
+          document.addEventListener('DOMContentLoaded', function () {
+
+              // --- 1. BIẾN TOÀN CỤC & TIỆN ÍCH ---
+              const loader = document.getElementById('loader');
+              const toastContainer = document.getElementById('toast-container');
+
+              // Tham số quy định từ database
+              const soLuongNhapToiThieu = <%= soLuongNhapToiThieu %>;
+
+              // Biến dùng cho việc sửa dòng
+              let currentRowToEdit = null;
+              let currentTableId = null;
+
+              // Biến snapshot
+              let originalEditState = null;
+
+              function showLoader() { loader.style.display = 'flex'; }
+              function hideLoader() { loader.style.display = 'none'; }
+              function showToast(message, type = 'success') {
+                  const toast = document.createElement('div');
+                  toast.classList.add('toast', type);
+                  toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i><span class="toast-message">${message}</span>`;
+                  toastContainer.appendChild(toast);
+                  setTimeout(() => { toast.classList.add('show'); }, 100);
+                  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+              }
+              // API Call Helper (Real API)
+              async function apiCall(url, method = 'GET', body = null) {
+                  showLoader();
+                  try {
+                      const options = {
+                          method,
+                          headers: { 'Content-Type': 'application/json' }
+                      };
+                      if (body) options.body = JSON.stringify(body);
+
+                      const response = await fetch(url, options);
+
+                      // KIỂM TRA response.ok TRƯỚC KHI parse JSON
+                      if (!response.ok) {
+                          const errorText = await response.text();
+                          hideLoader();
+                          throw new Error(`Server error ${response.status}: ${errorText.substring(0, 100)}`);
+                      }
+
+                      const data = await response.json();
+                      hideLoader();
+                      return { success: true, data };
+                  } catch (error) {
+                      hideLoader();
+                      console.error('API Error:', error);
+                      return { success: false, error: error.message };
+                  }
+              }
+
+              function formatNumber(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+              function parseNumber(str) { if (!str) return 0; return parseFloat(str.toString().replace(/\./g, '')) || 0; }
+
+
+              // --- 2. HÀM XỬ LÝ BẢNG ---
+
+              // Hàm tính tổng tiền
+              window.updateTotal = function(tableId, totalId) {
+                  const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+                  let total = 0;
+                  rows.forEach(row => {
+                      const totalCell = row.querySelector('.total-cell');
+                      if (totalCell && totalCell.dataset.value) {
+                          total += parseFloat(totalCell.dataset.value);
+                      }
+                  });
+
+                  const totalEl = document.getElementById(totalId);
+                  if (totalEl) totalEl.textContent = total;
+              }
+
+              // Hàm MỞ Modal Sửa Dòng (Được gọi khi bấm bút chì)
+              window.openItemEditModal = function(element, tableId) {
+                  const row = element.closest('tr');
+                  currentRowToEdit = row;
+                  currentTableId = tableId;
+
+                  // Lấy dữ liệu từ dòng
+                  const name = row.querySelector('.name-cell').textContent;
+                  const qty = row.querySelector('.qty-cell').textContent;
+                  const priceRaw = row.querySelector('.price-cell').dataset.raw;
+                  const sellPriceRaw = row.querySelector('.sell-price-cell').dataset.raw; // Lấy giá bán
+
+                  // Điền vào Modal nhỏ
+                  document.getElementById('item-edit-name').value = name;
+                  document.getElementById('item-edit-qty').value = qty;
+                  document.getElementById('item-edit-price').value = priceRaw;
+                  document.getElementById('item-edit-sell-price').value = sellPriceRaw; // Điền giá bán
+
+                  // Hiện Modal nhỏ
+                  document.getElementById('line-item-modal').style.display = 'flex';
+              };
+
+              // Hàm XÓA Dòng
+              window.deleteItemRow = function(element, tableId, totalId) {
+                  element.closest('tr').remove();
+
+                  const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+                  rows.forEach((row, index) => {
+                      row.querySelector('.stt-cell').textContent = index + 1;
+                  });
+
+                  updateTotal(tableId, totalId);
+              };
+
+              // Hàm THÊM DÒNG vào bảng
+              window.addRowToDetailTable = function(tableId, totalId, data) {
+                  const tbody = document.querySelector(`#${tableId} tbody`);
+                  const row = tbody.insertRow();
+                  const donGia = Math.round(data.donGia);
+                  const donGiaBan = Math.round(data.donGiaBan);
+                  const thanhTien = data.soLuong * donGia;
+
+                  row.innerHTML = `
+                      <td class="stt-cell text-center">${tbody.rows.length}</td>
+                      <td>${data.maSach}</td>
+                      <td class="name-cell">${data.tenSach}</td>
+                      <td class="qty-cell text-center">${data.soLuong}</td>
+                      <td class="price-cell text-right" data-raw="${donGia}">${donGia.toLocaleString('vi-VN')}</td>
+                      <td class="sell-price-cell text-right" data-raw="${donGiaBan}">${donGiaBan.toLocaleString('vi-VN')}</td> <td class="total-cell text-right" data-value="${thanhTien}">${thanhTien.toLocaleString('vi-VN')}</td>
+                      <td class="text-center">
+                          <i class="fas fa-pencil-alt action-icon edit-row-icon"
+                             onclick="openItemEditModal(this, '${tableId}')"
+                             title="Sửa dòng này"></i>
+                          <i class="fas fa-trash action-icon delete-row-icon"
+                             onclick="deleteItemRow(this, '${tableId}', '${totalId}')"
+                             style="color:var(--red-accent);" title="Xóa dòng này"></i>
+                      </td>
+                  `;
+                  updateTotal(tableId, totalId);
+              }
+
+
+              // --- 3. XỬ LÝ LOGIC TRONG MODAL NHỎ (Cập nhật dòng) ---
+              const btnSaveLineItem = document.getElementById('btn-save-line-item');
+              const itemEditModal = document.getElementById('line-item-modal');
+
+              if(btnSaveLineItem) {
+                  btnSaveLineItem.addEventListener('click', () => {
+                      if (!currentRowToEdit) return;
+
+                      const newQty = parseInt(document.getElementById('item-edit-qty').value);
+                      const newPrice = parseNumber(document.getElementById('item-edit-price').value);
+                      const newSellPrice = Math.round(newPrice * 1.05); // Tự động tính giá bán = giá nhập * 1.05
+
+                      // QUY ĐỊNH: Số lượng nhập ít nhất là 150
+                      if (!newQty || newQty < 150) { showToast('Số lượng nhập phải từ 150 trở lên!', 'error'); return; }
+                      if (!newPrice || newPrice < 0) { showToast('Đơn giá nhập không hợp lệ!', 'error'); return; }
+
+                      // Cập nhật lại dòng trong bảng
+                      currentRowToEdit.querySelector('.qty-cell').textContent = newQty;
+
+                      const priceCell = currentRowToEdit.querySelector('.price-cell');
+                      priceCell.textContent = newPrice.toLocaleString('vi-VN');
+                      priceCell.dataset.raw = newPrice;
+
+                      const sellPriceCell = currentRowToEdit.querySelector('.sell-price-cell');
+                      sellPriceCell.textContent = newSellPrice.toLocaleString('vi-VN');
+                      sellPriceCell.dataset.raw = newSellPrice;
+
+                      const newTotal = newQty * newPrice; // Thành tiền tính theo giá nhập
+                      const totalCell = currentRowToEdit.querySelector('.total-cell');
+                      totalCell.textContent = newTotal.toLocaleString('vi-VN');
+                      totalCell.dataset.value = newTotal;
+
+                      // Cập nhật tổng
+                      const prefix = currentTableId.split('-')[0];
+                      updateTotal(currentTableId, `${prefix}-total-amount`);
+
+                      // Đóng modal
+                      itemEditModal.style.display = 'none';
+                      currentRowToEdit = null;
+                      showToast('Đã cập nhật dòng sách!', 'success');
+                  });
+              }
+
+              // Đóng modal nhỏ
+              document.querySelectorAll('.close-modal-item').forEach(btn => {
+                  btn.addEventListener('click', () => {
+                      itemEditModal.style.display = 'none';
+                      currentRowToEdit = null;
+                  });
+              });
+
+              // Format input giá VÀ tự động tính giá bán
+              const itemEditPriceInput = document.getElementById('item-edit-price');
+              const itemEditSellPriceInput = document.getElementById('item-edit-sell-price');
+
+              if(itemEditPriceInput) {
+                  itemEditPriceInput.addEventListener('input', function() {
+                      const val = this.value.replace(/[^0-9]/g, '');
+                      this.value = val ? val : '';
+
+                      // Tự động tính đơn giá bán = đơn giá nhập * 1.05
+                      if(val && itemEditSellPriceInput) {
+                          const giaNhap = parseFloat(val);
+                          const giaBan = Math.round(giaNhap * 1.05);
+                          itemEditSellPriceInput.value = giaBan;
+                      }
+                  });
+              }
+
+
+              // --- 4. AUTO-FILL SÁCH TỪ API ---
+              async function findBookInfo(maSach) {
+                  try {
+                      console.log('[DEBUG] Fetching book info for:', maSach);
+                      const response = await fetch(`/api/books/getSach/${maSach}`);
+                      console.log('[DEBUG] Response status:', response.status);
+
+                      if (!response.ok) {
+                          const text = await response.text();
+                          console.error('[DEBUG] Response error:', text);
+                          return null;
+                      }
+
+                      const contentType = response.headers.get('content-type');
+                      console.log('[DEBUG] Content-Type:', contentType);
+
+                      if (!contentType || !contentType.includes('application/json')) {
+                          const text = await response.text();
+                          console.error('[DEBUG] Response is not JSON:', text.substring(0, 200));
+                          showToast('Lỗi server: Không nhận được JSON', 'error');
+                          return null;
+                      }
+
+                      const data = await response.json();
+                      console.log('[DEBUG] Book data:', data);
+                      return data.sach || null;
+                  } catch (error) {
+                      console.error('[ERROR] Fetching book:', error);
+                      showToast('Lỗi kết nối: ' + error.message, 'error');
+                      return null;
+                  }
+              }
+
+              ['add', 'edit'].forEach(prefix => {
+                  const maSachInput = document.getElementById(`${prefix}-input-ma-sach`);
+                  const tenSachInput = document.getElementById(`${prefix}-input-ten-sach`);
+                  const donGiaInput = document.getElementById(`${prefix}-input-don-gia`);
+                  const donGiaBanInput = document.getElementById(`${prefix}-input-don-gia-ban`);
+                  const maNhanVienInput = document.getElementById(`${prefix}-ma-nv`);
+
+                  if (maNhanVienInput) {
+                      maNhanVienInput.addEventListener('blur', async function() {
+                          const maNhanVien = this.value.trim();
+
+                          // Chỉ kiểm tra khi có giá trị
+                          if (maNhanVien) {
+                              try {
+                                  // Gọi API để kiểm tra
+                                  const response = await fetch(`/api/employees/check-employee/${maNhanVien}`);
+                                  const data = await response.json();
+
+                                  if (!data.exists) {
+                                      // Nếu không tồn tại, hiển thị toast lỗi
+                                      showToast(data.message || 'Mã nhân viên không tồn tại.', 'error');
+                                  }
+                              } catch (error) {
+                                  console.error('Lỗi khi kiểm tra mã nhân viên:', error);
+                                  showToast('Không thể kết nối đến máy chủ để kiểm tra. Vui lòng thử lại.', 'error');
+                              }
+                          }
+                      });
+                  }
+                  if(maSachInput && tenSachInput){
+                      maSachInput.addEventListener('blur', async function() {
+                          const maSach = this.value.trim();
+                          if (!maSach) return;
+
+                          const book = await findBookInfo(maSach);
+                          if (book) {
+                              tenSachInput.value = book.TenSach || book.name || '';
+                              // Nếu có giá nhập từ DB, fill vào và tự động tính giá bán
+                              if(donGiaInput && !donGiaInput.value && book.DonGia) {
+                                  const giaNhap = book.DonGia;
+                                  donGiaInput.value = giaNhap;
+                                  // Tự động tính giá bán
+                                  if(donGiaBanInput) {
+                                      donGiaBanInput.value = Math.round(giaNhap * 1.05);
+                                  }
+                              }
+                          } else {
+                              showToast('Không tìm thấy sách với mã: ' + maSach, 'error');
+                          }
+                      });
+                  }
+
+                  // Format input khi nhập VÀ tự động tính giá bán
+                  if(donGiaInput) {
+                      donGiaInput.addEventListener('input', function() {
+                          const val = this.value.replace(/[^0-9]/g, '');
+                          this.value = val ? val : '';
+
+                          // Tự động tính đơn giá bán = đơn giá nhập * 1.05
+                          if(val && donGiaBanInput) {
+                              const giaNhap = parseFloat(val);
+                              const giaBan = Math.round(giaNhap * 1.05);
+                              donGiaBanInput.value = giaBan;
+                          }
+                      });
+                  }
+                  // Không cần xử lý input cho giá bán nữa vì nó tự động
+
+                  // Nút "Thêm" vào bảng
+                  const btnId = `btn-add-to-list${prefix === 'edit' ? '-edit' : ''}`;
+                  const addToBtn = document.getElementById(btnId);
+
+                  if(addToBtn) {
+                      addToBtn.addEventListener('click', function() {
+                          const soLuongInput = document.getElementById(`${prefix}-input-so-luong`);
+
+                          if (!maSachInput.value || !tenSachInput.value) {
+                              showToast('Vui lòng nhập sách!', 'error');
+                              return;
+                          }
+
+                          const soLuong = parseInt(soLuongInput.value);
+                          // QUY ĐỊNH: Số lượng nhập ít nhất là soLuongNhapToiThieu (từ database)
+                          if (!soLuong || soLuong < soLuongNhapToiThieu) {
+                              showToast(`Số lượng nhập phải từ ${soLuongNhapToiThieu} trở lên (theo quy định)!`, 'error');
+                              return;
+                          }
+
+                          const donGia = parseInt(donGiaInput.value);
+                          if (!donGia || donGia < 0) {
+                              showToast('Đơn giá nhập không hợp lệ!', 'error');
+                              return;
+                          }
+
+                          addRowToDetailTable(`${prefix}-detail-table`, `${prefix}-total-amount`, {
+                              maSach: maSachInput.value,
+                              tenSach: tenSachInput.value,
+                              soLuong: parseInt(soLuongInput.value),
+                              donGia: Math.round(parseFloat(donGiaInput.value)),
+                              donGiaBan: Math.round(parseFloat(donGiaBanInput.value)) // Lấy giá bán đã làm tròn
+                          });
+
+                          // Reset
+                          maSachInput.value = '';
+                          tenSachInput.value = '';
+                          soLuongInput.value = '<%= soLuongNhapToiThieu %>';
+                          donGiaInput.value = '';
+                          donGiaBanInput.value = '';
+                          maSachInput.focus();
+                      });
+                  }
+              });
+
+
+              // --- 5. QUẢN LÝ MODAL CHÍNH ---
+              const menuToggle = document.getElementById('menu-toggle');
+              const sidebar = document.getElementById('sidebar');
+              const container = document.querySelector('.dashboard-container');
+              if (menuToggle) menuToggle.addEventListener('click', () => {
+                  if (window.innerWidth <= 992) sidebar.classList.toggle('active');
+                  else container.classList.toggle('sidebar-collapsed');
+              });
+
+              const addModal = document.getElementById('add-modal');
+              const editModal = document.getElementById('edit-modal');
+
+              // Mở Modal Thêm
+              const openAddBtn = document.getElementById('open-add-modal');
+              if(openAddBtn) {
+                  openAddBtn.addEventListener('click', () => {
+                      resetAddForm();
+                      addModal.style.display = 'flex';
+                  });
+              }
+              let isSaveAndReset = false;
+              // Mở Modal Sửa
+              const viewDetailBtns = document.querySelectorAll('.view-detail-btn');
+              viewDetailBtns.forEach(btn => {
+                  btn.addEventListener('click', async function () {
+                      const id = this.dataset.id;
+                      // 1. Gọi API lấy chi tiết phiếu
+                      const result = await apiCall(`/api/import/${id}`);
+
+                      if (!result.success) {
+                          showToast('Không thể tải dữ liệu phiếu nhập!', 'error');
+                          return;
+                      }
+
+                      const receipt = result.data.receipt;
+
+                      // 2. Điền thông tin chung (Header)
+                      document.getElementById('edit-ma-phieu').value = receipt.MaPhieuNhap;
+                      document.getElementById('edit-ngay-nhap').value = receipt.NgayNhapPhieu ? receipt.NgayNhapPhieu.substring(0, 10) : '';
+                      document.getElementById('edit-ma-nv').value = receipt.MaNhanVien || '';
+
+                      // 3. Điền chi tiết sách (Table)
+                      const tbody = document.querySelector('#edit-detail-table tbody');
+                      tbody.innerHTML = ''; // Xóa dữ liệu cũ/dummy
+
+                      if (receipt.ChiTiet && receipt.ChiTiet.length > 0) {
+                          receipt.ChiTiet.forEach(item => {
+                              // Lấy tên sách từ quan hệ lồng nhau: CT_PNS -> Sach -> DauSach -> TenSach
+                              // Cần kiểm tra null an toàn (optional chaining)
+                              const tenSach = item.Sach?.DauSach?.TenSach || "Không xác định";
+
+                              addRowToDetailTable('edit-detail-table', 'edit-total-amount', {
+                                  maSach: item.MaSach,
+                                  tenSach: tenSach,
+                                  soLuong: item.SoLuong,
+                                  donGia: item.DonGiaNhap,
+                                  donGiaBan: item.DonGiaBan
+                              });
+                          });
+                      }
+
+                      // 4. Lưu trạng thái ban đầu để dùng cho nút "Đặt lại"
+                      setTimeout(() => { originalEditState = getEditState(); }, 100);
+
+                      // 5. Hiển thị Modal
+                      editModal.style.display = 'flex';
+                  });
+              });
+
+              // --- LOGIC NÚT "THÊM MỚI" (SMART RESET) - MODAL ADD ---
+              const btnResetAdd = document.getElementById('btn-custom-reset');
+              if (btnResetAdd) {
+                  btnResetAdd.addEventListener('click', () => {
+                      // Kiểm tra xem đã nhập gì chưa (Check mã NV hoặc có sách trong bảng)
+                      const hasData = document.getElementById('add-ma-nv').value.trim() !== '' ||
+                                      document.querySelector('#add-detail-table tbody').rows.length > 0;
+
+                      if (hasData) {
+                          if (confirm('Bạn đang nhập dở phiếu nhập sách. Bạn có muốn LƯU phiếu này không?\n\n- OK: Lưu phiếu.\n- Cancel: Xóa trắng để nhập phiếu khác.')) {
+                              // Chọn OK -> Gọi submit form (Lưu)
+                              isSaveAndReset = true;
+                              document.getElementById('btn-save-add').click();
+                          } else {
+                              // Chọn Cancel -> Reset form, KHÔNG ĐÓNG MODAL
+                              resetAddForm();
+                              showToast('Đã làm mới form!', 'info');
+                          }
+                      } else {
+                          // Chưa nhập gì -> Reset
+                          resetAddForm();
+                          showToast('Form đã sẵn sàng nhập mới.', 'info');
+                      }
+                  });
+              }
+
+              function resetAddForm() {
+                  document.getElementById('add-ma-nv').value = '';
+                  document.getElementById('add-ngay-nhap').valueAsDate = new Date();
+                  document.getElementById('add-input-ma-sach').value = '';
+                  document.getElementById('add-input-ten-sach').value = '';
+                  document.querySelector('#add-detail-table tbody').innerHTML = '';
+                  document.getElementById('add-total-amount').textContent = '0';
+              }
+
+              // --- LOGIC NÚT "ĐẶT LẠI" (SMART RESTORE) - MODAL EDIT ---
+              const btnResetEdit = document.getElementById('btn-reset-edit');
+
+              // Hàm lấy dữ liệu hiện tại để so sánh/lưu trữ
+              function getEditState() {
+                  return {
+                      ngayNhap: document.getElementById('edit-ngay-nhap').value,
+                      maNV: document.getElementById('edit-ma-nv').value,
+                      tableHtml: document.querySelector('#edit-detail-table tbody').innerHTML
+                  };
+              }
+
+              if(btnResetEdit) {
+                  btnResetEdit.addEventListener('click', () => {
+                      if(!originalEditState) return;
+
+                      // 1. Kiểm tra thay đổi
+                      const currentState = getEditState();
+                      const isChanged = JSON.stringify(currentState) !== JSON.stringify(originalEditState);
+
+                      if (!isChanged) {
+                          showToast('Chưa có thay đổi nào để đặt lại!', 'info');
+                          return;
+                      }
+
+                      // 2. Hỏi xác nhận
+                      if (confirm("Dữ liệu đã thay đổi. Bạn có muốn LƯU LẠI không?\n\n- OK: Lưu thay đổi.\n- Cancel: Khôi phục lại dữ liệu gốc.")) {
+                          // Chọn OK -> Lưu
+                          document.getElementById('btn-save-edit').click();
+                      } else {
+                          // Chọn Cancel -> Khôi phục
+                          document.getElementById('edit-ngay-nhap').value = originalEditState.ngayNhap;
+                          document.getElementById('edit-ma-nv').value = originalEditState.maNV;
+                          document.querySelector('#edit-detail-table tbody').innerHTML = originalEditState.tableHtml;
+                          updateTotal('edit-detail-table', 'edit-total-amount');
+                          showToast('Đã khôi phục dữ liệu ban đầu!', 'info');
+                      }
+                  });
+              }
+
+              // Lưu Thêm Mới
+              document.getElementById('btn-save-add').addEventListener('click', async () => {
+                  const ngayNhap = document.getElementById('add-ngay-nhap').value;
+                  const maNV = document.getElementById('add-ma-nv').value.trim();
+
+                  // Lấy chi tiết từ bảng
+                  const rows = document.querySelectorAll('#add-detail-table tbody tr');
+                  if (rows.length === 0) {
+                      showToast('Vui lòng thêm ít nhất một sách!', 'error');
+                      return;
+                  }
+
+                  const chiTiet = Array.from(rows).map(row => {
+                      // Lấy giá trị từ data-raw attribute thay vì textContent
+                      const priceCell = row.querySelector('.price-cell');
+                      const sellPriceCell = row.querySelector('.sell-price-cell');
+
+                      return {
+                          MaSach: row.cells[1].textContent.trim(), // cells[0]=STT, cells[1]=Mã Sách
+                          SoLuong: parseInt(row.cells[3].textContent), // cells[3]=Số Lượng
+                          DonGiaNhap: parseFloat(priceCell.dataset.raw || priceCell.textContent.replace(/[^0-9]/g, '')), // Lấy từ data-raw
+                          DonGiaBan: parseFloat(sellPriceCell.dataset.raw || sellPriceCell.textContent.replace(/[^0-9]/g, '')) // Lấy từ data-raw
+                      };
+                  });
+
+                  console.log('[DEBUG] Sending chiTiet:', chiTiet); // Debug log
+
+                  const result = await apiCall('/api/import/create', 'POST', {
+                      NgayNhapPhieu: ngayNhap,
+                      MaNhanVien: maNV || null,
+                      chiTiet
+                  });
+
+                  if (result.success) {
+
+                      showToast('Thêm phiếu nhập thành công!');
+                      if (isSaveAndReset) {
+                          // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
+                          resetAddForm();
+                          showToast('Đã sẵn sàng nhập phiếu nhập sách tiếp theo.', 'info');
+
+                          // Reset cờ về false sau khi xong việc
+                          isSaveAndReset = false;
+
+                      } else {
+                          addModal.style.display = 'none';
+                          resetAddForm();
+                      }
+
+                      // 1. Tính toán dữ liệu hiển thị
+                      const tbody = document.querySelector('#master-table tbody');
+
+                      // Xóa dòng "Chưa có phiếu nhập" nếu bảng đang trống
+                      // (Kiểm tra xem dòng đầu tiên có phải là dòng thông báo không)
+                      const firstRow = tbody.rows[0];
+                      if (firstRow && firstRow.cells.length === 1) {
+                          firstRow.remove();
+                      }
+
+                      const stt = tbody.rows.length + 1;
+
+                      // Format ngày: YYYY-MM-DD -> DD/MM/YYYY
+                      let dateDisplay = ngayNhap;
+                      if(ngayNhap && ngayNhap.includes('-')){
+                          const parts = ngayNhap.split('-');
+                          dateDisplay = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                      }
+
+                      // Tính tổng tiền từ mảng chiTiet vừa gửi đi
+                      const tongTien = chiTiet.reduce((sum, item) => sum + (item.SoLuong * item.DonGiaNhap), 0);
+
+                      // Lấy Mã Phiếu từ phản hồi API (Giả sử API trả về object chứa MaPhieuNhap)
+                      // Bạn cần đảm bảo Backend trả về { success: true, data: { MaPhieuNhap: 'PN...', ... } }
+                      const newId = result.data.MaPhieuNhap || result.data.receipt?.MaPhieuNhap || '---';
+
+                      // 2. Tạo dòng HTML mới
+                      const newRow = document.createElement('tr');
+                      newRow.innerHTML = `
+                          <td>${stt}</td>
+                          <td>${newId}</td>
+                          <td>${dateDisplay}</td>
+                          <td>${new Intl.NumberFormat('vi-VN').format(tongTien)}</td>
+                          <td>
+                              <button class="btn btn-sm btn-secondary view-detail-btn" data-id="${newId}">
+                                  <i class="fas fa-eye"></i> Chi tiết
+                              </button>
+                              <button class="btn btn-sm btn-print ml-2 print-btn" data-id="${newId}">
+                                  <i class="fas fa-print"></i>
+                              </button>
+                              <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
+                          </td>
+                      `;
+
+                      // 3. Thêm vào cuối bảng
+                      tbody.appendChild(newRow);
+                  } else {
+                      showToast(result.error || 'Có lỗi xảy ra!', 'error');
+                  }
+              });
+
+              // Lưu Cập Nhật
+              document.getElementById('btn-save-edit').addEventListener('click', async () => {
+                  const maPhieu = document.getElementById('edit-ma-phieu').value;
+                  const ngayNhap = document.getElementById('edit-ngay-nhap').value;
+                  const maNV = document.getElementById('edit-ma-nv').value.trim();
+
+                  const rows = document.querySelectorAll('#edit-detail-table tbody tr');
+                  if (rows.length === 0) {
+                      showToast('Vui lòng thêm ít nhất một sách!', 'error');
+                      return;
+                  }
+
+                  const chiTiet = Array.from(rows).map(row => {
+                      // Lấy giá trị từ data-raw attribute thay vì textContent
+                      const priceCell = row.querySelector('.price-cell');
+                      const sellPriceCell = row.querySelector('.sell-price-cell');
+
+                      return {
+                          MaSach: row.cells[1].textContent.trim(), // cells[0]=STT, cells[1]=Mã Sách
+                          SoLuong: parseInt(row.cells[3].textContent), // cells[3]=Số Lượng
+                          DonGiaNhap: parseFloat(priceCell.dataset.raw || priceCell.textContent.replace(/[^0-9]/g, '')), // Lấy từ data-raw
+                          DonGiaBan: parseFloat(sellPriceCell.dataset.raw || sellPriceCell.textContent.replace(/[^0-9]/g, '')) // Lấy từ data-raw
+                      };
+                  });
+
+                  console.log('[DEBUG] Sending chiTiet:', chiTiet); // Debug log
+
+                  const result = await apiCall(`/api/import/update/${maPhieu}`, 'PATCH', {
+                      NgayNhapPhieu: ngayNhap,
+                      MaNhanVien: maNV || null,
+                      chiTiet
+                  });
+
+                  if (result.success) {
+                      editModal.style.display = 'none';
+                      showToast('Cập nhật phiếu nhập thành công!');
+                      setTimeout(() => location.reload(), 1000);
+                  } else {
+                      showToast(result.error || 'Có lỗi xảy ra!', 'error');
+                  }
+              });
+
+              document.querySelectorAll('.close-modal').forEach(btn => {
+                  btn.addEventListener('click', () => {
+                      addModal.style.display = 'none';
+                      editModal.style.display = 'none';
+                  });
+              });
+
+              // --- XỬ LÝ IN PHIẾU NHẬP ---
+
+              // Bắt sự kiện click cho tất cả nút in
+              document.addEventListener('click', function(e) {
+                  // Kiểm tra nếu click vào nút in hoặc icon bên trong nút in
+                  const btn = e.target.closest('.print-btn');
+                  if (btn) {
+                      const id = btn.dataset.id;
+                      printReceipt(id);
+                  }
+              });
+
+              async function printReceipt(maPhieu) {
+                  // 1. Lấy dữ liệu phiếu từ Server
+                  const result = await apiCall(`/api/import/${maPhieu}`);
+
+                  if (!result.success) {
+                      showToast('Không thể lấy dữ liệu để in!', 'error');
+                      return;
+                  }
+
+                  const data = result.data.receipt;
+                  const date = new Date(data.NgayNhapPhieu);
+                  const dateStr = `Ngày ${date.getDate()} tháng ${date.getMonth() + 1} năm ${date.getFullYear()}`;
+
+                  // 2. Tạo nội dung HTML cho hóa đơn (Template in)
+                  // Bạn có thể sửa CSS trong thẻ <style> dưới đây để đẹp hơn
+                  let itemsHtml = '';
+                  let stt = 1;
+
+                  if (data.ChiTiet) {
+                      data.ChiTiet.forEach(item => {
+                          const tenSach = item.Sach?.DauSach?.TenSach || "Sách đã xóa";
+                          itemsHtml += `
+                              <tr>
+                                  <td style="text-align: center;">${stt++}</td>
+                                  <td>${tenSach}</td>
+                                  <td style="text-align: center;">${item.SoLuong}</td>
+                                  <td style="text-align: right;">${item.DonGiaNhap}</td>
+                                  <td style="text-align: right;">${item.ThanhTien}</td>
+                              </tr>
+                          `;
+                      });
+                  }
+
+                  const printContent = `
+                  <html>
+                  <head>
+                      <title>In Phiếu Nhập - ${maPhieu}</title>
+                      <style>
+                          body { font-family: 'Times New Roman', Times, serif; font-size: 14px; margin: 20px; }
+                          .header { text-align: center; margin-bottom: 20px; }
+                          .store-name { font-size: 18px; font-weight: bold; text-transform: uppercase; }
+                          .title { font-size: 22px; font-weight: bold; margin-top: 10px; }
+                          .info { margin-bottom: 20px; }
+                          .info p { margin: 5px 0; }
+                          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                          th, td { border: 1px solid #333; padding: 8px; }
+                          th { background-color: #f0f0f0; }
+                          .total-section { text-align: right; font-weight: bold; font-size: 16px; margin-bottom: 30px; }
+                          .signature-section { display: flex; justify-content: space-between; text-align: center; margin-top: 50px; }
+                          .signature-box { width: 30%; }
+                      </style>
+                  </head>
+                  <body>
+                      <div class="header">
+                          <div class="store-name">NHÀ SÁCH CỦA BẠN</div>
+                          <div>Địa chỉ: 123 Đường ABC, TP.HCM</div>
+                          <div class="title">PHIẾU NHẬP SÁCH</div>
+                          <div>(${dateStr})</div>
+                      </div>
+
+                      <div class="info">
+                          <p><strong>Mã phiếu:</strong> ${data.MaPhieuNhap}</p>
+                          <p><strong>Nhân viên nhập:</strong> ${data.MaNhanVien || '---'}</p>
+                      </div>
+
+                      <table>
+                          <thead>
+                              <tr>
+                                  <th style="width: 50px;">STT</th>
+                                  <th>Tên Sách</th>
+                                  <th style="width: 80px;">SL</th>
+                                  <th style="width: 120px;">Đơn Giá</th>
+                                  <th style="width: 150px;">Thành Tiền</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              ${itemsHtml}
+                          </tbody>
+                      </table>
+
+                      <div class="total-section">
+                          Tổng cộng: ${data.TongTien} VNĐ
+                      </div>
+
+                      <div class="signature-section">
+                          <div class="signature-box">
+                              <strong>Người lập phiếu</strong><br>
+                              (Ký, họ tên)<br><br><br><br>
+                          </div>
+                          <div class="signature-box">
+                              <strong>Thủ kho</strong><br>
+                              (Ký, họ tên)<br><br><br><br>
+                          </div>
+                      </div>
+                  </body>
+                  </html>
+                  `;
+
+                  // 3. Mở cửa sổ in
+                  const printWindow = window.open('', '', 'height=600,width=800');
+                  printWindow.document.write(printContent);
+                  printWindow.document.close(); // Quan trọng: Đóng luồng ghi để trình duyệt render
+
+                  // Đợi một chút để load nội dung rồi mới gọi lệnh in
+                  setTimeout(() => {
+                      printWindow.focus();
+                      printWindow.print();
+                      // printWindow.close(); // Có thể bỏ comment nếu muốn tự đóng sau khi in
+                  }, 500);
+              }
+
+              // Xóa phiếu ngoài bảng
+              const masterTable = document.getElementById('master-table');
+              if (masterTable) {
+                  masterTable.addEventListener('click', async function(e) {
+                      if (e.target.classList.contains('delete-icon') || e.target.closest('.delete-icon')) {
+                          const row = e.target.closest('tr');
+                          const maPhieu = row.cells[1].textContent.trim();
+
+                          if(confirm(`Xóa phiếu nhập ${maPhieu}?`)) {
+                              const result = await apiCall(`/api/import/delete/${maPhieu}`, 'DELETE');
+                              if (result.success) {
+                                  row.remove();
+                                  showToast('Xóa phiếu nhập thành công!');
+                                  const tableBody = document.getElementById('master-table').getElementsByTagName('tbody')[0];
+                                  if (tableBody.rows.length === 0) {
+                                      // Nếu <tbody> không còn hàng nào
+                                      const newRow = tableBody.insertRow(); // Thêm 1 hàng mới
+                                      // Thêm ô "Không có nhân viên nào"
+                                      newRow.innerHTML = `<td colspan="5" style="text-align: center;">Chưa có phiếu nhập sách nào.</td>`;
+                                  }
+                              } else {
+                                  showToast(result.error || 'Có lỗi xảy ra!', 'error');
+                              }
+                          }
+                      }
+                  });
+              }
+
+              // --- LOGOUT ---
+      const logoutBtn = document.getElementById('logout-button');
+      if(logoutBtn) {
+          logoutBtn.addEventListener('click', async (e) => {
+              e.preventDefault();
+              if(confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                  window.location.href = '/logout';
+              }
+          });
+      }
+
+          });
     </script>
-</body>
+  </body>
 </html>

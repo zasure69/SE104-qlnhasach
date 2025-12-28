@@ -1208,26 +1208,282 @@ const deleteTacGia = async (req, res) => {
   }
 };
 
+// =====================================================
+// ADMIN ONLY: LẤY DANH SÁCH ĐÃ XÓA
+// =====================================================
+const getDeletedDauSach = async (req, res) => {
+  try {
+    const dauSachs = await db.DauSach.findAll({ 
+      where: { isDeleted: true },
+      raw: true 
+    });
+    return res.status(200).json(dauSachs);
+  } catch (err) {
+    console.error("[bookController] getDeletedDauSach error", err);
+    return res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
+const getDeletedSach = async (req, res) => {
+  try {
+    const sachList = await db.Sach.findAll({ 
+      where: { isDeleted: true },
+      raw: true 
+    });
+    return res.status(200).json(sachList);
+  } catch (err) {
+    console.error("[bookController] getDeletedSach error", err);
+    return res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
+const getDeletedTheLoai = async (req, res) => {
+  try {
+    const theLoais = await db.TheLoai.findAll({ 
+      where: { isDeleted: true },
+      raw: true 
+    });
+    return res.status(200).json(theLoais);
+  } catch (err) {
+    console.error("[bookController] getDeletedTheLoai error", err);
+    return res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
+const getDeletedTacGia = async (req, res) => {
+  try {
+    const tacGias = await db.TacGia.findAll({ 
+      where: { isDeleted: true },
+      raw: true 
+    });
+    return res.status(200).json(tacGias);
+  } catch (err) {
+    console.error("[bookController] getDeletedTacGia error", err);
+    return res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
+// =====================================================
+// ADMIN ONLY: KHÔI PHỤC DỮ LIỆU ĐÃ XÓA
+// =====================================================
+const restoreDauSach = async (req, res) => {
+  try {
+    const maDS = req.params.maDS;
+    const dauSach = await db.DauSach.findByPk(maDS);
+    if (!dauSach) {
+      return res.status(404).json({ error: "Không tìm thấy Đầu sách" });
+    }
+    if (!dauSach.isDeleted) {
+      return res.status(400).json({ error: "Đầu sách này chưa bị xóa." });
+    }
+    dauSach.isDeleted = false;
+    await dauSach.save();
+    return res.status(200).json({ message: "Khôi phục đầu sách thành công!" });
+  } catch (err) {
+    console.error("[bookController] restoreDauSach error", err);
+    return res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
+const restoreSach = async (req, res) => {
+  try {
+    const maSach = req.params.maSach;
+    const sach = await db.Sach.findByPk(maSach);
+    if (!sach) {
+      return res.status(404).json({ error: "Không tìm thấy Sách" });
+    }
+    if (!sach.isDeleted) {
+      return res.status(400).json({ error: "Sách này chưa bị xóa." });
+    }
+    sach.isDeleted = false;
+    await sach.save();
+    return res.status(200).json({ message: "Khôi phục sách thành công!" });
+  } catch (err) {
+    console.error("[bookController] restoreSach error", err);
+    return res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
+const restoreTheLoai = async (req, res) => {
+  try {
+    const maTheLoai = req.params.maTheLoai;
+    const theLoai = await db.TheLoai.findByPk(maTheLoai);
+    if (!theLoai) {
+      return res.status(404).json({ error: "Không tìm thấy thể loại" });
+    }
+    if (!theLoai.isDeleted) {
+      return res.status(400).json({ error: "Thể loại này chưa bị xóa." });
+    }
+    theLoai.isDeleted = false;
+    await theLoai.save();
+    return res.status(200).json({ message: "Khôi phục thể loại thành công!" });
+  } catch (err) {
+    console.error("[bookController] restoreTheLoai error", err);
+    return res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
+const restoreTacGia = async (req, res) => {
+  try {
+    const maTacGia = req.params.maTacGia;
+    const tacGia = await db.TacGia.findByPk(maTacGia);
+    if (!tacGia) {
+      return res.status(404).json({ error: "Không tìm thấy tác giả" });
+    }
+    if (!tacGia.isDeleted) {
+      return res.status(400).json({ error: "Tác giả này chưa bị xóa." });
+    }
+    tacGia.isDeleted = false;
+    await tacGia.save();
+    return res.status(200).json({ message: "Khôi phục tác giả thành công!" });
+  } catch (err) {
+    console.error("[bookController] restoreTacGia error", err);
+    return res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
+// =====================================================
+// ADMIN ONLY: XÓA VĨNH VIỄN (HARD DELETE)
+// =====================================================
+const hardDeleteDauSach = async (req, res) => {
+  try {
+    const maDS = req.params.maDS;
+    const dauSach = await db.DauSach.findByPk(maDS);
+    if (!dauSach) {
+      return res.status(404).json({ error: "Không tìm thấy Đầu sách" });
+    }
+    if (!dauSach.isDeleted) {
+      return res.status(400).json({ 
+        error: "Chỉ có thể xóa vĩnh viễn đầu sách đã được xóa mềm trước đó." 
+      });
+    }
+    // Xóa các liên kết tác giả
+    await db.CT_TacGia.destroy({ where: { MaDauSach: maDS } });
+    await dauSach.destroy();
+    return res.status(200).json({ message: "Đã xóa vĩnh viễn đầu sách khỏi hệ thống!" });
+  } catch (err) {
+    if (err.name === "SequelizeForeignKeyConstraintError") {
+      return res.status(400).json({
+        error: "Xóa thất bại! Đầu sách này có dữ liệu liên quan trong hệ thống.",
+      });
+    }
+    console.error("[bookController] hardDeleteDauSach error", err);
+    return res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
+const hardDeleteSach = async (req, res) => {
+  try {
+    const maSach = req.params.maSach;
+    const sach = await db.Sach.findByPk(maSach);
+    if (!sach) {
+      return res.status(404).json({ error: "Không tìm thấy Sách" });
+    }
+    if (!sach.isDeleted) {
+      return res.status(400).json({ 
+        error: "Chỉ có thể xóa vĩnh viễn sách đã được xóa mềm trước đó." 
+      });
+    }
+    // Xóa các bản ghi liên quan
+    await db.CT_PNS.destroy({ where: { MaSach: maSach } });
+    await db.CT_HD.destroy({ where: { MaSach: maSach } });
+    await sach.destroy();
+    return res.status(200).json({ message: "Đã xóa vĩnh viễn sách khỏi hệ thống!" });
+  } catch (err) {
+    if (err.name === "SequelizeForeignKeyConstraintError") {
+      return res.status(400).json({
+        error: "Xóa thất bại! Sách này có dữ liệu liên quan trong hệ thống.",
+      });
+    }
+    console.error("[bookController] hardDeleteSach error", err);
+    return res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
+const hardDeleteTheLoai = async (req, res) => {
+  try {
+    const maTheLoai = req.params.maTheLoai;
+    const theLoai = await db.TheLoai.findByPk(maTheLoai);
+    if (!theLoai) {
+      return res.status(404).json({ error: "Không tìm thấy thể loại" });
+    }
+    if (!theLoai.isDeleted) {
+      return res.status(400).json({ 
+        error: "Chỉ có thể xóa vĩnh viễn thể loại đã được xóa mềm trước đó." 
+      });
+    }
+    await theLoai.destroy();
+    return res.status(200).json({ message: "Đã xóa vĩnh viễn thể loại khỏi hệ thống!" });
+  } catch (err) {
+    if (err.name === "SequelizeForeignKeyConstraintError") {
+      return res.status(400).json({
+        error: "Xóa thất bại! Thể loại này có dữ liệu liên quan trong hệ thống.",
+      });
+    }
+    console.error("[bookController] hardDeleteTheLoai error", err);
+    return res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
+const hardDeleteTacGia = async (req, res) => {
+  try {
+    const maTacGia = req.params.maTacGia;
+    const tacGia = await db.TacGia.findByPk(maTacGia);
+    if (!tacGia) {
+      return res.status(404).json({ error: "Không tìm thấy tác giả" });
+    }
+    if (!tacGia.isDeleted) {
+      return res.status(400).json({ 
+        error: "Chỉ có thể xóa vĩnh viễn tác giả đã được xóa mềm trước đó." 
+      });
+    }
+    // Xóa liên kết trong CT_TacGia
+    await db.CT_TacGia.destroy({ where: { MaTacGia: maTacGia } });
+    await tacGia.destroy();
+    return res.status(200).json({ message: "Đã xóa vĩnh viễn tác giả khỏi hệ thống!" });
+  } catch (err) {
+    if (err.name === "SequelizeForeignKeyConstraintError") {
+      return res.status(400).json({
+        error: "Xóa thất bại! Tác giả này có dữ liệu liên quan trong hệ thống.",
+      });
+    }
+    console.error("[bookController] hardDeleteTacGia error", err);
+    return res.status(500).json({ error: "Lỗi server nội bộ" });
+  }
+};
+
 module.exports = {
   getBooksPage,
   // DauSach
   getAllDauSach,
+  getDeletedDauSach,
   getDauSachById,
   createDauSach,
   updateDauSach,
   deleteDauSach,
+  restoreDauSach,
+  hardDeleteDauSach,
   // Sach
   getAllSach,
+  getDeletedSach,
   getSachById,
   createSach,
   updateSach,
   deleteSach,
+  restoreSach,
+  hardDeleteSach,
   // TheLoai
+  getDeletedTheLoai,
   createTheLoai,
   updateTheLoai,
   deleteTheLoai,
+  restoreTheLoai,
+  hardDeleteTheLoai,
   // TacGia
+  getDeletedTacGia,
   createTacGia,
   updateTacGia,
   deleteTacGia,
+  restoreTacGia,
+  hardDeleteTacGia,
 };
