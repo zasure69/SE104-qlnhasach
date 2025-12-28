@@ -1,893 +1,1279 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tra cứu</title> 
-    
-    <!-- Link Font Awesome để có icon --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tra cứu</title>
+
+    <!-- Link Font Awesome để có icon -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
     <style>
-        /* * --- PHẦN CSS --- 
+      /* * --- PHẦN CSS --- 
          */
 
-        :root {
-            --primary-color: #2c3e50; 
-            --secondary-color: #3498db; 
-            --green-accent: #1EE4AC; 
-            --green-accent-hover: #1ac096;
-            --red-accent: #e74c3c; /* THÊM: Màu cho lỗi */
-            --light-bg: #f0f4f8;
-            --white-bg: #ffffff;
-            --text-dark: #222;
-            --text-light: #555;
-            --text-white: #ecf0f1;
-            --border-color: #e0e0e0;
-            --tab-inactive-bg: #e9ecef;
-            --tab-inactive-text: #6c757d;
-        }
+      :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --green-accent: #1ee4ac;
+        --green-accent-hover: #1ac096;
+        --red-accent: #e74c3c; /* THÊM: Màu cho lỗi */
+        --light-bg: #f0f4f8;
+        --white-bg: #ffffff;
+        --text-dark: #222;
+        --text-light: #555;
+        --text-white: #ecf0f1;
+        --border-color: #e0e0e0;
+        --tab-inactive-bg: #e9ecef;
+        --tab-inactive-text: #6c757d;
+      }
 
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+      }
 
-        body { background-color: var(--light-bg); color: var(--text-dark); }
+      body {
+        background-color: var(--light-bg);
+        color: var(--text-dark);
+      }
 
-        /* --- Layout chính --- */
-        .dashboard-container { 
-            display: grid; 
-            grid-template-columns: 250px 1fr; 
-            min-height: 100vh; 
-            transition: grid-template-columns 0.3s ease-in-out; 
-        }
+      /* --- Layout chính --- */
+      .dashboard-container {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        min-height: 100vh;
+        transition: grid-template-columns 0.3s ease-in-out;
+      }
 
-        /* --- Sidebar --- */
-        .sidebar { 
-            background-color: var(--primary-color); 
-            color: var(--text-white); 
-            padding: 1.5rem; 
-            display: flex; 
-            flex-direction: column; 
-            transition: all 0.3s ease-in-out; 
-            overflow-x: hidden; 
-        }
-        .sidebar-header { 
-            text-align: center; 
-            margin-bottom: 2.5rem; 
-        }
-        .sidebar-header i { 
-            font-size: 3rem; 
-            margin-bottom: 0.5rem; 
-        }
-        .sidebar-header h2 { 
-            font-size: 1rem; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-            font-weight: 600; 
-        }
-        .sidebar-nav ul { list-style: none; }
-        .sidebar-nav li { margin-bottom: 0.5rem; }
-        .sidebar-nav a { 
-            display: flex; 
-            align-items: center; 
-            gap: 0.75rem; padding: 0.85rem 1rem; 
-            border-radius: 8px; 
-            text-decoration: none; 
-            color: var(--text-white); 
-            font-weight: 500; 
-            transition: background-color 0.2s ease; 
-        }
-        .sidebar-nav a i { width: 20px; text-align: center; }
-        .sidebar-nav a:hover { background-color: rgba(255, 255, 255, 0.1); }
-        .sidebar-nav a.active { background-color: var(--secondary-color); color: white; }
+      /* --- Sidebar --- */
+      .sidebar {
+        background-color: var(--primary-color);
+        color: var(--text-white);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s ease-in-out;
+        overflow-x: hidden;
+      }
+      .sidebar-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+      }
+      .sidebar-header i {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+      }
+      .sidebar-header h2 {
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+      }
+      .sidebar-nav ul {
+        list-style: none;
+      }
+      .sidebar-nav li {
+        margin-bottom: 0.5rem;
+      }
+      .sidebar-nav a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.85rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--text-white);
+        font-weight: 500;
+        transition: background-color 0.2s ease;
+      }
+      .sidebar-nav a i {
+        width: 20px;
+        text-align: center;
+      }
+      .sidebar-nav a:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+      .sidebar-nav a.active {
+        background-color: var(--secondary-color);
+        color: white;
+      }
 
-        /* --- Nội dung chính --- */
-        .main-content { background-color: var(--light-bg); padding: 1.5rem; overflow-y: auto; }
+      /* --- Nội dung chính --- */
+      .main-content {
+        background-color: var(--light-bg);
+        padding: 1.5rem;
+        overflow-y: auto;
+      }
 
-        /* --- Thanh Header --- */
-        .top-bar { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 1rem 1.5rem; 
-            background-color: var(--white-bg); 
-            border-radius: 12px; 
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
-            margin-bottom: 1.5rem; 
+      /* --- Thanh Header --- */
+      .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background-color: var(--white-bg);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+      }
+      .top-bar-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .top-bar-left h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+      }
+      .user-menu {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-light);
+        cursor: pointer;
+        position: relative;
+      }
+
+      .user-menu .user-trigger {
+        cursor: pointer;
+        display: inline-block; /* Giúp dễ click hơn */
+      }
+
+      .user-menu .dropdown-menu {
+        display: none; /* Ẩn ban đầu */
+        position: absolute;
+        top: 100%; /* Hiển thị ngay bên dưới */
+        right: 0;
+        background-color: var(--white-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        min-width: 150px; /* Độ rộng tối thiểu */
+        z-index: 1000;
+        overflow: hidden; /* Để bo góc */
+      }
+
+      /* Hiển thị menu khi di chuột vào .user-menu */
+      .user-menu:hover .dropdown-menu {
+        display: block;
+      }
+
+      .user-menu .dropdown-menu a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        text-decoration: none;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+        transition: background-color 0.2s ease;
+      }
+
+      .user-menu .dropdown-menu a:hover {
+        background-color: var(--light-bg);
+        color: var(--red-accent, #e74c3c); /* Dùng màu đỏ cho logout */
+      }
+
+      .user-menu .dropdown-menu a i {
+        width: 16px;
+        text-align: center;
+        color: var(--text-light);
+        transition: color 0.2s ease;
+      }
+
+      .user-menu .dropdown-menu a:hover i {
+        color: var(--red-accent, #e74c3c);
+      }
+      .menu-toggle {
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        color: var(--text-dark);
+        cursor: pointer;
+        padding: 0.25rem;
+        line-height: 1;
+      }
+
+      /* --- Vùng nội dung (Tabs) --- */
+      .content-wrapper {
+        padding: 0;
+        background-color: var(--white-bg);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+      }
+
+      /* --- Tab Navigation --- */
+      .tab-nav {
+        display: flex;
+        background-color: var(--light-bg);
+        border-bottom: 1px solid var(--border-color);
+      }
+      .tab-button {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        background-color: transparent;
+        color: var(--tab-inactive-text);
+        border-bottom: 3px solid transparent;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        transition: color 0.2s ease, background-color 0.2s ease,
+          border-bottom-color 0.2s ease;
+      }
+      .tab-button.active {
+        color: var(--secondary-color);
+        border-bottom-color: var(--secondary-color);
+        background-color: var(--white-bg);
+      }
+      .tab-button:hover:not(.active) {
+        color: var(--text-dark);
+      }
+
+      /* --- Tab Content Panes --- */
+      .tab-content {
+        padding: 1.5rem;
+      }
+      .tab-pane {
+        display: none;
+        animation: fadeIn 0.3s ease;
+      }
+      .tab-pane.active {
+        display: block;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
         }
-        .top-bar-left { display: flex; align-items: center; gap: 1rem; }
-        .top-bar-left h1 { font-size: 1.75rem; font-weight: 700; margin: 0; }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* --- Form Tra cứu --- */
+      .search-form {
+        display: grid;
+        gap: 1.25rem;
+        align-items: end;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+      #customer-search-form {
+        display: grid;
+        /* Chia làm 4 cột: 3 cột cho input, 1 cột cho nút */
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.25rem;
+        align-items: end;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      #book-search-form {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.25rem;
+        align-items: end;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .form-group label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-light);
+      }
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 0.9rem;
+      }
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+      }
+      .btn {
+        padding: 0.75rem 1.25rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .btn-primary {
+        background-color: var(--green-accent);
+        color: white;
+        width: 100%;
+      }
+      .btn-primary:hover {
+        background-color: var(--green-accent-hover);
+      }
+
+      /* --- Bảng Kết quả --- */
+      .table-responsive {
+        overflow-x: auto;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px;
+      }
+      .data-table th,
+      .data-table td {
+        padding: 0.85rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+        vertical-align: middle;
+      }
+      .data-table thead th {
+        background-color: #f9f9f9;
+        font-weight: 600;
+        color: var(--text-light);
+      }
+      .data-table tbody tr:hover {
+        background-color: #f5f5f5;
+      }
+      /* SỬA: Xóa 2 dòng tbody tr:last-child và .empty-table-rows */
+
+      /* --- CSS CHO INPUT CÓ TOÁN TỬ (MỚI) --- */
+      .input-group {
+        display: flex;
+        align-items: stretch; /* Kéo giãn chiều cao cho bằng nhau */
+      }
+
+      .input-group select.operator-select {
+        width: 7rem; /* Độ rộng cố định cho ô chọn dấu */
+        padding: 0 0.5rem;
+        background-color: #f8f9fa;
+        border: 1px solid var(--border-color);
+        border-right: none; /* Bỏ viền phải để nối liền với input */
+        border-top-left-radius: 6px;
+        border-bottom-left-radius: 6px;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        font-weight: bold;
+        color: var(--primary-color);
+        text-align: center;
+        cursor: pointer;
+      }
+
+      .input-group input {
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+        flex-grow: 1;
+
+        /* --- THÊM MỚI --- */
+        min-width: 4rem; /* Đặt độ rộng tối thiểu (khoảng 64px) để số luôn hiện rõ */
+        padding-left: 0.75rem; /* Tăng khoảng cách lề trái cho thoáng */
+        padding-right: 0.5rem;
+      }
+
+      .input-group select:focus,
+      .input-group input:focus {
+        z-index: 2; /* Đưa phần tử đang focus lên trên để thấy rõ viền */
+        position: relative;
+      }
+
+      /* --- CSS CHO RANGE INPUT (MỚI) --- */
+      .input-group .range-separator {
+        display: none; /* Mặc định ẩn */
+        align-items: center;
+        padding: 0 0.5rem;
+        background-color: #f8f9fa;
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-light);
+        font-weight: bold;
+      }
+
+      .input-group input.input-2 {
+        display: none; /* Mặc định ẩn */
+        border-left: none;
+      }
+
+      /* Khi hiển thị dạng khoảng (Class 'mode-range' sẽ được thêm bằng JS) */
+      .input-group.mode-range .range-separator {
+        display: flex;
+      }
+      .input-group.mode-range input.input-2 {
+        display: block;
+      }
+
+      /* Chỉnh lại bo góc khi hiện 2 ô input */
+      .input-group.mode-range input:first-of-type {
+        border-right: none;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+
+      /* --- CSS ĐƯA TỔNG NỢ XUỐNG HÀNG --- */
+      #fg-sl-ton,
+      #fg-tong-no {
+        grid-column: 1 / 4; /* Bắt đầu cột 1, kết thúc ở vạch 4 (tức là chiếm cột 1,2,3) */
+        grid-row: 2; /* Ép xuống hàng thứ 2 */
+      }
+
+      /* Xóa max-width cũ đi để nó tự động giãn bằng 3 cột trên */
+      #fg-sl-ton .input-group,
+      #fg-tong-no .input-group {
+        max-width: none;
+      }
+
+      /* 2. Nút tìm kiếm: Nằm ở hàng 1, cột cuối cùng (cột 4) */
+      #book-search-form .search-button-group,
+      #customer-search-form .search-button-group {
+        grid-column: 4 / 5; /* Nằm ở cột 4 */
+        grid-row: 1; /* Ép lên hàng 1 */
+      }
+
+      /* Chỉnh lại nút cho đẹp (chiều cao bằng ô input) */
+      #book-search-form .search-button-group .btn,
+      #customer-search-form .search-button-group .btn {
+        width: 100%;
+        padding: 0.75rem;
+      }
+
+      /* --- CSS NHÃN BẢNG KẾT QUẢ --- */
+      .table-caption {
+        font-size: 1.1rem; /* Cỡ chữ vừa phải */
+        font-weight: 700; /* In đậm */
+        color: var(--primary-color);
+        margin-bottom: 0.5rem; /* Cách bảng một chút xíu thôi (khoảng 8px) */
+        text-transform: uppercase; /* Chữ in hoa */
+        letter-spacing: 0.05rem; /* Dãn chữ nhẹ cho thoáng */
+      }
+
+      /* --- THÊM: CSS CHO LOADER VÀ TOAST --- */
+      .loader-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.7);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+      }
+      .loader-overlay.show {
+        display: flex;
+      }
+      .loader {
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid var(--secondary-color);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .toast-container {
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        z-index: 2001;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .toast {
+        background-color: var(--white-bg);
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+        border-left: 5px solid;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .toast.success {
+        border-left-color: var(--green-accent);
+      }
+      .toast.success .toast-icon {
+        color: var(--green-accent);
+      }
+      .toast.error {
+        border-left-color: var(--red-accent);
+      }
+      .toast.error .toast-icon {
+        color: var(--red-accent);
+      }
+      .toast-message {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-dark);
+      }
+      /* --- HẾT CSS MỚI --- */
+
+      /* --- Sidebar Collapsed State --- */
+      .dashboard-container.sidebar-collapsed {
+        grid-template-columns: 70px 1fr;
+      }
+
+      .dashboard-container.sidebar-collapsed .sidebar {
+        width: 70px;
+        padding: 1rem 0.5rem;
+      }
+
+      .dashboard-container.sidebar-collapsed .sidebar-header h2,
+      .dashboard-container.sidebar-collapsed .sidebar-nav a span {
+        display: none;
+      }
+
+      .dashboard-container.sidebar-collapsed .sidebar-header {
+        margin-bottom: 1.5rem;
+      }
+
+      .dashboard-container.sidebar-collapsed .sidebar-header i {
+        font-size: 2rem;
+      }
+
+      .dashboard-container.sidebar-collapsed .sidebar-nav a {
+        justify-content: center;
+        padding: 0.85rem 0.5rem;
+      }
+
+      .dashboard-container.sidebar-collapsed .sidebar-nav a i {
+        width: auto;
+        font-size: 1.2rem;
+      }
+
+      /* --- Responsive Design --- */
+      @media (min-width: 992.01px) {
+        /* Collapsed state already defined above */
+      }
+      @media (max-width: 992px) {
+        .dashboard-container {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          position: fixed;
+          left: -260px;
+          top: 0;
+          height: 100vh;
+          width: 250px;
+          z-index: 1050;
+          box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar.active {
+          left: 0;
+        }
+        .main-content {
+          padding: 1rem;
+        }
+        .top-bar {
+          padding: 1rem;
+        }
+        .menu-toggle {
+          display: block;
+        }
+        #customer-search-form,
+        #book-search-form {
+          grid-template-columns: 1fr 1fr;
+        }
+        .search-button-group {
+          grid-column: 1 / -1;
+        }
+      }
+      @media (max-width: 768px) {
+        #customer-search-form,
+        #book-search-form {
+          grid-template-columns: 1fr;
+        }
+        .top-bar {
+          gap: 0.5rem;
+        }
+        .top-bar-left h1 {
+          font-size: 1.25rem;
+        }
         .user-menu {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-light);
-            cursor: pointer;
-            position: relative;
+          font-size: 0.8rem;
         }
-
-        .user-menu .user-trigger {
-            cursor: pointer;
-            display: inline-block; /* Giúp dễ click hơn */
+        .content-wrapper {
+          border-radius: 8px;
         }
-
-        .user-menu .dropdown-menu {
-            display: none; /* Ẩn ban đầu */
-            position: absolute;
-            top: 100%; /* Hiển thị ngay bên dưới */
-            right: 0;
-            background-color: var(--white-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            min-width: 150px; /* Độ rộng tối thiểu */
-            z-index: 1000;
-            overflow: hidden; /* Để bo góc */
+        .tab-nav {
+          overflow-x: auto;
         }
-
-        /* Hiển thị menu khi di chuột vào .user-menu */
-        .user-menu:hover .dropdown-menu {
-            display: block;
+        .tab-button {
+          padding: 0.8rem 1rem;
+          font-size: 0.9rem;
         }
-
-        .user-menu .dropdown-menu a {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            text-decoration: none;
-            color: var(--text-dark);
-            font-size: 0.9rem;
-            transition: background-color 0.2s ease;
+        .tab-content {
+          padding: 1rem;
         }
-
-        .user-menu .dropdown-menu a:hover {
-            background-color: var(--light-bg);
-            color: var(--red-accent, #e74c3c); /* Dùng màu đỏ cho logout */
-        }
-
-        .user-menu .dropdown-menu a i {
-            width: 16px;
-            text-align: center;
-            color: var(--text-light);
-            transition: color 0.2s ease;
-        }
-
-        .user-menu .dropdown-menu a:hover i {
-            color: var(--red-accent, #e74c3c);
-        }
-        .menu-toggle { 
-            font-size: 1.5rem; 
-            background: none; 
-            border: none; 
-            color: var(--text-dark); 
-            cursor: pointer; 
-            padding: 0.25rem; 
-            line-height: 1; 
-        }
-
-        /* --- Vùng nội dung (Tabs) --- */
-        .content-wrapper { 
-            padding: 0; 
-            background-color: var(--white-bg); 
-            border-radius: 12px; 
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
-            overflow: hidden; 
-        }
-        
-        /* --- Tab Navigation --- */
-        .tab-nav { display: flex; background-color: var(--light-bg); border-bottom: 1px solid var(--border-color); }
-        .tab-button { 
-            padding: 1rem 1.5rem; 
-            font-size: 1rem; 
-            font-weight: 600; 
-            cursor: pointer; 
-            border: none; 
-            background-color: transparent; 
-            color: var(--tab-inactive-text); 
-            border-bottom: 3px solid transparent; 
-            border-top-left-radius: 8px; 
-            border-top-right-radius: 8px;
-            transition: color 0.2s ease, background-color 0.2s ease, border-bottom-color 0.2s ease; 
-        }
-        .tab-button.active { 
-            color: var(--secondary-color); 
-            border-bottom-color: var(--secondary-color); 
-            background-color: var(--white-bg); 
-        }
-        .tab-button:hover:not(.active) { color: var(--text-dark); }
-
-        /* --- Tab Content Panes --- */
-        .tab-content { padding: 1.5rem; }
-        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
-        .tab-pane.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* --- Form Tra cứu --- */
-        .search-form { 
-            display: grid; 
-            gap: 1.25rem; 
-            align-items: end; 
-            margin-bottom: 2rem; 
-            padding-bottom: 1.5rem; 
-            border-bottom: 1px solid var(--border-color); }
-        #customer-search-form { display: grid;
-            /* Chia làm 4 cột: 3 cột cho input, 1 cột cho nút */
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 1.25rem; 
-            align-items: end; 
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        #book-search-form { grid-template-columns: repeat(4, 1fr); 
-            gap: 1.25rem; 
-            align-items: end; 
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 1.5rem;
-            margin-bottom: 1rem; 
-        }
-        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
-        .form-group label { font-weight: 600; font-size: 0.9rem; color: var(--text-light); }
-        .form-group input, .form-group select { 
-            width: 100%; 
-            padding: 0.75rem; 
-            border: 1px solid var(--border-color); 
-            border-radius: 6px; 
-            font-size: 0.9rem; 
-        }
-        .form-group input:focus, .form-group select:focus { 
-            outline: none; 
-            border-color: var(--secondary-color); 
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2); 
-        }
-        .btn { 
-            padding: 0.75rem 1.25rem; 
-            border: none; 
-            border-radius: 8px; 
-            font-size: 0.9rem; 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            cursor: pointer; 
-            transition: all 0.2s ease; 
-        }
-        .btn-primary { background-color: var(--green-accent); color: white; width: 100%; }
-        .btn-primary:hover { background-color: var(--green-accent-hover); }
-
-        /* --- Bảng Kết quả --- */
-        .table-responsive { overflow-x: auto; }
-        .data-table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        .data-table th, .data-table td { 
-            padding: 0.85rem 1rem; 
-            text-align: left; 
-            border-bottom: 1px solid var(--border-color); 
-            font-size: 0.9rem; 
-            vertical-align: middle; 
-        }
-        .data-table thead th { background-color: #f9f9f9; font-weight: 600; color: var(--text-light); }
-        .data-table tbody tr:hover { background-color: #f5f5f5; }
-        /* SỬA: Xóa 2 dòng tbody tr:last-child và .empty-table-rows */
-
-        /* --- CSS CHO INPUT CÓ TOÁN TỬ (MỚI) --- */
-        .input-group {
-            display: flex;
-            align-items: stretch; /* Kéo giãn chiều cao cho bằng nhau */
-        }
-        
-        .input-group select.operator-select {
-            width: 7rem; /* Độ rộng cố định cho ô chọn dấu */
-            padding: 0 0.5rem;
-            background-color: #f8f9fa;
-            border: 1px solid var(--border-color);
-            border-right: none; /* Bỏ viền phải để nối liền với input */
-            border-top-left-radius: 6px;
-            border-bottom-left-radius: 6px;
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
-            font-weight: bold;
-            color: var(--primary-color);
-            text-align: center;
-            cursor: pointer;
-        }
-
-        .input-group input {
-            border-top-left-radius: 0 !important;
-            border-bottom-left-radius: 0 !important;
-            flex-grow: 1; 
-            
-            /* --- THÊM MỚI --- */
-            min-width: 4rem;      /* Đặt độ rộng tối thiểu (khoảng 64px) để số luôn hiện rõ */
-            padding-left: 0.75rem; /* Tăng khoảng cách lề trái cho thoáng */
-            padding-right: 0.5rem;
-        }
-
-        .input-group select:focus,
-        .input-group input:focus {
-            z-index: 2; /* Đưa phần tử đang focus lên trên để thấy rõ viền */
-            position: relative;
-        }
-
-        /* --- CSS CHO RANGE INPUT (MỚI) --- */
-        .input-group .range-separator {
-            display: none; /* Mặc định ẩn */
-            align-items: center;
-            padding: 0 0.5rem;
-            background-color: #f8f9fa;
-            border-top: 1px solid var(--border-color);
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-light);
-            font-weight: bold;
-        }
-
-        .input-group input.input-2 {
-            display: none; /* Mặc định ẩn */
-            border-left: none; 
-        }
-
-        /* Khi hiển thị dạng khoảng (Class 'mode-range' sẽ được thêm bằng JS) */
-        .input-group.mode-range .range-separator {
-            display: flex;
-        }
-        .input-group.mode-range input.input-2 {
-            display: block;
-        }
-        
-        /* Chỉnh lại bo góc khi hiện 2 ô input */
-        .input-group.mode-range input:first-of-type {
-            border-right: none;
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
-        }
-
-        /* --- CSS ĐƯA TỔNG NỢ XUỐNG HÀNG --- */
-        #fg-sl-ton, #fg-tong-no {
-            grid-column: 1 / 4; /* Bắt đầu cột 1, kết thúc ở vạch 4 (tức là chiếm cột 1,2,3) */
-            grid-row: 2;        /* Ép xuống hàng thứ 2 */
-        }
-        
-        /* Xóa max-width cũ đi để nó tự động giãn bằng 3 cột trên */
-        #fg-sl-ton .input-group, #fg-tong-no .input-group {
-            max-width: none; 
-        }
-
-        /* 2. Nút tìm kiếm: Nằm ở hàng 1, cột cuối cùng (cột 4) */
-        #book-search-form .search-button-group, #customer-search-form .search-button-group {
-            grid-column: 4 / 5; /* Nằm ở cột 4 */
-            grid-row: 1;        /* Ép lên hàng 1 */
-        }
-        
-        /* Chỉnh lại nút cho đẹp (chiều cao bằng ô input) */
-        #book-search-form .search-button-group .btn, #customer-search-form .search-button-group .btn {
-            width: 100%;
-            padding: 0.75rem;
-        }
-
-        /* --- CSS NHÃN BẢNG KẾT QUẢ --- */
-        .table-caption {
-            font-size: 1.1rem;         /* Cỡ chữ vừa phải */
-            font-weight: 700;          /* In đậm */
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;     /* Cách bảng một chút xíu thôi (khoảng 8px) */
-            text-transform: uppercase; /* Chữ in hoa */
-            letter-spacing: 0.05rem;   /* Dãn chữ nhẹ cho thoáng */
-        }
-
-        /* --- THÊM: CSS CHO LOADER VÀ TOAST --- */
-        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.7); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .loader-overlay.show { display: flex; }
-        .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--secondary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 2001; display: flex; flex-direction: column; gap: 0.5rem; }
-        .toast { background-color: var(--white-bg); padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 0.75rem; opacity: 0; transform: translateX(100%); transition: all 0.3s ease; border-left: 5px solid; }
-        .toast.show { opacity: 1; transform: translateX(0); }
-        .toast.success { border-left-color: var(--green-accent); }
-        .toast.success .toast-icon { color: var(--green-accent); }
-        .toast.error { border-left-color: var(--red-accent); }
-        .toast.error .toast-icon { color: var(--red-accent); }
-        .toast-message { font-size: 0.9rem; font-weight: 500; color: var(--text-dark); }
-        /* --- HẾT CSS MỚI --- */
-
-        /* --- Responsive Design --- */
-        @media (min-width: 992.01px) {
-            .dashboard-container.sidebar-collapsed { grid-template-columns: 0 1fr; }
-            .dashboard-container.sidebar-collapsed .sidebar { width: 0; padding-left: 0; padding-right: 0; transform: translateX(-250px); }
-        }
-        @media (max-width: 992px) {
-            .dashboard-container { grid-template-columns: 1fr; }
-            .sidebar { position: fixed; left: -260px; top: 0; height: 100vh; width: 250px; z-index: 1050; box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1); }
-            .sidebar.active { left: 0; }
-            .main-content { padding: 1rem; }
-            .top-bar { padding: 1rem; }
-            .menu-toggle { display: block; }
-             #customer-search-form, #book-search-form { grid-template-columns: 1fr 1fr; }
-             .search-button-group { grid-column: 1 / -1; }
-        }
-        @media (max-width: 768px) {
-             #customer-search-form, #book-search-form { grid-template-columns: 1fr; }
-            .top-bar { gap: 0.5rem; }
-            .top-bar-left h1 { font-size: 1.25rem; }
-            .user-menu { font-size: 0.8rem; }
-            .content-wrapper { border-radius: 8px; }
-            .tab-nav { overflow-x: auto; }
-            .tab-button { padding: 0.8rem 1rem; font-size: 0.9rem; }
-            .tab-content { padding: 1rem; }
-        }
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <!-- THÊM: Loader và Toast Container -->
     <div class="loader-overlay" id="loader">
-        <div class="loader"></div>
+      <div class="loader"></div>
     </div>
     <div class="toast-container" id="toast-container"></div>
     <!-- KẾT THÚC THÊM MỚI -->
 
     <div class="dashboard-container">
-        
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <i class="fas fa-book-open"></i>
-                <h2>QUẢN LÝ NHÀ SÁCH</h2>
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <i class="fas fa-book-open"></i>
+          <h2>NHÀ SÁCH ABC</h2>
+        </div>
+        <nav class="sidebar-nav">
+          <ul>
+            <li>
+              <a href="/dashboard"
+                ><i class="fas fa-home"></i><span>Tổng quan</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/employees"
+                ><i class="fas fa-users"></i><span>QL nhân viên</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/books"
+                ><i class="fas fa-book"></i><span>QL Sách</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/customers"
+                ><i class="fas fa-id-card"></i><span>QL Khách hàng</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/books_import"
+                ><i class="fas fa-file-invoice"></i
+                ><span>QL Phiếu nhập sách</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/inventory"
+                ><i class="fas fa-clipboard-check"></i
+                ><span>QL Phiếu kiểm kê</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/receipts"
+                ><i class="fas fa-receipt"></i><span>QL Phiếu thu tiền</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/bills"
+                ><i class="fa-solid fa-money-check-dollar"></i
+                ><span>QL Hóa đơn</span></a
+              >
+            </li>
+            <li>
+              <a href="#" class="active"
+                ><i class="fas fa-search"></i><span> Tra cứu</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/reports"
+                ><i class="fas fa-chart-line"></i
+                ><span> Báo cáo tổng kết</span></a
+              >
+            </li>
+            <li>
+              <a href="/dashboard/change-rule"
+                ><i class="fas fa-gavel"></i><span>Thay đổi quy định</span></a
+              >
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <header class="top-bar">
+          <div class="top-bar-left">
+            <button class="menu-toggle" id="menu-toggle">
+              <i class="fas fa-bars"></i>
+            </button>
+            <h1>Tra cứu</h1>
+          </div>
+          <div class="user-menu">
+            <span class="user-trigger">
+              Chào, <strong><%= username %></strong>
+              <i class="fas fa-chevron-down"></i>
+            </span>
+
+            <div class="dropdown-menu">
+              <a href="#" id="logout-button">
+                <i class="fas fa-sign-out-alt"></i> Đăng xuất
+              </a>
             </div>
-            <nav class="sidebar-nav">
-                <ul>
-                    <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
-                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Người dùng</a></li>
-                    <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
-                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
-                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
-                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
-                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
-                    <li><a href="#" class="active"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li>
-                    <% if (role === 'Admin' || role === 'Owner') { %>
-                    <li><a href="/dashboard/trash"><i class="fas fa-trash-alt"></i> Thùng rác</a></li>
+          </div>
+        </header>
+
+        <div class="content-wrapper">
+          <nav class="tab-nav">
+            <button class="tab-button active" data-target="#tab-khach-hang">
+              Khách hàng
+            </button>
+            <button class="tab-button" data-target="#tab-sach">Sách</button>
+          </nav>
+
+          <div class="tab-content">
+            <div class="tab-pane active" id="tab-khach-hang">
+              <form class="search-form" id="customer-search-form">
+                <div class="form-group">
+                  <label for="search-ho-ten">Họ Tên</label>
+                  <input type="text" id="search-ho-ten" />
+                </div>
+                <div class="form-group">
+                  <label for="search-sdt">SĐT</label>
+                  <input type="tel" id="search-sdt" />
+                </div>
+                <div class="form-group">
+                  <label for="search-dia-chi">Địa chỉ</label>
+                  <input type="text" id="search-dia-chi" />
+                </div>
+                <div class="form-group" id="fg-tong-no">
+                  <label>Tổng nợ</label>
+                  <div class="input-group" id="group-tong-no">
+                    <select
+                      class="operator-select"
+                      id="op-tong-no"
+                      onchange="toggleRange('group-tong-no', this.value)"
+                    >
+                      <option value="=">=</option>
+                      <option value="between">Khoảng</option>
+                      <option value=">">></option>
+                      <option value=">=">≥</option>
+                      <option value="<"><</option>
+                      <option value="<=">≤</option>
+                    </select>
+
+                    <input type="number" id="search-tong-no-from" />
+                    <span class="range-separator">-</span>
+                    <input
+                      type="number"
+                      id="search-tong-no-to"
+                      class="input-2"
+                    />
+                  </div>
+                </div>
+                <div class="search-button-group">
+                  <button type="submit" class="btn btn-primary">
+                    Tìm kiếm
+                  </button>
+                </div>
+              </form>
+              <div class="table-responsive">
+                <h3 class="table-caption">Kết quả tìm kiếm</h3>
+                <table class="data-table" id="customer-results-table">
+                  <thead>
+                    <tr>
+                      <th>STT</th>
+                      <th>Mã KH</th>
+                      <th>Họ Tên</th>
+                      <th>Địa chỉ</th>
+                      <th>SĐT</th>
+                      <th>Tổng nợ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (customers && customers.length > 0) { %> <%
+                    customers.forEach((customer, index) => { %>
+                    <tr>
+                      <td><%= index + 1 %></td>
+                      <td><%= customer.MaKhachHang %></td>
+                      <td><%= customer.HoVaTen %></td>
+                      <td><%= customer.DiaChi %></td>
+                      <td><%= customer.SoDienThoai %></td>
+                      <td><%= customer.TongNo %></td>
+                    </tr>
+                    <% }); %> <% } else { %>
+                    <tr>
+                      <td colspan="6" style="text-align: center">
+                        Không có khách hàng nào.
+                      </td>
+                    </tr>
                     <% } %>
-                </ul>
-            </nav>
-        </aside>
-        
-        <main class="main-content">
-            
-            <header class="top-bar">
-                <div class="top-bar-left">
-                    <button class="menu-toggle" id="menu-toggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h1>Tra cứu</h1> 
-                </div>
-                <div class="user-menu">
-                    <span class="user-trigger">
-                        Chào, <strong><%= username %></strong> <i class="fas fa-chevron-down"></i>
-                    </span>
-
-                    <div class="dropdown-menu">
-                        <a href="#" id="logout-button">
-                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                        </a>
-                    </div>
-                </div>
-            </header>
-
-            <div class="content-wrapper">
-                <nav class="tab-nav">
-                    <button class="tab-button active" data-target="#tab-khach-hang">Khách hàng</button>
-                    <button class="tab-button" data-target="#tab-sach">Sách</button>
-                </nav>
-
-                <div class="tab-content">
-                    
-                    <div class="tab-pane active" id="tab-khach-hang">
-                        <form class="search-form" id="customer-search-form">
-                            <div class="form-group"> <label for="search-ho-ten">Họ Tên</label> <input type="text" id="search-ho-ten"> </div>
-                            <div class="form-group"> <label for="search-sdt">SĐT</label> <input type="tel" id="search-sdt"> </div>
-                            <div class="form-group"> <label for="search-dia-chi">Địa chỉ</label> <input type="text" id="search-dia-chi"> </div>
-                            <div class="form-group" id="fg-tong-no"> 
-                                <label>Tổng nợ</label> 
-                                <div class="input-group" id="group-tong-no">
-                                    <select class="operator-select" id="op-tong-no" onchange="toggleRange('group-tong-no', this.value)">
-                                        <option value="=">=</option>
-                                        <option value="between">Khoảng</option> <option value=">">></option>
-                                        <option value=">=">≥</option>
-                                        <option value="<"><</option>
-                                        <option value="<=">≤</option>
-                                    </select>
-                                    
-                                    <input type="number" id="search-tong-no-from">
-                                    <span class="range-separator">-</span>
-                                    <input type="number" id="search-tong-no-to" class="input-2"> 
-                                </div>
-                            </div>
-                            <div class="search-button-group"> <button type="submit" class="btn btn-primary">Tìm kiếm</button> </div>
-                        </form>
-                        <div class="table-responsive">
-                            <h3 class="table-caption">Kết quả tìm kiếm</h3>
-                            <table class="data-table" id="customer-results-table"> 
-                                <thead> 
-                                    <tr> 
-                                        <th>STT</th>
-                                        <th>Mã KH</th> 
-                                        <th>Họ Tên</th> 
-                                        <th>Địa chỉ</th> 
-                                        <th>SĐT</th> 
-                                        <th>Tổng nợ</th> 
-                                    </tr> 
-                                </thead>
-                                <tbody>
-                                    <% if (customers && customers.length > 0) { %>
-                                        <% customers.forEach((customer, index) => { %>
-                                            <tr>
-                                                <td><%= index + 1 %></td>
-                                                <td><%= customer.MaKhachHang %></td>
-                                                <td><%= customer.HoVaTen %></td>
-                                                <td><%= customer.DiaChi %></td>
-                                                <td><%= customer.SoDienThoai %></td>
-                                                <td><%= customer.TongNo %></td>
-                                            </tr>
-                                        <% }); %>
-                                    <% } else { %>
-                                        <tr>
-                                            <td colspan="6" style="text-align: center;">Không có khách hàng nào.</td>
-                                        </tr>
-                                    <% } %>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="tab-pane" id="tab-sach">
-                        <form class="search-form" id="book-search-form">
-                            <div class="form-group"> <label for="search-ten-sach">Tên sách</label> <input type="text" id="search-ten-sach"> </div>
-                            <div class="form-group"> <label for="search-tac-gia">Tác giả</label> <input type="text" id="search-tac-gia"> </div>
-                            <div class="form-group"> <label for="search-the-loai">Thể loại</label> <input type="text" id="search-the-loai"> </div>
-                            <div class="form-group" id="fg-sl-ton"> 
-                                <label>Số lượng tồn</label> 
-                                <div class="input-group" id="group-sl-ton">
-                                    <select class="operator-select" id="op-sl-ton" onchange="toggleRange('group-sl-ton', this.value)">
-                                        <option value="=">=</option>
-                                        <option value="between">Khoảng</option> <option value=">">></option>
-                                        <option value=">=">≥</option>
-                                        <option value="<"><</option>
-                                        <option value="<=">≤</option>
-                                    </select>
-                                    
-                                    <input type="number" id="search-sl-ton-from">
-                                    <span class="range-separator">-</span>
-                                    <input type="number" id="search-sl-ton-to" class="input-2"> 
-                                </div>
-                            </div>
-                            <div class="search-button-group"> <button type="submit" class="btn btn-primary">Tìm kiếm</button> </div>
-                        </form>
-                        <div class="table-responsive">
-                            <h3 class="table-caption">Kết quả tìm kiếm</h3>
-                            <table class="data-table" id="book-results-table"> 
-                                <thead> 
-                                    <tr> 
-                                        <th>STT</th>
-                                        <th>Mã sách</th> 
-                                        <th>Tên sách</th>   
-                                        <th>Thể loại</th> 
-                                        <th>Tác giả</th> 
-                                        <th>Số lượng tồn</th> 
-                                    </tr> 
-                                </thead>
-                                <tbody>
-                                    <% if (books && books.length > 0) { %>
-                                        <% books.forEach((book, index) => { %>
-                                            <tr>
-                                                <td><%= index + 1 %></td>
-                                                <td><%= book.MaSach%></td>
-                                                <td><%= book.DauSach.TenSach %></td>
-                                                <td><%= book.DauSach.TheLoai.TenTheLoai %></td>
-                                                <td><%= book.DauSach.TacGias.HoTen %></td>
-                                                <td><%= book.SoLuongTon %></td>
-                                            </tr>
-                                        <% }); %>
-                                    <% } else { %>
-                                        <tr>
-                                            <td colspan="6" style="text-align: center;">Không có sách nào.</td>
-                                        </tr>
-                                    <% } %>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                </div>
+                  </tbody>
+                </table>
+              </div>
             </div>
-        </main>
+
+            <div class="tab-pane" id="tab-sach">
+              <form class="search-form" id="book-search-form">
+                <div class="form-group">
+                  <label for="search-ten-sach">Tên sách</label>
+                  <input type="text" id="search-ten-sach" />
+                </div>
+                <div class="form-group">
+                  <label for="search-tac-gia">Tác giả</label>
+                  <input type="text" id="search-tac-gia" />
+                </div>
+                <div class="form-group">
+                  <label for="search-the-loai">Thể loại</label>
+                  <input type="text" id="search-the-loai" />
+                </div>
+                <div class="form-group" id="fg-sl-ton">
+                  <label>Số lượng tồn</label>
+                  <div class="input-group" id="group-sl-ton">
+                    <select
+                      class="operator-select"
+                      id="op-sl-ton"
+                      onchange="toggleRange('group-sl-ton', this.value)"
+                    >
+                      <option value="=">=</option>
+                      <option value="between">Khoảng</option>
+                      <option value=">">></option>
+                      <option value=">=">≥</option>
+                      <option value="<"><</option>
+                      <option value="<=">≤</option>
+                    </select>
+
+                    <input type="number" id="search-sl-ton-from" />
+                    <span class="range-separator">-</span>
+                    <input
+                      type="number"
+                      id="search-sl-ton-to"
+                      class="input-2"
+                    />
+                  </div>
+                </div>
+                <div class="search-button-group">
+                  <button type="submit" class="btn btn-primary">
+                    Tìm kiếm
+                  </button>
+                </div>
+              </form>
+              <div class="table-responsive">
+                <h3 class="table-caption">Kết quả tìm kiếm</h3>
+                <table class="data-table" id="book-results-table">
+                  <thead>
+                    <tr>
+                      <th>STT</th>
+                      <th>Mã sách</th>
+                      <th>Tên sách</th>
+                      <th>Thể loại</th>
+                      <th>Tác giả</th>
+                      <th>Số lượng tồn</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (books && books.length > 0) { %> <%
+                    books.forEach((book, index) => { %>
+                    <tr>
+                      <td><%= index + 1 %></td>
+                      <td><%= book.MaSach%></td>
+                      <td><%= book.DauSach.TenSach %></td>
+                      <td><%= book.DauSach.TheLoai.TenTheLoai %></td>
+                      <td><%= book.DauSach.TacGias.HoTen %></td>
+                      <td><%= book.SoLuongTon %></td>
+                    </tr>
+                    <% }); %> <% } else { %>
+                    <tr>
+                      <td colspan="6" style="text-align: center">
+                        Không có sách nào.
+                      </td>
+                    </tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            
-            // --- THÊM: Các hàm điều khiển Loader và Toast ---
-            const loader = document.getElementById('loader');
-            const toastContainer = document.getElementById('toast-container');
+      document.addEventListener("DOMContentLoaded", function () {
+        // --- THÊM: Các hàm điều khiển Loader và Toast ---
+        const loader = document.getElementById("loader");
+        const toastContainer = document.getElementById("toast-container");
 
-            function showLoader() { loader.style.display = 'flex'; }
-            function hideLoader() { loader.style.display = 'none'; }
-            
-            function showToast(message, type = 'success') {
-                const toast = document.createElement('div');
-                toast.classList.add('toast', type);
-                toast.innerHTML = `
-                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i>
+        function showLoader() {
+          loader.style.display = "flex";
+        }
+        function hideLoader() {
+          loader.style.display = "none";
+        }
+
+        function showToast(message, type = "success") {
+          const toast = document.createElement("div");
+          toast.classList.add("toast", type);
+          toast.innerHTML = `
+                    <i class="fas ${
+                      type === "success"
+                        ? "fa-check-circle"
+                        : "fa-exclamation-circle"
+                    } toast-icon"></i>
                     <span class="toast-message">${message}</span>
                 `;
-                toastContainer.appendChild(toast);
-                setTimeout(() => { toast.classList.add('show'); }, 100);
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    toast.addEventListener('transitionend', () => {
-                        if (toast.parentNode) { toast.parentNode.removeChild(toast); }
-                    });
-                }, 3000);
+          toastContainer.appendChild(toast);
+          setTimeout(() => {
+            toast.classList.add("show");
+          }, 100);
+          setTimeout(() => {
+            toast.classList.remove("show");
+            toast.addEventListener("transitionend", () => {
+              if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+              }
+            });
+          }, 3000);
+        }
+
+        function simulateApiCall(callback) {
+          showLoader();
+          setTimeout(() => {
+            hideLoader();
+            const success = Math.random() > 0.2;
+            callback(success);
+          }, 1500);
+        }
+        // --- KẾT THÚC HÀM MỚI ---
+
+        const menuToggle = document.getElementById("menu-toggle");
+        const sidebar = document.getElementById("sidebar");
+        const container = document.querySelector(".dashboard-container");
+        if (menuToggle && sidebar && container) {
+          menuToggle.addEventListener("click", function () {
+            if (window.innerWidth <= 992) {
+              sidebar.classList.toggle("active");
+            } else {
+              container.classList.toggle("sidebar-collapsed");
             }
+          });
+        }
 
-            function simulateApiCall(callback) {
-                showLoader();
-                setTimeout(() => {
-                    hideLoader();
-                    const success = Math.random() > 0.2; 
-                    callback(success); 
-                }, 1500); 
-            }
-            // --- KẾT THÚC HÀM MỚI ---
+        const tabButtons = document.querySelectorAll(".tab-button");
+        const tabPanes = document.querySelectorAll(".tab-pane");
+        if (tabButtons.length > 0 && tabPanes.length > 0) {
+          tabButtons.forEach((button) => {
+            button.addEventListener("click", function () {
+              const targetId = this.dataset.target;
+              const targetPane = document.querySelector(targetId);
+              if (targetPane) {
+                tabButtons.forEach((btn) => btn.classList.remove("active"));
+                tabPanes.forEach((pane) => pane.classList.remove("active"));
+                this.classList.add("active");
+                targetPane.classList.add("active");
+              }
+            });
+          });
+        }
 
-            
-            const menuToggle = document.getElementById('menu-toggle');
-            const sidebar = document.getElementById('sidebar');
-            const container = document.querySelector('.dashboard-container'); 
-            if (menuToggle && sidebar && container) {
-                menuToggle.addEventListener('click', function() {
-                    if (window.innerWidth <= 992) { sidebar.classList.toggle('active'); } 
-                    else { container.classList.toggle('sidebar-collapsed'); }
-                });
-            }
-            
-             const tabButtons = document.querySelectorAll('.tab-button');
-             const tabPanes = document.querySelectorAll('.tab-pane');
-             if (tabButtons.length > 0 && tabPanes.length > 0) {
-                 tabButtons.forEach(button => {
-                     button.addEventListener('click', function() {
-                         const targetId = this.dataset.target; 
-                         const targetPane = document.querySelector(targetId);
-                         if (targetPane) {
-                             tabButtons.forEach(btn => btn.classList.remove('active'));
-                             tabPanes.forEach(pane => pane.classList.remove('active'));
-                             this.classList.add('active');
-                             targetPane.classList.add('active');
-                         }
-                     });
-                 });
-             }
+        // Hàm bật/tắt chế độ nhập khoảng
+        window.toggleRange = function (groupId, value) {
+          const group = document.getElementById(groupId);
+          const input1 = group.querySelector("input:first-of-type");
 
-             // Hàm bật/tắt chế độ nhập khoảng
-            window.toggleRange = function(groupId, value) {
-                const group = document.getElementById(groupId);
-                const input1 = group.querySelector('input:first-of-type');
-                
-                if (value === 'between') {
-                    // Bật chế độ range
-                    group.classList.add('mode-range');
-                } else {
-                    // Tắt chế độ range
-                    group.classList.remove('mode-range');
-                }
-            }
+          if (value === "between") {
+            // Bật chế độ range
+            group.classList.add("mode-range");
+          } else {
+            // Tắt chế độ range
+            group.classList.remove("mode-range");
+          }
+        };
 
-             // Xử lý Tìm kiếm KHÁCH HÀNG
-            const customerSearchForm = document.getElementById('customer-search-form');
-            const customerTableBody = document.getElementById('customer-results-table').getElementsByTagName('tbody')[0];
-            const allCustomerRows = Array.from(customerTableBody.querySelectorAll('tr'));
+        // Xử lý Tìm kiếm KHÁCH HÀNG
+        const customerSearchForm = document.getElementById(
+          "customer-search-form"
+        );
+        const customerTableBody = document
+          .getElementById("customer-results-table")
+          .getElementsByTagName("tbody")[0];
+        const allCustomerRows = Array.from(
+          customerTableBody.querySelectorAll("tr")
+        );
 
-            if(customerSearchForm){
-                customerSearchForm.addEventListener('submit', function(event){ 
-                    event.preventDefault(); 
-                    // 1. Lấy giá trị tìm kiếm (chuyển về chữ thường để không phân biệt hoa/thường)
-                    const hoTenQuery = document.getElementById('search-ho-ten').value.toLowerCase();
-                    const sdtQuery = document.getElementById('search-sdt').value.toLowerCase();
-                    const diaChiQuery = document.getElementById('search-dia-chi').value.toLowerCase();
-                    
-                    // Lấy toán tử (>, <, =, between...)
-                    const opTongNo = document.getElementById('op-tong-no').value;
-                    // Lấy giá trị "Từ" (hoặc giá trị đơn)
-                    const valFrom = parseFloat(document.getElementById('search-tong-no-from').value);
-                    // Lấy giá trị "Đến" (chỉ dùng cho between)
-                    const valTo = parseFloat(document.getElementById('search-tong-no-to').value);
-                    
-                    console.log(`OP Tổng nợ: ${opTongNo}, From: ${valFrom}, To: ${valTo}`);
-                    let resultsFound = 0;
-                
-                    // 2. Lặp qua TẤT CẢ các hàng
-                    allCustomerRows.forEach(row => {
-                        // Lấy nội dung của từng ô (cell)
-                        const hoTenCell = (row.cells[2] ? row.cells[2].textContent : '').toLowerCase();
-                        const diaChiCell = (row.cells[3] ? row.cells[3].textContent : '').toLowerCase();
-                        const sdtCell = (row.cells[4] ? row.cells[4].textContent : '').toLowerCase();
-                        const tongNoCell = parseFloat(row.cells[5] ? row.cells[5].textContent : 0) || 0;
+        if (customerSearchForm) {
+          customerSearchForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+            // 1. Lấy giá trị tìm kiếm (chuyển về chữ thường để không phân biệt hoa/thường)
+            const hoTenQuery = document
+              .getElementById("search-ho-ten")
+              .value.toLowerCase();
+            const sdtQuery = document
+              .getElementById("search-sdt")
+              .value.toLowerCase();
+            const diaChiQuery = document
+              .getElementById("search-dia-chi")
+              .value.toLowerCase();
 
-                        // 3. Kiểm tra điều kiện
-                        let hoTenMatch = true;
-                        let sdtMatch = true;
-                        let diaChiMatch = true;
-                        hoTenMatch = hoTenCell.includes(hoTenQuery);
-                        sdtMatch = sdtCell.includes(sdtQuery);
-                        diaChiMatch = diaChiCell.includes(diaChiQuery);
-                        let tongNoMatch = true; // Mặc định là khớp (nếu không nhập gì)
+            // Lấy toán tử (>, <, =, between...)
+            const opTongNo = document.getElementById("op-tong-no").value;
+            // Lấy giá trị "Từ" (hoặc giá trị đơn)
+            const valFrom = parseFloat(
+              document.getElementById("search-tong-no-from").value
+            );
+            // Lấy giá trị "Đến" (chỉ dùng cho between)
+            const valTo = parseFloat(
+              document.getElementById("search-tong-no-to").value
+            );
 
-                        // Chỉ so sánh nếu người dùng có nhập số vào ô "Từ"
-                        if (!isNaN(valFrom)) {
-                            switch (opTongNo) {
-                                case '=':
-                                    tongNoMatch = tongNoCell === valFrom;
-                                    break;
-                                case '>':
-                                    tongNoMatch = tongNoCell > valFrom;
-                                    break;
-                                case '>=':
-                                    tongNoMatch = tongNoCell >= valFrom;
-                                    break;
-                                case '<':
-                                    tongNoMatch = tongNoCell < valFrom;
-                                    break;
-                                case '<=':
-                                    tongNoMatch = tongNoCell <= valFrom;
-                                    break;
-                                case 'between':
-                                    // Nếu nhập đủ cả "Từ" và "Đến"
-                                    if (!isNaN(valTo)) {
-                                        tongNoMatch = tongNoCell >= valFrom && tongNoCell <= valTo;
-                                    } else {
-                                        // Nếu chỉ nhập "Từ" mà chọn Between -> Mặc định hiểu là >= Từ
-                                        tongNoMatch = tongNoCell >= valFrom;
-                                    }
-                                    break;
-                                default:
-                                    tongNoMatch = true;
-                            }
-                        }
+            console.log(
+              `OP Tổng nợ: ${opTongNo}, From: ${valFrom}, To: ${valTo}`
+            );
+            let resultsFound = 0;
 
-                        // 4. Ẩn/Hiện hàng
-                        if (hoTenMatch && sdtMatch && diaChiMatch && tongNoMatch) {
-                            resultsFound++; // 1. Tăng bộ đếm
-                            // 2. Cập nhật ô STT
-                            row.cells[0].textContent = resultsFound; 
-                            row.style.display = '';
-                        } else {
-                            row.style.display = 'none'; // Ẩn
-                        }
-                    });
+            // 2. Lặp qua TẤT CẢ các hàng
+            allCustomerRows.forEach((row) => {
+              // Lấy nội dung của từng ô (cell)
+              const hoTenCell = (
+                row.cells[2] ? row.cells[2].textContent : ""
+              ).toLowerCase();
+              const diaChiCell = (
+                row.cells[3] ? row.cells[3].textContent : ""
+              ).toLowerCase();
+              const sdtCell = (
+                row.cells[4] ? row.cells[4].textContent : ""
+              ).toLowerCase();
+              const tongNoCell =
+                parseFloat(row.cells[5] ? row.cells[5].textContent : 0) || 0;
 
-                    // 5. Hiển thị thông báo nếu không có kết quả
-                    // Xóa thông báo "không có" cũ
-                    const existingNoResults = customerTableBody.querySelector('.no-results-row');
-                    if (existingNoResults) existingNoResults.remove();
+              // 3. Kiểm tra điều kiện
+              let hoTenMatch = true;
+              let sdtMatch = true;
+              let diaChiMatch = true;
+              hoTenMatch = hoTenCell.includes(hoTenQuery);
+              sdtMatch = sdtCell.includes(sdtQuery);
+              diaChiMatch = diaChiCell.includes(diaChiQuery);
+              let tongNoMatch = true; // Mặc định là khớp (nếu không nhập gì)
 
-                    if (resultsFound === 0) {
-                        const noResultsRow = customerTableBody.insertRow();
-                        noResultsRow.classList.add('no-results-row');
-                        noResultsRow.innerHTML = `<td colspan="7" style="text-align: center;">Không tìm thấy kết quả nào.</td>`;
+              // Chỉ so sánh nếu nhân viên có nhập số vào ô "Từ"
+              if (!isNaN(valFrom)) {
+                switch (opTongNo) {
+                  case "=":
+                    tongNoMatch = tongNoCell === valFrom;
+                    break;
+                  case ">":
+                    tongNoMatch = tongNoCell > valFrom;
+                    break;
+                  case ">=":
+                    tongNoMatch = tongNoCell >= valFrom;
+                    break;
+                  case "<":
+                    tongNoMatch = tongNoCell < valFrom;
+                    break;
+                  case "<=":
+                    tongNoMatch = tongNoCell <= valFrom;
+                    break;
+                  case "between":
+                    // Nếu nhập đủ cả "Từ" và "Đến"
+                    if (!isNaN(valTo)) {
+                      tongNoMatch =
+                        tongNoCell >= valFrom && tongNoCell <= valTo;
+                    } else {
+                      // Nếu chỉ nhập "Từ" mà chọn Between -> Mặc định hiểu là >= Từ
+                      tongNoMatch = tongNoCell >= valFrom;
                     }
-                    
-                    hideLoader();
-                    showToast(`Tìm thấy ${resultsFound} kết quả.`, 'success');
-                    });
+                    break;
+                  default:
+                    tongNoMatch = true;
+                }
+              }
+
+              // 4. Ẩn/Hiện hàng
+              if (hoTenMatch && sdtMatch && diaChiMatch && tongNoMatch) {
+                resultsFound++; // 1. Tăng bộ đếm
+                // 2. Cập nhật ô STT
+                row.cells[0].textContent = resultsFound;
+                row.style.display = "";
+              } else {
+                row.style.display = "none"; // Ẩn
+              }
+            });
+
+            // 5. Hiển thị thông báo nếu không có kết quả
+            // Xóa thông báo "không có" cũ
+            const existingNoResults =
+              customerTableBody.querySelector(".no-results-row");
+            if (existingNoResults) existingNoResults.remove();
+
+            if (resultsFound === 0) {
+              const noResultsRow = customerTableBody.insertRow();
+              noResultsRow.classList.add("no-results-row");
+              noResultsRow.innerHTML = `<td colspan="7" style="text-align: center;">Không tìm thấy kết quả nào.</td>`;
+            }
+
+            hideLoader();
+            showToast(`Tìm thấy ${resultsFound} kết quả.`, "success");
+          });
+        }
+
+        // Xử lý Tìm kiếm SÁCH
+        const bookSearchForm = document.getElementById("book-search-form");
+        // Lấy tham chiếu đến bảng sách và các dòng dữ liệu (tương tự như bảng khách hàng)
+        const bookTableBody = document
+          .getElementById("book-results-table")
+          .getElementsByTagName("tbody")[0];
+        const allBookRows = Array.from(
+          bookTableBody.querySelectorAll("tr:not(.no-results-row)")
+        ); // Tránh chọn nhầm dòng thông báo lỗi cũ
+
+        if (bookSearchForm) {
+          bookSearchForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            // 1. Lấy giá trị từ các ô input tìm kiếm
+            const tenSachQuery = document
+              .getElementById("search-ten-sach")
+              .value.toLowerCase();
+            const tacGiaQuery = document
+              .getElementById("search-tac-gia")
+              .value.toLowerCase();
+            const theLoaiQuery = document
+              .getElementById("search-the-loai")
+              .value.toLowerCase();
+
+            // Lấy giá trị tìm kiếm theo số lượng tồn (toán tử và số)
+            const opSlTon = document.getElementById("op-sl-ton").value;
+            const valFrom = parseFloat(
+              document.getElementById("search-sl-ton-from").value
+            );
+            const valTo = parseFloat(
+              document.getElementById("search-sl-ton-to").value
+            );
+
+            let resultsFound = 0;
+
+            // Hiển thị loader giả lập để nhân viên thấy có phản hồi
+            showLoader();
+
+            // Sử dụng setTimeout nhỏ để UI kịp hiển thị loader trước khi tính toán
+            setTimeout(() => {
+              // 2. Lặp qua tất cả các dòng trong bảng Sách
+              allBookRows.forEach((row) => {
+                // Cấu trúc bảng Sách:
+                // Cell 0: STT
+                // Cell 1: Tên sách
+                // Cell 2: Thể loại
+                // Cell 3: Tác giả
+                // Cell 4: Số lượng tồn
+
+                const tenSachCell = (
+                  row.cells[1] ? row.cells[1].textContent : ""
+                ).toLowerCase();
+                const theLoaiCell = (
+                  row.cells[2] ? row.cells[2].textContent : ""
+                ).toLowerCase();
+                const tacGiaCell = (
+                  row.cells[3] ? row.cells[3].textContent : ""
+                ).toLowerCase();
+                const slTonCell =
+                  parseFloat(row.cells[4] ? row.cells[4].textContent : 0) || 0;
+
+                // 3. Kiểm tra điều kiện (Logic string giống khách hàng)
+                const tenSachMatch = tenSachCell.includes(tenSachQuery);
+                const tacGiaMatch = tacGiaCell.includes(tacGiaQuery);
+                const theLoaiMatch = theLoaiCell.includes(theLoaiQuery);
+
+                // Logic số (Số lượng tồn) - Copy từ logic Tổng nợ
+                let slTonMatch = true;
+
+                if (!isNaN(valFrom)) {
+                  switch (opSlTon) {
+                    case "=":
+                      slTonMatch = slTonCell === valFrom;
+                      break;
+                    case ">":
+                      slTonMatch = slTonCell > valFrom;
+                      break;
+                    case ">=":
+                      slTonMatch = slTonCell >= valFrom;
+                      break;
+                    case "<":
+                      slTonMatch = slTonCell < valFrom;
+                      break;
+                    case "<=":
+                      slTonMatch = slTonCell <= valFrom;
+                      break;
+                    case "between":
+                      if (!isNaN(valTo)) {
+                        slTonMatch = slTonCell >= valFrom && slTonCell <= valTo;
+                      } else {
+                        slTonMatch = slTonCell >= valFrom;
+                      }
+                      break;
+                    default:
+                      slTonMatch = true;
+                  }
                 }
 
-            // Xử lý Tìm kiếm SÁCH
-            const bookSearchForm = document.getElementById('book-search-form');
-            // Lấy tham chiếu đến bảng sách và các dòng dữ liệu (tương tự như bảng khách hàng)
-            const bookTableBody = document.getElementById('book-results-table').getElementsByTagName('tbody')[0];
-            const allBookRows = Array.from(bookTableBody.querySelectorAll('tr:not(.no-results-row)')); // Tránh chọn nhầm dòng thông báo lỗi cũ
+                // 4. Ẩn/Hiện hàng dựa trên kết quả
+                if (tenSachMatch && tacGiaMatch && theLoaiMatch && slTonMatch) {
+                  resultsFound++;
+                  // Cập nhật lại cột STT (Cell 0)
+                  row.cells[0].textContent = resultsFound;
+                  row.style.display = ""; // Hiện
+                } else {
+                  row.style.display = "none"; // Ẩn
+                }
+              });
 
-            if(bookSearchForm){
-                bookSearchForm.addEventListener('submit', function(event){ 
-                    event.preventDefault(); 
+              // 5. Xử lý trường hợp không tìm thấy kết quả
+              const existingNoResults =
+                bookTableBody.querySelector(".no-results-row");
+              if (existingNoResults) existingNoResults.remove();
 
-                    // 1. Lấy giá trị từ các ô input tìm kiếm
-                    const tenSachQuery = document.getElementById('search-ten-sach').value.toLowerCase();
-                    const tacGiaQuery = document.getElementById('search-tac-gia').value.toLowerCase();
-                    const theLoaiQuery = document.getElementById('search-the-loai').value.toLowerCase();
+              if (resultsFound === 0) {
+                const noResultsRow = bookTableBody.insertRow();
+                noResultsRow.classList.add("no-results-row");
+                // Colspan = 5 vì bảng sách có 5 cột
+                noResultsRow.innerHTML = `<td colspan="5" style="text-align: center;">Không tìm thấy sách nào phù hợp.</td>`;
+              }
 
-                    // Lấy giá trị tìm kiếm theo số lượng tồn (toán tử và số)
-                    const opSlTon = document.getElementById('op-sl-ton').value;
-                    const valFrom = parseFloat(document.getElementById('search-sl-ton-from').value);
-                    const valTo = parseFloat(document.getElementById('search-sl-ton-to').value);
+              hideLoader();
+              showToast(`Tìm thấy ${resultsFound} cuốn sách.`, "success");
+            }, 300); // Delay 300ms cho mượt
+          });
+        }
 
-                    let resultsFound = 0;
-                    
-                    // Hiển thị loader giả lập để người dùng thấy có phản hồi
-                    showLoader();
-
-                    // Sử dụng setTimeout nhỏ để UI kịp hiển thị loader trước khi tính toán
-                    setTimeout(() => {
-                        // 2. Lặp qua tất cả các dòng trong bảng Sách
-                        allBookRows.forEach(row => {
-                            // Cấu trúc bảng Sách:
-                            // Cell 0: STT
-                            // Cell 1: Tên sách
-                            // Cell 2: Thể loại
-                            // Cell 3: Tác giả
-                            // Cell 4: Số lượng tồn
-                            
-                            const tenSachCell = (row.cells[1] ? row.cells[1].textContent : '').toLowerCase();
-                            const theLoaiCell = (row.cells[2] ? row.cells[2].textContent : '').toLowerCase();
-                            const tacGiaCell = (row.cells[3] ? row.cells[3].textContent : '').toLowerCase();
-                            const slTonCell = parseFloat(row.cells[4] ? row.cells[4].textContent : 0) || 0;
-
-                            // 3. Kiểm tra điều kiện (Logic string giống khách hàng)
-                            const tenSachMatch = tenSachCell.includes(tenSachQuery);
-                            const tacGiaMatch = tacGiaCell.includes(tacGiaQuery);
-                            const theLoaiMatch = theLoaiCell.includes(theLoaiQuery);
-                            
-                            // Logic số (Số lượng tồn) - Copy từ logic Tổng nợ
-                            let slTonMatch = true; 
-
-                            if (!isNaN(valFrom)) {
-                                switch (opSlTon) {
-                                    case '=': slTonMatch = slTonCell === valFrom; break;
-                                    case '>': slTonMatch = slTonCell > valFrom; break;
-                                    case '>=': slTonMatch = slTonCell >= valFrom; break;
-                                    case '<': slTonMatch = slTonCell < valFrom; break;
-                                    case '<=': slTonMatch = slTonCell <= valFrom; break;
-                                    case 'between':
-                                        if (!isNaN(valTo)) {
-                                            slTonMatch = slTonCell >= valFrom && slTonCell <= valTo;
-                                        } else {
-                                            slTonMatch = slTonCell >= valFrom;
-                                        }
-                                        break;
-                                    default: slTonMatch = true;
-                                }
-                            }
-
-                            // 4. Ẩn/Hiện hàng dựa trên kết quả
-                            if (tenSachMatch && tacGiaMatch && theLoaiMatch && slTonMatch) {
-                                resultsFound++;
-                                // Cập nhật lại cột STT (Cell 0)
-                                row.cells[0].textContent = resultsFound;
-                                row.style.display = ''; // Hiện
-                            } else {
-                                row.style.display = 'none'; // Ẩn
-                            }
-                        });
-
-                        // 5. Xử lý trường hợp không tìm thấy kết quả
-                        const existingNoResults = bookTableBody.querySelector('.no-results-row');
-                        if (existingNoResults) existingNoResults.remove();
-
-                        if (resultsFound === 0) {
-                            const noResultsRow = bookTableBody.insertRow();
-                            noResultsRow.classList.add('no-results-row');
-                            // Colspan = 5 vì bảng sách có 5 cột
-                            noResultsRow.innerHTML = `<td colspan="5" style="text-align: center;">Không tìm thấy sách nào phù hợp.</td>`;
-                        }
-
-                        hideLoader();
-                        showToast(`Tìm thấy ${resultsFound} cuốn sách.`, 'success');
-
-                    }, 300); // Delay 300ms cho mượt
-                });
-            }
-
-            // --- LOGOUT ---
-    const logoutBtn = document.getElementById('logout-button');
-    if(logoutBtn) {
-        logoutBtn.addEventListener('click', async (e) => {
+        // --- LOGOUT ---
+        const logoutBtn = document.getElementById("logout-button");
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", async (e) => {
             e.preventDefault();
-            if(confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-                window.location.href = '/logout';
+            if (confirm("Bạn có chắc chắn muốn đăng xuất?")) {
+              window.location.href = "/logout";
             }
-        });
-    }
-        });
+          });
+        }
+      });
     </script>
-
-</body>
+  </body>
 </html>

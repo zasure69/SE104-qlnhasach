@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DS Người dùng - Quản lý</title>
+    <title>DS Nhân viên - Quản lý</title>
     
     <!-- Link Font Awesome để có icon --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -537,18 +537,43 @@
         }
 
 
+        /* --- Sidebar Collapsed State --- */
+        .dashboard-container.sidebar-collapsed {
+          grid-template-columns: 70px 1fr;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar {
+          width: 70px;
+          padding: 1rem 0.5rem;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar-header h2,
+        .dashboard-container.sidebar-collapsed .sidebar-nav a span {
+          display: none;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar-header {
+          margin-bottom: 1.5rem;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar-header i {
+          font-size: 2rem;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar-nav a {
+          justify-content: center;
+          padding: 0.85rem 0.5rem;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar-nav a i {
+          width: auto;
+          font-size: 1.2rem;
+        }
+
         /* --- Responsive Design --- */
 
         @media (min-width: 992.01px) {
-            .dashboard-container.sidebar-collapsed {
-                grid-template-columns: 0 1fr;
-            }
-            .dashboard-container.sidebar-collapsed .sidebar {
-                width: 0;
-                padding-left: 0;
-                padding-right: 0;
-                transform: translateX(-250px);
-            }
+            /* Collapsed state already defined above */
         }
         
         @media (max-width: 992px) {
@@ -651,22 +676,23 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <i class="fas fa-book-open"></i>
-                <h2>QUẢN LÝ NHÀ SÁCH</h2>
+                <h2>NHÀ SÁCH ABC</h2>
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
-                    <li><a href="#" class="active"><i class="fas fa-users"></i>QL Người dùng</a></li>
-                    <li><a href="/dashboard/books"><i class="fas fa-book"></i>QL Sách</a></li>
-                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li>
-                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
-                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
-                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
-                    <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li>
+                    <li><a href="/dashboard"><i class="fas fa-home"></i><span>Tổng quan</span></a></li>
+                    <li><a href="#" class="active"><i class="fas fa-users"></i><span>QL Nhân viên</span></a></li>
+                    <li><a href="/dashboard/books"><i class="fas fa-book"></i><span>QL Sách</span></a></li>
+                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i><span>QL Khách hàng</span></a></li>
+                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i><span>QL Phiếu nhập sách</span></a></li>
+                    <li><a href="/dashboard/inventory"><i class="fas fa-clipboard-check"></i><span>QL Phiếu kiểm kê</span></a></li>
+                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i><span>QL Phiếu thu tiền</span></a></li>
+                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i><span>QL Hóa đơn</span></a></li>
+                    <li><a href="/dashboard/search"><i class="fas fa-search"></i><span> Tra cứu</span></a></li>
+                    <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i><span> Báo cáo tổng kết</span></a></li>
+                    <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i><span>Thay đổi quy định</span></a></li>
                     <% if (role === 'Admin' || role === 'Owner') { %>
-                    <li><a href="/dashboard/trash"><i class="fas fa-trash-alt"></i> Thùng rác</a></li>
+                    <li><a href="/dashboard/trash"><i class="fas fa-trash-alt"></i><span> Thùng rác</span></a></li>
                     <% } %>
                 </ul>
             </nav>
@@ -680,7 +706,7 @@
                     <button class="menu-toggle" id="menu-toggle">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <h1>Quản lý Người dùng</h1>
+                    <h1>Quản lý Nhân viên</h1>
                 </div>
                 <div class="user-menu">
                     <span class="user-trigger">
@@ -697,9 +723,9 @@
 
             <div class="content-wrapper">
                 <div class="content-header">
-                    <h2>Danh sách Người dùng</h2>
+                    <h2>Danh sách Nhân viên</h2>
                     <button class="btn btn-primary btn-add-new" id="open-add-modal">
-                        <i class="fas fa-plus"></i> Thêm mới Người dùng
+                        <i class="fas fa-plus"></i> Thêm mới Nhân viên
                     </button>
                 </div>
 
@@ -761,7 +787,7 @@
                                 <% }); %>
                             <% } else { %>
                                 <tr>
-                                    <td colspan="10" style="text-align: center;">Không có người dùng nào.</td>
+                                    <td colspan="10" style="text-align: center;">Không có nhân viên nào.</td>
                                 </tr>
                             <% } %>
                             <!-- <tr data-id="NV01"> 
@@ -802,11 +828,11 @@
     </div>
 
 
-    <!-- --- MODAL THÊM MỚI NGƯỜI DÙNG --- -->
+    <!-- --- MODAL THÊM MỚI NHÂN VIÊN --- -->
     <div class="modal-overlay" id="add-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Thêm mới thông tin Người dùng</h2>
+                <h2>Thêm mới thông tin Nhân viên</h2>
                 <button class="close-modal"><i class="fas fa-times"></i></button>
             </div>
             <form id="add-employee-form">
@@ -866,7 +892,7 @@
     <div class="modal-overlay" id="edit-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Chỉnh sửa thông tin Người dùng</h2>
+                <h2>Chỉnh sửa thông tin Nhân viên</h2>
                 <button class="close-modal"><i class="fas fa-times"></i></button>
             </div>
             <form id="edit-employee-form">
@@ -1006,11 +1032,11 @@
                             tbody.appendChild(tr);
                         });
                     } else {
-                        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Không có người dùng nào.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Không có nhân viên nào.</td></tr>';
                     }
                 } catch (error) {
-                    console.error("Lỗi tải người dùng:", error);
-                    // showToast('Lỗi tải danh sách người dùng', 'error');
+                    console.error("Lỗi tải nhân viên:", error);
+                    // showToast('Lỗi tải danh sách nhân viên', 'error');
                 }
             }
     
@@ -1128,13 +1154,13 @@
                         // Bắt sự kiện click vào icon xóa hoặc nút chứa icon xóa
                         if (e.target.classList.contains('delete-icon') || e.target.closest('.delete-icon')) {
                             const row = e.target.closest('tr');
-                            const itemName = row.cells[2].textContent; // Lấy tên người dùng (cột 3)
-                            const maNV = row.cells[1].textContent; // Lấy mã người dùng (cột 2)
+                            const itemName = row.cells[2].textContent; // Lấy tên nhân viên (cột 3)
+                            const maNV = row.cells[1].textContent; // Lấy mã nhân viên (cột 2)
                             
-                            if (confirm(`Bạn có chắc chắn muốn XÓA người dùng: ${itemName}?`)) {
+                            if (confirm(`Bạn có chắc chắn muốn XÓA nhân viên: ${itemName}?`)) {
                                 showLoader();
                                 try {
-                                    console.log('Xóa người dùng:', row);
+                                    console.log('Xóa nhân viên:', row);
                                     // --- SỬA: GỌI API 'delete' ---
                                     const response = await fetch(`/api/employees/deleteEmployee/${maNV}`, {
                                         method: 'DELETE'
@@ -1145,13 +1171,13 @@
                                     
                                     if(response.ok) {
                                         row.remove();
-                                        showToast('Xóa người dùng thành công!', 'success');
+                                        showToast('Xóa nhân viên thành công!', 'success');
                                         const tableBody = document.getElementById('employee-table').getElementsByTagName('tbody')[0];
                                         if (tableBody.rows.length === 0) {
                                             // Nếu <tbody> không còn hàng nào
                                             const newRow = tableBody.insertRow(); // Thêm 1 hàng mới
-                                            // Thêm ô "Không có người dùng nào"
-                                            newRow.innerHTML = `<td colspan="10" style="text-align: center;">Không có người dùng nào.</td>`;
+                                            // Thêm ô "Không có nhân viên nào"
+                                            newRow.innerHTML = `<td colspan="10" style="text-align: center;">Không có nhân viên nào.</td>`;
                                         }
                                     } else {
                                         showToast(`Xóa thất bại: ${result.error}`, 'error');
@@ -1212,7 +1238,7 @@
                     const ngayNhanViecInput = document.getElementById('edit-ngay-nhan-viec').value;
 
                     if (!checkAgeRequirement(ngaySinhInput, ngayNhanViecInput)) {
-                        showToast('Người dùng chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
+                        showToast('Nhân viên chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
                         return; // Dừng lại, không gửi dữ liệu đi
                     }
 
@@ -1253,7 +1279,7 @@
                 }
             }
     
-            // --- 4. GỌI HÀM SETUP CHO NGƯỜI DÙNG ---
+            // --- 4. GỌI HÀM SETUP CHO NHÂN VIÊN ---
             setupSmartModal({
                 addBtnId: 'open-add-modal',
                 addModalId: 'add-modal',
@@ -1262,8 +1288,8 @@
                 formId: 'edit-employee-form',
                 editBtnClass: '.open-edit-modal',
                 resetBtnId: 'btn-reset-edit',      // ID nút Đặt lại
-                tableSelector: '#employee-table',  // ID bảng người dùng
-                typeName: 'Người dùng'
+                tableSelector: '#employee-table',  // ID bảng nhân viên
+                typeName: 'Nhân viên'
             });
     
     
@@ -1278,12 +1304,12 @@
             let isSaveAndReset = false;
             if (btnCustomReset && addEmployeeForm) {
                 btnCustomReset.addEventListener('click', () => {
-                    // Kiểm tra xem form có dữ liệu không (check tên người dùng)
+                    // Kiểm tra xem form có dữ liệu không (check tên nhân viên)
                     const hasData = document.getElementById('add-ho-ten').value.trim() !== '';
 
                     if (hasData) {
                         // Nếu có dữ liệu -> Hỏi
-                        if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU Người dùng này trước khi làm mới không?\n\n- OK: Lưu người dùng này.\n- Cancel: Xóa trắng để nhập người dùng khác.')) {
+                        if (confirm('Bạn đã nhập thông tin. Bạn có muốn LƯU Nhân viên này trước khi làm mới không?\n\n- OK: Lưu nhân viên này.\n- Cancel: Xóa trắng để nhập nhân viên khác.')) {
                             // Chọn OK -> Lưu
                             if (addEmployeeForm.checkValidity()) {
                                 isSaveAndReset = true;
@@ -1338,12 +1364,12 @@
                         hideLoader();
 
                         if (response.ok) {
-                            await showToast('Thêm người dùng thành công!', 'success');
+                            await showToast('Thêm nhân viên thành công!', 'success');
 
                             if (isSaveAndReset) {
                                 // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
                                 addEmployeeForm.reset(); 
-                                showToast('Đã sẵn sàng nhập người dùng tiếp theo.', 'info');
+                                showToast('Đã sẵn sàng nhập nhân viên tiếp theo.', 'info');
                                 
                                 // Reset cờ về false sau khi xong việc
                                 isSaveAndReset = false; 
@@ -1352,7 +1378,7 @@
                                 document.getElementById('add-modal').style.display = 'none';
                                 addEmployeeForm.reset(); // Reset luôn cho sạch
                             } 
-                            fetchEmployees(); // tải lại danh sách người dùng
+                            fetchEmployees(); // tải lại danh sách nhân viên
                         } else {
                             showToast(`Thêm thất bại: ${result.error}`, 'error');
                         }

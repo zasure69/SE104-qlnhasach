@@ -504,10 +504,42 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideIn { from { transform: translateY(-30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
 
+        /* --- Sidebar Collapsed State --- */
+        .dashboard-container.sidebar-collapsed {
+          grid-template-columns: 70px 1fr;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar {
+          width: 70px;
+          padding: 1rem 0.5rem;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar-header h2,
+        .dashboard-container.sidebar-collapsed .sidebar-nav a span {
+          display: none;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar-header {
+          margin-bottom: 1.5rem;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar-header i {
+          font-size: 2rem;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar-nav a {
+          justify-content: center;
+          padding: 0.85rem 0.5rem;
+        }
+
+        .dashboard-container.sidebar-collapsed .sidebar-nav a i {
+          width: auto;
+          font-size: 1.2rem;
+        }
+
         /* --- Responsive Design --- */
         @media (min-width: 992.01px) {
-            .dashboard-container.sidebar-collapsed { grid-template-columns: 0 1fr; }
-            .dashboard-container.sidebar-collapsed .sidebar { width: 0; padding-left: 0; padding-right: 0; transform: translateX(-250px); }
+            /* Collapsed state already defined above */
         }
 
         @media (max-width: 992px) {
@@ -542,23 +574,24 @@
 
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header"> <i class="fas fa-book-open"></i>
-                <h2>QUẢN LÝ NHÀ SÁCH</h2>
+                <h2>NHÀ SÁCH ABC</h2>
             </div>
             <nav class="sidebar-nav">
                 <!-- SỬA: Cập nhật link sidebar -->
                 <ul>
-                    <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
-                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Người dùng</a></li>
-                    <li><a href="/dashboard/books" ><i class="fas fa-book"></i>QL Sách</a></li>
-                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li> 
-                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
-                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
-                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a></li>
-                    <li><a href="/dashboard/search"><i class="fas fa-search"></i> Tra cứu</a></li>
-                    <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-                    <li><a href="#" class="active"><i class="fas fa-gavel"></i>Thay đổi quy định</a></li>
+                    <li><a href="/dashboard"><i class="fas fa-home"></i><span>Tổng quan</span></a></li>
+                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i><span>QL Nhân viên</span></a></li>
+                    <li><a href="/dashboard/books" ><i class="fas fa-book"></i><span>QL Sách</span></a></li>
+                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i><span>QL Khách hàng</span></a></li> 
+                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i><span>QL Phiếu nhập sách</span></a></li>
+                    <li><a href="/dashboard/inventory"><i class="fas fa-clipboard-check"></i><span>QL Phiếu kiểm kê</span></a></li>
+                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i><span>QL Phiếu thu tiền</span></a></li>
+                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i><span>QL Hóa đơn</span></a></li>
+                    <li><a href="/dashboard/search"><i class="fas fa-search"></i><span>Tra cứu</span></a></li>
+                    <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i><span>Báo cáo tổng kết</span></a></li>
+                    <li><a href="#" class="active"><i class="fas fa-gavel"></i><span>Thay đổi quy định</span></a></li>
                     <% if (role === 'Admin' || role === 'Owner') { %>
-                    <li><a href="/dashboard/trash"><i class="fas fa-trash-alt"></i> Thùng rác</a></li>
+                    <li><a href="/dashboard/trash"><i class="fas fa-trash-alt"></i><span>Thùng rác</span></a></li>
                     <% } %>
                 </ul>
             </nav>
