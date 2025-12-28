@@ -8,6 +8,9 @@ const CT_HD = require("../models/CT_HD");
 const PhieuThuTien = require("../models/PhieuThuTien");
 const PhieuNhapSach = require("../models/PhieuNhapSach");
 const CT_PNS = require("../models/CT_PNS");
+const BaoCaoDoanhThu = require("../models/BaoCaoDoanhThu");
+const BaoCaoCongNo = require("../models/BaoCaoCongNo");
+const BaoCaoTon = require("../models/BaoCaoTon");
 
 module.exports = {
   async RenderReportPage(req, res) {
@@ -34,6 +37,41 @@ module.exports = {
       return res.json({ data: [], totalRevenue: 0 });
     }
 
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    const startOfSelectedMonth = new Date(year, month - 1, 1);
+    
+    // Kiểm tra nếu tháng được chọn là tháng tương lai
+    if (year > currentYear || (year === currentYear && month > currentMonth)) {
+      return res.status(400).json({ 
+        error: `Báo cáo tháng ${month}/${year} chưa khả dụng. Tháng này chưa bắt đầu.` 
+      });
+    }
+
+    // Xác định có phải tháng hiện tại không
+    const isCurrentMonth = (year === currentYear && month === currentMonth);
+
+    // Nếu KHÔNG phải tháng hiện tại -> kiểm tra cache
+    if (!isCurrentMonth) {
+      const cachedData = await BaoCaoDoanhThu.findAll({
+        where: { Thang: month, Nam: year }
+      });
+
+      if (cachedData && cachedData.length > 0) {
+        // Đã có trong DB -> lấy ra luôn
+        const totalRevenue = cachedData.length > 0 ? cachedData[0].TongDoanhThu : 0;
+        const result = cachedData.map(item => ({
+          MaTheLoai: item.MaTheLoai,
+          SoLuongBan: item.SoLuongBan,
+          ThanhTien: item.ThanhTien,
+          TiLe: item.TiLe.toFixed(2) + '%'
+        }));
+        return res.json({ data: result, totalRevenue, fromCache: true });
+      }
+    }
+
+    // Chưa có -> tính toán
     const startDate = new Date(year, month - 1, 1, 0, 0, 0);
     const endDate = new Date(year, month, 0, 23, 59, 59);
 
@@ -83,7 +121,22 @@ module.exports = {
         : '0%'
     }));
 
-    res.json({ data: result, totalRevenue });
+    // Lưu vào DB để cache (chỉ lưu nếu không phải tháng hiện tại)
+    if (!isCurrentMonth) {
+      for (const item of result) {
+        await BaoCaoDoanhThu.upsert({
+          MaTheLoai: item.MaTheLoai,
+          Thang: month,
+          Nam: year,
+          SoLuongBan: item.SoLuongBan,
+          ThanhTien: item.ThanhTien,
+          TongDoanhThu: totalRevenue,
+          TiLe: parseFloat(item.TiLe)
+        });
+      }
+    }
+
+    res.json({ data: result, totalRevenue, fromCache: false, isCurrentMonth });
 
   } catch (err) {
     console.error("Lỗi báo cáo doanh thu:", err);
@@ -98,6 +151,45 @@ module.exports = {
       month = parseInt(month);
       year = parseInt(year);
 
+      if (!month || !year) {
+        return res.json({ data: [] });
+      }
+
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth() + 1;
+      
+      // Kiểm tra nếu tháng được chọn là tháng tương lai
+      if (year > currentYear || (year === currentYear && month > currentMonth)) {
+        return res.status(400).json({ 
+          error: `Báo cáo tháng ${month}/${year} chưa khả dụng. Tháng này chưa bắt đầu.` 
+        });
+      }
+
+      // Xác định có phải tháng hiện tại không
+      const isCurrentMonth = (year === currentYear && month === currentMonth);
+
+      // Nếu KHÔNG phải tháng hiện tại -> kiểm tra cache
+      if (!isCurrentMonth) {
+        const cachedData = await BaoCaoCongNo.findAll({
+          where: { Thang: month, Nam: year },
+          include: [{ model: KhachHang, attributes: ['HoVaTen'], required: false }]
+        });
+
+        if (cachedData && cachedData.length > 0) {
+          // Đã có trong DB -> lấy ra luôn
+          const result = cachedData.map(item => ({
+            MaKhachHang: item.MaKhachHang,
+            HoVaTen: item.KhachHang?.HoVaTen || 'Không xác định',
+            NoDau: item.NoDau,
+            NoPhatSinh: item.NoPhatSinh,
+            NoCuoi: item.NoCuoi
+          }));
+          return res.json({ data: result, fromCache: true });
+        }
+      }
+
+      // Chưa có -> tính toán
       const startDate = new Date(year, month - 1, 1, 0, 0, 0);
       const endDate = new Date(year, month, 0, 23, 59, 59);
       
@@ -151,7 +243,22 @@ module.exports = {
         return null;
       }));
       const cleanResult = result.filter(item => item !== null);
-      res.json({ data: cleanResult });
+
+      // Lưu vào DB để cache (chỉ lưu nếu không phải tháng hiện tại)
+      if (!isCurrentMonth) {
+        for (const item of cleanResult) {
+          await BaoCaoCongNo.upsert({
+            MaKhachHang: item.MaKhachHang,
+            Thang: month,
+            Nam: year,
+            NoDau: item.NoDau,
+            NoPhatSinh: item.NoPhatSinh,
+            NoCuoi: item.NoCuoi
+          });
+        }
+      }
+
+      res.json({ data: cleanResult, fromCache: false, isCurrentMonth });
 
     } catch (err) {
       console.error(err);
@@ -170,6 +277,47 @@ async getTonKhoAPI(req, res) {
       return res.json({ data: [] });
     }
 
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    
+    // Kiểm tra nếu tháng được chọn là tháng tương lai
+    if (year > currentYear || (year === currentYear && month > currentMonth)) {
+      return res.status(400).json({ 
+        error: `Báo cáo tháng ${month}/${year} chưa khả dụng. Tháng này chưa bắt đầu.` 
+      });
+    }
+
+    // Xác định có phải tháng hiện tại không
+    const isCurrentMonth = (year === currentYear && month === currentMonth);
+
+    // Nếu KHÔNG phải tháng hiện tại -> kiểm tra cache
+    if (!isCurrentMonth) {
+      const cachedData = await BaoCaoTon.findAll({
+        where: { Thang: month, Nam: year },
+        include: [{ 
+          model: Sach, 
+          attributes: ['MaSach'],
+          include: [{ model: DauSach, attributes: ['TenSach'], required: false }],
+          required: false 
+        }]
+      });
+
+      if (cachedData && cachedData.length > 0) {
+        // Đã có trong DB -> lấy ra luôn
+        const result = cachedData.map(item => ({
+          MaSach: item.MaSach,
+          TenSach: item.Sach?.DauSach?.TenSach || 'Không xác định',
+          TonDau: item.TonDau,
+          Nhap: item.NhapTrongThang,
+          Ban: item.BanTrongThang,
+          TonCuoi: item.TonCuoi
+        }));
+        return res.json({ data: result, fromCache: true });
+      }
+    }
+
+    // Chưa có -> tính toán
     const startDate = new Date(year, month - 1, 1, 0, 0, 0);
     const endDate = new Date(year, month, 0, 23, 59, 59);
 
@@ -232,7 +380,22 @@ async getTonKhoAPI(req, res) {
       })
     );
 
-    res.json({ data: result });
+    // Lưu vào DB để cache (chỉ lưu nếu không phải tháng hiện tại)
+    if (!isCurrentMonth) {
+      for (const item of result) {
+        await BaoCaoTon.upsert({
+          MaSach: item.MaSach,
+          Thang: month,
+          Nam: year,
+          TonDau: item.TonDau,
+          TonCuoi: item.TonCuoi,
+          NhapTrongThang: item.Nhap,
+          BanTrongThang: item.Ban
+        });
+      }
+    }
+
+    res.json({ data: result, fromCache: false, isCurrentMonth });
 
   } catch (err) {
     console.error("Lỗi tồn kho:", err);
