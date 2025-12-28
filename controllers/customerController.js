@@ -33,6 +33,16 @@ const createCustomer = async (req, res) => {
   const { hoTen, ngaySinh, gioiTinh, soDienThoai, diaChi } = req.body;
 
   try {
+    // Kiểm tra xem khách hàng đã tồn tại (chỉ những khách hàng chưa bị xóa mềm)
+    const existingCustomer = await db.KhachHang.findOne({
+      where: { SoDienThoai: soDienThoai, isDeleted: false }
+    });
+
+    if (existingCustomer) {
+      return res.status(409).json({ error: 'Số điện thoại này đã tồn tại.' });
+    }
+
+    // Tạo khách hàng mới
     const newMaKhachHang = await generateNewCustomerId();
 
     const newCustomer = await db.KhachHang.create({

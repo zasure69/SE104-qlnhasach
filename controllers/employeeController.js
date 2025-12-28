@@ -85,6 +85,26 @@ const registerEmployee = async (req, res) => {
       ngayNhanViec,
       ngaySinh,
     } = req.body;
+
+    // Kiểm tra xem nhân viên đã tồn tại (chỉ những nhân viên chưa bị xóa mềm)
+    const existingEmployee = await db.NhanVien.findOne({
+      where: { Username: username, isDeleted: false }
+    });
+
+    if (existingEmployee) {
+      return res.status(409).json({ message: "Username đã tồn tại" });
+    }
+
+    // Kiểm tra số điện thoại đã tồn tại chưa (chỉ những nhân viên chưa bị xóa mềm)
+    const existingPhone = await db.NhanVien.findOne({
+      where: { SoDienThoai: soDienThoai, isDeleted: false }
+    });
+
+    if (existingPhone) {
+      return res.status(409).json({ message: "Số điện thoại đã tồn tại" });
+    }
+
+    // Tạo nhân viên mới
     const newMaNhanVien = await generateNewEmployeeId();
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);

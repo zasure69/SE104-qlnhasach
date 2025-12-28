@@ -2,10 +2,11 @@ const { Op } = require("sequelize");
 const db = require("../models");
 
 // Hàm này trả về giá trị (value) thay vì response (res)
+// Chỉ tìm thể loại chưa bị xóa mềm
 const timMaTheLoai = async (tenTheLoaiInput, options = {}) => {
   try {
     const theLoai = await db.TheLoai.findOne({
-      where: { TenTheLoai: tenTheLoaiInput },
+      where: { TenTheLoai: tenTheLoaiInput, isDeleted: false },
       attributes: ["MaTheLoai"],
       raw: true,
       ...options, // cho phép truyền { transaction }
@@ -17,10 +18,11 @@ const timMaTheLoai = async (tenTheLoaiInput, options = {}) => {
   }
 };
 
+// Chỉ tìm tác giả chưa bị xóa mềm
 const timMaTacGia = async (tenTacGiaInput) => {
   try {
     const tacGia = await db.TacGia.findOne({
-      where: { HoTen: tenTacGiaInput },
+      where: { HoTen: tenTacGiaInput, isDeleted: false },
       attributes: ["MaTacGia"],
       raw: true,
     });
@@ -413,9 +415,9 @@ const createDauSach = async (req, res) => {
       });
     }
 
-    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Thể loại phải tồn tại
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Thể loại phải tồn tại và chưa bị xóa mềm
     const theLoaiExists = await db.TheLoai.findOne({
-      where: { TenTheLoai: TenTheLoai.trim() },
+      where: { TenTheLoai: TenTheLoai.trim(), isDeleted: false },
     });
     if (!theLoaiExists) {
       return res.status(400).json({
@@ -429,14 +431,10 @@ const createDauSach = async (req, res) => {
 
     // Managed transaction: auto-commit/rollback
     await db.sequelize.transaction(async (t) => {
-      // Thể loại: tìm hoặc tạo
+      // Thể loại: tìm (chỉ những thể loại chưa bị xóa mềm)
       finalMaTheLoai = await timMaTheLoai(TenTheLoai, { transaction: t });
       if (!finalMaTheLoai) {
-        finalMaTheLoai = await generateNewMaTheLoai();
-        await db.TheLoai.create(
-          { MaTheLoai: finalMaTheLoai, TenTheLoai },
-          { transaction: t }
-        );
+        throw new Error(`Thể loại "${TenTheLoai}" không tồn tại trong hệ thống.`);
       }
 
       // Tác giả: tìm theo ID (TGxxx) hoặc tên; nếu chưa có thì thêm vào bảng TacGia
@@ -447,17 +445,20 @@ const createDauSach = async (req, res) => {
 
         // Nếu là mã TGxxx
         if (typeof item === "string" && /^TG\d+$/i.test(item)) {
-          const found = await db.TacGia.findByPk(item, { transaction: t });
+          const found = await db.TacGia.findOne({
+            where: { MaTacGia: item, isDeleted: false },
+            transaction: t
+          });
           if (found) {
             maTacGia = found.MaTacGia;
           } else {
-            throw new Error(`Mã tác giả ${item} không tồn tại`);
+            throw new Error(`Mã tác giả ${item} không tồn tại hoặc đã bị xóa`);
           }
         } else {
           // Tên tác giả
           const tenTG = String(item).trim();
           let found = await db.TacGia.findOne({
-            where: { HoTen: tenTG },
+            where: { HoTen: tenTG, isDeleted: false },
             transaction: t,
           });
           if (!found) {
@@ -479,9 +480,9 @@ const createDauSach = async (req, res) => {
         throw new Error("Không thể xử lý danh sách tác giả");
       }
 
-      // KIỂM TRA TRÙNG LẶP: Tìm đầu sách có cùng tên
+      // KIỂM TRA TRÙNG LẶP: Tìm đầu sách có cùng tên (chỉ những đầu sách chưa bị xóa)
       const existingDauSachs = await db.DauSach.findAll({
-        where: { TenSach: TenSach.trim() },
+        where: { TenSach: TenSach.trim(), isDeleted: false },
         include: [
           {
             model: db.TacGia,
@@ -513,7 +514,7 @@ const createDauSach = async (req, res) => {
         }
       }
 
-      // Tạo đầu sách
+      // Tạo đầu sách mới
       newMaDauSach = await generateNewDauSachId();
       await db.DauSach.create(
         {
@@ -775,15 +776,16 @@ const createSach = async (req, res) => {
       return res.status(400).json({ error: "Vui lòng chọn Đầu sách" });
     }
 
-    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Đầu sách phải tồn tại
-    const dauSach = await db.DauSach.findByPk(MaDauSach);
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Đầu sách phải tồn tại và chưa bị xóa mềm
+    const dauSach = await db.DauSach.findOne({
+      where: { MaDauSach: MaDauSach, isDeleted: false }
+    });
     if (!dauSach) {
       return res.status(404).json({
-        error: `Đầu sách với mã "${MaDauSach}" không tồn tại trong hệ thống`,
+        error: `Đầu sách với mã "${MaDauSach}" không tồn tại hoặc đã bị xóa`,
       });
     }
 
-    const newMaSach = await generateNewSachId();
     const parsedNamXB = NamXB ? parseInt(NamXB, 10) : null;
     const currentYear = new Date().getFullYear();
 
@@ -800,12 +802,13 @@ const createSach = async (req, res) => {
     }
     const normalizedNamXB = parsedNamXB;
 
-    // KIỂM TRA TRÙNG LẶP: Sách có cùng đầu sách, NXB và năm XB
+    // KIỂM TRA TRÙNG LẶP: Sách có cùng đầu sách, NXB và năm XB (chỉ những sách chưa bị xóa)
     const existingSach = await db.Sach.findOne({
       where: {
         MaDauSach: MaDauSach,
         NhaXB: NhaXB || null,
         NamXB: normalizedNamXB,
+        isDeleted: false,
       },
     });
 
@@ -819,6 +822,7 @@ const createSach = async (req, res) => {
     }
 
     // Số lượng tồn ban đầu là 0, sẽ được cập nhật khi có phiếu nhập
+    const newMaSach = await generateNewSachId();
     const newSach = await db.Sach.create({
       MaSach: newMaSach,
       MaDauSach,
@@ -963,10 +967,11 @@ const createTheLoai = async (req, res) => {
       return res.status(400).json({ error: "Vui lòng nhập tên thể loại" });
     }
 
-    // Check if already exists
+    // Kiểm tra xem thể loại đã tồn tại (chỉ những thể loại chưa bị xóa mềm)
     const exists = await db.TheLoai.findOne({
-      where: { TenTheLoai: TenTheLoai.trim() },
+      where: { TenTheLoai: TenTheLoai.trim(), isDeleted: false },
     });
+    
     if (exists) {
       return res.status(400).json({ error: "Thể loại này đã tồn tại" });
     }
@@ -1075,14 +1080,6 @@ const createTacGia = async (req, res) => {
       return res.status(400).json({ error: "Vui lòng nhập họ tên tác giả" });
     }
 
-    // Check if already exists
-    const exists = await db.TacGia.findOne({
-      where: { HoTen: HoTen.trim() },
-    });
-    if (exists) {
-      return res.status(400).json({ error: "Tác giả này đã tồn tại" });
-    }
-
     // Validate NamSinh if provided
     const namSinhInt = NamSinh ? parseInt(NamSinh, 10) : null;
     const currentYear = new Date().getFullYear();
@@ -1094,6 +1091,15 @@ const createTacGia = async (req, res) => {
       return res
         .status(400)
         .json({ error: `Năm sinh không hợp lệ (1800-${currentYear})` });
+    }
+
+    // Kiểm tra xem tác giả đã tồn tại (chỉ những tác giả chưa bị xóa mềm)
+    const exists = await db.TacGia.findOne({
+      where: { HoTen: HoTen.trim(), isDeleted: false },
+    });
+    
+    if (exists) {
+      return res.status(400).json({ error: "Tác giả này đã tồn tại" });
     }
 
     const newMaTacGia = await generateNewMaTacGia();

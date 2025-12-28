@@ -107,12 +107,24 @@ const create = async (req, res) => {
   try {
     const minStock = await getMinStockRule(); // Lấy quy định tồn tối thiểu
 
+    // KIỂM TRA KHÁCH HÀNG TỒN TẠI VÀ CHƯA BỊ XÓA MỀM
+    const khachHang = await KhachHang.findOne({
+      where: { MaKhachHang: MaKhachHang, isDeleted: false },
+      transaction: t
+    });
+    if (!khachHang) {
+      throw new Error(`Khách hàng có mã ${MaKhachHang} không tồn tại hoặc đã bị xóa.`);
+    }
+
     // 1. KIỂM TRA TỒN KHO VÀ QUY ĐỊNH
     for (const detail of Details) {
-      const sach = await Sach.findByPk(detail.MaSach, { transaction: t });
+      const sach = await Sach.findOne({
+        where: { MaSach: detail.MaSach, isDeleted: false },
+        transaction: t
+      });
 
       if (!sach) {
-        throw new Error(`Sách có mã ${detail.MaSach} không tồn tại.`);
+        throw new Error(`Sách có mã ${detail.MaSach} không tồn tại hoặc đã bị xóa.`);
       }
 
       const currentStock = sach.SoLuongTon;

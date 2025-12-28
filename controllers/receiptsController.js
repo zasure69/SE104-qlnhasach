@@ -49,11 +49,15 @@ const createReceipt = async (req, res) => {
     const t = await sequelize.transaction();
 
     try {
-        // 1. Kiểm tra Khách hàng và Số tiền thu
-        const customer = await KhachHang.findByPk(MaKhachHang, { attributes: ['TongNo'], transaction: t });
+        // 1. Kiểm tra Khách hàng (phải tồn tại và chưa bị xóa mềm) và Số tiền thu
+        const customer = await KhachHang.findOne({
+            where: { MaKhachHang: MaKhachHang, isDeleted: false },
+            attributes: ['TongNo'],
+            transaction: t
+        });
         const thuTien = parseFloat(SoTienThu);
 
-        if (!customer) { await t.rollback(); return res.status(404).json({ message: 'Không tìm thấy khách hàng.' }); }
+        if (!customer) { await t.rollback(); return res.status(404).json({ message: 'Không tìm thấy khách hàng hoặc khách hàng đã bị xóa.' }); }
         if (thuTien <= 0) { await t.rollback(); return res.status(400).json({ message: 'Số tiền thu phải lớn hơn 0.' }); }
 
         // --- CHECK LOGIC MỚI: KHÔNG ĐƯỢC THU QUÁ SỐ NỢ ---
