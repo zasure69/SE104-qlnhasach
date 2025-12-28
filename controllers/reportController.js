@@ -14,6 +14,7 @@ module.exports = {
     try {
             res.render("report", { 
                 username: req.user.username,
+                role: req.user.role,
                 bcton: [], 
                 bccongno: [],
                 bcdoanhthu: []
