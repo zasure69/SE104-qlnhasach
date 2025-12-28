@@ -980,6 +980,21 @@ const deleteSach = async (req, res) => {
       });
     }
 
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có chi tiết kiểm kê liên kết không
+    const ctKiemKeLienKet = await db.ChiTietKiemKe.findOne({
+      where: { MaSach: maSach },
+      include: [{
+        model: db.PhieuKiemKe,
+        where: { isDeleted: false },
+        required: true,
+      }],
+    });
+    if (ctKiemKeLienKet) {
+      return res.status(400).json({
+        error: `Không thể xóa sách "${tenSach}". Sách này đã có trong phiếu kiểm kê.`,
+      });
+    }
+
     // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
     sach.isDeleted = true;
     await sach.save();
