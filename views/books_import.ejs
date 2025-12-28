@@ -925,6 +925,7 @@
                 <th>STT</th>
                 <th>Mã Phiếu</th>
                 <th>Ngày Nhập</th>
+                <th>Mã NV</th>
                 <th>Tổng Tiền</th>
                 <th></th>
               </tr>
@@ -943,6 +944,9 @@
                         month: '2-digit' , year: 'numeric' }) %>
                     </td>
                     <td>
+                      <%= receipt.MaNhanVien || '---' %>
+                    </td>
+                    <td>
                       <%= new Intl.NumberFormat('vi-VN').format(receipt.TongTien) %>
                     </td>
                     <td>
@@ -959,7 +963,7 @@
                   <% }) %>
                     <% } else { %>
                       <tr>
-                        <td colspan="5" style="text-align: center">
+                        <td colspan="6" style="text-align: center">
                           Chưa có phiếu nhập sách nào.
                         </td>
                       </tr>
@@ -1270,6 +1274,18 @@
 
 
       // --- 2. HÀM XỬ LÝ BẢNG ---
+
+      // Hàm cập nhật lại STT cho bảng master (danh sách phiếu nhập)
+      function updateMasterTableSTT() {
+        const tbody = document.querySelector('#master-table tbody');
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach((row, index) => {
+          // Bỏ qua dòng thông báo "Chưa có phiếu nhập sách nào"
+          if (row.cells.length > 1) {
+            row.cells[0].textContent = index + 1;
+          }
+        });
+      }
 
       // Hàm tính tổng tiền
       window.updateTotal = function (tableId, totalId) {
@@ -1601,61 +1617,66 @@
         });
       }
       let isSaveAndReset = false;
-      // Mở Modal Sửa
-      const viewDetailBtns = document.querySelectorAll('.view-detail-btn');
-      viewDetailBtns.forEach(btn => {
-        btn.addEventListener('click', async function () {
-          const id = this.dataset.id;
-          // 1. Gọi API lấy chi tiết phiếu
-          const result = await apiCall(`/api/import/${id}`);
+      
+      // Mở Modal Sửa - Sử dụng event delegation để xử lý cả nút được thêm động
+      async function openEditModal(id) {
+        // 1. Gọi API lấy chi tiết phiếu
+        const result = await apiCall(`/api/import/${id}`);
 
-          if (!result.success) {
-            showToast('Không thể tải dữ liệu phiếu nhập!', 'error');
-            return;
-          }
+        if (!result.success) {
+          showToast('Không thể tải dữ liệu phiếu nhập!', 'error');
+          return;
+        }
 
-          const receipt = result.data.receipt;
+        const receipt = result.data.receipt;
 
-          // 2. Điền thông tin chung (Header)
-          document.getElementById('edit-ma-phieu').value = receipt.MaPhieuNhap;
-          document.getElementById('edit-ngay-nhap').value = receipt.NgayNhapPhieu ? receipt.NgayNhapPhieu.substring(0, 10) : '';
-          document.getElementById('edit-ma-nv').value = receipt.MaNhanVien || '';
+        // 2. Điền thông tin chung (Header)
+        document.getElementById('edit-ma-phieu').value = receipt.MaPhieuNhap;
+        document.getElementById('edit-ngay-nhap').value = receipt.NgayNhapPhieu ? receipt.NgayNhapPhieu.substring(0, 10) : '';
+        document.getElementById('edit-ma-nv').value = receipt.MaNhanVien || '';
 
-          // 3. Điền chi tiết sách (Table)
-          const tbody = document.querySelector('#edit-detail-table tbody');
-          tbody.innerHTML = ''; // Xóa dữ liệu cũ/dummy
+        // 3. Điền chi tiết sách (Table)
+        const tbody = document.querySelector('#edit-detail-table tbody');
+        tbody.innerHTML = ''; // Xóa dữ liệu cũ/dummy
 
-          if (receipt.ChiTiet && receipt.ChiTiet.length > 0) {
-            receipt.ChiTiet.forEach(item => {
-              // Lấy tên sách từ quan hệ lồng nhau: CT_PNS -> Sach -> DauSach -> TenSach
-              // Cần kiểm tra null an toàn (optional chaining)
-              const tenSach = item.Sach?.DauSach?.TenSach || "Không xác định";
+        if (receipt.ChiTiet && receipt.ChiTiet.length > 0) {
+          receipt.ChiTiet.forEach(item => {
+            // Lấy tên sách từ quan hệ lồng nhau: CT_PNS -> Sach -> DauSach -> TenSach
+            // Cần kiểm tra null an toàn (optional chaining)
+            const tenSach = item.Sach?.DauSach?.TenSach || "Không xác định";
 
-              addRowToDetailTable('edit-detail-table', 'edit-total-amount', {
-                maSach: item.MaSach,
-                tenSach: tenSach,
-                soLuong: item.SoLuong,
-                donGia: item.DonGiaNhap,
-                donGiaBan: item.DonGiaBan
-              });
+            addRowToDetailTable('edit-detail-table', 'edit-total-amount', {
+              maSach: item.MaSach,
+              tenSach: tenSach,
+              soLuong: item.SoLuong,
+              donGia: item.DonGiaNhap,
+              donGiaBan: item.DonGiaBan
             });
-          }
+          });
+        }
 
-          // 4. Lưu trạng thái ban đầu để dùng cho nút "Đặt lại"
-          setTimeout(() => { originalEditState = getEditState(); }, 100);
+        // 4. Lưu trạng thái ban đầu để dùng cho nút "Đặt lại"
+        setTimeout(() => { originalEditState = getEditState(); }, 100);
 
-          // 5. Hiển thị Modal
-          editModal.style.display = 'flex';
-        });
+        // 5. Hiển thị Modal
+        editModal.style.display = 'flex';
+      }
+      
+      // Event delegation cho nút Chi tiết (hoạt động với cả nút được thêm động)
+      document.getElementById('master-table').addEventListener('click', async function(e) {
+        const viewBtn = e.target.closest('.view-detail-btn');
+        if (viewBtn) {
+          const id = viewBtn.dataset.id;
+          await openEditModal(id);
+        }
       });
 
       // --- LOGIC NÚT "THÊM MỚI" (SMART RESET) - MODAL ADD ---
       const btnResetAdd = document.getElementById('btn-custom-reset');
       if (btnResetAdd) {
         btnResetAdd.addEventListener('click', () => {
-          // Kiểm tra xem đã nhập gì chưa (Check mã NV hoặc có sách trong bảng)
-          const hasData = document.getElementById('add-ma-nv').value.trim() !== '' ||
-            document.querySelector('#add-detail-table tbody').rows.length > 0;
+          // Kiểm tra xem đã nhập gì chưa (chỉ kiểm tra bảng sách vì mã NV tự động lấy từ tài khoản)
+          const hasData = document.querySelector('#add-detail-table tbody').rows.length > 0;
 
           if (hasData) {
             if (confirm('Bạn đang nhập dở phiếu nhập sách. Bạn có muốn LƯU phiếu này không?\n\n- OK: Lưu phiếu.\n- Cancel: Xóa trắng để nhập phiếu khác.')) {
@@ -1676,10 +1697,13 @@
       }
 
       function resetAddForm() {
-        document.getElementById('add-ma-nv').value = '';
+        // Không reset mã nhân viên vì nó tự động lấy từ tài khoản hiện tại
         document.getElementById('add-ngay-nhap').valueAsDate = new Date();
         document.getElementById('add-input-ma-sach').value = '';
         document.getElementById('add-input-ten-sach').value = '';
+        document.getElementById('add-input-so-luong').value = '<%= soLuongNhapToiThieu %>';
+        document.getElementById('add-input-don-gia').value = '';
+        document.getElementById('add-input-don-gia-ban').value = '';
         document.querySelector('#add-detail-table tbody').innerHTML = '';
         document.getElementById('add-total-amount').textContent = '0';
       }
@@ -1777,13 +1801,10 @@
           const tbody = document.querySelector('#master-table tbody');
 
           // Xóa dòng "Chưa có phiếu nhập" nếu bảng đang trống
-          // (Kiểm tra xem dòng đầu tiên có phải là dòng thông báo không)
           const firstRow = tbody.rows[0];
           if (firstRow && firstRow.cells.length === 1) {
             firstRow.remove();
           }
-
-          const stt = tbody.rows.length + 1;
 
           // Format ngày: YYYY-MM-DD -> DD/MM/YYYY
           let dateDisplay = ngayNhap;
@@ -1795,16 +1816,18 @@
           // Tính tổng tiền từ mảng chiTiet vừa gửi đi
           const tongTien = chiTiet.reduce((sum, item) => sum + (item.SoLuong * item.DonGiaNhap), 0);
 
-          // Lấy Mã Phiếu từ phản hồi API (Giả sử API trả về object chứa MaPhieuNhap)
-          // Bạn cần đảm bảo Backend trả về { success: true, data: { MaPhieuNhap: 'PN...', ... } }
-          const newId = result.data.MaPhieuNhap || result.data.receipt?.MaPhieuNhap || '---';
+          // Lấy Mã Phiếu từ phản hồi API 
+          // API trả về: { maPhieu: 'PN...', tongTien: ... }
+          const newId = result.data.maPhieu || result.data.MaPhieuNhap || '---';
 
           // 2. Tạo dòng HTML mới
+          const maNVDisplay = document.getElementById('add-ma-nv').value || '---';
           const newRow = document.createElement('tr');
           newRow.innerHTML = `
-                          <td>${stt}</td>
+                          <td>1</td>
                           <td>${newId}</td>
                           <td>${dateDisplay}</td>
+                          <td>${maNVDisplay}</td>
                           <td>${new Intl.NumberFormat('vi-VN').format(tongTien)}</td>
                           <td>
                               <button class="btn btn-sm btn-secondary view-detail-btn" data-id="${newId}">
@@ -1817,8 +1840,15 @@
                           </td>
                       `;
 
-          // 3. Thêm vào cuối bảng
-          tbody.appendChild(newRow);
+          // 3. Thêm vào ĐẦU bảng (vì danh sách sắp xếp theo ngày mới nhất)
+          if (tbody.firstChild) {
+            tbody.insertBefore(newRow, tbody.firstChild);
+          } else {
+            tbody.appendChild(newRow);
+          }
+          
+          // 4. Cập nhật lại STT cho tất cả các dòng (đánh số lại từ 1)
+          updateMasterTableSTT();
         } else {
           showToast(result.error || 'Có lỗi xảy ra!', 'error');
         }
@@ -2002,19 +2032,23 @@
         masterTable.addEventListener('click', async function (e) {
           if (e.target.classList.contains('delete-icon') || e.target.closest('.delete-icon')) {
             const row = e.target.closest('tr');
-            const maPhieu = row.cells[1].textContent.trim();
+            const maPhieu = row.cells[1].textContent.trim(); // Mã phiếu vẫn ở cột index 1
 
             if (confirm(`Xóa phiếu nhập ${maPhieu}?`)) {
               const result = await apiCall(`/api/import/delete/${maPhieu}`, 'DELETE');
               if (result.success) {
                 row.remove();
                 showToast('Xóa phiếu nhập thành công!');
+                
+                // Cập nhật lại STT sau khi xóa
+                updateMasterTableSTT();
+                
                 const tableBody = document.getElementById('master-table').getElementsByTagName('tbody')[0];
                 if (tableBody.rows.length === 0) {
                   // Nếu <tbody> không còn hàng nào
                   const newRow = tableBody.insertRow(); // Thêm 1 hàng mới
-                  // Thêm ô "Không có nhân viên nào"
-                  newRow.innerHTML = `<td colspan="5" style="text-align: center;">Chưa có phiếu nhập sách nào.</td>`;
+                  // Thêm ô "Không có phiếu nhập sách nào"
+                  newRow.innerHTML = `<td colspan="6" style="text-align: center;">Chưa có phiếu nhập sách nào.</td>`;
                 }
               } else {
                 showToast(result.error || 'Có lỗi xảy ra!', 'error');
