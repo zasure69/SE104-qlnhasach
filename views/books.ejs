@@ -2115,7 +2115,7 @@
           if (!row) return;
 
           const maDS = row.dataset.id;
-          const tenSach = row.cells[2].textContent;
+          const tenSach = row.cells[2].textContent.trim();
 
           if (!confirm(`Bạn có chắc chắn muốn xóa đầu sách: ${tenSach}?`)) return;
 
@@ -2421,7 +2421,7 @@
           if (!row) return;
 
           const maSach = row.dataset.id;
-          const tenSach = row.cells[2].textContent;
+          const tenSach = row.cells[2].textContent.trim();
 
           if (!confirm(`Bạn có chắc chắn muốn xóa sách: ${tenSach}?`)) return;
 
@@ -2665,7 +2665,7 @@
           if (!row) return;
 
           const maTheLoai = row.dataset.id;
-          const tenTheLoai = row.cells[2].textContent;
+          const tenTheLoai = row.cells[2].textContent.trim();
 
           if (!confirm(`Bạn có chắc chắn muốn xóa thể loại: ${tenTheLoai}?`)) return;
 
@@ -2918,7 +2918,7 @@
           if (!row) return;
 
           const maTacGia = row.dataset.id;
-          const hoTen = row.cells[2].textContent;
+          const hoTen = row.cells[2].textContent.trim();
 
           if (!confirm(`Bạn có chắc chắn muốn xóa tác giả: ${hoTen}?`)) return;
 
