@@ -109,6 +109,10 @@ const getImportReceiptById = async (req, res) => {
             },
           ],
         },
+        {
+          model: db.NhanVien,
+          attributes: ["MaNhanVien", "HoTen"],
+        },
       ],
       raw: false,
     });

@@ -1,6 +1,6 @@
 // controllers/receiptsController.js
 const db = require('../models'); 
-const { PhieuThuTien, KhachHang, sequelize } = db;
+const { PhieuThuTien, KhachHang, NhanVien, sequelize } = db;
 const { Op } = require('sequelize'); // Cần cho các truy vấn phức tạp
 
 // =============================================================
@@ -172,13 +172,19 @@ const deleteReceipt = async (req, res) => {
 const getReceiptDetail = async (req, res) => {
     const MaPhieuThu = req.params.MaPhieuThu;
     try {
-        // Lấy chi tiết Phiếu Thu và thông tin Khách hàng liên quan
+        // Lấy chi tiết Phiếu Thu và thông tin Khách hàng, Nhân viên liên quan
         const receipt = await PhieuThuTien.findByPk(MaPhieuThu, {
-            include: [{ 
-                model: KhachHang, 
-                as: 'KhachHang', 
-                attributes: ['HoVaTen','DiaChi','SoDienThoai', 'TongNo'] 
-            }]
+            include: [
+                { 
+                    model: KhachHang, 
+                    as: 'KhachHang', 
+                    attributes: ['HoVaTen','DiaChi','SoDienThoai', 'TongNo'] 
+                },
+                {
+                    model: NhanVien,
+                    attributes: ['MaNhanVien', 'HoTen']
+                }
+            ]
         });
 
         if (!receipt) {

@@ -1,26 +1,27 @@
 <!DOCTYPE html>
 <html lang="vi">
- 
+
 
 <head>
-       <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-       <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Báo cáo tổng kết</title> 
-    
-    <!-- Link Font Awesome để có icon --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <title>Báo cáo tổng kết</title>
+
+    <!-- Link Font Awesome để có icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         /* * --- PHẦN CSS --- 
          * (Giữ nguyên CSS layout, tabs và thêm CSS cho phần filter tháng)
          */
 
         :root {
-            --primary-color: #2c3e50; 
-            --secondary-color: #3498db; 
-            --green-accent: #1EE4AC; 
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --green-accent: #1EE4AC;
             --green-accent-hover: #1ac096;
             --light-bg: #f0f4f8;
             --white-bg: #ffffff;
@@ -32,31 +33,119 @@
             --tab-inactive-text: #6c757d;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: var(--light-bg); color: var(--text-dark); }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+        }
 
         /* --- Layout chính --- */
-        .dashboard-container { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; transition: grid-template-columns 0.3s ease-in-out; }
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+            transition: grid-template-columns 0.3s ease-in-out;
+        }
 
         /* --- Sidebar --- */
-        .sidebar { background-color: var(--primary-color); color: var(--text-white); padding: 1.5rem; display: flex; flex-direction: column; transition: all 0.3s ease-in-out; overflow-x: hidden; }
-        .sidebar-header { text-align: center; margin-bottom: 2.5rem; }
-        .sidebar-header i { font-size: 3rem; margin-bottom: 0.5rem; }
-        .sidebar-header h2 { font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-        .sidebar-nav ul { list-style: none; }
-        .sidebar-nav li { margin-bottom: 0.5rem; }
-        .sidebar-nav a { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; border-radius: 8px; text-decoration: none; color: var(--text-white); font-weight: 500; transition: background-color 0.2s ease; }
-        .sidebar-nav a i { width: 20px; text-align: center; }
-        .sidebar-nav a:hover { background-color: rgba(255, 255, 255, 0.1); }
-        .sidebar-nav a.active { background-color: var(--secondary-color); color: white; }
+        .sidebar {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease-in-out;
+            overflow-x: hidden;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .sidebar-header i {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-white);
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+
+        .sidebar-nav a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-nav a.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
 
         /* --- Nội dung chính --- */
-        .main-content { background-color: var(--light-bg); padding: 1.5rem; overflow-y: auto; }
+        .main-content {
+            background-color: var(--light-bg);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
 
         /* --- Thanh Header --- */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background-color: var(--white-bg); border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); margin-bottom: 1.5rem; }
-        .top-bar-left { display: flex; align-items: center; gap: 1rem; }
-        .top-bar-left h1 { font-size: 1.75rem; font-weight: 700; margin: 0; }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: var(--white-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .top-bar-left h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
         .user-menu {
             font-size: 0.9rem;
             font-weight: 500;
@@ -67,21 +156,26 @@
 
         .user-menu .user-trigger {
             cursor: pointer;
-            display: inline-block; /* Giúp dễ click hơn */
+            display: inline-block;
+            /* Giúp dễ click hơn */
         }
 
         .user-menu .dropdown-menu {
-            display: none; /* Ẩn ban đầu */
+            display: none;
+            /* Ẩn ban đầu */
             position: absolute;
-            top: 100%; /* Hiển thị ngay bên dưới */
+            top: 100%;
+            /* Hiển thị ngay bên dưới */
             right: 0;
             background-color: var(--white-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            min-width: 150px; /* Độ rộng tối thiểu */
+            min-width: 150px;
+            /* Độ rộng tối thiểu */
             z-index: 1000;
-            overflow: hidden; /* Để bo góc */
+            overflow: hidden;
+            /* Để bo góc */
         }
 
         /* Hiển thị menu khi di chuột vào .user-menu */
@@ -102,7 +196,8 @@
 
         .user-menu .dropdown-menu a:hover {
             background-color: var(--light-bg);
-            color: var(--red-accent, #e74c3c); /* Dùng màu đỏ cho logout */
+            color: var(--red-accent, #e74c3c);
+            /* Dùng màu đỏ cho logout */
         }
 
         .user-menu .dropdown-menu a i {
@@ -115,39 +210,82 @@
         .user-menu .dropdown-menu a:hover i {
             color: var(--red-accent, #e74c3c);
         }
-        .menu-toggle { font-size: 1.5rem; background: none; border: none; color: var(--text-dark); cursor: pointer; padding: 0.25rem; line-height: 1; }
+
+        .menu-toggle {
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            cursor: pointer;
+            padding: 0.25rem;
+            line-height: 1;
+        }
 
         /* --- Vùng nội dung (Tabs) --- */
-        .content-wrapper { padding: 0; background-color: var(--white-bg); border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); overflow: hidden; }
-        
+        .content-wrapper {
+            padding: 0;
+            background-color: var(--white-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
         /* --- Tab Navigation --- */
-        .tab-nav { display: flex; background-color: var(--light-bg); border-bottom: 1px solid var(--border-color); }
-        .tab-button { 
-            padding: 1rem 1.5rem; 
-            font-size: 1rem; 
-            font-weight: 600; 
-            cursor: pointer; 
-            border: none; 
-            background-color: transparent; 
-            color: var(--tab-inactive-text); 
-            border-bottom: 3px solid transparent; 
-            border-top-left-radius: 8px; 
+        .tab-nav {
+            display: flex;
+            background-color: var(--light-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-button {
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            color: var(--tab-inactive-text);
+            border-bottom: 3px solid transparent;
+            border-top-left-radius: 8px;
             border-top-right-radius: 8px;
-            transition: color 0.2s ease, background-color 0.2s ease, border-bottom-color 0.2s ease; 
-            white-space: nowrap; /* Ngăn xuống dòng */
+            transition: color 0.2s ease, background-color 0.2s ease, border-bottom-color 0.2s ease;
+            white-space: nowrap;
+            /* Ngăn xuống dòng */
         }
-        .tab-button.active { 
-            color: var(--secondary-color); 
-            border-bottom-color: var(--secondary-color); 
-            background-color: var(--white-bg); 
+
+        .tab-button.active {
+            color: var(--secondary-color);
+            border-bottom-color: var(--secondary-color);
+            background-color: var(--white-bg);
         }
-        .tab-button:hover:not(.active) { color: var(--text-dark); }
+
+        .tab-button:hover:not(.active) {
+            color: var(--text-dark);
+        }
 
         /* --- Tab Content Panes --- */
-        .tab-content { padding: 1.5rem; }
-        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
-        .tab-pane.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .tab-content {
+            padding: 1.5rem;
+        }
+
+        .tab-pane {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
 
         /* --- Bộ lọc Tháng/Năm --- */
         .report-filter {
@@ -156,198 +294,377 @@
             gap: 0.75rem;
             margin-bottom: 1.5rem;
         }
+
         .report-filter label {
             font-weight: 600;
             font-size: 0.9rem;
             color: var(--text-light);
         }
+
         /* Wrapper cho input date có icon lịch */
         .date-input-wrapper {
             position: relative;
-            display: inline-block; /* Để wrapper co lại theo input */
+            display: inline-block;
+            /* Để wrapper co lại theo input */
         }
-        .date-input-wrapper input[type="month"] { /* Sử dụng type month */
-            padding: 0.6rem 0.75rem 0.6rem 0.75rem; /* Điều chỉnh padding */
+
+        .date-input-wrapper input[type="month"] {
+            /* Sử dụng type month */
+            padding: 0.6rem 0.75rem 0.6rem 0.75rem;
+            /* Điều chỉnh padding */
             border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 0.9rem;
-            min-width: 150px; /* Chiều rộng tối thiểu */
+            min-width: 150px;
+            /* Chiều rộng tối thiểu */
         }
-         .date-input-wrapper input[type="month"]:focus {
-             outline: none;
-             border-color: var(--secondary-color);
-             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-         }
+
+        .date-input-wrapper input[type="month"]:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
         .date-input-wrapper .calendar-icon {
             position: absolute;
             right: 0.75rem;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-light);
-            pointer-events: none; 
+            pointer-events: none;
         }
 
         /* --- Bảng Báo cáo --- */
-        .table-responsive { overflow-x: auto; }
-        .data-table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        .data-table th, .data-table td { padding: 0.85rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; vertical-align: middle; }
-        .data-table thead th { background-color: #f9f9f9; font-weight: 600; color: var(--text-light); }
-        .data-table tbody tr:hover { background-color: #f5f5f5; }
-        
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        .data-table thead th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
         /* SỬA: CSS cho Tổng doanh thu */
         .report-summary {
             text-align: right;
             font-weight: 700;
-            font-size: 1.1rem; /* Tăng cỡ chữ */
+            font-size: 1.1rem;
+            /* Tăng cỡ chữ */
             color: var(--text-dark);
-            margin-bottom: 1.5rem; /* Thêm khoảng cách dưới */
-            padding-top: 0; /* Xóa padding top */
-            margin-top: 0; /* Xóa margin top */
-            border-top: none; /* Xóa border top */
+            margin-bottom: 1.5rem;
+            /* Thêm khoảng cách dưới */
+            padding-top: 0;
+            /* Xóa padding top */
+            margin-top: 0;
+            /* Xóa margin top */
+            border-top: none;
+            /* Xóa border top */
         }
-        /* ====== GIỚI HẠN KÍCH THƯỚC BIỂU ĐỒ TRÒN ====== */
-.chart-small {
-    width: 450px;        /*chỉnh nhỏ / to tại đây */
-    margin: 25px auto;   /* căn giữa */
-}
 
-.chart-small canvas {
-    width: 100% !important;
-    height: auto !important;
-}
+        /* ====== GIỚI HẠN KÍCH THƯỚC BIỂU ĐỒ TRÒN ====== */
+        .chart-small {
+            width: 450px;
+            /*chỉnh nhỏ / to tại đây */
+            margin: 25px auto;
+            /* căn giữa */
+        }
+
+        .chart-small canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+
         /* --- CSS NHÃN BẢNG KẾT QUẢ --- */
         .table-caption {
-            font-size: 1.1rem;         /* Cỡ chữ vừa phải */
-            font-weight: 700;          /* In đậm */
+            font-size: 1.1rem;
+            /* Cỡ chữ vừa phải */
+            font-weight: 700;
+            /* In đậm */
             color: var(--primary-color);
-            margin-bottom: 0.5rem;     /* Cách bảng một chút xíu thôi (khoảng 8px) */
-            text-transform: uppercase; /* Chữ in hoa */
-            letter-spacing: 0.05rem;   /* Dãn chữ nhẹ cho thoáng */
+            margin-bottom: 0.5rem;
+            /* Cách bảng một chút xíu thôi (khoảng 8px) */
+            text-transform: uppercase;
+            /* Chữ in hoa */
+            letter-spacing: 0.05rem;
+            /* Dãn chữ nhẹ cho thoáng */
         }
+
         /* --- THÊM: CSS CHO LOADER VÀ TOAST --- */
-        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.7); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .loader-overlay.show { display: flex; }
-        .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--secondary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 2001; display: flex; flex-direction: column; gap: 0.5rem; }
-        .toast { background-color: var(--white-bg); padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 0.75rem; opacity: 0; transform: translateX(100%); transition: all 0.3s ease; border-left: 5px solid; }
-        .toast.show { opacity: 1; transform: translateX(0); }
-        .toast.success { border-left-color: var(--green-accent); }
-        .toast.success .toast-icon { color: var(--green-accent); }
-        .toast.error { border-left-color: var(--red-accent); }
-        .toast.error .toast-icon { color: var(--red-accent); }
-        .toast-message { font-size: 0.9rem; font-weight: 500; color: var(--text-dark); }
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .loader-overlay.show {
+            display: flex;
+        }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 2001;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            background-color: var(--white-bg);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            border-left: 5px solid;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left-color: var(--green-accent);
+        }
+
+        .toast.success .toast-icon {
+            color: var(--green-accent);
+        }
+
+        .toast.error {
+            border-left-color: var(--red-accent);
+        }
+
+        .toast.error .toast-icon {
+            color: var(--red-accent);
+        }
+
+        .toast-message {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
         .report-filter-and-buttons {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
-}
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
 
-.filter-item {
-    display: flex;
-    flex-direction: column;
-}
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+        }
 
-.btn-green {
-    background-color: #1abc9c;
-    color: white;
-    padding: 12px 0;
-    flex: 1;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 14px;
-    cursor: pointer;
-    transition: 0.2s;
-}
+        .btn-green {
+            background-color: #1abc9c;
+            color: white;
+            padding: 12px 0;
+            flex: 1;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
 
-.btn-green:hover {
-    background-color: #17a589;
-}
+        .btn-green:hover {
+            background-color: #17a589;
+        }
+
         /* --- HẾT CSS MỚI --- */
 
         /* --- Sidebar Collapsed State --- */
         .dashboard-container.sidebar-collapsed {
-          grid-template-columns: 70px 1fr;
+            grid-template-columns: 70px 1fr;
         }
 
         .dashboard-container.sidebar-collapsed .sidebar {
-          width: 70px;
-          padding: 1rem 0.5rem;
+            width: 70px;
+            padding: 1rem 0.5rem;
         }
 
         .dashboard-container.sidebar-collapsed .sidebar-header h2,
         .dashboard-container.sidebar-collapsed .sidebar-nav a span {
-          display: none;
+            display: none;
         }
 
         .dashboard-container.sidebar-collapsed .sidebar-header {
-          margin-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .dashboard-container.sidebar-collapsed .sidebar-header i {
-          font-size: 2rem;
+            font-size: 2rem;
         }
 
         .dashboard-container.sidebar-collapsed .sidebar-nav a {
-          justify-content: center;
-          padding: 0.85rem 0.5rem;
+            justify-content: center;
+            padding: 0.85rem 0.5rem;
         }
 
         .dashboard-container.sidebar-collapsed .sidebar-nav a i {
-          width: auto;
-          font-size: 1.2rem;
+            width: auto;
+            font-size: 1.2rem;
         }
 
         /* --- Responsive Design --- */
         @media (min-width: 992.01px) {
             /* Collapsed state already defined above */
         }
+
         @media (max-width: 992px) {
-            .dashboard-container { grid-template-columns: 1fr; }
-            .sidebar { position: fixed; left: -260px; top: 0; height: 100vh; width: 250px; z-index: 1050; box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1); }
-            .sidebar.active { left: 0; }
-            .main-content { padding: 1rem; }
-            .top-bar { padding: 1rem; }
-            .menu-toggle { display: block; }
-            .tab-nav { overflow-x: auto; } /* Cho phép cuộn ngang tab */
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                height: 100vh;
+                width: 250px;
+                z-index: 1050;
+                box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .top-bar {
+                padding: 1rem;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .tab-nav {
+                overflow-x: auto;
+            }
+
+            /* Cho phép cuộn ngang tab */
         }
+
         @media (max-width: 768px) {
-            .top-bar { gap: 0.5rem; }
-            .top-bar-left h1 { font-size: 1.25rem; }
-            .user-menu { font-size: 0.8rem; }
-            .content-wrapper { border-radius: 8px; }
-            .tab-button { padding: 0.8rem 1rem; font-size: 0.9rem; }
-            .tab-content { padding: 1rem; }
-            .report-filter { flex-direction: column; align-items: flex-start; } /* Xếp chồng bộ lọc */
+            .top-bar {
+                gap: 0.5rem;
+            }
+
+            .top-bar-left h1 {
+                font-size: 1.25rem;
+            }
+
+            .user-menu {
+                font-size: 0.8rem;
+            }
+
+            .content-wrapper {
+                border-radius: 8px;
+            }
+
+            .tab-button {
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .tab-content {
+                padding: 1rem;
+            }
+
+            .report-filter {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            /* Xếp chồng bộ lọc */
         }
+
         @media print {
-    body * {
-        visibility: hidden;
-    }
+            body * {
+                visibility: hidden;
+            }
 
-    .tab-pane.active, .tab-pane.active * {
-        visibility: visible;
-    }
+            .tab-pane.active,
+            .tab-pane.active * {
+                visibility: visible;
+            }
 
-    .tab-pane.active {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-    }
+            .tab-pane.active {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
 
-    .sidebar,
-    .top-bar,
-    .tab-nav,
-    .btn-green {
-        display: none !important;
-    }
-}
-
+            .sidebar,
+            .top-bar,
+            .tab-nav,
+            .btn-green {
+                display: none !important;
+            }
+        }
     </style>
 </head>
+
 <body>
     <!-- THÊM: Loader và Toast Container -->
     <div class="loader-overlay" id="loader">
@@ -357,7 +674,7 @@
     <!-- KẾT THÚC THÊM MỚI -->
 
     <div class="dashboard-container">
-        
+
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <i class="fas fa-book-open"></i>
@@ -366,36 +683,65 @@
             <nav class="sidebar-nav">
                 <ul>
                     <li><a href="/dashboard"><i class="fas fa-home"></i><span>Tổng quan</span></a></li>
-                    <li><a href="/dashboard/employees"><i class="fas fa-users"></i><span>QL Nhân viên</span></a></li>
-                    <li><a href="/dashboard/books" ><i class="fas fa-book"></i><span>QL Sách</span></a></li>
-                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i><span>QL Khách hàng</span></a></li>
-                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i><span>QL Phiếu nhập sách</span></a></li>
-                    <li><a href="/dashboard/inventory"><i class="fas fa-clipboard-check"></i><span>QL Phiếu kiểm kê</span></a></li>
-                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i><span>QL Phiếu thu tiền</span></a></li>
-                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i><span>QL Hóa đơn</span></a></li>
-                    <li><a href="/dashboard/search"><i class="fas fa-search"></i><span> Tra cứu</span></a></li>
-                    <li><a href="#" class="active"><i class="fas fa-chart-line"></i><span> Báo cáo tổng kết</span></a></li>
-                    <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i><span>Thay đổi quy định</span></a></li>
-                    <% if (role === 'Admin' || role === 'Owner') { %>
-                    <li><a href="/dashboard/trash"><i class="fas fa-trash-alt"></i><span> Thùng rác</span></a></li>
-                    <% } %>
+                    <% if (role==='Admin' || role==='Owner' ) { %>
+                        <li><a href="/dashboard/employees"><i class="fas fa-users"></i><span>QL Nhân viên</span></a>
+                        </li>
+                        <% } %>
+                            <li><a href="/dashboard/books"><i class="fas fa-book"></i><span>QL Sách</span></a></li>
+                            <% if (role==='Admin' || role==='Owner' || role==='Staff' ) { %>
+                                <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i><span>QL Khách
+                                            hàng</span></a></li>
+                                <% } %>
+                                    <% if (role==='Admin' || role==='Owner' || role==='Warehouse' ) { %>
+                                        <li><a href="/dashboard/books_import"><i
+                                                    class="fas fa-file-invoice"></i><span>QL Phiếu nhập sách</span></a>
+                                        </li>
+                                        <li><a href="/dashboard/inventory"><i
+                                                    class="fas fa-clipboard-check"></i><span>QL Phiếu kiểm kê</span></a>
+                                        </li>
+                                        <% } %>
+                                            <% if (role==='Admin' || role==='Owner' || role==='Staff' ) { %>
+                                                <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i><span>QL
+                                                            Phiếu thu tiền</span></a></li>
+                                                <li><a href="/dashboard/bills"><i
+                                                            class="fa-solid fa-money-check-dollar"></i><span>QL Hóa
+                                                            đơn</span></a></li>
+                                                <% } %>
+                                                    <% if (role==='Admin' || role==='Owner' ) { %>
+                                                        <li><a href="/dashboard/search"><i
+                                                                    class="fas fa-search"></i><span> Tra cứu</span></a>
+                                                        </li>
+                                                        <% } %>
+                                                            <li><a href="#" class="active"><i
+                                                                        class="fas fa-chart-line"></i><span> Báo cáo
+                                                                        tổng kết</span></a></li>
+                                                            <% if (role==='Admin' || role==='Owner' ) { %>
+                                                                <li><a href="/dashboard/change-rule"><i
+                                                                            class="fas fa-gavel"></i><span>Thay đổi quy
+                                                                            định</span></a></li>
+                                                                <li><a href="/dashboard/trash"><i
+                                                                            class="fas fa-trash-alt"></i><span> Thùng
+                                                                            rác</span></a></li>
+                                                                <% } %>
                 </ul>
             </nav>
         </aside>
-        
+
         <main class="main-content">
-            
+
             <header class="top-bar">
                 <div class="top-bar-left">
                     <button class="menu-toggle" id="menu-toggle">
                         <i class="fas fa-bars"></i>
                     </button>
                     <!-- Cập nhật tiêu đề -->
-                    <h1>Báo cáo tổng kết</h1> 
+                    <h1>Báo cáo tổng kết</h1>
                 </div>
                 <div class="user-menu">
                     <span class="user-trigger">
-                        Chào, <strong><%= username %></strong> <i class="fas fa-chevron-down"></i>
+                        Chào, <strong>
+                            <%= username %>
+                        </strong> <i class="fas fa-chevron-down"></i>
                     </span>
 
                     <div class="dropdown-menu">
@@ -416,92 +762,106 @@
 
                 <!-- Tab Content -->
                 <div class="tab-content">
-                    
+
                     <!-- Tab Pane: Báo cáo tồn -->
                     <div class="tab-pane active" id="tab-ton">
                         <div class="report-filter">
-                             <label for="month-ton">Tháng Năm</label>
-                             <div class="date-input-wrapper">
-                                 <input type="month" id="month-ton" value="1999-01"> <!-- Giá trị mẫu YYYY-MM -->
-                             </div>
-                             <button class="btn-green" id="btn-xem-bieudo-ton">XEM BIỂU ĐỒ</button>
+                            <label for="month-ton">Tháng Năm</label>
+                            <div class="date-input-wrapper">
+                                <input type="month" id="month-ton" value="1999-01"> <!-- Giá trị mẫu YYYY-MM -->
+                            </div>
+                            <button class="btn-green" id="btn-xem-bieudo-ton">XEM BIỂU ĐỒ</button>
                             <button class="btn-green" id="btn-xuat-ton">XUẤT BÁO CÁO</button>
                             <button class="btn-green" id="btn-in-ton">IN BÁO CÁO</button>
                         </div>
                         <div id="chart-ton-wrapper" style="margin-top:30px; display:none;">
-    <h3 style="text-align:center;">Biểu đồ tồn kho</h3>
-    <canvas id="chart-ton-kho" height="120"></canvas>
-</div>
+                            <h3 style="text-align:center;">Biểu đồ tồn kho</h3>
+                            <canvas id="chart-ton-kho" height="120"></canvas>
+                        </div>
 
                         <div class="table-responsive">
                             <h3 class="table-caption">Chi tiết báo cáo</h3>
-                            <table class="data-table" id="inventory-report-table"> 
-                                <thead> 
-                                    <tr> 
-                                        <th>STT</th> 
-                                        <th>Sách</th> 
-                                        <th>Tồn đầu</th> 
-                                        <th>Nhập trong tháng</th> 
-                                        <th>Bán trong tháng</th> 
-                                        <th>Tồn cuối</th> 
-                                    </tr> 
+                            <table class="data-table" id="inventory-report-table">
+                                <thead>
+                                    <tr>
+                                        <th>STT</th>
+                                        <th>Sách</th>
+                                        <th>Tồn đầu</th>
+                                        <th>Nhập trong tháng</th>
+                                        <th>Bán trong tháng</th>
+                                        <th>Tồn cuối</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                    <% if (bcton && bcton.length > 0) { %>
-                                <% bcton.forEach((bcton, index) => { %>
-                                    <tr data-id="<%= bcton.TenThamSo %>">
-                                        <td><%= index + 1 %></td>
-                                        <td><%= bcton.TenSach %></td>
-                                        <td><%= bcton.TonDau %></td>
-                                        <td><%= bcton.NhapTrongThang %></td>
-                                        <td><%= bcton.BanTrongThang %></td>
-                                        <td><%= bcton.TonCuoi %></td>
-                                    </tr>
-                                <% }); %>
-                            <% } else { %>
-                                <tr>
-                                    <td colspan="6" style="text-align: center;">Không có tham số nào.</td>
-                                </tr>
-                            <% } %>
+                                    <% if (bcton && bcton.length> 0) { %>
+                                        <% bcton.forEach((bcton, index)=> { %>
+                                            <tr data-id="<%= bcton.TenThamSo %>">
+                                                <td>
+                                                    <%= index + 1 %>
+                                                </td>
+                                                <td>
+                                                    <%= bcton.TenSach %>
+                                                </td>
+                                                <td>
+                                                    <%= bcton.TonDau %>
+                                                </td>
+                                                <td>
+                                                    <%= bcton.NhapTrongThang %>
+                                                </td>
+                                                <td>
+                                                    <%= bcton.BanTrongThang %>
+                                                </td>
+                                                <td>
+                                                    <%= bcton.TonCuoi %>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                                                <% } else { %>
+                                                    <tr>
+                                                        <td colspan="6" style="text-align: center;">Không có tham số
+                                                            nào.</td>
+                                                    </tr>
+                                                    <% } %>
                                 </tbody>
                             </table>
                             <div class="empty-table-rows"></div>
                         </div>
-                         <!-- Có thể thêm phần tóm tắt ở đây nếu cần -->
+                        <!-- Có thể thêm phần tóm tắt ở đây nếu cần -->
                     </div>
 
                     <!-- Tab Pane: Báo cáo công nợ -->
                     <div class="tab-pane" id="tab-cong-no">
-                         <div class="report-filter-and-buttons">
-                             <label for="month-cong-no">Tháng Năm</label>
-                             <div class="date-input-wrapper">
-                                 <input type="month" id="month-cong-no" value="1999-01">
-                             </div>
-                              <button class="btn-green" id="btn-xem-bieudo-congno">XEM BIỂU ĐỒ</button>
-        <button class="btn-green" id="btn-xuat-congno">XUẤT BÁO CÁO</button>
-        <button class="btn-green" id="btn-in-congno">IN BÁO CÁO</button>
+                        <div class="report-filter-and-buttons">
+                            <label for="month-cong-no">Tháng Năm</label>
+                            <div class="date-input-wrapper">
+                                <input type="month" id="month-cong-no" value="1999-01">
+                            </div>
+                            <button class="btn-green" id="btn-xem-bieudo-congno">XEM BIỂU ĐỒ</button>
+                            <button class="btn-green" id="btn-xuat-congno">XUẤT BÁO CÁO</button>
+                            <button class="btn-green" id="btn-in-congno">IN BÁO CÁO</button>
                         </div>
                         <div id="chart-congno-wrapper" style="margin-top:30px; display:none;">
-    <h3 style="text-align:center;">Biểu đồ công nợ (Nợ cuối)</h3>
-    <canvas id="chart-congno" height="120"></canvas>
-</div>
+                            <h3 style="text-align:center;">Biểu đồ công nợ (Nợ cuối)</h3>
+                            <canvas id="chart-congno" height="120"></canvas>
+                        </div>
                         <div class="table-responsive">
                             <h3 class="table-caption">Chi tiết báo cáo</h3>
-                            <table class="data-table" id="debt-report-table"> 
-                                <thead> 
-                                    <tr> 
-                                        <th>STT</th> 
-                                        <th>Mã khách hàng</th> 
-                                        <th>Tên khách hàng</th> 
-                                        <th>Nợ đầu</th> 
-                                        <th>Nợ phát sinh</th> 
-                                        <th>Nợ cuối</th> 
-                                    </tr> 
+                            <table class="data-table" id="debt-report-table">
+                                <thead>
+                                    <tr>
+                                        <th>STT</th>
+                                        <th>Mã khách hàng</th>
+                                        <th>Tên khách hàng</th>
+                                        <th>Nợ đầu</th>
+                                        <th>Nợ phát sinh</th>
+                                        <th>Nợ cuối</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                   <% if (bccongno && bccongno.length > 0) { %> <% bcongno.forEach((bccongno, index) => { %>
+                                    <% if (bccongno && bccongno.length> 0) { %> <% bcongno.forEach((bccongno, index)=> {
+                                            %>
 
-                                    <tr data-id="<%= bcton.TenThamSo %>"">
+                                            <tr data-id="<%= bcton.TenThamSo %>"">
                                         <td><%= index + 1 %></td>
                                         <td><%= bccongno.MaKhachHang %></td>
                                         <td><%= bccongno.HoVaTen %></td>
@@ -513,52 +873,52 @@
                                 <% }); %>
                             <% } else { %>
                                 <tr>
-                                    <td colspan="6" style="text-align: center;">Không có tham số nào.</td>
-                                </tr>
-                            <% } %>
+                                    <td colspan=" 6" style="text-align: center;">Không có tham số nào.</td>
+                                            </tr>
+                                            <% } %>
                                 </tbody>
                             </table>
                             <div class="empty-table-rows"></div>
                         </div>
-                         <!-- Có thể thêm phần tóm tắt ở đây nếu cần -->
+                        <!-- Có thể thêm phần tóm tắt ở đây nếu cần -->
                     </div>
 
-                     <!-- Tab Pane: Báo cáo doanh thu -->
+                    <!-- Tab Pane: Báo cáo doanh thu -->
                     <div class="tab-pane" id="tab-doanh-thu">
-                         <div class="report-filter">
-                             <label for="month-doanh-thu">Tháng Năm</label>
-                             <div class="date-input-wrapper">
-                                 <input type="month" id="month-doanh-thu" value="1999-01">
-                             </div>
-                             <button class="btn-green" id="btn-xem-bieudo-doanhthu">XEM BIỂU ĐỒ</button>
-        <button class="btn-green" id="btn-xuat-doanhthu">XUẤT BÁO CÁO</button>
-        <button class="btn-green" id="btn-in-doanhthu">IN BÁO CÁO</button>
+                        <div class="report-filter">
+                            <label for="month-doanh-thu">Tháng Năm</label>
+                            <div class="date-input-wrapper">
+                                <input type="month" id="month-doanh-thu" value="1999-01">
+                            </div>
+                            <button class="btn-green" id="btn-xem-bieudo-doanhthu">XEM BIỂU ĐỒ</button>
+                            <button class="btn-green" id="btn-xuat-doanhthu">XUẤT BÁO CÁO</button>
+                            <button class="btn-green" id="btn-in-doanhthu">IN BÁO CÁO</button>
                         </div>
-                       <div id="chart-doanhthu-wrapper" class="chart-small" style="display:none;">
-    <h3 style="text-align:center;">Tỉ lệ doanh thu theo thể loại</h3>
-    <canvas id="chart-doanhthu"></canvas>
-</div>
+                        <div id="chart-doanhthu-wrapper" class="chart-small" style="display:none;">
+                            <h3 style="text-align:center;">Tỉ lệ doanh thu theo thể loại</h3>
+                            <canvas id="chart-doanhthu"></canvas>
+                        </div>
 
 
                         <div class="table-responsive">
                             <h3 class="table-caption">Chi tiết báo cáo</h3>
                             <div class="report-summary" id="display-tong-doanh-thu">
-                                    Tổng doanh thu: 0 đ
+                                Tổng doanh thu: 0 đ
                             </div>
-                            <table class="data-table" id="revenue-report-table"> 
-                                <thead> 
-                                    <tr> 
-                                        <th>STT</th> 
-                                        <th>Thể loại</th> 
-                                        <th>Số lượng bán</th> 
-                                        <th>Thành tiền</th> 
-                                        <th>Tỉ lệ</th> 
-                                    </tr> 
+                            <table class="data-table" id="revenue-report-table">
+                                <thead>
+                                    <tr>
+                                        <th>STT</th>
+                                        <th>Thể loại</th>
+                                        <th>Số lượng bán</th>
+                                        <th>Thành tiền</th>
+                                        <th>Tỉ lệ</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                    <% if (bcdoanhthu && bcdoanhthu.length > 0) { %>
-                                <% bcdoanhthu.forEach((bcdoanhthu, index) => { %>
-                                    <tr data-id="<%= bcton.TenThamSo %>"">
+                                    <% if (bcdoanhthu && bcdoanhthu.length> 0) { %>
+                                        <% bcdoanhthu.forEach((bcdoanhthu, index)=> { %>
+                                            <tr data-id="<%= bcton.TenThamSo %>"">
                                         <td><%= index + 1 %></td>
                                         <td><%= bcdoanhthu.MaTheLoai %></td>
                                         <td><%= bcdoanhthu.SoLuongBan %></td>
@@ -570,14 +930,14 @@
                                 <% }); %>
                             <% } else { %>
                                 <tr>
-                                    <td colspan="5" style="text-align: center;">Không có tham số nào.</td>
-                                </tr>
-                            <% } %>
+                                    <td colspan=" 5" style="text-align: center;">Không có tham số nào.</td>
+                                            </tr>
+                                            <% } %>
                                 </tbody>
                             </table>
-                             <div class="empty-table-rows"></div>
+                            <div class="empty-table-rows"></div>
                         </div>
-                        
+
                     </div>
 
                 </div>
@@ -585,137 +945,137 @@
         </main>
     </div>
 
-<script>
-    function tableHasNoData(rows) {
-    return (
-        rows.length === 0 ||
-        (rows.length === 1 &&
-         rows[0].innerText.toLowerCase().includes("không có"))
-    );
-}
+    <script>
+        function tableHasNoData(rows) {
+            return (
+                rows.length === 0 ||
+                (rows.length === 1 &&
+                    rows[0].innerText.toLowerCase().includes("không có"))
+            );
+        }
 
-function confirmPrint(title = "báo cáo") {
-    const ok = confirm(`Bạn có muốn in ${title} không?`);
-    if (ok) {
-        window.print();
-    }
-}
-    document.addEventListener('DOMContentLoaded', function() {
+        function confirmPrint(title = "báo cáo") {
+            const ok = confirm(`Bạn có muốn in ${title} không?`);
+            if (ok) {
+                window.print();
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function () {
 
-        // ============================================================
-        // 1. CÁC HÀM TIỆN ÍCH (UI & FORMAT)
-        // ============================================================
-        const loader = document.getElementById('loader');
-        const toastContainer = document.getElementById('toast-container');
+            // ============================================================
+            // 1. CÁC HÀM TIỆN ÍCH (UI & FORMAT)
+            // ============================================================
+            const loader = document.getElementById('loader');
+            const toastContainer = document.getElementById('toast-container');
 
-        // Hàm định dạng tiền tệ (VND)
-        const formatCurrency = (amount) => {
-            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-        };
+            // Hàm định dạng tiền tệ (VND)
+            const formatCurrency = (amount) => {
+                return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+            };
 
-        function showLoader() { if(loader) loader.style.display = 'flex'; }
-        function hideLoader() { if(loader) loader.style.display = 'none'; }
-        
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.classList.add('toast', type);
-            toast.innerHTML = `
+            function showLoader() { if (loader) loader.style.display = 'flex'; }
+            function hideLoader() { if (loader) loader.style.display = 'none'; }
+
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.classList.add('toast', type);
+                toast.innerHTML = `
                 <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} toast-icon"></i>
                 <span class="toast-message">${message}</span>
             `;
-            if(toastContainer) {
-                toastContainer.appendChild(toast);
-                setTimeout(() => { toast.classList.add('show'); }, 100);
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    toast.addEventListener('transitionend', () => {
-                        if (toast.parentNode) toast.parentNode.removeChild(toast);
-                    });
-                }, 3000);
-            }
-        }
-
-        // ============================================================
-        // 2. HÀM GỌI API (THAY THẾ simulateApiCall)
-        // ============================================================
-        async function fetchReportData(type, dateString) {
-            if (!dateString) return null;
-            showLoader();
-            try {
-                // dateString dạng "2024-05" -> Tách ra year=2024, month=05
-                const [year, month] = dateString.split('-');
-                
-                let url = '';
-                if (type === 'doanhthu') url = `/api/report/revenue?month=${month}&year=${year}`;
-                else if (type === 'congno') url = `/api/report/debt?month=${month}&year=${year}`;
-                else if (type === 'ton') url = `/api/report/inventory?month=${month}&year=${year}`;
-
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`Lỗi server: ${response.status}`);
+                if (toastContainer) {
+                    toastContainer.appendChild(toast);
+                    setTimeout(() => { toast.classList.add('show'); }, 100);
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                        toast.addEventListener('transitionend', () => {
+                            if (toast.parentNode) toast.parentNode.removeChild(toast);
+                        });
+                    }, 3000);
                 }
-                
-                const result = await response.json();
-                hideLoader();
-                showToast('Cập nhật dữ liệu thành công!', 'success');
-                return result; 
-            } catch (error) {
-                hideLoader();
-                console.error(error);
-                showToast('Không tải được báo cáo: ' + error.message, 'error');
-                return null;
-            }
-        }
-
-        // ============================================================
-        // 3. CÁC HÀM RENDER (VẼ BẢNG)
-        // ============================================================
-
-        // --- Render Bảng Doanh Thu ---
-        function renderRevenueTable(data, totalRevenue) {
-            const tbody = document.querySelector('#revenue-report-table tbody');
-            const summaryDiv = document.getElementById('display-tong-doanh-thu'); // Cần ID này trong HTML
-            
-            // Cập nhật dòng tổng tiền
-            if(summaryDiv) {
-                summaryDiv.textContent = `Tổng doanh thu: ${formatCurrency(totalRevenue || 0)}`;
             }
 
-            if (!tbody) return;
-            tbody.innerHTML = ''; // Xóa dữ liệu cũ
+            // ============================================================
+            // 2. HÀM GỌI API (THAY THẾ simulateApiCall)
+            // ============================================================
+            async function fetchReportData(type, dateString) {
+                if (!dateString) return null;
+                showLoader();
+                try {
+                    // dateString dạng "2024-05" -> Tách ra year=2024, month=05
+                    const [year, month] = dateString.split('-');
 
-            if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Không có dữ liệu tháng này</td></tr>`;
-                return;
+                    let url = '';
+                    if (type === 'doanhthu') url = `/api/report/revenue?month=${month}&year=${year}`;
+                    else if (type === 'congno') url = `/api/report/debt?month=${month}&year=${year}`;
+                    else if (type === 'ton') url = `/api/report/inventory?month=${month}&year=${year}`;
+
+                    const response = await fetch(url);
+
+                    if (!response.ok) {
+                        throw new Error(`Lỗi server: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    hideLoader();
+                    showToast('Cập nhật dữ liệu thành công!', 'success');
+                    return result;
+                } catch (error) {
+                    hideLoader();
+                    console.error(error);
+                    showToast('Không tải được báo cáo: ' + error.message, 'error');
+                    return null;
+                }
             }
 
-            data.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
+            // ============================================================
+            // 3. CÁC HÀM RENDER (VẼ BẢNG)
+            // ============================================================
+
+            // --- Render Bảng Doanh Thu ---
+            function renderRevenueTable(data, totalRevenue) {
+                const tbody = document.querySelector('#revenue-report-table tbody');
+                const summaryDiv = document.getElementById('display-tong-doanh-thu'); // Cần ID này trong HTML
+
+                // Cập nhật dòng tổng tiền
+                if (summaryDiv) {
+                    summaryDiv.textContent = `Tổng doanh thu: ${formatCurrency(totalRevenue || 0)}`;
+                }
+
+                if (!tbody) return;
+                tbody.innerHTML = ''; // Xóa dữ liệu cũ
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Không có dữ liệu tháng này</td></tr>`;
+                    return;
+                }
+
+                data.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
                     <td>${index + 1}</td>
                     <td>${item.MaTheLoai}</td> <td>${item.SoLuongBan}</td>
                     <td>${formatCurrency(item.ThanhTien)}</td>
                     <td>${item.TiLe}</td>
                 `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // --- Render Bảng Công Nợ ---
-        function renderDebtTable(data) {
-            const tbody = document.querySelector('#debt-report-table tbody');
-            if (!tbody) return;
-            tbody.innerHTML = ''; 
-
-            if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px;">Không có dữ liệu công nợ</td></tr>`;
-                return;
+                    tbody.appendChild(tr);
+                });
             }
 
-            data.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
+            // --- Render Bảng Công Nợ ---
+            function renderDebtTable(data) {
+                const tbody = document.querySelector('#debt-report-table tbody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px;">Không có dữ liệu công nợ</td></tr>`;
+                    return;
+                }
+
+                data.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
                     <td>${index + 1}</td>
                     <td>${item.MaKhachHang}</td>
                     <td>${item.HoVaTen}</td>
@@ -723,24 +1083,24 @@ function confirmPrint(title = "báo cáo") {
                     <td>${formatCurrency(item.NoPhatSinh)}</td>
                     <td>${formatCurrency(item.NoCuoi)}</td>
                 `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // --- Render Bảng Tồn Kho ---
-        function renderInventoryTable(data) {
-            const tbody = document.querySelector('#inventory-report-table tbody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px;">Không có dữ liệu tồn kho</td></tr>`;
-                return;
+                    tbody.appendChild(tr);
+                });
             }
 
-            data.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
+            // --- Render Bảng Tồn Kho ---
+            function renderInventoryTable(data) {
+                const tbody = document.querySelector('#inventory-report-table tbody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px;">Không có dữ liệu tồn kho</td></tr>`;
+                    return;
+                }
+
+                data.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
                     <td>${index + 1}</td>
                     <td>${item.TenSach}</td>
                     <td>${item.TonDau}</td>
@@ -748,419 +1108,420 @@ function confirmPrint(title = "báo cáo") {
                     <td>${item.Ban}</td>
                     <td>${item.TonCuoi}</td>
                 `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // ============================================================
-        // 4. SỰ KIỆN & KHỞI TẠO (LOGIC CHÍNH)
-        // ============================================================
-        
-        // --- Xử lý Sidebar (Giữ nguyên của bạn) ---
-        const menuToggle = document.getElementById('menu-toggle');
-        const sidebar = document.getElementById('sidebar');
-        const container = document.querySelector('.dashboard-container'); 
-        if (menuToggle && sidebar && container) {
-            menuToggle.addEventListener('click', function() {
-                if (window.innerWidth <= 992) { sidebar.classList.toggle('active'); } 
-                else { container.classList.toggle('sidebar-collapsed'); }
-            });
-        }
-
-        // --- Lấy các Input Date ---
-        const inputDoanhThu = document.getElementById('month-doanh-thu');
-        const inputCongNo = document.getElementById('month-cong-no');
-        const inputTon = document.getElementById('month-ton');
-
-        // --- Sự kiện khi chọn ngày (Thay đổi Input) ---
-        if (inputDoanhThu) {
-    inputDoanhThu.addEventListener('change', async function () {
-        const result = await fetchReportData('doanhthu', this.value);
-        if (!result) return;
-
-        // 1. Render lại bảng
-        renderRevenueTable(result.data, result.totalRevenue);
-
-        // 2. NẾU biểu đồ doanh thu đang tồn tại → UPDATE
-        if (doanhThuChart) {
-            const rows = document.querySelectorAll("#revenue-report-table tbody tr");
-            const labels = [];
-            const data = [];
-
-            rows.forEach(row => {
-                const cells = row.querySelectorAll("td");
-                if (cells.length >= 5) {
-                    labels.push(cells[1].innerText.trim()); // Thể loại
-                    data.push(
-                        Number(cells[3].innerText.replace(/[^\d]/g, "")) || 0
-                    ); // Thành tiền
-                }
-            });
-
-            doanhThuChart.data.labels = labels;
-            doanhThuChart.data.datasets[0].data = data;
-            doanhThuChart.update();
-        }
-    });
-}
-
-        if (inputCongNo) {
-    inputCongNo.addEventListener('change', async function () {
-        const result = await fetchReportData('congno', this.value);
-        if (!result) return;
-
-        renderDebtTable(result.data);
-
-        // Nếu biểu đồ đang mở → cập nhật
-        const wrapper = document.getElementById("chart-congno-wrapper");
-        if (congNoChart && wrapper.style.display === "block") {
-            const rows = document.querySelectorAll("#debt-report-table tbody tr");
-            const labels = [];
-            const data = [];
-
-            rows.forEach(row => {
-                const cells = row.querySelectorAll("td");
-                if (cells.length >= 6) {
-                    labels.push(cells[2].innerText.trim());
-                    data.push(Number(
-                        cells[5].innerText.replace(/[^\d]/g, "")
-                    ) || 0);
-                }
-            });
-
-            congNoChart.data.labels = labels;
-            congNoChart.data.datasets[0].data = data;
-            congNoChart.update();
-        }
-    });
-}
-
-        if (inputTon) {
-    inputTon.addEventListener('change', async function () {
-        const result = await fetchReportData('ton', this.value);
-        if (!result) return;
-
-        renderInventoryTable(result.data);
-
-        // Nếu biểu đồ đang tồn tại & đang hiện → update
-        const wrapper = document.getElementById("chart-ton-wrapper");
-        if (tonKhoChart && wrapper.style.display === "block") {
-            const rows = document.querySelectorAll("#inventory-report-table tbody tr");
-            const labels = [];
-            const data = [];
-
-            rows.forEach(row => {
-                const cells = row.querySelectorAll("td");
-                if (cells.length >= 6) {
-                    labels.push(cells[1].innerText.trim());
-                    data.push(Number(cells[5].innerText) || 0);
-                }
-            });
-
-            tonKhoChart.data.labels = labels;
-            tonKhoChart.data.datasets[0].data = data;
-            tonKhoChart.update();
-        }
-    
-            });
-        }
-
-        // --- Khởi tạo giá trị mặc định (Tháng hiện tại) ---
-        const now = new Date();
-        const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        
-        [inputDoanhThu, inputCongNo, inputTon].forEach(input => {
-            if(input) input.value = currentMonthStr;
-        });
-
-        // Tự động tải dữ liệu cho tab mặc định (Báo cáo Tồn)
-        if(inputTon) inputTon.dispatchEvent(new Event('change'));
-
-
-        // --- Xử lý Chuyển Tab và Tải dữ liệu khi chuyển ---
-        const tabButtons = document.querySelectorAll('.tab-button');
-        const tabPanes = document.querySelectorAll('.tab-pane');
-        
-        if (tabButtons.length > 0) {
-            tabButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    // UI Switch
-                    tabButtons.forEach(btn => btn.classList.remove('active'));
-                    tabPanes.forEach(pane => pane.classList.remove('active'));
-                    this.classList.add('active');
-                    const targetId = this.dataset.target;
-                    const targetPane = document.querySelector(targetId);
-                    if (targetPane) targetPane.classList.add('active');
-
-                    // Data Load Trigger (Nếu tab đó chưa có dữ liệu hoặc muốn reload)
-                    if(targetId === '#tab-doanh-thu' && inputDoanhThu) 
-                        inputDoanhThu.dispatchEvent(new Event('change'));
-                    
-                    if(targetId === '#tab-cong-no' && inputCongNo) 
-                        inputCongNo.dispatchEvent(new Event('change'));
-
-                    if(targetId === '#tab-ton' && inputTon) 
-                        inputTon.dispatchEvent(new Event('change'));
+                    tbody.appendChild(tr);
                 });
+            }
+
+            // ============================================================
+            // 4. SỰ KIỆN & KHỞI TẠO (LOGIC CHÍNH)
+            // ============================================================
+
+            // --- Xử lý Sidebar (Giữ nguyên của bạn) ---
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const container = document.querySelector('.dashboard-container');
+            if (menuToggle && sidebar && container) {
+                menuToggle.addEventListener('click', function () {
+                    if (window.innerWidth <= 992) { sidebar.classList.toggle('active'); }
+                    else { container.classList.toggle('sidebar-collapsed'); }
+                });
+            }
+
+            // --- Lấy các Input Date ---
+            const inputDoanhThu = document.getElementById('month-doanh-thu');
+            const inputCongNo = document.getElementById('month-cong-no');
+            const inputTon = document.getElementById('month-ton');
+
+            // --- Sự kiện khi chọn ngày (Thay đổi Input) ---
+            if (inputDoanhThu) {
+                inputDoanhThu.addEventListener('change', async function () {
+                    const result = await fetchReportData('doanhthu', this.value);
+                    if (!result) return;
+
+                    // 1. Render lại bảng
+                    renderRevenueTable(result.data, result.totalRevenue);
+
+                    // 2. NẾU biểu đồ doanh thu đang tồn tại → UPDATE
+                    if (doanhThuChart) {
+                        const rows = document.querySelectorAll("#revenue-report-table tbody tr");
+                        const labels = [];
+                        const data = [];
+
+                        rows.forEach(row => {
+                            const cells = row.querySelectorAll("td");
+                            if (cells.length >= 5) {
+                                labels.push(cells[1].innerText.trim()); // Thể loại
+                                data.push(
+                                    Number(cells[3].innerText.replace(/[^\d]/g, "")) || 0
+                                ); // Thành tiền
+                            }
+                        });
+
+                        doanhThuChart.data.labels = labels;
+                        doanhThuChart.data.datasets[0].data = data;
+                        doanhThuChart.update();
+                    }
+                });
+            }
+
+            if (inputCongNo) {
+                inputCongNo.addEventListener('change', async function () {
+                    const result = await fetchReportData('congno', this.value);
+                    if (!result) return;
+
+                    renderDebtTable(result.data);
+
+                    // Nếu biểu đồ đang mở → cập nhật
+                    const wrapper = document.getElementById("chart-congno-wrapper");
+                    if (congNoChart && wrapper.style.display === "block") {
+                        const rows = document.querySelectorAll("#debt-report-table tbody tr");
+                        const labels = [];
+                        const data = [];
+
+                        rows.forEach(row => {
+                            const cells = row.querySelectorAll("td");
+                            if (cells.length >= 6) {
+                                labels.push(cells[2].innerText.trim());
+                                data.push(Number(
+                                    cells[5].innerText.replace(/[^\d]/g, "")
+                                ) || 0);
+                            }
+                        });
+
+                        congNoChart.data.labels = labels;
+                        congNoChart.data.datasets[0].data = data;
+                        congNoChart.update();
+                    }
+                });
+            }
+
+            if (inputTon) {
+                inputTon.addEventListener('change', async function () {
+                    const result = await fetchReportData('ton', this.value);
+                    if (!result) return;
+
+                    renderInventoryTable(result.data);
+
+                    // Nếu biểu đồ đang tồn tại & đang hiện → update
+                    const wrapper = document.getElementById("chart-ton-wrapper");
+                    if (tonKhoChart && wrapper.style.display === "block") {
+                        const rows = document.querySelectorAll("#inventory-report-table tbody tr");
+                        const labels = [];
+                        const data = [];
+
+                        rows.forEach(row => {
+                            const cells = row.querySelectorAll("td");
+                            if (cells.length >= 6) {
+                                labels.push(cells[1].innerText.trim());
+                                data.push(Number(cells[5].innerText) || 0);
+                            }
+                        });
+
+                        tonKhoChart.data.labels = labels;
+                        tonKhoChart.data.datasets[0].data = data;
+                        tonKhoChart.update();
+                    }
+
+                });
+            }
+
+            // --- Khởi tạo giá trị mặc định (Tháng hiện tại) ---
+            const now = new Date();
+            const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+            [inputDoanhThu, inputCongNo, inputTon].forEach(input => {
+                if (input) input.value = currentMonthStr;
             });
-        }
 
-        // --- LOGOUT ---
-    const logoutBtn = document.getElementById('logout-button');
-    if(logoutBtn) {
-        logoutBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            if(confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-                window.location.href = '/logout';
+            // Tự động tải dữ liệu cho tab mặc định (Báo cáo Tồn)
+            if (inputTon) inputTon.dispatchEvent(new Event('change'));
+
+
+            // --- Xử lý Chuyển Tab và Tải dữ liệu khi chuyển ---
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            if (tabButtons.length > 0) {
+                tabButtons.forEach(button => {
+                    button.addEventListener('click', function () {
+                        // UI Switch
+                        tabButtons.forEach(btn => btn.classList.remove('active'));
+                        tabPanes.forEach(pane => pane.classList.remove('active'));
+                        this.classList.add('active');
+                        const targetId = this.dataset.target;
+                        const targetPane = document.querySelector(targetId);
+                        if (targetPane) targetPane.classList.add('active');
+
+                        // Data Load Trigger (Nếu tab đó chưa có dữ liệu hoặc muốn reload)
+                        if (targetId === '#tab-doanh-thu' && inputDoanhThu)
+                            inputDoanhThu.dispatchEvent(new Event('change'));
+
+                        if (targetId === '#tab-cong-no' && inputCongNo)
+                            inputCongNo.dispatchEvent(new Event('change'));
+
+                        if (targetId === '#tab-ton' && inputTon)
+                            inputTon.dispatchEvent(new Event('change'));
+                    });
+                });
             }
+
+            // --- LOGOUT ---
+            const logoutBtn = document.getElementById('logout-button');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                        window.location.href = '/logout';
+                    }
+                });
+            }
+
         });
-    }
 
-    });
-  
-    let tonKhoChart = null;
-    let congNoChart = null;
-    let doanhThuChart = null;
-document.addEventListener("DOMContentLoaded", function () {
-document.getElementById("btn-xem-bieudo-ton")
-.addEventListener("click", function () {
+        let tonKhoChart = null;
+        let congNoChart = null;
+        let doanhThuChart = null;
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("btn-xem-bieudo-ton")
+                .addEventListener("click", function () {
 
-    const wrapper = document.getElementById("chart-ton-wrapper");
-    const ctx = document.getElementById("chart-ton-kho").getContext("2d");
+                    const wrapper = document.getElementById("chart-ton-wrapper");
+                    const ctx = document.getElementById("chart-ton-kho").getContext("2d");
 
-    if (wrapper.style.display === "block") {
-        wrapper.style.display = "none";
-        return;
-    }
+                    if (wrapper.style.display === "block") {
+                        wrapper.style.display = "none";
+                        return;
+                    }
 
-    const rows = document.querySelectorAll("#inventory-report-table tbody tr");
+                    const rows = document.querySelectorAll("#inventory-report-table tbody tr");
 
-    //KHÔNG CÓ DỮ LIỆU
-    if (tableHasNoData(rows)) {
-        alert("Không có dữ liệu tồn kho tháng này");
-        return;
-    }
+                    //KHÔNG CÓ DỮ LIỆU
+                    if (tableHasNoData(rows)) {
+                        alert("Không có dữ liệu tồn kho tháng này");
+                        return;
+                    }
 
-    const labels = [];
-    const data = [];
+                    const labels = [];
+                    const data = [];
 
-    rows.forEach(row => {
-        const cells = row.querySelectorAll("td");
-        labels.push(cells[1].innerText.trim());
-        data.push(Number(cells[5].innerText) || 0);
-    });
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll("td");
+                        labels.push(cells[1].innerText.trim());
+                        data.push(Number(cells[5].innerText) || 0);
+                    });
 
-    if (tonKhoChart) tonKhoChart.destroy();
+                    if (tonKhoChart) tonKhoChart.destroy();
 
-    tonKhoChart = new Chart(ctx, {
-        type: "bar",
-        data: {
-            labels,
-            datasets: [{
-                label: "Tồn cuối",
-                data,
-                backgroundColor: "#1abc9c"
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: { y: { beginAtZero: true } }
-        }
-    });
+                    tonKhoChart = new Chart(ctx, {
+                        type: "bar",
+                        data: {
+                            labels,
+                            datasets: [{
+                                label: "Tồn cuối",
+                                data,
+                                backgroundColor: "#1abc9c"
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: { y: { beginAtZero: true } }
+                        }
+                    });
 
-    wrapper.style.display = "block";
-});
+                    wrapper.style.display = "block";
+                });
 
-document.getElementById("btn-xem-bieudo-congno")
-.addEventListener("click", function () {
+            document.getElementById("btn-xem-bieudo-congno")
+                .addEventListener("click", function () {
 
-    const wrapper = document.getElementById("chart-congno-wrapper");
-    const ctx = document.getElementById("chart-congno").getContext("2d");
+                    const wrapper = document.getElementById("chart-congno-wrapper");
+                    const ctx = document.getElementById("chart-congno").getContext("2d");
 
-    if (wrapper.style.display === "block") {
-        wrapper.style.display = "none";
-        return;
-    }
+                    if (wrapper.style.display === "block") {
+                        wrapper.style.display = "none";
+                        return;
+                    }
 
-    const rows = document.querySelectorAll("#debt-report-table tbody tr");
+                    const rows = document.querySelectorAll("#debt-report-table tbody tr");
 
-    // KHÔNG CÓ DỮ LIỆU
-    if (tableHasNoData(rows)) {
-        alert("Không có dữ liệu công nợ tháng này");
-        return;
-    }
+                    // KHÔNG CÓ DỮ LIỆU
+                    if (tableHasNoData(rows)) {
+                        alert("Không có dữ liệu công nợ tháng này");
+                        return;
+                    }
 
-    const labels = [];
-    const data = [];
+                    const labels = [];
+                    const data = [];
 
-    rows.forEach(row => {
-        const cells = row.querySelectorAll("td");
-        labels.push(cells[2].innerText.trim());
-        data.push(Number(cells[5].innerText.replace(/[^\d]/g, "")) || 0);
-    });
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll("td");
+                        labels.push(cells[2].innerText.trim());
+                        data.push(Number(cells[5].innerText.replace(/[^\d]/g, "")) || 0);
+                    });
 
-    if (congNoChart) congNoChart.destroy();
+                    if (congNoChart) congNoChart.destroy();
 
-    congNoChart = new Chart(ctx, {
-        type: "bar",
-        data: {
-            labels,
-            datasets: [{
-                label: "Nợ cuối",
-                data,
-                backgroundColor: "#3498db"
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: { y: { beginAtZero: true } }
-        }
-    });
+                    congNoChart = new Chart(ctx, {
+                        type: "bar",
+                        data: {
+                            labels,
+                            datasets: [{
+                                label: "Nợ cuối",
+                                data,
+                                backgroundColor: "#3498db"
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: { y: { beginAtZero: true } }
+                        }
+                    });
 
-    wrapper.style.display = "block";
-});
+                    wrapper.style.display = "block";
+                });
 
-document.getElementById("btn-xem-bieudo-doanhthu")
-.addEventListener("click", function () {
+            document.getElementById("btn-xem-bieudo-doanhthu")
+                .addEventListener("click", function () {
 
-    const wrapper = document.getElementById("chart-doanhthu-wrapper");
-    const ctx = document.getElementById("chart-doanhthu").getContext("2d");
+                    const wrapper = document.getElementById("chart-doanhthu-wrapper");
+                    const ctx = document.getElementById("chart-doanhthu").getContext("2d");
 
-    if (wrapper.style.display === "block") {
-        wrapper.style.display = "none";
-        return;
-    }
+                    if (wrapper.style.display === "block") {
+                        wrapper.style.display = "none";
+                        return;
+                    }
 
-    const rows = document.querySelectorAll("#revenue-report-table tbody tr");
+                    const rows = document.querySelectorAll("#revenue-report-table tbody tr");
 
-    // KHÔNG CÓ DỮ LIỆU
-    if (tableHasNoData(rows)) {
-        alert("Không có dữ liệu doanh thu tháng này");
-        return;
-    }
+                    // KHÔNG CÓ DỮ LIỆU
+                    if (tableHasNoData(rows)) {
+                        alert("Không có dữ liệu doanh thu tháng này");
+                        return;
+                    }
 
-    const labels = [];
-    const data = [];
+                    const labels = [];
+                    const data = [];
 
-    rows.forEach(row => {
-        const cells = row.querySelectorAll("td");
-        labels.push(cells[1].innerText.trim());
-        data.push(Number(cells[4].innerText.replace('%', '')) || 0);
-    });
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll("td");
+                        labels.push(cells[1].innerText.trim());
+                        data.push(Number(cells[4].innerText.replace('%', '')) || 0);
+                    });
 
-    if (doanhThuChart) doanhThuChart.destroy();
+                    if (doanhThuChart) doanhThuChart.destroy();
 
-    doanhThuChart = new Chart(ctx, {
-        type: "pie",
-        data: {
-            labels,
-            datasets: [{
-                data,
-                backgroundColor: [
-                    "#1abc9c", "#3498db", "#9b59b6",
-                    "#f1c40f", "#e67e22", "#e74c3c"
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: "right" }
-            }
-        }
-    });
+                    doanhThuChart = new Chart(ctx, {
+                        type: "pie",
+                        data: {
+                            labels,
+                            datasets: [{
+                                data,
+                                backgroundColor: [
+                                    "#1abc9c", "#3498db", "#9b59b6",
+                                    "#f1c40f", "#e67e22", "#e74c3c"
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { position: "right" }
+                            }
+                        }
+                    });
 
-    wrapper.style.display = "block";
-});
+                    wrapper.style.display = "block";
+                });
 
 
 
-    document.getElementById("btn-xuat-ton").addEventListener("click", function () {
-    const table = document.getElementById("inventory-report-table");
+            document.getElementById("btn-xuat-ton").addEventListener("click", function () {
+                const table = document.getElementById("inventory-report-table");
 
-    if (!table) {
-        alert("Không tìm thấy bảng dữ liệu!");
-        return;
-    }
+                if (!table) {
+                    alert("Không tìm thấy bảng dữ liệu!");
+                    return;
+                }
 
-    // Lấy tháng năm để đặt tên file
-    const monthValue = document.getElementById("month-ton").value || "baocao";
-    const fileName = `Bao_cao_ton_${monthValue}.xlsx`;
+                // Lấy tháng năm để đặt tên file
+                const monthValue = document.getElementById("month-ton").value || "baocao";
+                const fileName = `Bao_cao_ton_${monthValue}.xlsx`;
 
-    // Chuyển HTML table → worksheet
-    const worksheet = XLSX.utils.table_to_sheet(table);
+                // Chuyển HTML table → worksheet
+                const worksheet = XLSX.utils.table_to_sheet(table);
 
-    // Tạo workbook
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "BaoCaoTon");
+                // Tạo workbook
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "BaoCaoTon");
 
-    // Xuất file Excel
-    XLSX.writeFile(workbook, fileName);
-});
-
-
-// In báo cáo tồn
-document.getElementById("btn-in-ton")?.addEventListener("click", function () {
-    confirmPrint("báo cáo tồn kho");
-});
-document.getElementById("btn-xuat-congno").addEventListener("click", function () {
-    const table = document.getElementById("debt-report-table");
-
-    if (!table) {
-        alert("Không tìm thấy bảng công nợ!");
-        return;
-    }
-
-    const monthValue = document.getElementById("month-cong-no").value || "baocao";
-    const fileName = `Bao_cao_cong_no_${monthValue}.xlsx`;
-
-    const worksheet = XLSX.utils.table_to_sheet(table);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "BaoCaoCongNo");
-
-    XLSX.writeFile(workbook, fileName);
-});
-
-// In báo cáo công nợ
-document.getElementById("btn-in-congno")?.addEventListener("click", function () {
-    
-    confirmPrint("báo cáo công nợ");
-});
-// ==============================
-// XUẤT BÁO CÁO DOANH THU
-// ==============================
-document.getElementById("btn-xuat-doanhthu")?.addEventListener("click", function () {
-    const table = document.getElementById("revenue-report-table");
-
-    if (!table) {
-        alert("Không tìm thấy bảng doanh thu!");
-        return;
-    }
-
-    // Lấy tháng năm
-    const monthValue = document.getElementById("month-doanh-thu").value || "baocao";
-    const fileName = `Bao_cao_doanh_thu_${monthValue}.xlsx`;
-
-    // Chuyển table → worksheet
-    const worksheet = XLSX.utils.table_to_sheet(table);
-
-    // Tạo workbook
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "BaoCaoDoanhThu");
-
-    // Xuất file
-    XLSX.writeFile(workbook, fileName);
-});
+                // Xuất file Excel
+                XLSX.writeFile(workbook, fileName);
+            });
 
 
-// In báo cáo doanh thu
-document.getElementById("btn-in-doanhthu")?.addEventListener("click", function () {
-    confirmPrint("báo cáo doanh thu");
-});
+            // In báo cáo tồn
+            document.getElementById("btn-in-ton")?.addEventListener("click", function () {
+                confirmPrint("báo cáo tồn kho");
+            });
+            document.getElementById("btn-xuat-congno").addEventListener("click", function () {
+                const table = document.getElementById("debt-report-table");
+
+                if (!table) {
+                    alert("Không tìm thấy bảng công nợ!");
+                    return;
+                }
+
+                const monthValue = document.getElementById("month-cong-no").value || "baocao";
+                const fileName = `Bao_cao_cong_no_${monthValue}.xlsx`;
+
+                const worksheet = XLSX.utils.table_to_sheet(table);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "BaoCaoCongNo");
+
+                XLSX.writeFile(workbook, fileName);
+            });
+
+            // In báo cáo công nợ
+            document.getElementById("btn-in-congno")?.addEventListener("click", function () {
+
+                confirmPrint("báo cáo công nợ");
+            });
+            // ==============================
+            // XUẤT BÁO CÁO DOANH THU
+            // ==============================
+            document.getElementById("btn-xuat-doanhthu")?.addEventListener("click", function () {
+                const table = document.getElementById("revenue-report-table");
+
+                if (!table) {
+                    alert("Không tìm thấy bảng doanh thu!");
+                    return;
+                }
+
+                // Lấy tháng năm
+                const monthValue = document.getElementById("month-doanh-thu").value || "baocao";
+                const fileName = `Bao_cao_doanh_thu_${monthValue}.xlsx`;
+
+                // Chuyển table → worksheet
+                const worksheet = XLSX.utils.table_to_sheet(table);
+
+                // Tạo workbook
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "BaoCaoDoanhThu");
+
+                // Xuất file
+                XLSX.writeFile(workbook, fileName);
+            });
 
 
-});
-</script>
+            // In báo cáo doanh thu
+            document.getElementById("btn-in-doanhthu")?.addEventListener("click", function () {
+                confirmPrint("báo cáo doanh thu");
+            });
+
+
+        });
+    </script>
 
 </body>
+
 </html>

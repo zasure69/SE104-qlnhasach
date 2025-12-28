@@ -125,6 +125,11 @@ const deleteCustomer = async (req, res) => {
     }
 
     // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
+    // Thêm suffix vào trường unique để tránh trùng khi thêm mới
+    const deletedSuffix = `_deleted_${Date.now()}`;
+    if (customer.SoDienThoai && !customer.SoDienThoai.includes('_deleted_')) {
+      customer.SoDienThoai = customer.SoDienThoai + deletedSuffix;
+    }
     customer.isDeleted = true;
     await customer.save();
     
@@ -166,6 +171,25 @@ const restoreCustomer = async (req, res) => {
 
     if (!customer.isDeleted) {
       return res.status(400).json({ error: 'Khách hàng này chưa bị xóa.' });
+    }
+
+    // Khôi phục giá trị gốc của trường unique (loại bỏ suffix _deleted_xxx)
+    if (customer.SoDienThoai && customer.SoDienThoai.includes('_deleted_')) {
+      const originalSoDT = customer.SoDienThoai.split('_deleted_')[0];
+      // Kiểm tra xem số điện thoại gốc có bị trùng không
+      const existingCustomer = await db.KhachHang.findOne({
+        where: { 
+          SoDienThoai: originalSoDT, 
+          isDeleted: false,
+          MaKhachHang: { [db.Sequelize.Op.ne]: maKH }
+        }
+      });
+      if (existingCustomer) {
+        return res.status(400).json({ 
+          error: `Không thể khôi phục! Số điện thoại ${originalSoDT} đã được sử dụng bởi khách hàng khác.` 
+        });
+      }
+      customer.SoDienThoai = originalSoDT;
     }
 
     customer.isDeleted = false;
