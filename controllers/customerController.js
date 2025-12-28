@@ -33,6 +33,16 @@ const createCustomer = async (req, res) => {
   const { hoTen, ngaySinh, gioiTinh, soDienThoai, diaChi } = req.body;
 
   try {
+    // Kiểm tra xem khách hàng đã tồn tại (chỉ những khách hàng chưa bị xóa mềm)
+    const existingCustomer = await db.KhachHang.findOne({
+      where: { SoDienThoai: soDienThoai, isDeleted: false }
+    });
+
+    if (existingCustomer) {
+      return res.status(409).json({ error: 'Số điện thoại này đã tồn tại.' });
+    }
+
+    // Tạo khách hàng mới
     const newMaKhachHang = await generateNewCustomerId();
 
     const newCustomer = await db.KhachHang.create({
@@ -122,6 +132,26 @@ const deleteCustomer = async (req, res) => {
     // Kiểm tra nếu khách hàng đã bị xóa rồi
     if (customer.isDeleted) {
       return res.status(400).json({ error: 'Khách hàng này đã bị xóa trước đó.' });
+    }
+
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có hóa đơn liên kết không (chỉ hóa đơn chưa xóa)
+    const hoaDonLienKet = await db.HoaDon.findOne({
+      where: { MaKhachHang: maKH, isDeleted: false },
+    });
+    if (hoaDonLienKet) {
+      return res.status(400).json({
+        error: `Không thể xóa khách hàng "${customer.HoVaTen}". Vẫn còn hóa đơn liên kết với khách hàng này.`,
+      });
+    }
+
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có phiếu thu tiền liên kết không (chỉ phiếu chưa xóa)
+    const phieuThuLienKet = await db.PhieuThuTien.findOne({
+      where: { MaKhachHang: maKH, isDeleted: false },
+    });
+    if (phieuThuLienKet) {
+      return res.status(400).json({
+        error: `Không thể xóa khách hàng "${customer.HoVaTen}". Vẫn còn phiếu thu tiền liên kết với khách hàng này.`,
+      });
     }
 
     // Soft delete: đánh dấu isDeleted = true thay vì xóa thật

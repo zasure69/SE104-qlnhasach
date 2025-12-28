@@ -171,6 +171,17 @@ const createImportReceipt = async (req, res) => {
         });
       }
 
+      // KIỂM TRA SÁCH TỒN TẠI VÀ CHƯA BỊ XÓA MỀM
+      const sachCheck = await db.Sach.findOne({
+        where: { MaSach: item.MaSach, isDeleted: false },
+        include: [{ model: db.DauSach, attributes: ["TenSach"], where: { isDeleted: false }, required: false }],
+      });
+      if (!sachCheck) {
+        return res.status(400).json({
+          error: `Sách có mã ${item.MaSach} không tồn tại hoặc đã bị xóa`,
+        });
+      }
+
       const tongNhap =
         (await db.CT_PNS.sum("SoLuong", { where: { MaSach: item.MaSach } })) ||
         0;
@@ -181,10 +192,7 @@ const createImportReceipt = async (req, res) => {
       const soLuongTonHienTai = tongNhap - tongBan;
 
       if (soLuongTonHienTai >= soLuongTonToiDa) {
-        const sach = await db.Sach.findByPk(item.MaSach, {
-          include: [{ model: db.DauSach, attributes: ["TenSach"] }],
-        });
-        const tenSach = sach?.DauSach?.TenSach || item.MaSach;
+        const tenSach = sachCheck?.DauSach?.TenSach || item.MaSach;
         return res.status(400).json({
           error: `Không thể nhập sách "${tenSach}" vì số lượng tồn hiện tại (${soLuongTonHienTai}) đã >= ${soLuongTonToiDa}`,
         });

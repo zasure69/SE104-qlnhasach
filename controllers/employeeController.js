@@ -85,6 +85,26 @@ const registerEmployee = async (req, res) => {
       ngayNhanViec,
       ngaySinh,
     } = req.body;
+
+    // Kiểm tra xem nhân viên đã tồn tại (chỉ những nhân viên chưa bị xóa mềm)
+    const existingEmployee = await db.NhanVien.findOne({
+      where: { Username: username, isDeleted: false }
+    });
+
+    if (existingEmployee) {
+      return res.status(409).json({ message: "Username đã tồn tại" });
+    }
+
+    // Kiểm tra số điện thoại đã tồn tại chưa (chỉ những nhân viên chưa bị xóa mềm)
+    const existingPhone = await db.NhanVien.findOne({
+      where: { SoDienThoai: soDienThoai, isDeleted: false }
+    });
+
+    if (existingPhone) {
+      return res.status(409).json({ message: "Số điện thoại đã tồn tại" });
+    }
+
+    // Tạo nhân viên mới
     const newMaNhanVien = await generateNewEmployeeId();
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -283,10 +303,50 @@ const deleteEmployee = async (req, res) => {
       return res.status(400).json({ error: "Nhân viên này đã bị xóa trước đó." });
     }
 
-    // (Thêm logic kiểm tra an toàn ở đây, ví dụ: không cho xóa chính mình)
-    // if (req.user.id === maNhanVien) {
-    //     return res.status(403).json({ error: 'Bạn không thể tự xóa chính mình.' });
-    // }
+    // Không cho phép xóa chính mình
+    if (req.user && req.user.id === maNhanVien) {
+      return res.status(403).json({ error: 'Bạn không thể tự xóa chính mình.' });
+    }
+
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có hóa đơn liên kết không (chỉ hóa đơn chưa xóa)
+    const hoaDonLienKet = await db.HoaDon.findOne({
+      where: { MaNhanVien: maNhanVien, isDeleted: false },
+    });
+    if (hoaDonLienKet) {
+      return res.status(400).json({
+        error: `Không thể xóa nhân viên "${user.HoTen}". Vẫn còn hóa đơn liên kết với nhân viên này.`,
+      });
+    }
+
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có phiếu nhập sách liên kết không (chỉ phiếu chưa xóa)
+    const phieuNhapLienKet = await db.PhieuNhapSach.findOne({
+      where: { MaNhanVien: maNhanVien, isDeleted: false },
+    });
+    if (phieuNhapLienKet) {
+      return res.status(400).json({
+        error: `Không thể xóa nhân viên "${user.HoTen}". Vẫn còn phiếu nhập sách liên kết với nhân viên này.`,
+      });
+    }
+
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có phiếu thu tiền liên kết không (chỉ phiếu chưa xóa)
+    const phieuThuLienKet = await db.PhieuThuTien.findOne({
+      where: { MaNhanVien: maNhanVien, isDeleted: false },
+    });
+    if (phieuThuLienKet) {
+      return res.status(400).json({
+        error: `Không thể xóa nhân viên "${user.HoTen}". Vẫn còn phiếu thu tiền liên kết với nhân viên này.`,
+      });
+    }
+
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có phiếu kiểm kê liên kết không (chỉ phiếu chưa xóa)
+    const phieuKiemKeLienKet = await db.PhieuKiemKe.findOne({
+      where: { MaNhanVien: maNhanVien, isDeleted: false },
+    });
+    if (phieuKiemKeLienKet) {
+      return res.status(400).json({
+        error: `Không thể xóa nhân viên "${user.HoTen}". Vẫn còn phiếu kiểm kê liên kết với nhân viên này.`,
+      });
+    }
 
     // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
     // Thêm suffix vào các trường unique để tránh trùng khi thêm mới
