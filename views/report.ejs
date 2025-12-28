@@ -1011,12 +1011,15 @@
                     else if (type === 'ton') url = `/api/report/inventory?month=${month}&year=${year}`;
 
                     const response = await fetch(url);
+                    const result = await response.json();
 
                     if (!response.ok) {
-                        throw new Error(`Lỗi server: ${response.status}`);
+                        // Hiển thị thông báo lỗi từ server (ví dụ: báo cáo chưa khả dụng)
+                        hideLoader();
+                        showToast(result.error || `Lỗi server: ${response.status}`, 'error');
+                        return null;
                     }
 
-                    const result = await response.json();
                     hideLoader();
                     showToast('Cập nhật dữ liệu thành công!', 'success');
                     return result;
