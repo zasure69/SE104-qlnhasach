@@ -2034,7 +2034,7 @@
             return;
           }
 
-          const data = result.data;
+          const data = result.data.receipt;
           const date = new Date(data.NgayKiem);
           const dateStr = `Ngày ${date.getDate()} tháng ${
             date.getMonth() + 1
@@ -2090,8 +2090,8 @@
                 </head>
                 <body>
                     <div class="header">
-                        <div class="store-name">NHÀ SÁCH CỦA BẠN</div>
-                        <div>Địa chỉ: 123 Đường ABC, TP.HCM</div>
+                        <div class="store-name">NHÀ SÁCH ABC</div>
+                        <div>Địa chỉ: 123 Đường Hàn Thuyên, phường Thủ Đức, TP.HCM</div>
                         <div class="title">BIÊN BẢN KIỂM KÊ KHO</div>
                         <div>(${dateStr})</div>
                     </div>
@@ -2099,7 +2099,7 @@
                     <div class="info">
                         <p><strong>Mã phiếu:</strong> ${data.MaPhieuKiem}</p>
                         <p><strong>Người kiểm kê:</strong> ${
-                          data.MaNhanVien || "---"
+                          data.NhanVien?.HoTen || data.MaNhanVien || "---"
                         }</p>
                         <p><strong>Ghi chú:</strong> ${data.GhiChu || "---"}</p>
                     </div>

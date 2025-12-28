@@ -1426,6 +1426,22 @@
       document.addEventListener("DOMContentLoaded", function () {
         setupPaymentValidation("add");
         setupPaymentValidation("edit");
+
+        // --- SIDEBAR TOGGLE ---
+        const menuToggle = document.getElementById("menu-toggle");
+        const sidebar = document.getElementById("sidebar");
+        const container = document.querySelector(".dashboard-container");
+
+        if (menuToggle && sidebar && container) {
+          menuToggle.addEventListener("click", function () {
+            if (window.innerWidth <= 992) {
+              sidebar.classList.toggle("active");
+            } else {
+              container.classList.toggle("sidebar-collapsed");
+            }
+          });
+        }
+
         // --- 1. BIẾN TOÀN CỤC & TIỆN ÍCH ---
         const loader = document.getElementById("loader");
         const toastContainer = document.getElementById("toast-container");
