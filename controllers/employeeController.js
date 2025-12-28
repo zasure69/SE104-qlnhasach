@@ -109,7 +109,7 @@ const registerEmployee = async (req, res) => {
       });
   } catch (err) {
     if (err.name === "SequelizeUniqueConstraintError") {
-      return res.status(409).json({ error: "Username hoặc SĐT đã tồn tại" });
+      return res.status(409).json({ message: "Username hoặc SĐT đã tồn tại" });
     }
     console.error(err);
     res.status(500).json({ error: "Lỗi server nội bộ" });
@@ -146,10 +146,20 @@ const login = async (req, res) => {
         .json({ error: "Username hoặc password không đúng" });
     }
 
+    // Mapping ChucVu từ tiếng Việt sang tiếng Anh cho phân quyền
+    const roleMapping = {
+      'Admin': 'Admin',
+      'Chủ cửa hàng': 'Owner',
+      'Nhân viên': 'Staff',
+      'Thủ kho': 'Warehouse',
+    };
+    const mappedRole = roleMapping[user.ChucVu] || user.ChucVu;
+    console.log("ChucVu:", user.ChucVu, "-> Mapped role:", mappedRole);
+
     const payload = {
       id: user.MaNhanVien,
       username: user.Username,
-      role: user.ChucVu,
+      role: mappedRole,
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
       expiresIn: "24h",
@@ -279,6 +289,14 @@ const deleteEmployee = async (req, res) => {
     // }
 
     // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
+    // Thêm suffix vào các trường unique để tránh trùng khi thêm mới
+    const deletedSuffix = `_deleted_${Date.now()}`;
+    if (user.Username && !user.Username.includes('_deleted_')) {
+      user.Username = user.Username + deletedSuffix;
+    }
+    if (user.SoDienThoai && !user.SoDienThoai.includes('_deleted_')) {
+      user.SoDienThoai = user.SoDienThoai + deletedSuffix;
+    }
     user.isDeleted = true;
     await user.save();
     
@@ -319,6 +337,43 @@ const restoreEmployee = async (req, res) => {
 
     if (!user.isDeleted) {
       return res.status(400).json({ error: "Nhân viên này chưa bị xóa." });
+    }
+
+    // Khôi phục giá trị gốc của các trường unique (loại bỏ suffix _deleted_xxx)
+    if (user.Username && user.Username.includes('_deleted_')) {
+      const originalUsername = user.Username.split('_deleted_')[0];
+      // Kiểm tra xem username gốc có bị trùng không
+      const existingUser = await db.NhanVien.findOne({
+        where: { 
+          Username: originalUsername, 
+          isDeleted: false,
+          MaNhanVien: { [db.Sequelize.Op.ne]: maNhanVien }
+        }
+      });
+      if (existingUser) {
+        return res.status(400).json({ 
+          error: `Không thể khôi phục! Username "${originalUsername}" đã được sử dụng bởi nhân viên khác.` 
+        });
+      }
+      user.Username = originalUsername;
+    }
+
+    if (user.SoDienThoai && user.SoDienThoai.includes('_deleted_')) {
+      const originalSoDT = user.SoDienThoai.split('_deleted_')[0];
+      // Kiểm tra xem số điện thoại gốc có bị trùng không
+      const existingUser = await db.NhanVien.findOne({
+        where: { 
+          SoDienThoai: originalSoDT, 
+          isDeleted: false,
+          MaNhanVien: { [db.Sequelize.Op.ne]: maNhanVien }
+        }
+      });
+      if (existingUser) {
+        return res.status(400).json({ 
+          error: `Không thể khôi phục! Số điện thoại ${originalSoDT} đã được sử dụng bởi nhân viên khác.` 
+        });
+      }
+      user.SoDienThoai = originalSoDT;
     }
 
     user.isDeleted = false;

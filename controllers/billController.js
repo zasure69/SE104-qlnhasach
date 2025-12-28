@@ -5,6 +5,7 @@ const {
   CT_HD,
   Sach,
   KhachHang,
+  NhanVien,
   sequelize,
   DauSach,
   TheLoai,
@@ -203,6 +204,7 @@ const getDetail = async (req, res) => {
         "MaHoaDon",
         "NgayLapHoaDon",
         "MaKhachHang",
+        "MaNhanVien",
         "TongTien",
         "SoTienTra",
         "ConLai",
@@ -212,6 +214,11 @@ const getDetail = async (req, res) => {
           model: KhachHang,
           // Chỉ lấy tên khách hàng
           attributes: ["HoVaTen"],
+        },
+        {
+          model: NhanVien,
+          // Lấy thông tin nhân viên
+          attributes: ["MaNhanVien", "HoTen"],
         },
         {
           model: CT_HD,

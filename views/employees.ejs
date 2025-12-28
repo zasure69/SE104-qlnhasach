@@ -1,23 +1,29 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DS Nhân viên - Quản lý</title>
-    
-    <!-- Link Font Awesome để có icon --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
+    <!-- Link Font Awesome để có icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         /* * --- PHẦN CSS --- 
          */
 
         /* Biến màu và Cài đặt chung */
         :root {
-            --primary-color: #2c3e50; /* Màu sidebar */
-            --secondary-color: #3498db; /* Màu active */
-            --green-accent: #1EE4AC; /* Màu nút Thêm */
+            --primary-color: #2c3e50;
+            /* Màu sidebar */
+            --secondary-color: #3498db;
+            /* Màu active */
+            --green-accent: #1EE4AC;
+            /* Màu nút Thêm */
             --green-accent-hover: #1ac096;
-            --red-accent: #e74c3c; /* Màu nút Xóa */
+            --red-accent: #e74c3c;
+            /* Màu nút Xóa */
             --red-accent-hover: #c0392b;
             --light-bg: #f0f4f8;
             --white-bg: #ffffff;
@@ -25,7 +31,8 @@
             --text-light: #555;
             --text-white: #ecf0f1;
             --border-color: #e0e0e0;
-            --disabled-bg: #e9ecef; /* THÊM */
+            --disabled-bg: #e9ecef;
+            /* THÊM */
         }
 
         * {
@@ -55,8 +62,10 @@
             padding: 1.5rem;
             display: flex;
             flex-direction: column;
-            transition: all 0.3s ease-in-out; /* SỬA */
-            overflow-x: hidden; /* SỬA */
+            transition: all 0.3s ease-in-out;
+            /* SỬA */
+            overflow-x: hidden;
+            /* SỬA */
         }
 
         .sidebar-header {
@@ -128,15 +137,16 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             margin-bottom: 1.5rem;
         }
-        
+
         /* SỬA: Thêm top-bar-left */
         .top-bar-left {
             display: flex;
             align-items: center;
             gap: 1rem;
         }
-        
-        .top-bar-left h1 { /* SỬA: Bỏ h1 khỏi top-bar trực tiếp */
+
+        .top-bar-left h1 {
+            /* SỬA: Bỏ h1 khỏi top-bar trực tiếp */
             font-size: 1.75rem;
             font-weight: 700;
             margin: 0;
@@ -152,21 +162,26 @@
 
         .user-menu .user-trigger {
             cursor: pointer;
-            display: inline-block; /* Giúp dễ click hơn */
+            display: inline-block;
+            /* Giúp dễ click hơn */
         }
 
         .user-menu .dropdown-menu {
-            display: none; /* Ẩn ban đầu */
+            display: none;
+            /* Ẩn ban đầu */
             position: absolute;
-            top: 100%; /* Hiển thị ngay bên dưới */
+            top: 100%;
+            /* Hiển thị ngay bên dưới */
             right: 0;
             background-color: var(--white-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            min-width: 150px; /* Độ rộng tối thiểu */
+            min-width: 150px;
+            /* Độ rộng tối thiểu */
             z-index: 1000;
-            overflow: hidden; /* Để bo góc */
+            overflow: hidden;
+            /* Để bo góc */
         }
 
         /* Hiển thị menu khi di chuột vào .user-menu */
@@ -187,7 +202,8 @@
 
         .user-menu .dropdown-menu a:hover {
             background-color: var(--light-bg);
-            color: var(--red-accent, #e74c3c); /* Dùng màu đỏ cho logout */
+            color: var(--red-accent, #e74c3c);
+            /* Dùng màu đỏ cho logout */
         }
 
         .user-menu .dropdown-menu a i {
@@ -223,7 +239,7 @@
             align-items: center;
             margin-bottom: 1.5rem;
         }
-        
+
         /* THÊM */
         .content-header h2 {
             font-size: 1.5rem;
@@ -246,6 +262,7 @@
             background-color: var(--green-accent);
             color: white;
         }
+
         .btn-primary:hover {
             background-color: var(--green-accent-hover);
             box-shadow: 0 4px 8px rgba(30, 228, 172, 0.3);
@@ -255,6 +272,7 @@
             background-color: #f0f0f0;
             color: var(--text-light);
         }
+
         .btn-secondary:hover {
             background-color: #e0e0e0;
         }
@@ -263,26 +281,33 @@
             background-color: var(--red-accent);
             color: white;
         }
+
         .btn-danger:hover {
             background-color: var(--red-accent-hover);
         }
 
         .btn-warning {
-            background-color: #f39c12; /* Màu cam */
+            background-color: #f39c12;
+            /* Màu cam */
             color: white;
         }
+
         .btn-warning:hover {
             background-color: #d35400;
         }
 
         #btn-custom-reset {
-            background-color: #6c757d; /* Màu xám đậm chuẩn UI */
-            color: #ffffff;            /* Chữ màu trắng */
+            background-color: #6c757d;
+            /* Màu xám đậm chuẩn UI */
+            color: #ffffff;
+            /* Chữ màu trắng */
         }
 
         #btn-custom-reset:hover {
-            background-color: #5a6268; /* Màu hover đậm hơn chút */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Thêm bóng đổ nhẹ khi di chuột */
+            background-color: #5a6268;
+            /* Màu hover đậm hơn chút */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            /* Thêm bóng đổ nhẹ khi di chuột */
         }
 
         /* --- Bảng --- */
@@ -293,7 +318,7 @@
         .employee-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px; 
+            min-width: 800px;
         }
 
         .employee-table th,
@@ -320,20 +345,25 @@
             cursor: pointer;
             font-size: 1rem;
         }
+
         .action-icon:hover {
             color: #2980b9;
         }
 
         /* Hiệu ứng cho icon xóa ở bảng */
         .action-icon.delete-icon:hover {
-            color: #c0392b !important; /* Đỏ đậm hơn khi hover */
-            transform: scale(1.2); /* Phóng to nhẹ */
+            color: #c0392b !important;
+            /* Đỏ đậm hơn khi hover */
+            transform: scale(1.2);
+            /* Phóng to nhẹ */
             transition: all 0.2s;
         }
 
         .action-icon.open-edit-modal:hover {
-            color: #2980b9; /* Màu xanh dương khi hover */
-            transform: scale(1.2); /* Phóng to nhẹ */
+            color: #2980b9;
+            /* Màu xanh dương khi hover */
+            transform: scale(1.2);
+            /* Phóng to nhẹ */
             transition: all 0.2s;
         }
 
@@ -346,7 +376,7 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.6);
-            display: none; 
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -359,9 +389,9 @@
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             width: 100%;
-            max-width: 700px; 
+            max-width: 700px;
             animation: slideIn 0.3s ease;
-            display: flex; 
+            display: flex;
             flex-direction: column;
         }
 
@@ -379,7 +409,8 @@
         }
 
         .close-modal {
-            font-size: 1.5rem; /* SỬA: Tăng kích thước */
+            font-size: 1.5rem;
+            /* SỬA: Tăng kích thước */
             color: var(--text-light);
             cursor: pointer;
             background: none;
@@ -388,10 +419,10 @@
 
         .modal-body {
             padding: 1.5rem;
-            flex-grow: 1; 
+            flex-grow: 1;
         }
 
-        .modal-form-grid { 
+        .modal-form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1.25rem;
@@ -412,17 +443,19 @@
         .date-input-wrapper {
             position: relative;
         }
+
         /* THÊM: Căn icon lịch cho input modal */
         .modal-form-grid .date-input-wrapper input[type="date"] {
-             padding: 0.75rem;
+            padding: 0.75rem;
         }
+
         .date-input-wrapper .calendar-icon {
             position: absolute;
             right: 0.75rem;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-light);
-            pointer-events: none; 
+            pointer-events: none;
         }
 
         .form-group input,
@@ -433,45 +466,57 @@
             border-radius: 6px;
             font-size: 0.9rem;
         }
+
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
             border-color: var(--secondary-color);
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
         }
-        
+
         /* --- CSS CHO INPUT KHÔNG ĐƯỢC NHẬP (Disabled & Readonly) --- */
         .form-group input:disabled,
         .form-group select:disabled,
         .form-group textarea:disabled,
-        .form-group input:read-only, 
+        .form-group input:read-only,
         .form-group textarea:read-only {
-            background-color: var(--disabled-bg); /* Màu nền xám (#e9ecef) */
-            color: #6c757d;                       /* Màu chữ xám đậm cho cảm giác "chìm" đi */
-            cursor: not-allowed;                  /* Đổi con trỏ chuột để báo hiệu */
-            border-color: #d6d8db;                /* Viền nhạt hơn chút */
+            background-color: var(--disabled-bg);
+            /* Màu nền xám (#e9ecef) */
+            color: #6c757d;
+            /* Màu chữ xám đậm cho cảm giác "chìm" đi */
+            cursor: not-allowed;
+            /* Đổi con trỏ chuột để báo hiệu */
+            border-color: #d6d8db;
+            /* Viền nhạt hơn chút */
         }
 
         /* Tinh chỉnh riêng cho Read-only (vẫn cho phép bôi đen copy nhưng không sửa) */
         .form-group input:read-only,
         .form-group textarea:read-only {
-            cursor: default; /* Con trỏ chuột bình thường */
+            cursor: default;
+            /* Con trỏ chuột bình thường */
         }
 
         .form-group label.required::after {
-            content: "*";               /* Thêm dấu sao */
-            color: var(--red-accent);    /* Màu đỏ (lấy từ biến màu đỏ của bạn) */
-            font-weight: bold;           /* In đậm */
-            margin-left: 4px;            /* Cách ra một chút cho đẹp */
+            content: "*";
+            /* Thêm dấu sao */
+            color: var(--red-accent);
+            /* Màu đỏ (lấy từ biến màu đỏ của bạn) */
+            font-weight: bold;
+            /* In đậm */
+            margin-left: 4px;
+            /* Cách ra một chút cho đẹp */
         }
 
         /* Wrapper cho input password có icon */
         .password-wrapper {
             position: relative;
         }
+
         .password-wrapper input {
-            padding-right: 2.5rem; 
+            padding-right: 2.5rem;
         }
+
         .toggle-password {
             position: absolute;
             right: 0.75rem;
@@ -483,7 +528,7 @@
 
         .modal-footer {
             display: flex;
-            justify-content: flex-end; 
+            justify-content: flex-end;
             gap: 0.75rem;
             padding: 1.25rem 1.5rem;
             border-top: 1px solid var(--border-color);
@@ -493,81 +538,171 @@
         }
 
         .modal-footer .btn {
-            flex-grow: 1; 
+            flex-grow: 1;
             text-align: center;
-            font-size: 0.9rem; 
+            font-size: 0.9rem;
         }
 
         #edit-modal .modal-footer {
-            justify-content: space-between; 
+            justify-content: space-between;
         }
-        #edit-modal .modal-footer > div {
-             display: flex; 
-             gap: 0.75rem; 
-             flex-grow: 1; 
-             justify-content: flex-end; 
+
+        #edit-modal .modal-footer>div {
+            display: flex;
+            gap: 0.75rem;
+            flex-grow: 1;
+            justify-content: flex-end;
         }
-        #edit-modal .modal-footer > div .btn {
-            flex-grow: 1; 
+
+        #edit-modal .modal-footer>div .btn {
+            flex-grow: 1;
         }
 
         /* --- THÊM: CSS CHO LOADER VÀ TOAST --- */
-        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.7); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .loader-overlay.show { display: flex; }
-        .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--secondary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 2001; display: flex; flex-direction: column; gap: 0.5rem; }
-        .toast { background-color: var(--white-bg); padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 0.75rem; opacity: 0; transform: translateX(100%); transition: all 0.3s ease; border-left: 5px solid; }
-        .toast.show { opacity: 1; transform: translateX(0); }
-        .toast.success { border-left-color: var(--green-accent); }
-        .toast.success .toast-icon { color: var(--green-accent); }
-        .toast.error { border-left-color: var(--red-accent); }
-        .toast.error .toast-icon { color: var(--red-accent); }
-        .toast-message { font-size: 0.9rem; font-weight: 500; color: var(--text-dark); }
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .loader-overlay.show {
+            display: flex;
+        }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 2001;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            background-color: var(--white-bg);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            border-left: 5px solid;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left-color: var(--green-accent);
+        }
+
+        .toast.success .toast-icon {
+            color: var(--green-accent);
+        }
+
+        .toast.error {
+            border-left-color: var(--red-accent);
+        }
+
+        .toast.error .toast-icon {
+            color: var(--red-accent);
+        }
+
+        .toast-message {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
         /* --- HẾT CSS MỚI --- */
 
         /* --- Animations --- */
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
+
         @keyframes slideIn {
-            from { transform: translateY(-30px) scale(0.95); opacity: 0; }
-            to { transform: translateY(0) scale(1); opacity: 1; }
+            from {
+                transform: translateY(-30px) scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
         }
 
 
         /* --- Sidebar Collapsed State --- */
         .dashboard-container.sidebar-collapsed {
-          grid-template-columns: 70px 1fr;
+            grid-template-columns: 70px 1fr;
         }
 
         .dashboard-container.sidebar-collapsed .sidebar {
-          width: 70px;
-          padding: 1rem 0.5rem;
+            width: 70px;
+            padding: 1rem 0.5rem;
         }
 
         .dashboard-container.sidebar-collapsed .sidebar-header h2,
         .dashboard-container.sidebar-collapsed .sidebar-nav a span {
-          display: none;
+            display: none;
         }
 
         .dashboard-container.sidebar-collapsed .sidebar-header {
-          margin-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .dashboard-container.sidebar-collapsed .sidebar-header i {
-          font-size: 2rem;
+            font-size: 2rem;
         }
 
         .dashboard-container.sidebar-collapsed .sidebar-nav a {
-          justify-content: center;
-          padding: 0.85rem 0.5rem;
+            justify-content: center;
+            padding: 0.85rem 0.5rem;
         }
 
         .dashboard-container.sidebar-collapsed .sidebar-nav a i {
-          width: auto;
-          font-size: 1.2rem;
+            width: auto;
+            font-size: 1.2rem;
         }
 
         /* --- Responsive Design --- */
@@ -575,26 +710,27 @@
         @media (min-width: 992.01px) {
             /* Collapsed state already defined above */
         }
-        
+
         @media (max-width: 992px) {
             .dashboard-container {
-                grid-template-columns: 1fr; 
+                grid-template-columns: 1fr;
             }
 
             .sidebar {
                 position: fixed;
-                left: -260px; 
+                left: -260px;
                 top: 0;
                 height: 100vh;
                 width: 250px;
                 z-index: 900;
                 box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
             }
+
             .sidebar.active {
-                left: 0; 
+                left: 0;
             }
-            
-             /* SỬA: Hiển thị nút menu */
+
+            /* SỬA: Hiển thị nút menu */
             .menu-toggle {
                 display: block;
             }
@@ -602,13 +738,14 @@
             .main-content {
                 padding: 1rem;
             }
+
             .top-bar {
                 padding: 1rem;
             }
         }
-        
+
         @media (max-width: 768px) {
-            .modal-form-grid { 
+            .modal-form-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -617,7 +754,7 @@
                 align-items: flex-start;
                 gap: 0.5rem;
             }
-            
+
             .user-menu {
                 align-self: flex-end;
             }
@@ -625,45 +762,49 @@
             .content-wrapper {
                 padding: 1rem;
             }
-            
+
             .content-header {
                 flex-direction: column;
                 align-items: stretch;
                 gap: 1rem;
             }
-            
+
             .btn-add-new {
                 width: 100%;
                 text-align: center;
             }
 
             .modal-footer {
-                flex-direction: column; 
+                flex-direction: column;
                 align-items: stretch;
             }
+
             #edit-modal .modal-footer {
-                justify-content: flex-start; 
+                justify-content: flex-start;
             }
-            #edit-modal .modal-footer > div {
+
+            #edit-modal .modal-footer>div {
                 display: flex;
                 flex-direction: column;
                 gap: 0.75rem;
             }
+
             .modal-footer .btn {
                 width: 100%;
                 /* SỬA: Bỏ flex-grow */
-                flex-grow: 0; 
+                flex-grow: 0;
                 font-size: 0.9rem;
             }
-            #edit-modal .modal-footer > div .btn {
+
+            #edit-modal .modal-footer>div .btn {
                 flex-grow: 0;
             }
         }
-
     </style>
 </head>
+
 <body>
-    
+
     <!-- THÊM: Loader và Toast Container -->
     <div class="loader-overlay" id="loader">
         <div class="loader"></div>
@@ -672,7 +813,7 @@
     <!-- KẾT THÚC THÊM MỚI -->
 
     <div class="dashboard-container">
-        
+
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <i class="fas fa-book-open"></i>
@@ -681,25 +822,51 @@
             <nav class="sidebar-nav">
                 <ul>
                     <li><a href="/dashboard"><i class="fas fa-home"></i><span>Tổng quan</span></a></li>
-                    <li><a href="#" class="active"><i class="fas fa-users"></i><span>QL Nhân viên</span></a></li>
-                    <li><a href="/dashboard/books"><i class="fas fa-book"></i><span>QL Sách</span></a></li>
-                    <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i><span>QL Khách hàng</span></a></li>
-                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i><span>QL Phiếu nhập sách</span></a></li>
-                    <li><a href="/dashboard/inventory"><i class="fas fa-clipboard-check"></i><span>QL Phiếu kiểm kê</span></a></li>
-                    <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i><span>QL Phiếu thu tiền</span></a></li>
-                    <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i><span>QL Hóa đơn</span></a></li>
-                    <li><a href="/dashboard/search"><i class="fas fa-search"></i><span> Tra cứu</span></a></li>
-                    <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i><span> Báo cáo tổng kết</span></a></li>
-                    <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i><span>Thay đổi quy định</span></a></li>
-                    <% if (role === 'Admin' || role === 'Owner') { %>
-                    <li><a href="/dashboard/trash"><i class="fas fa-trash-alt"></i><span> Thùng rác</span></a></li>
-                    <% } %>
+                    <% if (role==='Admin' || role==='Owner' ) { %>
+                        <li><a href="#" class="active"><i class="fas fa-users"></i><span>QL Nhân viên</span></a></li>
+                        <% } %>
+                            <li><a href="/dashboard/books"><i class="fas fa-book"></i><span>QL Sách</span></a></li>
+                            <% if (role==='Admin' || role==='Owner' || role==='Staff' ) { %>
+                                <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i><span>QL Khách
+                                            hàng</span></a></li>
+                                <% } %>
+                                    <% if (role==='Admin' || role==='Owner' || role==='Warehouse' ) { %>
+                                        <li><a href="/dashboard/books_import"><i
+                                                    class="fas fa-file-invoice"></i><span>QL Phiếu nhập sách</span></a>
+                                        </li>
+                                        <li><a href="/dashboard/inventory"><i
+                                                    class="fas fa-clipboard-check"></i><span>QL Phiếu kiểm kê</span></a>
+                                        </li>
+                                        <% } %>
+                                            <% if (role==='Admin' || role==='Owner' || role==='Staff' ) { %>
+                                                <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i><span>QL
+                                                            Phiếu thu tiền</span></a></li>
+                                                <li><a href="/dashboard/bills"><i
+                                                            class="fa-solid fa-money-check-dollar"></i><span>QL Hóa
+                                                            đơn</span></a></li>
+                                                <% } %>
+                                                    <% if (role==='Admin' || role==='Owner' ) { %>
+                                                        <li><a href="/dashboard/search"><i
+                                                                    class="fas fa-search"></i><span> Tra cứu</span></a>
+                                                        </li>
+                                                        <% } %>
+                                                            <li><a href="/dashboard/reports"><i
+                                                                        class="fas fa-chart-line"></i><span> Báo cáo
+                                                                        tổng kết</span></a></li>
+                                                            <% if (role==='Admin' || role==='Owner' ) { %>
+                                                                <li><a href="/dashboard/change-rule"><i
+                                                                            class="fas fa-gavel"></i><span>Thay đổi quy
+                                                                            định</span></a></li>
+                                                                <li><a href="/dashboard/trash"><i
+                                                                            class="fas fa-trash-alt"></i><span> Thùng
+                                                                            rác</span></a></li>
+                                                                <% } %>
                 </ul>
             </nav>
         </aside>
 
         <main class="main-content">
-            
+
             <header class="top-bar">
                 <!-- SỬA: Bọc div -->
                 <div class="top-bar-left">
@@ -710,7 +877,9 @@
                 </div>
                 <div class="user-menu">
                     <span class="user-trigger">
-                        Chào, <strong><%= username %></strong> <i class="fas fa-chevron-down"></i>
+                        Chào, <strong>
+                            <%= username %>
+                        </strong> <i class="fas fa-chevron-down"></i>
                     </span>
 
                     <div class="dropdown-menu">
@@ -742,42 +911,25 @@
                                 <th>Username</th>
                                 <th>Password</th>
                                 <th>Ngày nhận việc</th>
-                                <th></th> 
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             <% if (employees && employees.length > 0) { %>
                                 <% employees.forEach((employee, index) => { %>
-                                    <%
-                                        // Dùng 'en-US' (kiểu Mỹ) để ép ra MM/DD/YYYY
-                                        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-                                        
-                                        // Dùng 'en-US' (Kiểu Mỹ) để format
-                                        const formattedNgaySinh = new Date(employee.NgaySinh).toLocaleDateString('en-US', options);
-                                        const formattedNgayNhanViec = new Date(employee.NgayNhanViec).toLocaleDateString('en-US', options);
-                                    %>
                                     <tr data-id="<%= employee.MaNhanVien %>"
                                         data-ngay-sinh="<%= new Date(employee.NgaySinh).toISOString().split('T')[0] %>"
                                         data-ngay-nhan-viec="<%= new Date(employee.NgayNhanViec).toISOString().split('T')[0] %>">
                                         <td><%= index + 1 %></td>
                                         <td><%= employee.MaNhanVien %></td>
                                         <td><%= employee.HoTen %></td>
-                                        <td><%= new Date(employee.NgaySinh).toLocaleDateString('vi-VN', { 
-                                            day: '2-digit', 
-                                            month: '2-digit', 
-                                            year: 'numeric' 
-                                        }) %></td>
+                                        <td><%= new Date(employee.NgaySinh).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
                                         <td><%= employee.SoDienThoai %></td>
                                         <td><%= employee.ChucVu %></td>
                                         <td><%= employee.Username %></td>
-                                        <td>******</td> 
-                                        <td><%= new Date(employee.NgayNhanViec).toLocaleDateString('vi-VN', { 
-                                            day: '2-digit', 
-                                            month: '2-digit', 
-                                            year: 'numeric' 
-                                        }) %></td>
+                                        <td>******</td>
+                                        <td><%= new Date(employee.NgayNhanViec).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
                                         <td>
-                                            <%# Kiểm tra xem Username có phải là 'admin' không %>
                                             <% if (employee.Username !== 'admin') { %>
                                                 <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
                                                 <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
@@ -790,7 +942,7 @@
                                     <td colspan="10" style="text-align: center;">Không có nhân viên nào.</td>
                                 </tr>
                             <% } %>
-                            <!-- <tr data-id="NV01"> 
+                                                    <!-- <tr data-id="NV01"> 
                                 <td>1</td>
                                 <td>NV01</td>
                                 <td>Nguyễn Văn A</td>
@@ -819,7 +971,7 @@
                                     <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
                                     <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
                                 </td> -->
-                            </tr>
+                                                    </tr>
                         </tbody>
                     </table>
                 </div>
@@ -856,7 +1008,7 @@
                         </div>
                         <div class="form-group">
                             <label for="add-sdt" class="required">Số điện thoại</label>
-                            <input type="number" id="add-sdt" placeholder="0123456789">
+                            <input type="number" id="add-sdt" placeholder="0123456789" required>
                         </div>
                         <div class="form-group">
                             <label for="add-username" class="required">Tên đăng nhập</label>
@@ -870,12 +1022,12 @@
                             </div>
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
-                             <label for="add-chuc-vu" class="required">Chức vụ</label>
-                             <select id="add-chuc-vu">
-                                 <option value="nhân viên">nhân viên</option>
-                                 <option value="Thủ kho">Thủ kho</option>
-                                 <option value="Chủ cửa hàng">Chủ cửa hàng</option>
-                             </select>
+                            <label for="add-chuc-vu" class="required">Chức vụ</label>
+                            <select id="add-chuc-vu" required>
+                                <option value="Nhân viên">Nhân viên</option>
+                                <option value="Thủ kho">Thủ kho</option>
+                                <option value="Chủ cửa hàng">Chủ cửa hàng</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -920,7 +1072,8 @@
                         </div>
                         <div class="form-group">
                             <label for="edit-username">Tên đăng nhập</label>
-                            <input type="text" id="edit-username" value="anvnv" required readonly> <!-- SỬA: Khóa Username -->
+                            <input type="text" id="edit-username" value="anvnv" required readonly>
+                            <!-- SỬA: Khóa Username -->
                         </div>
                         <div class="form-group">
                             <label for="edit-password">Mật khẩu (Để trống nếu không đổi)</label>
@@ -930,12 +1083,12 @@
                             </div>
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
-                             <label for="edit-chuc-vu">Chức vụ</label>
-                             <select id="edit-chuc-vu">
-                                 <option value="nhân viên" selected>nhân viên</option>
-                                 <option value="Thủ kho">Thủ kho</option>
-                                 <option value="Chủ cửa hàng">Chủ cửa hàng</option>
-                             </select>
+                            <label for="edit-chuc-vu">Chức vụ</label>
+                            <select id="edit-chuc-vu" required>
+                                <option value="Nhân viên" selected>Nhân viên</option>
+                                <option value="Thủ kho">Thủ kho</option>
+                                <option value="Chủ cửa hàng">Chủ cửa hàng</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -949,16 +1102,16 @@
 
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            
+        document.addEventListener('DOMContentLoaded', function () {
+
             // --- 1. CÁC HÀM TIỆN ÍCH (LOADER, TOAST, FETCH DATA) ---
             const loader = document.getElementById('loader');
             const toastContainer = document.getElementById('toast-container');
-            let currentEditingRow = null; 
-    
+            let currentEditingRow = null;
+
             function showLoader() { loader.style.display = 'flex'; }
             function hideLoader() { loader.style.display = 'none'; }
-            
+
             function showToast(message, type = 'success') {
                 const toast = document.createElement('div');
                 toast.classList.add('toast', type);
@@ -972,21 +1125,21 @@
                     });
                 }, 3000);
             }
-    
+
             function simulateApiCall(callback) {
                 showLoader();
                 setTimeout(() => {
                     hideLoader();
                     const success = Math.random() > 0.1; // 90% thành công
-                    callback(success); 
-                }, 1000); 
+                    callback(success);
+                }, 1000);
             }
 
             async function fetchEmployees() {
                 try {
                     const response = await fetch('/api/employees/getEmployees'); // Đổi lại đường dẫn API của bạn nếu khác
                     if (!response.ok) throw new Error('Không thể tải dữ liệu');
-                    
+
                     const employees = await response.json();
                     const tbody = document.querySelector('#employee-table tbody');
                     tbody.innerHTML = ''; // Xóa sạch dữ liệu cũ
@@ -994,11 +1147,11 @@
                     if (employees && employees.length > 0) {
                         employees.forEach((employee, index) => {
                             const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-                            
+
                             // Xử lý ngày tháng (để hiện dd/mm/yyyy)
                             const formattedNgaySinh = employee.NgaySinh ? new Date(employee.NgaySinh).toLocaleDateString('en-US', options) : '';
                             const formattedNgayNhanViec = employee.NgayNhanViec ? new Date(employee.NgayNhanViec).toLocaleDateString('en-US', options) : '';
-                            
+
                             // Xử lý ngày chuẩn (để lưu vào dataset cho nút Sửa)
                             const rawNgaySinh = employee.NgaySinh ? new Date(employee.NgaySinh).toISOString().split('T')[0] : '';
                             const rawNgayNhanViec = employee.NgayNhanViec ? new Date(employee.NgayNhanViec).toISOString().split('T')[0] : '';
@@ -1039,33 +1192,33 @@
                     // showToast('Lỗi tải danh sách nhân viên', 'error');
                 }
             }
-    
+
             // --- 2. XỬ LÝ SIDEBAR & RESPONSIVE ---
             const menuToggle = document.getElementById('menu-toggle');
             const sidebar = document.getElementById('sidebar');
-            const container = document.querySelector('.dashboard-container'); 
-    
+            const container = document.querySelector('.dashboard-container');
+
             if (menuToggle && sidebar && container) {
-                menuToggle.addEventListener('click', function() {
-                    if (window.innerWidth <= 992) { sidebar.classList.toggle('active'); } 
+                menuToggle.addEventListener('click', function () {
+                    if (window.innerWidth <= 992) { sidebar.classList.toggle('active'); }
                     else { container.classList.toggle('sidebar-collapsed'); }
                 });
             }
-    
+
             // --- 3. HÀM LOGIC CỐT LÕI (SMART MODAL) ---
-            
+
             // Hàm lấy dữ liệu từ Form (snapshot)
             function getFormData(form) {
                 const data = {};
                 const inputs = form.querySelectorAll('input, select, textarea');
                 inputs.forEach(input => {
-                    if(input.type !== 'submit' && input.type !== 'button') {
+                    if (input.type !== 'submit' && input.type !== 'button') {
                         data[input.id] = input.value;
                     }
                 });
                 return data;
             }
-    
+
             // Hàm khôi phục dữ liệu Form
             function restoreFormData(form, data) {
                 for (const [key, value] of Object.entries(data)) {
@@ -1073,38 +1226,38 @@
                     if (input) input.value = value;
                 }
             }
-    
+
             // Hàm Setup Modal Thông minh (Dùng chung cho Sửa/Xóa/Reset)
             function setupSmartModal(config) {
                 const addBtn = document.getElementById(config.addBtnId);
                 const addModal = document.getElementById(config.addModalId);
-                
+
                 const editModal = document.getElementById(config.editModalId);
                 const editForm = document.getElementById(config.formId);
                 const editBtns = document.querySelectorAll(config.editBtnClass);
-                
+
                 const resetBtn = document.getElementById(config.resetBtnId);
                 const table = document.querySelector(config.tableSelector);
-                
+
                 let originalFormData = {}; // Biến lưu snapshot dữ liệu gốc
-    
+
                 // A. Mở Modal Thêm mới
                 if (addBtn && addModal) {
                     addBtn.addEventListener('click', () => {
-                        if(config.addFormId) {
+                        if (config.addFormId) {
                             document.getElementById(config.addFormId).reset();
                         }
                         addModal.style.display = 'flex';
                     });
                 }
-    
+
                 // // B. Mở Modal Sửa (Điền dữ liệu & Lưu snapshot)
                 // if (editBtns.length > 0 && editModal) {
                 //     editBtns.forEach(btn => {
                 //         btn.addEventListener('click', (e) => {
                 //             currentEditingRow = e.target.closest('tr');
                 //             if(!currentEditingRow) return;
-    
+
                 //             // --- LOGIC ĐIỀN DỮ LIỆU VÀO FORM (MAPPING) ---
                 //             // Lưu ý: Cần mapping đúng thứ tự cột trong bảng của bạn
                 //             const cells = currentEditingRow.cells;
@@ -1116,38 +1269,38 @@
                 //             document.getElementById('edit-username').value = cells[6].textContent;
                 //             document.getElementById('edit-ngay-nhan-viec').value = currentEditingRow.dataset.ngayNhanViec;
                 //             document.getElementById('edit-password').value = ''; // Reset mật khẩu
-    
+
                 //             // SAU KHI điền xong, lưu lại trạng thái gốc ngay lập tức
                 //             setTimeout(() => {
                 //                  if(editForm) originalFormData = getFormData(editForm);
                 //             }, 50); 
-                            
+
                 //             editModal.style.display = 'flex';
                 //         });
                 //     });
                 // }
-    
+
                 // C. Xử lý nút ĐẶT LẠI (Thông minh)
                 if (resetBtn && editForm) {
                     resetBtn.addEventListener('click', () => {
                         const currentData = getFormData(editForm);
                         // So sánh dữ liệu hiện tại với bản gốc
                         const isChanged = JSON.stringify(currentData) !== JSON.stringify(originalFormData);
-    
+
                         if (!isChanged) {
                             showToast('Chưa có thay đổi nào để đặt lại!', 'error');
                             return;
                         }
-    
-                        if (confirm("Dữ liệu đã thay đổi. Bạn có muốn LƯU LẠI không?\n\n- OK: Lưu thay đổi.\n- Cancel: Khôi phục lại dữ liệu gốc.")) {
-                            editForm.requestSubmit(); // Submit form
-                        } else {
+
+                        if (confirm("Khôi phục lại dữ liệu ban đầu?\n\nOK: Khôi phục lại dữ liệu ban đầu \n Cancel: Tiếp tục chỉnh sửa với dữ liệu hiện tại.")) {
+                            //     editForm.requestSubmit(); // Submit form
+                            // } else {
                             restoreFormData(editForm, originalFormData); // Reset form
                             showToast('Đã khôi phục dữ liệu gốc!', 'success');
                         }
                     });
                 }
-    
+
                 // D. Xử lý nút XÓA (Icon thùng rác ở bảng) và nút CHỈNH SỬA
                 if (table) {
                     table.addEventListener('click', async (e) => {
@@ -1156,7 +1309,7 @@
                             const row = e.target.closest('tr');
                             const itemName = row.cells[2].textContent; // Lấy tên nhân viên (cột 3)
                             const maNV = row.cells[1].textContent; // Lấy mã nhân viên (cột 2)
-                            
+
                             if (confirm(`Bạn có chắc chắn muốn XÓA nhân viên: ${itemName}?`)) {
                                 showLoader();
                                 try {
@@ -1168,8 +1321,8 @@
                                     const result = await response.json();
                                     hideLoader();
                                     console.log('Kết quả xóa:', result);
-                                    
-                                    if(response.ok) {
+
+                                    if (response.ok) {
                                         row.remove();
                                         showToast('Xóa nhân viên thành công!', 'success');
                                         const tableBody = document.getElementById('employee-table').getElementsByTagName('tbody')[0];
@@ -1191,10 +1344,10 @@
                         }
 
                         if (e.target.classList.contains('open-edit-modal') || e.target.closest('.open-edit-modal')) {
-                            const btn  = e.target.closest('.open-edit-modal');
+                            const btn = e.target.closest('.open-edit-modal');
                             currentEditingRow = btn.closest('tr');
-                            if(!currentEditingRow) return;
-                            
+                            if (!currentEditingRow) return;
+
                             // --- LOGIC ĐIỀN DỮ LIỆU VÀO FORM (MAPPING) ---
                             // Lưu ý: Cần mapping đúng thứ tự cột trong bảng của bạn
                             const cells = currentEditingRow.cells;
@@ -1206,79 +1359,104 @@
                             document.getElementById('edit-username').value = cells[6].textContent;
                             document.getElementById('edit-ngay-nhan-viec').value = currentEditingRow.dataset.ngayNhanViec;
                             document.getElementById('edit-password').value = ''; // Reset mật khẩu
-    
+
                             // SAU KHI điền xong, lưu lại trạng thái gốc ngay lập tức
                             setTimeout(() => {
-                                 if(editForm) originalFormData = getFormData(editForm);
-                            }, 50); 
-                            
+                                if (editForm) originalFormData = getFormData(editForm);
+                            }, 50);
+
                             editModal.style.display = 'flex';
 
                         }
                     });
                 }
-    
+
                 // E. Xử lý Submit Form Sửa
                 if (editForm) {
                     editForm.addEventListener('submit', async (e) => {
                         e.preventDefault();
                         if (!currentEditingRow) return;
 
-                    const maNV = currentEditingRow.dataset.id;
-                    const data = {
-                        hoTen: document.getElementById('edit-ho-ten').value,
-                        ngaySinh: document.getElementById('edit-ngay-sinh').value,
-                        soDienThoai: document.getElementById('edit-sdt').value,
-                        chucVu: document.getElementById('edit-chuc-vu').value,
-                        ngayNhanViec: document.getElementById('edit-ngay-nhan-viec').value,
-                        password: document.getElementById('edit-password').value // Gửi cả password (trống hoặc mới)
-                    };
+                        const maNV = currentEditingRow.dataset.id;
+                        const data = {
+                            hoTen: document.getElementById('edit-ho-ten').value,
+                            ngaySinh: document.getElementById('edit-ngay-sinh').value,
+                            soDienThoai: document.getElementById('edit-sdt').value,
+                            chucVu: document.getElementById('edit-chuc-vu').value,
+                            ngayNhanViec: document.getElementById('edit-ngay-nhan-viec').value,
+                            password: document.getElementById('edit-password').value // Gửi cả password (trống hoặc mới)
+                        };
 
-                    const ngaySinhInput = document.getElementById('edit-ngay-sinh').value;
-                    const ngayNhanViecInput = document.getElementById('edit-ngay-nhan-viec').value;
-
-                    if (!checkAgeRequirement(ngaySinhInput, ngayNhanViecInput)) {
-                        showToast('Nhân viên chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
-                        return; // Dừng lại, không gửi dữ liệu đi
-                    }
-
-                    showLoader();
-                    try {
-                        // --- GỌI API 'update' ---
-                        const response = await fetch(`/api/employees/updateEmployee/${maNV}`, {
-                            method: 'PATCH',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(data)
-                        });
-                        const result = await response.json();
-                        hideLoader();
-
-                        if (response.ok) {
-                            showToast('Cập nhật thành công!', 'success');
-                            editModal.style.display = 'none';
-                            const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-                            // Cập nhật hàng trong bảng
-                            currentEditingRow.cells[2].textContent = result.user.HoTen;
-                            currentEditingRow.cells[3].textContent = result.user.NgaySinh;
-                            currentEditingRow.cells[4].textContent = result.user.SoDienThoai;
-                            currentEditingRow.cells[5].textContent = result.user.ChucVu;
-                            currentEditingRow.cells[8].textContent = result.user.NgayNhanViec;
-                            //Cập nhật "bộ nhớ" data- attributes của hàng cho lần sửa tiếp theo
-                            currentEditingRow.dataset.ngaySinh = new Date(result.user.NgaySinh).toISOString().split('T')[0];
-                            currentEditingRow.dataset.ngayNhanViec = new Date(result.user.NgayNhanViec).toISOString().split('T')[0];
-                            currentEditingRow = null;
-                        } else {
-                            restoreFormData(editForm, originalFormData); // Reset form
-                            showToast('Đã khôi phục dữ liệu gốc!', 'success');
+                        // Validate số điện thoại phải đủ 10 số
+                        const soDienThoai = data.soDienThoai.toString().replace(/\D/g, '');
+                        if (soDienThoai.length !== 10) {
+                            showToast('Số điện thoại không hợp lệ! Vui lòng nhập đủ 10 số.', 'error');
+                            return;
                         }
-                    } catch (err) {
-                        hideLoader();
-                        showToast('Lỗi kết nối máy chủ.', 'error');
-                    }
+
+                        // Validate ngày sinh không được sau ngày hiện tại
+                        const ngaySinh = new Date(data.ngaySinh);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        if (ngaySinh > today) {
+                            showToast('Ngày sinh không hợp lệ! Không được sau ngày hiện tại.', 'error');
+                            return;
+                        }
+
+                        // Validate ngày nhận việc không sau ngày hiện tại quá 1 tuần
+                        const ngayNhanViec = new Date(data.ngayNhanViec);
+                        const ngayHienTai = new Date();
+                        const motTuanSau = new Date(ngayHienTai.getTime() + 7 * 24 * 60 * 60 * 1000);
+                        if (ngayNhanViec > motTuanSau) {
+                            showToast('Ngày nhận việc không hợp lệ! Không được sau ngày hiện tại quá 1 tuần.', 'error');
+                            return;
+                        }
+
+                        const ngaySinhInput = document.getElementById('edit-ngay-sinh').value;
+                        const ngayNhanViecInput = document.getElementById('edit-ngay-nhan-viec').value;
+
+                        if (!checkAgeRequirement(ngaySinhInput, ngayNhanViecInput)) {
+                            showToast('Nhân viên chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
+                            return; // Dừng lại, không gửi dữ liệu đi
+                        }
+
+                        showLoader();
+                        try {
+                            // --- GỌI API 'update' ---
+                            const response = await fetch(`/api/employees/updateEmployee/${maNV}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(data)
+                            });
+                            const result = await response.json();
+                            hideLoader();
+
+                            if (response.ok) {
+                                showToast('Cập nhật thành công!', 'success');
+                                editModal.style.display = 'none';
+                                const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+                                // Cập nhật hàng trong bảng
+                                currentEditingRow.cells[2].textContent = result.user.HoTen;
+                                currentEditingRow.cells[3].textContent = result.user.NgaySinh;
+                                currentEditingRow.cells[4].textContent = result.user.SoDienThoai;
+                                currentEditingRow.cells[5].textContent = result.user.ChucVu;
+                                currentEditingRow.cells[8].textContent = result.user.NgayNhanViec;
+                                //Cập nhật "bộ nhớ" data- attributes của hàng cho lần sửa tiếp theo
+                                currentEditingRow.dataset.ngaySinh = new Date(result.user.NgaySinh).toISOString().split('T')[0];
+                                currentEditingRow.dataset.ngayNhanViec = new Date(result.user.NgayNhanViec).toISOString().split('T')[0];
+                                currentEditingRow = null;
+                            } else {
+                                restoreFormData(editForm, originalFormData); // Reset form
+                                showToast('Đã khôi phục dữ liệu gốc!', 'success');
+                            }
+                        } catch (err) {
+                            hideLoader();
+                            showToast('Lỗi kết nối máy chủ.', 'error');
+                        }
                     });
                 }
             }
-    
+
             // --- 4. GỌI HÀM SETUP CHO NHÂN VIÊN ---
             setupSmartModal({
                 addBtnId: 'open-add-modal',
@@ -1291,13 +1469,13 @@
                 tableSelector: '#employee-table',  // ID bảng nhân viên
                 typeName: 'Nhân viên'
             });
-    
-    
+
+
             // --- 5. XỬ LÝ NÚT "THÊM MỚI" (CUSTOM RESET) Ở MODAL THÊM ---
             // Logic mới: Nút này dùng để "Làm mới" form.
             // - Nếu có dữ liệu: Hỏi Lưu hay Xóa trắng. Chọn Không -> Xóa trắng form (giữ modal).
             // - Nếu không có dữ liệu: Xóa trắng form (giữ modal).
-            
+
             const btnCustomReset = document.getElementById('btn-custom-reset');
             const addEmployeeForm = document.getElementById('add-employee-form');
             // const addModal = document.getElementById('add-modal'); // Không cần biến này ở đây nữa vì không đóng
@@ -1313,7 +1491,7 @@
                             // Chọn OK -> Lưu
                             if (addEmployeeForm.checkValidity()) {
                                 isSaveAndReset = true;
-                                addEmployeeForm.requestSubmit(); 
+                                addEmployeeForm.requestSubmit();
                             } else {
                                 addEmployeeForm.reportValidity();
                             }
@@ -1332,7 +1510,7 @@
                 // Xử lý sự kiện Submit Form (Giữ nguyên)
                 addEmployeeForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    
+
                     const data = {
                         hoTen: document.getElementById('add-ho-ten').value,
                         ngaySinh: document.getElementById('add-ngay-sinh').value,
@@ -1343,11 +1521,39 @@
                         ngayNhanViec: document.getElementById('add-ngay-nhan-viec').value,
                     };
 
+                    // Validate số điện thoại phải đủ 10 số
+                    const soDienThoai = data.soDienThoai.toString().replace(/\D/g, '');
+                    if (soDienThoai.length !== 10) {
+                        showToast('Số điện thoại không hợp lệ! Vui lòng nhập đủ 10 số.', 'error');
+                        isSaveAndReset = false;
+                        return;
+                    }
+
+                    // Validate ngày sinh không được sau ngày hiện tại
+                    const ngaySinh = new Date(data.ngaySinh);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (ngaySinh > today) {
+                        showToast('Ngày sinh không hợp lệ! Không được sau ngày hiện tại.', 'error');
+                        isSaveAndReset = false;
+                        return;
+                    }
+
+                    // Validate ngày nhận việc không sau ngày hiện tại quá 1 tuần
+                    const ngayNhanViec = new Date(data.ngayNhanViec);
+                    const ngayHienTai = new Date();
+                    const motTuanSau = new Date(ngayHienTai.getTime() + 7 * 24 * 60 * 60 * 1000);
+                    if (ngayNhanViec > motTuanSau) {
+                        showToast('Ngày nhận việc không hợp lệ! Không được sau ngày hiện tại quá 1 tuần.', 'error');
+                        isSaveAndReset = false;
+                        return;
+                    }
+
                     const ngaySinhInput = document.getElementById('add-ngay-sinh').value;
                     const ngayNhanViecInput = document.getElementById('add-ngay-nhan-viec').value;
 
                     if (!checkAgeRequirement(ngaySinhInput, ngayNhanViecInput)) {
-                        showToast('nhân viên chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
+                        showToast('Nhân viên chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
                         isSaveAndReset = false;
                         return; // Dừng lại, không gửi dữ liệu đi
                     }
@@ -1368,16 +1574,16 @@
 
                             if (isSaveAndReset) {
                                 // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
-                                addEmployeeForm.reset(); 
+                                addEmployeeForm.reset();
                                 showToast('Đã sẵn sàng nhập nhân viên tiếp theo.', 'info');
-                                
+
                                 // Reset cờ về false sau khi xong việc
-                                isSaveAndReset = false; 
+                                isSaveAndReset = false;
                             } else {
                                 // Trường hợp 2: Submit thường (Lưu -> Đóng form)
                                 document.getElementById('add-modal').style.display = 'none';
                                 addEmployeeForm.reset(); // Reset luôn cho sạch
-                            } 
+                            }
                             fetchEmployees(); // tải lại danh sách nhân viên
                         } else {
                             showToast(`Thêm thất bại: ${result.error}`, 'error');
@@ -1389,10 +1595,10 @@
                     }
                 });
             }
-    
-    
+
+
             // --- 6. CÁC TIỆN ÍCH KHÁC (Close modal, Password toggle) ---
-            
+
             // Đóng modal chung
             const closeModalBtns = document.querySelectorAll('.close-modal');
             closeModalBtns.forEach(btn => {
@@ -1401,12 +1607,12 @@
             window.addEventListener('click', (e) => {
                 if (e.target.classList.contains('modal-overlay')) e.target.style.display = 'none';
             });
-    
+
             // Ẩn hiện mật khẩu
             const togglePasswordBtns = document.querySelectorAll('.toggle-password');
             togglePasswordBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const input = this.closest('.password-wrapper').querySelector('input'); 
+                btn.addEventListener('click', function () {
+                    const input = this.closest('.password-wrapper').querySelector('input');
                     const icon = this.querySelector('i');
                     if (input.type === 'password') {
                         input.type = 'text';
@@ -1419,11 +1625,11 @@
             });
 
             // --- 7. VALIDATE DỮ LIỆU ĐẦU VÀO (MỚI THÊM) ---
-            
+
             function setupInputValidation() {
                 // 1. Validate HỌ TÊN: Fix lỗi gõ tiếng Việt
                 const nameInputs = [document.getElementById('add-ho-ten'), document.getElementById('edit-ho-ten')];
-                
+
                 nameInputs.forEach(input => {
                     if (input) {
                         // Cờ đánh dấu: nhân viên có đang gõ tổ hợp phím tiếng Việt không?
@@ -1442,10 +1648,10 @@
                         });
 
                         // Sự kiện nhập liệu thông thường
-                        input.addEventListener('input', function() {
+                        input.addEventListener('input', function () {
                             // Nếu đang gõ dở tiếng Việt thì KHÔNG can thiệp
                             if (isComposing) return;
-                            
+
                             validateName(this);
                         });
                     }
@@ -1458,9 +1664,9 @@
                     // \s: Khoảng trắng
                     // ^: Phủ định (Không phải chữ và không phải khoảng trắng thì xóa)
                     // u: Cờ unicode
-                    
+
                     const validValue = el.value.replace(/[^\p{L}\s]/gu, '');
-                    
+
                     // Chỉ cập nhật lại nếu giá trị thực sự thay đổi (để tránh nhảy con trỏ chuột không cần thiết)
                     if (el.value !== validValue) {
                         el.value = validValue;
@@ -1471,7 +1677,7 @@
                 const phoneInputs = [document.getElementById('add-sdt'), document.getElementById('edit-sdt')];
                 phoneInputs.forEach(input => {
                     if (input) {
-                        input.addEventListener('input', function() {
+                        input.addEventListener('input', function () {
                             this.value = this.value.replace(/[^0-9]/g, '');
                             if (this.value.length > 10) this.value = this.value.slice(0, 10);
                         });
@@ -1482,7 +1688,7 @@
                 const usernameInputs = [document.getElementById('add-username'), document.getElementById('edit-username')];
                 usernameInputs.forEach(input => {
                     if (input) {
-                        input.addEventListener('input', function() {
+                        input.addEventListener('input', function () {
                             this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
                         });
                     }
@@ -1505,8 +1711,8 @@
 
                 // So sánh: Nếu ngày vào làm < ngày sinh nhật thứ 18 -> Chưa đủ tuổi
                 // setHours(0,0,0,0) để chỉ so sánh ngày, bỏ qua giờ giấc
-                ngayNhanViec.setHours(0,0,0,0);
-                sinhNhatThu18.setHours(0,0,0,0);
+                ngayNhanViec.setHours(0, 0, 0, 0);
+                sinhNhatThu18.setHours(0, 0, 0, 0);
 
                 if (ngayNhanViec < sinhNhatThu18) {
                     return false;
@@ -1515,18 +1721,19 @@
             }
 
             // --- LOGOUT ---
-    const logoutBtn = document.getElementById('logout-button');
-    if(logoutBtn) {
-        logoutBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            if(confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-                window.location.href = '/logout';
+            const logoutBtn = document.getElementById('logout-button');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                        window.location.href = '/logout';
+                    }
+                });
             }
-        });
-    }
-    
+
         });
     </script>
 
 </body>
+
 </html>

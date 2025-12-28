@@ -4,6 +4,7 @@ const { Op } = require("sequelize");
 
 // --- Lấy thông tin User (để hiển thị tên) ---
 const getUserInfo = (req) => {
+  console.log("User info:", req.user);
   return {
     id: req.user.id,
     username: req.user.username,
