@@ -303,10 +303,40 @@ const deleteEmployee = async (req, res) => {
       return res.status(400).json({ error: "Nhân viên này đã bị xóa trước đó." });
     }
 
-    // (Thêm logic kiểm tra an toàn ở đây, ví dụ: không cho xóa chính mình)
-    // if (req.user.id === maNhanVien) {
-    //     return res.status(403).json({ error: 'Bạn không thể tự xóa chính mình.' });
-    // }
+    // Không cho phép xóa chính mình
+    if (req.user && req.user.id === maNhanVien) {
+      return res.status(403).json({ error: 'Bạn không thể tự xóa chính mình.' });
+    }
+
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có hóa đơn liên kết không (chỉ hóa đơn chưa xóa)
+    const hoaDonLienKet = await db.HoaDon.findOne({
+      where: { MaNhanVien: maNhanVien, isDeleted: false },
+    });
+    if (hoaDonLienKet) {
+      return res.status(400).json({
+        error: `Không thể xóa nhân viên "${user.HoTen}". Vẫn còn hóa đơn liên kết với nhân viên này.`,
+      });
+    }
+
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có phiếu nhập sách liên kết không (chỉ phiếu chưa xóa)
+    const phieuNhapLienKet = await db.PhieuNhapSach.findOne({
+      where: { MaNhanVien: maNhanVien, isDeleted: false },
+    });
+    if (phieuNhapLienKet) {
+      return res.status(400).json({
+        error: `Không thể xóa nhân viên "${user.HoTen}". Vẫn còn phiếu nhập sách liên kết với nhân viên này.`,
+      });
+    }
+
+    // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có phiếu thu tiền liên kết không (chỉ phiếu chưa xóa)
+    const phieuThuLienKet = await db.PhieuThuTien.findOne({
+      where: { MaNhanVien: maNhanVien, isDeleted: false },
+    });
+    if (phieuThuLienKet) {
+      return res.status(400).json({
+        error: `Không thể xóa nhân viên "${user.HoTen}". Vẫn còn phiếu thu tiền liên kết với nhân viên này.`,
+      });
+    }
 
     // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
     // Thêm suffix vào các trường unique để tránh trùng khi thêm mới
