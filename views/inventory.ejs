@@ -2034,7 +2034,7 @@
             return;
           }
 
-          const data = result.data;
+          const data = result.data.receipt;
           const date = new Date(data.NgayKiem);
           const dateStr = `Ngày ${date.getDate()} tháng ${
             date.getMonth() + 1
@@ -2099,7 +2099,7 @@
                     <div class="info">
                         <p><strong>Mã phiếu:</strong> ${data.MaPhieuKiem}</p>
                         <p><strong>Người kiểm kê:</strong> ${
-                          data.MaNhanVien || "---"
+                          data.NhanVien?.HoTen || data.MaNhanVien || "---"
                         }</p>
                         <p><strong>Ghi chú:</strong> ${data.GhiChu || "---"}</p>
                     </div>
