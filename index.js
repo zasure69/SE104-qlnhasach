@@ -58,9 +58,6 @@ protectedRoutes.use("/api/bill", billRoutes);
 const customersRoutes = require("./routes/customersRoutes");
 protectedRoutes.use("/api/customers", customersRoutes);
 
-const searchRoutes = require("./routes/searchRoutes");
-protectedRoutes.use("/api/search", searchRoutes);
-
 const changeruleRoutes = require("./routes/changeruleRoutes");
 protectedRoutes.use("/api/change-rules", changeruleRoutes);
 

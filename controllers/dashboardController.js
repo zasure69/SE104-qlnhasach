@@ -77,64 +77,6 @@ const getCustomersPage = async (req, res) => {
   }
 };
 
-const getSearchPage = async (req, res) => {
-  // <-- 1. CHUYỂN THÀNH ASYNC
-  try {
-    const userInfo = {
-      id: req.user.id,
-      username: req.user.username,
-      role: req.user.role,
-    };
-
-    // 2. Lấy khách hàng chưa bị xóa
-    const allCustomers = await db.KhachHang.findAll({
-      where: { isDeleted: false },
-      raw: true,
-    });
-
-    const allBooks = await db.Sach.findAll({
-      where: { isDeleted: false },
-      include: [
-        {
-          model: db.DauSach,
-          where: { isDeleted: false },
-          required: true,
-          include: [
-            // 1. Join với bảng Thể Loại (Giữ nguyên)
-            {
-              model: db.TheLoai,
-              where: { isDeleted: false },
-              required: false,
-            },
-            // 2. Join với bảng Tác Giả (Thông qua CT_TacGia)
-            {
-              model: db.TacGia,
-              as: "TacGias",
-              where: { isDeleted: false },
-              required: false, // Để sách chưa có tác giả vẫn hiện ra
-              through: {
-                attributes: [], // (Tuỳ chọn) Ẩn các cột của bảng trung gian CT_TacGia để kết quả gọn hơn
-              },
-            },
-          ],
-        },
-      ],
-      raw: true,
-      nest: true,
-    });
-
-    // 4. Render trang VÀ gửi dữ liệu vào
-    res.render("search", {
-      ...userInfo,
-      customers: allCustomers, // Gửi danh sách khách hàng
-      books: allBooks, // Gửi danh sách sách
-    });
-  } catch (err) {
-    console.error("Lỗi render trang tra cứu:", err);
-    res.status(500).send("Lỗi Server");
-  }
-};
-
 const getBillsPage = async (req, res) => {
   try {
     const userInfo = getUserInfo(req);
@@ -151,7 +93,7 @@ const getBillsPage = async (req, res) => {
       ],
       order: [["NgayLapHoaDon", "ASC"]],
     });
-    console.log(bills)
+    console.log(bills);
     // 2. Render trang bills.ejs và truyền dữ liệu
     res.render("bills", {
       ...userInfo,
@@ -421,7 +363,6 @@ module.exports = {
   getDashboardPage,
   getEmployeesPage,
   getCustomersPage,
-  getSearchPage,
   getChangeRulePage,
   getBillsPage,
   getReceiptsPage,
