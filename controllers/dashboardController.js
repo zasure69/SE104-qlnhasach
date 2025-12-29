@@ -151,7 +151,7 @@ const getBillsPage = async (req, res) => {
       ],
       order: [["NgayLapHoaDon", "ASC"]],
     });
-
+    console.log(bills)
     // 2. Render trang bills.ejs và truyền dữ liệu
     res.render("bills", {
       ...userInfo,

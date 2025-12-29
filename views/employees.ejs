@@ -1435,12 +1435,16 @@
                                 showToast('Cập nhật thành công!', 'success');
                                 editModal.style.display = 'none';
                                 const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+
+                                // Xử lý ngày tháng (để hiện dd/mm/yyyy)
+                                const formattedNgaySinh = result.user.NgaySinh ? new Date(result.user.NgaySinh).toLocaleDateString('en-US', options) : '';
+                                const formattedNgayNhanViec = result.user.NgayNhanViec ? new Date(result.user.NgayNhanViec).toLocaleDateString('en-US', options) : '';
                                 // Cập nhật hàng trong bảng
                                 currentEditingRow.cells[2].textContent = result.user.HoTen;
-                                currentEditingRow.cells[3].textContent = result.user.NgaySinh;
+                                currentEditingRow.cells[3].textContent = formattedNgaySinh;
                                 currentEditingRow.cells[4].textContent = result.user.SoDienThoai;
                                 currentEditingRow.cells[5].textContent = result.user.ChucVu;
-                                currentEditingRow.cells[8].textContent = result.user.NgayNhanViec;
+                                currentEditingRow.cells[8].textContent = formattedNgayNhanViec;
                                 //Cập nhật "bộ nhớ" data- attributes của hàng cho lần sửa tiếp theo
                                 currentEditingRow.dataset.ngaySinh = new Date(result.user.NgaySinh).toISOString().split('T')[0];
                                 currentEditingRow.dataset.ngayNhanViec = new Date(result.user.NgayNhanViec).toISOString().split('T')[0];
