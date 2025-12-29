@@ -1058,29 +1058,26 @@
       </div>
       <nav class="sidebar-nav">
         <ul>
-          <li><a href="/dashboard"><i class="fas fa-home"></i>Tổng quan</a></li>
+          <li><a href="/dashboard"><i class="fas fa-home"></i><span>Tổng quan</span></a></li>
           <% if (role==='Admin' || role==='Owner' ) { %>
-            <li><a href="/dashboard/employees"><i class="fas fa-users"></i>QL Nhân viên</a></li>
+            <li><a href="/dashboard/employees"><i class="fas fa-users"></i><span>QL Nhân viên</span></a></li>
             <% } %>
-              <li><a href="#" class="active"><i class="fas fa-book"></i>QL Sách</a></li>
+              <li><a href="#" class="active"><i class="fas fa-book"></i><span>QL Sách</span></a></li>
               <% if (role==='Admin' || role==='Owner' || role==='Staff' ) { %>
-                <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i>QL Khách hàng</a></li>
+                <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i><span>QL Khách hàng</span></a></li>
                 <% } %>
                   <% if (role==='Admin' || role==='Owner' || role==='Warehouse' ) { %>
-                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i>QL Phiếu nhập sách</a></li>
-                    <li><a href="/dashboard/inventory"><i class="fas fa-clipboard-check"></i>QL Phiếu kiểm kê</a></li>
+                    <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i><span>QL Phiếu nhập sách</span></a></li>
+                    <li><a href="/dashboard/inventory"><i class="fas fa-clipboard-check"></i><span>QL Phiếu kiểm kê</span></a></li>
                     <% } %>
                       <% if (role==='Admin' || role==='Owner' || role==='Staff' ) { %>
-                        <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i>QL Phiếu thu tiền</a></li>
-                        <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i></i>QL Hóa đơn</a>
-                        </li>
+                        <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i><span>QL Phiếu thu tiền</span></a></li>
+                        <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i><span>QL Hóa đơn</span></a></li>
                         <% } %>
-                              <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a>
-                              </li>
+                              <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i><span>Báo cáo tổng kết</span></a></li>
                               <% if (role==='Admin' || role==='Owner' ) { %>
-                                <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i>Thay đổi quy định</a>
-                                </li>
-                                <li><a href="/dashboard/trash"><i class="fas fa-trash-alt"></i> Thùng rác</a></li>
+                                <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i><span>Thay đổi quy định</span></a></li>
+                                <li><a href="/dashboard/trash"><i class="fas fa-trash-alt"></i><span>Thùng rác</span></a></li>
                                 <% } %>
         </ul>
       </nav>
@@ -1812,6 +1809,13 @@
           .filter(Boolean);
       }
 
+      // Hàm lấy TÊN tác giả để hiển thị trong bảng
+      function collectAuthorNames(wrapper) {
+        return Array.from(wrapper.querySelectorAll('.author-tag'))
+          .map(tag => tag.textContent.replace('×', '').trim())
+          .filter(Boolean);
+      }
+
       // --- TAB SWITCHING ---
       const tabButtons = document.querySelectorAll('.tab-button');
       const tabPanes = document.querySelectorAll('.tab-pane');
@@ -1918,12 +1922,14 @@
               const rowCount = tbody.querySelectorAll('tr').length;
               const newRow = document.createElement('tr');
               newRow.dataset.id = data.dauSach.MaDauSach || '';
+              // Lấy TÊN tác giả để hiển thị thay vì mã
+              const authorNames = collectAuthorNames(document.getElementById('add-author-wrapper'));
               newRow.innerHTML = `
                         <td>${rowCount + 1}</td>
                         <td>${data.dauSach.MaDauSach || ''}</td>
                         <td>${formData.TenSach}</td>
                         <td>${formData.TenTheLoai}</td>
-                        <td>${formData.tacGiaIds.join(', ')}</td>
+                        <td>${authorNames.join(', ')}</td>
                         <td>${formData.MoTa || ''}</td>
                         <td>
                             <i class="fas fa-pencil-alt action-icon open-dausach-edit-modal"></i>
@@ -1935,6 +1941,24 @@
               // Reset form
               addDauSachForm.reset();
               document.getElementById('add-author-wrapper').querySelectorAll('.author-tag').forEach(tag => tag.remove());
+
+              // Cập nhật dropdown chọn đầu sách trong form thêm sách
+              const dauSachSelect = document.getElementById('add-ma-dau-sach-s');
+              if (dauSachSelect && data.dauSach.MaDauSach) {
+                const newOption = document.createElement('option');
+                newOption.value = data.dauSach.MaDauSach;
+                newOption.textContent = formData.TenSach;
+                dauSachSelect.appendChild(newOption);
+              }
+
+              // Cập nhật dropdown chọn đầu sách trong form sửa sách (nếu có)
+              const editDauSachSelect = document.getElementById('edit-ma-dau-sach-s');
+              if (editDauSachSelect && data.dauSach.MaDauSach) {
+                const newOption = document.createElement('option');
+                newOption.value = data.dauSach.MaDauSach;
+                newOption.textContent = formData.TenSach;
+                editDauSachSelect.appendChild(newOption);
+              }
             } else {
               showToast(data.error || 'Có lỗi xảy ra!', 'error');
             }
@@ -2088,9 +2112,11 @@
               // Cập nhật UI trực tiếp - tìm và cập nhật row
               const row = document.querySelector(`#table-dau-sach tr[data-id="${maDS}"]`);
               if (row) {
+                // Lấy TÊN tác giả để hiển thị thay vì mã
+                const authorNames = collectAuthorNames(document.getElementById('edit-author-wrapper'));
                 row.cells[2].textContent = formData.TenSach;
                 row.cells[3].textContent = formData.TenTheLoai;
-                row.cells[4].textContent = formData.tacGiaIds.join(', ');
+                row.cells[4].textContent = authorNames.join(', ');
                 row.cells[5].textContent = formData.MoTa || '';
               }
             } else {

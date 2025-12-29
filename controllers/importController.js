@@ -37,7 +37,11 @@ async function generateNewPhieuNhapId() {
 const getImportPage = async (req, res) => {
   try {
     console.log("[importController] getImportPage called");
-    const userInfo = { id: req.user.id, username: req.user?.username, role: req.user?.role };
+    const userInfo = {
+      id: req.user.id,
+      username: req.user?.username,
+      role: req.user?.role,
+    };
 
     let importReceipts = [];
 
@@ -174,11 +178,18 @@ const createImportReceipt = async (req, res) => {
       // KIỂM TRA SÁCH TỒN TẠI VÀ CHƯA BỊ XÓA MỀM
       const sachCheck = await db.Sach.findOne({
         where: { MaSach: item.MaSach, isDeleted: false },
-        include: [{ model: db.DauSach, attributes: ["TenSach"], where: { isDeleted: false }, required: false }],
+        include: [
+          {
+            model: db.DauSach,
+            attributes: ["TenSach"],
+            where: { isDeleted: false },
+            required: false,
+          },
+        ],
       });
       if (!sachCheck) {
         return res.status(400).json({
-          error: `Sách có mã ${item.MaSach} không tồn tại hoặc đã bị xóa`,
+          error: `Sách có mã ${item.MaSach} không tồn tại`,
         });
       }
 
@@ -324,6 +335,24 @@ const updateImportReceipt = async (req, res) => {
 
     // Logic kiểm tra nhập mới
     for (const item of chiTiet) {
+      // KIỂM TRA SÁCH TỒN TẠI VÀ CHƯA BỊ XÓA MỀM
+      const sachCheck = await db.Sach.findOne({
+        where: { MaSach: item.MaSach, isDeleted: false },
+        include: [
+          {
+            model: db.DauSach,
+            attributes: ["TenSach"],
+            where: { isDeleted: false },
+            required: false,
+          },
+        ],
+      });
+      if (!sachCheck) {
+        return res.status(400).json({
+          error: `Sách có mã ${item.MaSach} không tồn tại hoặc đã bị xóa`,
+        });
+      }
+
       // Kiểm tra số lượng nhập tối thiểu theo tham số từ DB
       if (!item.SoLuong || item.SoLuong < soLuongNhapToiThieu) {
         return res.status(400).json({
@@ -447,7 +476,9 @@ const deleteImportReceipt = async (req, res) => {
 
     // Kiểm tra nếu phiếu nhập đã bị xóa rồi
     if (receipt.isDeleted) {
-      return res.status(400).json({ error: "Phiếu nhập này đã bị xóa trước đó." });
+      return res
+        .status(400)
+        .json({ error: "Phiếu nhập này đã bị xóa trước đó." });
     }
 
     // --- LOGIC MỚI: CHECK TỒN KHO TRƯỚC KHI XÓA ---
@@ -550,7 +581,9 @@ const restoreImportReceipt = async (req, res) => {
       await receipt.update({ isDeleted: false }, { transaction: t });
     });
 
-    return res.status(200).json({ message: "Khôi phục phiếu nhập thành công!" });
+    return res
+      .status(200)
+      .json({ message: "Khôi phục phiếu nhập thành công!" });
   } catch (err) {
     console.error("[importController] restoreImportReceipt error", err);
     return res.status(500).json({ error: "Lỗi server nội bộ" });
@@ -570,8 +603,8 @@ const hardDeleteImportReceipt = async (req, res) => {
     }
 
     if (!receipt.isDeleted) {
-      return res.status(400).json({ 
-        error: "Chỉ có thể xóa vĩnh viễn phiếu nhập đã được xóa mềm trước đó." 
+      return res.status(400).json({
+        error: "Chỉ có thể xóa vĩnh viễn phiếu nhập đã được xóa mềm trước đó.",
       });
     }
 
@@ -586,11 +619,14 @@ const hardDeleteImportReceipt = async (req, res) => {
       await receipt.destroy({ transaction: t });
     });
 
-    return res.status(200).json({ message: "Đã xóa vĩnh viễn phiếu nhập khỏi hệ thống!" });
+    return res
+      .status(200)
+      .json({ message: "Đã xóa vĩnh viễn phiếu nhập khỏi hệ thống!" });
   } catch (err) {
     if (err.name === "SequelizeForeignKeyConstraintError") {
       return res.status(400).json({
-        error: "Xóa thất bại! Phiếu nhập này có dữ liệu liên quan trong hệ thống.",
+        error:
+          "Xóa thất bại! Phiếu nhập này có dữ liệu liên quan trong hệ thống.",
       });
     }
     console.error("[importController] hardDeleteImportReceipt error", err);
