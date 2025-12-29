@@ -37,7 +37,7 @@ const ChiTietKiemKe = sequelize.define(
     },
   },
   {
-    tableName: "CT_KiemKe",
+    tableName: "CT_KIEMKE",
     timestamps: false,
   }
 );

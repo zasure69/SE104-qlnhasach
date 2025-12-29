@@ -497,6 +497,85 @@
             color: var(--text-dark);
         }
 
+        /* --- Print-only blocks (header/signatures) --- */
+        .print-only {
+            display: none;
+        }
+
+        .print-header {
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #000;
+        }
+
+        .print-header__top {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .print-org__name {
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .print-org__meta {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        .print-doc {
+            text-align: right;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            white-space: nowrap;
+        }
+
+        .print-header__title {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .print-title {
+            font-size: 1.25rem;
+            font-weight: 900;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .print-subtitle {
+            margin-top: 4px;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+        }
+
+        .print-signatures {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .print-signature {
+            text-align: center;
+        }
+
+        .print-signature__role {
+            font-weight: 700;
+        }
+
+        .print-signature__note {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        .print-signature__space {
+            height: 70px;
+        }
+
         .report-filter-and-buttons {
             display: flex;
             align-items: center;
@@ -639,6 +718,21 @@
         }
 
         @media print {
+            @page {
+                size: A4;
+                margin: 12mm 10mm;
+            }
+
+            html,
+            body {
+                background: #fff !important;
+            }
+
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
             body * {
                 visibility: hidden;
             }
@@ -658,8 +752,78 @@
             .sidebar,
             .top-bar,
             .tab-nav,
-            .btn-green {
+            .toast-container,
+            .loader-overlay,
+            .btn-green,
+            .report-filter,
+            .report-filter-and-buttons,
+            .date-input-wrapper,
+            input[type="month"],
+            #chart-ton-wrapper,
+            #chart-congno-wrapper,
+            #chart-doanhthu-wrapper {
                 display: none !important;
+            }
+
+            .main-content {
+                padding: 0 !important;
+                background: #fff !important;
+            }
+
+            .content-wrapper {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                background: #fff !important;
+            }
+
+            .tab-content {
+                padding: 0 !important;
+            }
+
+            /* Show print-only blocks inside the active pane */
+            .tab-pane.active .print-only {
+                display: block !important;
+            }
+
+            /* Table printing improvements */
+            .table-caption {
+                margin-top: 10px;
+            }
+
+            .data-table {
+                min-width: 0 !important;
+                width: 100% !important;
+                border-collapse: collapse;
+                border: 1px solid #000;
+            }
+
+            .data-table thead {
+                display: table-header-group;
+            }
+
+            .data-table th,
+            .data-table td {
+                border: 1px solid #000;
+                padding: 6px 8px;
+                font-size: 11pt;
+            }
+
+            .data-table thead th {
+                background: #f2f2f2 !important;
+                color: #000 !important;
+            }
+
+            #inventory-report-table td:nth-child(n+3),
+            #debt-report-table td:nth-child(n+4),
+            #revenue-report-table td:nth-child(n+3) {
+                text-align: right;
+            }
+
+            #inventory-report-table td:nth-child(2),
+            #debt-report-table td:nth-child(2),
+            #debt-report-table td:nth-child(3),
+            #revenue-report-table td:nth-child(2) {
+                text-align: left;
             }
         }
     </style>
@@ -765,6 +929,22 @@
 
                     <!-- Tab Pane: Báo cáo tồn -->
                     <div class="tab-pane active" id="tab-ton">
+                        <div class="print-only print-header" data-month-input="month-ton">
+                            <div class="print-header__top">
+                                <div class="print-org">
+                                    <div class="print-org__name">NHÀ SÁCH ABC</div>
+                                    <div class="print-org__meta">Báo cáo nội bộ</div>
+                                </div>
+                                <div class="print-doc">
+                                    <div>Ngày in: <span class="print-datetime"></span></div>
+                                    <div>Người in: <span class="print-user"><%= username %></span></div>
+                                </div>
+                            </div>
+                            <div class="print-header__title">
+                                <div class="print-title">BÁO CÁO TỒN KHO</div>
+                                <div class="print-subtitle">Kỳ báo cáo: <span class="print-period"></span></div>
+                            </div>
+                        </div>
                         <div class="report-filter">
                             <label for="month-ton">Tháng Năm</label>
                             <div class="date-input-wrapper">
@@ -827,10 +1007,44 @@
                             <div class="empty-table-rows"></div>
                         </div>
                         <!-- Có thể thêm phần tóm tắt ở đây nếu cần -->
+
+                        <div class="print-only print-signatures">
+                            <div class="print-signature">
+                                <div class="print-signature__role">Người lập</div>
+                                <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
+                                <div class="print-signature__space"></div>
+                            </div>
+                            <div class="print-signature">
+                                <div class="print-signature__role">Kế toán</div>
+                                <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
+                                <div class="print-signature__space"></div>
+                            </div>
+                            <div class="print-signature">
+                                <div class="print-signature__role">Quản lý</div>
+                                <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
+                                <div class="print-signature__space"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Tab Pane: Báo cáo công nợ -->
                     <div class="tab-pane" id="tab-cong-no">
+                        <div class="print-only print-header" data-month-input="month-cong-no">
+                            <div class="print-header__top">
+                                <div class="print-org">
+                                    <div class="print-org__name">NHÀ SÁCH ABC</div>
+                                    <div class="print-org__meta">Báo cáo nội bộ</div>
+                                </div>
+                                <div class="print-doc">
+                                    <div>Ngày in: <span class="print-datetime"></span></div>
+                                    <div>Người in: <span class="print-user"><%= username %></span></div>
+                                </div>
+                            </div>
+                            <div class="print-header__title">
+                                <div class="print-title">BÁO CÁO CÔNG NỢ</div>
+                                <div class="print-subtitle">Kỳ báo cáo: <span class="print-period"></span></div>
+                            </div>
+                        </div>
                         <div class="report-filter-and-buttons">
                             <label for="month-cong-no">Tháng Năm</label>
                             <div class="date-input-wrapper">
@@ -881,10 +1095,44 @@
                             <div class="empty-table-rows"></div>
                         </div>
                         <!-- Có thể thêm phần tóm tắt ở đây nếu cần -->
+
+                        <div class="print-only print-signatures">
+                            <div class="print-signature">
+                                <div class="print-signature__role">Người lập</div>
+                                <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
+                                <div class="print-signature__space"></div>
+                            </div>
+                            <div class="print-signature">
+                                <div class="print-signature__role">Kế toán</div>
+                                <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
+                                <div class="print-signature__space"></div>
+                            </div>
+                            <div class="print-signature">
+                                <div class="print-signature__role">Quản lý</div>
+                                <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
+                                <div class="print-signature__space"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Tab Pane: Báo cáo doanh thu -->
                     <div class="tab-pane" id="tab-doanh-thu">
+                        <div class="print-only print-header" data-month-input="month-doanh-thu">
+                            <div class="print-header__top">
+                                <div class="print-org">
+                                    <div class="print-org__name">NHÀ SÁCH ABC</div>
+                                    <div class="print-org__meta">Báo cáo nội bộ</div>
+                                </div>
+                                <div class="print-doc">
+                                    <div>Ngày in: <span class="print-datetime"></span></div>
+                                    <div>Người in: <span class="print-user"><%= username %></span></div>
+                                </div>
+                            </div>
+                            <div class="print-header__title">
+                                <div class="print-title">BÁO CÁO DOANH THU</div>
+                                <div class="print-subtitle">Kỳ báo cáo: <span class="print-period"></span></div>
+                            </div>
+                        </div>
                         <div class="report-filter">
                             <label for="month-doanh-thu">Tháng Năm</label>
                             <div class="date-input-wrapper">
@@ -938,6 +1186,24 @@
                             <div class="empty-table-rows"></div>
                         </div>
 
+                        <div class="print-only print-signatures">
+                            <div class="print-signature">
+                                <div class="print-signature__role">Người lập</div>
+                                <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
+                                <div class="print-signature__space"></div>
+                            </div>
+                            <div class="print-signature">
+                                <div class="print-signature__role">Kế toán</div>
+                                <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
+                                <div class="print-signature__space"></div>
+                            </div>
+                            <div class="print-signature">
+                                <div class="print-signature__role">Quản lý</div>
+                                <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
+                                <div class="print-signature__space"></div>
+                            </div>
+                        </div>
+
                     </div>
 
                 </div>
@@ -954,11 +1220,45 @@
             );
         }
 
-        function confirmPrint(title = "báo cáo") {
-            const ok = confirm(`Bạn có muốn in ${title} không?`);
-            if (ok) {
-                window.print();
+        function formatPeriodFromMonthInput(value) {
+            if (!value || typeof value !== 'string' || !value.includes('-')) return '';
+            const [year, month] = value.split('-');
+            const m = parseInt(month, 10);
+            if (!year || Number.isNaN(m)) return value;
+            return `Tháng ${m}/${year}`;
+        }
+
+        function preparePrint(activePane, monthInputId, documentTitle) {
+            if (!activePane) return;
+
+            const monthValue = document.getElementById(monthInputId)?.value || '';
+            const periodText = formatPeriodFromMonthInput(monthValue);
+            const nowText = new Date().toLocaleString('vi-VN');
+
+            activePane.querySelectorAll('.print-period').forEach((el) => {
+                el.textContent = periodText;
+            });
+            activePane.querySelectorAll('.print-datetime').forEach((el) => {
+                el.textContent = nowText;
+            });
+
+            if (documentTitle) {
+                document.title = documentTitle;
             }
+        }
+
+        function confirmPrint(title = "Báo cáo", monthInputId) {
+            const ok = confirm(`Bạn có muốn in ${title} không?`);
+            if (!ok) return;
+
+            const activePane = document.querySelector('.tab-pane.active');
+            const monthValue = monthInputId ? (document.getElementById(monthInputId)?.value || '') : '';
+            const safeMonth = monthValue ? monthValue.replace('-', '_') : '';
+            const docTitle = `${title}${safeMonth ? ' - ' + safeMonth : ''}`;
+            if (monthInputId) {
+                preparePrint(activePane, monthInputId, docTitle);
+            }
+            window.print();
         }
         document.addEventListener('DOMContentLoaded', function () {
 
@@ -1464,7 +1764,7 @@
 
             // In báo cáo tồn
             document.getElementById("btn-in-ton")?.addEventListener("click", function () {
-                confirmPrint("báo cáo tồn kho");
+                confirmPrint("Báo cáo tồn kho", "month-ton");
             });
             document.getElementById("btn-xuat-congno").addEventListener("click", function () {
                 const table = document.getElementById("debt-report-table");
@@ -1486,8 +1786,7 @@
 
             // In báo cáo công nợ
             document.getElementById("btn-in-congno")?.addEventListener("click", function () {
-
-                confirmPrint("báo cáo công nợ");
+                confirmPrint("Báo cáo công nợ", "month-cong-no");
             });
             // ==============================
             // XUẤT BÁO CÁO DOANH THU
@@ -1518,7 +1817,7 @@
 
             // In báo cáo doanh thu
             document.getElementById("btn-in-doanhthu")?.addEventListener("click", function () {
-                confirmPrint("báo cáo doanh thu");
+                confirmPrint("Báo cáo doanh thu", "month-doanh-thu");
             });
 
 

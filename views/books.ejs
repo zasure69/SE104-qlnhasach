@@ -514,21 +514,17 @@
       font-family: inherit;
     }
 
+    .form-group textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
       outline: none;
       border-color: var(--secondary-color);
       box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-    }
-
-    .form-group input:disabled {
-      background-color: var(--disabled-bg);
-    }
-
-    .form-group textarea {
-      min-height: 80px;
-      resize: vertical;
     }
 
     .modal-footer {
@@ -680,6 +676,7 @@
       /* Đổi con trỏ chuột để báo hiệu */
       border-color: #d6d8db;
       /* Viền nhạt hơn chút */
+      text-align: left !important;
     }
 
     /* Tinh chỉnh riêng cho Read-only (vẫn cho phép bôi đen copy nhưng không sửa) */
@@ -687,6 +684,7 @@
     .form-group textarea:read-only {
       cursor: default;
       /* Con trỏ chuột bình thường */
+      text-align: left !important;
     }
 
     /* --- KẾT THÚC CSS --- */
@@ -1237,8 +1235,7 @@
                               align-items: center;
                               padding: 0 0.5rem;
                             ">-</span>
-                        <input type="number" id="search-sl-ton-to" class="input-2" style="display: none"
-                          placeholder="Đến..." />
+                        <input type="number" id="search-sl-ton-to" class="input-2" style="display: none" placeholder="Đến..." />
                       </div>
                     </div>
                   </div>
@@ -1678,7 +1675,8 @@
               <input type="text" id="add-ten-the-loai" required />
             </div>
             <div class="form-group">
-              <label>Mô tả</label> <textarea id="add-mo-ta-tl"></textarea>
+              <label>Mô tả</label>
+              <textarea id="add-mo-ta-tl"></textarea>
             </div>
           </div>
         </div>
@@ -1706,7 +1704,8 @@
               <input type="text" id="edit-ten-the-loai" required />
             </div>
             <div class="form-group">
-              <label>Mô tả</label> <textarea id="edit-mo-ta-tl"></textarea>
+              <label>Mô tả</label>
+              <textarea id="edit-mo-ta-tl"></textarea>
             </div>
           </div>
         </div>
@@ -1779,6 +1778,7 @@
     </div>
   </div>
 
+  <script id="authors-data" type="application/json"><%- JSON.stringify(authors || []) %></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       // --- HELPER FUNCTIONS ---
@@ -1787,7 +1787,7 @@
       let currentEditingRow = null;
 
       // Lấy danh sách tác giả từ server-side data
-      const allAuthors = <%- JSON.stringify(authors || []) %>;
+      const allAuthors = JSON.parse(document.getElementById('authors-data')?.textContent || '[]');
 
       function showLoader() { if (loader) loader.style.display = 'flex'; }
       function hideLoader() { if (loader) loader.style.display = 'none'; }
@@ -1962,11 +1962,11 @@
           if (!row) return;
 
           const cells = row.cells;
-          const maDauSach = cells[1].textContent;
-          const tenSach = cells[2].textContent;
-          const theLoai = cells[3].textContent;
-          const tacGiaText = cells[4].textContent;
-          const moTa = cells[5].textContent;
+          const maDauSach = cells[1].textContent.trim();
+          const tenSach = cells[2].textContent.trim();
+          const theLoai = cells[3].textContent.trim();
+          const tacGiaText = cells[4].textContent.trim();
+          const moTa = cells[5].textContent.trim();
 
           document.getElementById('edit-ma-ds').value = maDauSach;
           document.getElementById('edit-ten-sach-ds').value = tenSach;
@@ -2311,23 +2311,23 @@
           if (!row) return;
 
           const cells = row.cells;
-          document.getElementById('edit-ma-sach-s').value = cells[1].textContent;
-          document.getElementById('edit-ten-sach-s').value = cells[2].textContent;
-          document.getElementById('edit-tac-gia-s').value = cells[4].textContent;
-          document.getElementById('edit-the-loai-s').value = cells[3].textContent;
-          document.getElementById('edit-nxb-s').value = cells[5].textContent;
-          document.getElementById('edit-nam-xb-s').value = cells[6].textContent;
-          document.getElementById('edit-so-luong-ton-s').value = cells[7].textContent;
+          document.getElementById('edit-ma-sach-s').value = cells[1].textContent.trim();
+          document.getElementById('edit-ten-sach-s').value = cells[2].textContent.trim();
+          document.getElementById('edit-tac-gia-s').value = cells[4].textContent.trim();
+          document.getElementById('edit-the-loai-s').value = cells[3].textContent.trim();
+          document.getElementById('edit-nxb-s').value = cells[5].textContent.trim();
+          document.getElementById('edit-nam-xb-s').value = cells[6].textContent.trim();
+          document.getElementById('edit-so-luong-ton-s').value = cells[7].textContent.trim();
 
           // Lưu dữ liệu ban đầu
           originalSachData = {
-            maSach: cells[1].textContent,
-            tenSach: cells[2].textContent,
-            tacGia: cells[4].textContent,
-            theLoai: cells[3].textContent,
-            nhaXB: cells[5].textContent,
-            namXB: cells[6].textContent,
-            soLuongTon: cells[7].textContent
+            maSach: cells[1].textContent.trim(),
+            tenSach: cells[2].textContent.trim(),
+            tacGia: cells[4].textContent.trim(),
+            theLoai: cells[3].textContent.trim(),
+            nhaXB: cells[5].textContent.trim(),
+            namXB: cells[6].textContent.trim(),
+            soLuongTon: cells[7].textContent.trim()
           };
 
           editSachModal.style.display = 'flex';
@@ -2569,15 +2569,15 @@
           if (!row) return;
 
           const cells = row.cells;
-          document.getElementById('edit-ma-the-loai').value = cells[1].textContent;
-          document.getElementById('edit-ten-the-loai').value = cells[2].textContent;
-          document.getElementById('edit-mo-ta-tl').value = cells[3].textContent;
+          document.getElementById('edit-ma-the-loai').value = cells[1].textContent.trim();
+          document.getElementById('edit-ten-the-loai').value = cells[2].textContent.trim();
+          document.getElementById('edit-mo-ta-tl').value = cells[3].textContent.trim();
 
           // Lưu dữ liệu ban đầu
           originalTheLoaiData = {
-            maTheLoai: cells[1].textContent,
-            tenTheLoai: cells[2].textContent,
-            moTa: cells[3].textContent
+            maTheLoai: cells[1].textContent.trim(),
+            tenTheLoai: cells[2].textContent.trim(),
+            moTa: cells[3].textContent.trim()
           };
 
           editTheLoaiModal.style.display = 'flex';
@@ -2815,15 +2815,15 @@
           if (!row) return;
 
           const cells = row.cells;
-          document.getElementById('edit-ma-tac-gia').value = cells[1].textContent;
-          document.getElementById('edit-ho-ten-tg').value = cells[2].textContent;
-          document.getElementById('edit-nam-sinh-tg').value = cells[3].textContent;
+          document.getElementById('edit-ma-tac-gia').value = cells[1].textContent.trim();
+          document.getElementById('edit-ho-ten-tg').value = cells[2].textContent.trim();
+          document.getElementById('edit-nam-sinh-tg').value = cells[3].textContent.trim();
 
           // Lưu dữ liệu ban đầu
           originalTacGiaData = {
-            maTacGia: cells[1].textContent,
-            hoTen: cells[2].textContent,
-            namSinh: cells[3].textContent
+            maTacGia: cells[1].textContent.trim(),
+            hoTen: cells[2].textContent.trim(),
+            namSinh: cells[3].textContent.trim()
           };
 
           editTacGiaModal.style.display = 'flex';
