@@ -552,8 +552,7 @@
         }
 
         .print-signatures {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: 1fr 1fr;
             gap: 18px;
             margin-top: 18px;
         }
@@ -785,6 +784,11 @@
                 display: block !important;
             }
 
+            .tab-pane.active .print-only.print-signatures {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr;
+            }
+
             /* Table printing improvements */
             .table-caption {
                 margin-top: 10px;
@@ -1003,19 +1007,14 @@
                         </div>
                         <!-- Có thể thêm phần tóm tắt ở đây nếu cần -->
 
-                        <div class="print-only print-signatures">
+                        <div class="print-only print-signatures" style="grid-template-columns: repeat(2, 1fr);">
                             <div class="print-signature">
-                                <div class="print-signature__role">Người lập</div>
+                                <div class="print-signature__role">Người lập phiếu</div>
                                 <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
                                 <div class="print-signature__space"></div>
                             </div>
                             <div class="print-signature">
-                                <div class="print-signature__role">Kế toán</div>
-                                <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
-                                <div class="print-signature__space"></div>
-                            </div>
-                            <div class="print-signature">
-                                <div class="print-signature__role">Quản lý</div>
+                                <div class="print-signature__role">Chủ cửa hàng</div>
                                 <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
                                 <div class="print-signature__space"></div>
                             </div>
@@ -1093,17 +1092,12 @@
 
                         <div class="print-only print-signatures">
                             <div class="print-signature">
-                                <div class="print-signature__role">Người lập</div>
+                                <div class="print-signature__role">Người lập phiếu</div>
                                 <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
                                 <div class="print-signature__space"></div>
                             </div>
                             <div class="print-signature">
-                                <div class="print-signature__role">Kế toán</div>
-                                <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
-                                <div class="print-signature__space"></div>
-                            </div>
-                            <div class="print-signature">
-                                <div class="print-signature__role">Quản lý</div>
+                                <div class="print-signature__role">Chủ cửa hàng</div>
                                 <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
                                 <div class="print-signature__space"></div>
                             </div>
@@ -1183,22 +1177,16 @@
 
                         <div class="print-only print-signatures">
                             <div class="print-signature">
-                                <div class="print-signature__role">Người lập</div>
+                                <div class="print-signature__role">Người lập phiếu</div>
                                 <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
                                 <div class="print-signature__space"></div>
                             </div>
                             <div class="print-signature">
-                                <div class="print-signature__role">Kế toán</div>
-                                <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
-                                <div class="print-signature__space"></div>
-                            </div>
-                            <div class="print-signature">
-                                <div class="print-signature__role">Quản lý</div>
+                                <div class="print-signature__role">Chủ cửa hàng</div>
                                 <div class="print-signature__note">(Ký, ghi rõ họ tên)</div>
                                 <div class="print-signature__space"></div>
                             </div>
                         </div>
-
                     </div>
 
                 </div>
