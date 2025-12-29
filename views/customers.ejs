@@ -1753,15 +1753,14 @@
                 showToast("Cập nhật thành công!", "success");
                 editModal.style.display = "none";
                 // Cập nhật hàng (hoặc reload)
-                const options = {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                };
+                const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+
+                // Xử lý ngày tháng (để hiện dd/mm/yyyy)
+                const formattedNgaySinh = result.customer.NgaySinh ? new Date(result.customer.NgaySinh).toLocaleDateString('en-US', options) : '';
                 currentEditingRow.cells[2].textContent =
                   result.customer.HoVaTen;
                 currentEditingRow.cells[3].textContent =
-                  result.customer.NgaySinh;
+                formattedNgaySinh;
                 currentEditingRow.cells[4].textContent =
                   result.customer.SoDienThoai;
                 currentEditingRow.cells[5].textContent =
