@@ -215,7 +215,11 @@ const resolveTacGiaList = async (list, transaction) => {
 const getBooksPage = async (req, res) => {
   try {
     console.log("[bookController] getBooksPage called");
-    const userInfo = { id: req.user.id, username: req.user.username, role: req.user.role };
+    const userInfo = {
+      id: req.user.id,
+      username: req.user.username,
+      role: req.user.role,
+    };
 
     // Fetch DauSach với JOIN TheLoai và TacGia (chỉ lấy chưa bị xóa)
     console.log("[getBooksPage] Fetching DauSach with associations...");
@@ -340,9 +344,9 @@ const getBooksPage = async (req, res) => {
 // =====================================================
 const getAllDauSach = async (req, res) => {
   try {
-    const dauSachs = await db.DauSach.findAll({ 
+    const dauSachs = await db.DauSach.findAll({
       where: { isDeleted: false },
-      raw: true 
+      raw: true,
     });
     return res.status(200).json(dauSachs);
   } catch (err) {
@@ -434,7 +438,9 @@ const createDauSach = async (req, res) => {
       // Thể loại: tìm (chỉ những thể loại chưa bị xóa mềm)
       finalMaTheLoai = await timMaTheLoai(TenTheLoai, { transaction: t });
       if (!finalMaTheLoai) {
-        throw new Error(`Thể loại "${TenTheLoai}" không tồn tại trong hệ thống.`);
+        throw new Error(
+          `Thể loại "${TenTheLoai}" không tồn tại trong hệ thống.`
+        );
       }
 
       // Tác giả: tìm theo ID (TGxxx) hoặc tên; nếu chưa có thì thêm vào bảng TacGia
@@ -447,7 +453,7 @@ const createDauSach = async (req, res) => {
         if (typeof item === "string" && /^TG\d+$/i.test(item)) {
           const found = await db.TacGia.findOne({
             where: { MaTacGia: item, isDeleted: false },
-            transaction: t
+            transaction: t,
           });
           if (found) {
             maTacGia = found.MaTacGia;
@@ -723,7 +729,9 @@ const deleteDauSach = async (req, res) => {
 
     // Kiểm tra nếu đầu sách đã bị xóa rồi
     if (dauSach.isDeleted) {
-      return res.status(400).json({ error: "Đầu sách này đã bị xóa trước đó." });
+      return res
+        .status(400)
+        .json({ error: "Đầu sách này đã bị xóa trước đó." });
     }
 
     // Kiểm tra xem có bản sách nào liên kết với đầu sách này không (chỉ tính sách chưa xóa)
@@ -757,9 +765,9 @@ const deleteDauSach = async (req, res) => {
 // =====================================================
 const getAllSach = async (req, res) => {
   try {
-    const sachList = await db.Sach.findAll({ 
+    const sachList = await db.Sach.findAll({
       where: { isDeleted: false },
-      raw: true 
+      raw: true,
     });
     return res.status(200).json(sachList);
   } catch (err) {
@@ -778,7 +786,7 @@ const createSach = async (req, res) => {
 
     // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Đầu sách phải tồn tại và chưa bị xóa mềm
     const dauSach = await db.DauSach.findOne({
-      where: { MaDauSach: MaDauSach, isDeleted: false }
+      where: { MaDauSach: MaDauSach, isDeleted: false },
     });
     if (!dauSach) {
       return res.status(404).json({
@@ -883,11 +891,13 @@ const getSachById = async (req, res) => {
     const maSach = req.params.maSach;
     console.log("[bookController] getSachById called with maSach:", maSach);
 
-    const sach = await db.Sach.findByPk(maSach, {
+    const sach = await db.Sach.findOne({
+      where: { MaSach: maSach, isDeleted: false },
       include: [
         {
           model: db.DauSach,
           attributes: ["TenSach", "MaTheLoai"],
+          where: { isDeleted: false },
           include: [
             {
               model: db.TheLoai,
@@ -907,7 +917,7 @@ const getSachById = async (req, res) => {
     );
 
     if (!sach) {
-      console.log("[bookController] Sach not found, returning 404");
+      console.log("[bookController] Sach not found or deleted, returning 404");
       return res.status(404).json({ error: "Không tìm thấy sách" });
     }
 
@@ -937,7 +947,7 @@ const deleteSach = async (req, res) => {
   try {
     const maSach = req.params.maSach;
     const sach = await db.Sach.findByPk(maSach, {
-      include: [{ model: db.DauSach, attributes: ['TenSach'] }]
+      include: [{ model: db.DauSach, attributes: ["TenSach"] }],
     });
     if (!sach) {
       return res.status(404).json({ error: "Không tìm thấy Sách" });
@@ -953,11 +963,13 @@ const deleteSach = async (req, res) => {
     // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có chi tiết hóa đơn liên kết không
     const ctHoaDonLienKet = await db.CT_HD.findOne({
       where: { MaSach: maSach },
-      include: [{
-        model: db.HoaDon,
-        where: { isDeleted: false },
-        required: true,
-      }],
+      include: [
+        {
+          model: db.HoaDon,
+          where: { isDeleted: false },
+          required: true,
+        },
+      ],
     });
     if (ctHoaDonLienKet) {
       return res.status(400).json({
@@ -968,11 +980,13 @@ const deleteSach = async (req, res) => {
     // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có chi tiết phiếu nhập liên kết không
     const ctPhieuNhapLienKet = await db.CT_PNS.findOne({
       where: { MaSach: maSach },
-      include: [{
-        model: db.PhieuNhapSach,
-        where: { isDeleted: false },
-        required: true,
-      }],
+      include: [
+        {
+          model: db.PhieuNhapSach,
+          where: { isDeleted: false },
+          required: true,
+        },
+      ],
     });
     if (ctPhieuNhapLienKet) {
       return res.status(400).json({
@@ -983,11 +997,13 @@ const deleteSach = async (req, res) => {
     // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có chi tiết kiểm kê liên kết không
     const ctKiemKeLienKet = await db.ChiTietKiemKe.findOne({
       where: { MaSach: maSach },
-      include: [{
-        model: db.PhieuKiemKe,
-        where: { isDeleted: false },
-        required: true,
-      }],
+      include: [
+        {
+          model: db.PhieuKiemKe,
+          where: { isDeleted: false },
+          required: true,
+        },
+      ],
     });
     if (ctKiemKeLienKet) {
       return res.status(400).json({
@@ -998,7 +1014,7 @@ const deleteSach = async (req, res) => {
     // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
     sach.isDeleted = true;
     await sach.save();
-    
+
     return res.status(200).json({ message: "Xóa sách thành công!" });
   } catch (err) {
     console.error("[bookController] deleteSach error", err);
@@ -1020,7 +1036,7 @@ const createTheLoai = async (req, res) => {
     const exists = await db.TheLoai.findOne({
       where: { TenTheLoai: TenTheLoai.trim(), isDeleted: false },
     });
-    
+
     if (exists) {
       return res.status(400).json({ error: "Thể loại này đã tồn tại" });
     }
@@ -1095,7 +1111,9 @@ const deleteTheLoai = async (req, res) => {
 
     // Kiểm tra nếu thể loại đã bị xóa rồi
     if (theLoai.isDeleted) {
-      return res.status(400).json({ error: "Thể loại này đã bị xóa trước đó." });
+      return res
+        .status(400)
+        .json({ error: "Thể loại này đã bị xóa trước đó." });
     }
 
     // Check if category is used in DauSach (chỉ tính đầu sách chưa xóa)
@@ -1111,7 +1129,7 @@ const deleteTheLoai = async (req, res) => {
     // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
     theLoai.isDeleted = true;
     await theLoai.save();
-    
+
     return res.status(200).json({ message: "Xóa thể loại thành công!" });
   } catch (err) {
     console.error("[bookController] deleteTheLoai error", err);
@@ -1146,7 +1164,7 @@ const createTacGia = async (req, res) => {
     const exists = await db.TacGia.findOne({
       where: { HoTen: HoTen.trim(), isDeleted: false },
     });
-    
+
     if (exists) {
       return res.status(400).json({ error: "Tác giả này đã tồn tại" });
     }
@@ -1240,11 +1258,13 @@ const deleteTacGia = async (req, res) => {
     // Check if author is used in CT_TacGia (liên kết với đầu sách chưa xóa)
     const usedInCT = await db.CT_TacGia.findOne({
       where: { MaTacGia: maTacGia },
-      include: [{
-        model: db.DauSach,
-        where: { isDeleted: false },
-        required: true,
-      }],
+      include: [
+        {
+          model: db.DauSach,
+          where: { isDeleted: false },
+          required: true,
+        },
+      ],
     });
     if (usedInCT) {
       return res.status(400).json({
@@ -1255,7 +1275,7 @@ const deleteTacGia = async (req, res) => {
     // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
     tacGia.isDeleted = true;
     await tacGia.save();
-    
+
     return res.status(200).json({ message: "Xóa tác giả thành công!" });
   } catch (err) {
     console.error("[bookController] deleteTacGia error", err);
@@ -1268,9 +1288,9 @@ const deleteTacGia = async (req, res) => {
 // =====================================================
 const getDeletedDauSach = async (req, res) => {
   try {
-    const dauSachs = await db.DauSach.findAll({ 
+    const dauSachs = await db.DauSach.findAll({
       where: { isDeleted: true },
-      raw: true 
+      raw: true,
     });
     return res.status(200).json(dauSachs);
   } catch (err) {
@@ -1281,9 +1301,9 @@ const getDeletedDauSach = async (req, res) => {
 
 const getDeletedSach = async (req, res) => {
   try {
-    const sachList = await db.Sach.findAll({ 
+    const sachList = await db.Sach.findAll({
       where: { isDeleted: true },
-      raw: true 
+      raw: true,
     });
     return res.status(200).json(sachList);
   } catch (err) {
@@ -1294,9 +1314,9 @@ const getDeletedSach = async (req, res) => {
 
 const getDeletedTheLoai = async (req, res) => {
   try {
-    const theLoais = await db.TheLoai.findAll({ 
+    const theLoais = await db.TheLoai.findAll({
       where: { isDeleted: true },
-      raw: true 
+      raw: true,
     });
     return res.status(200).json(theLoais);
   } catch (err) {
@@ -1307,9 +1327,9 @@ const getDeletedTheLoai = async (req, res) => {
 
 const getDeletedTacGia = async (req, res) => {
   try {
-    const tacGias = await db.TacGia.findAll({ 
+    const tacGias = await db.TacGia.findAll({
       where: { isDeleted: true },
-      raw: true 
+      raw: true,
     });
     return res.status(200).json(tacGias);
   } catch (err) {
@@ -1408,18 +1428,21 @@ const hardDeleteDauSach = async (req, res) => {
       return res.status(404).json({ error: "Không tìm thấy Đầu sách" });
     }
     if (!dauSach.isDeleted) {
-      return res.status(400).json({ 
-        error: "Chỉ có thể xóa vĩnh viễn đầu sách đã được xóa mềm trước đó." 
+      return res.status(400).json({
+        error: "Chỉ có thể xóa vĩnh viễn đầu sách đã được xóa mềm trước đó.",
       });
     }
     // Xóa các liên kết tác giả
     await db.CT_TacGia.destroy({ where: { MaDauSach: maDS } });
     await dauSach.destroy();
-    return res.status(200).json({ message: "Đã xóa vĩnh viễn đầu sách khỏi hệ thống!" });
+    return res
+      .status(200)
+      .json({ message: "Đã xóa vĩnh viễn đầu sách khỏi hệ thống!" });
   } catch (err) {
     if (err.name === "SequelizeForeignKeyConstraintError") {
       return res.status(400).json({
-        error: "Xóa thất bại! Đầu sách này có dữ liệu liên quan trong hệ thống.",
+        error:
+          "Xóa thất bại! Đầu sách này có dữ liệu liên quan trong hệ thống.",
       });
     }
     console.error("[bookController] hardDeleteDauSach error", err);
@@ -1435,15 +1458,17 @@ const hardDeleteSach = async (req, res) => {
       return res.status(404).json({ error: "Không tìm thấy Sách" });
     }
     if (!sach.isDeleted) {
-      return res.status(400).json({ 
-        error: "Chỉ có thể xóa vĩnh viễn sách đã được xóa mềm trước đó." 
+      return res.status(400).json({
+        error: "Chỉ có thể xóa vĩnh viễn sách đã được xóa mềm trước đó.",
       });
     }
     // Xóa các bản ghi liên quan
     await db.CT_PNS.destroy({ where: { MaSach: maSach } });
     await db.CT_HD.destroy({ where: { MaSach: maSach } });
     await sach.destroy();
-    return res.status(200).json({ message: "Đã xóa vĩnh viễn sách khỏi hệ thống!" });
+    return res
+      .status(200)
+      .json({ message: "Đã xóa vĩnh viễn sách khỏi hệ thống!" });
   } catch (err) {
     if (err.name === "SequelizeForeignKeyConstraintError") {
       return res.status(400).json({
@@ -1463,16 +1488,19 @@ const hardDeleteTheLoai = async (req, res) => {
       return res.status(404).json({ error: "Không tìm thấy thể loại" });
     }
     if (!theLoai.isDeleted) {
-      return res.status(400).json({ 
-        error: "Chỉ có thể xóa vĩnh viễn thể loại đã được xóa mềm trước đó." 
+      return res.status(400).json({
+        error: "Chỉ có thể xóa vĩnh viễn thể loại đã được xóa mềm trước đó.",
       });
     }
     await theLoai.destroy();
-    return res.status(200).json({ message: "Đã xóa vĩnh viễn thể loại khỏi hệ thống!" });
+    return res
+      .status(200)
+      .json({ message: "Đã xóa vĩnh viễn thể loại khỏi hệ thống!" });
   } catch (err) {
     if (err.name === "SequelizeForeignKeyConstraintError") {
       return res.status(400).json({
-        error: "Xóa thất bại! Thể loại này có dữ liệu liên quan trong hệ thống.",
+        error:
+          "Xóa thất bại! Thể loại này có dữ liệu liên quan trong hệ thống.",
       });
     }
     console.error("[bookController] hardDeleteTheLoai error", err);
@@ -1488,14 +1516,16 @@ const hardDeleteTacGia = async (req, res) => {
       return res.status(404).json({ error: "Không tìm thấy tác giả" });
     }
     if (!tacGia.isDeleted) {
-      return res.status(400).json({ 
-        error: "Chỉ có thể xóa vĩnh viễn tác giả đã được xóa mềm trước đó." 
+      return res.status(400).json({
+        error: "Chỉ có thể xóa vĩnh viễn tác giả đã được xóa mềm trước đó.",
       });
     }
     // Xóa liên kết trong CT_TacGia
     await db.CT_TacGia.destroy({ where: { MaTacGia: maTacGia } });
     await tacGia.destroy();
-    return res.status(200).json({ message: "Đã xóa vĩnh viễn tác giả khỏi hệ thống!" });
+    return res
+      .status(200)
+      .json({ message: "Đã xóa vĩnh viễn tác giả khỏi hệ thống!" });
   } catch (err) {
     if (err.name === "SequelizeForeignKeyConstraintError") {
       return res.status(400).json({

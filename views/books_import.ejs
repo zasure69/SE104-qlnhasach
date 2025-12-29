@@ -1507,8 +1507,14 @@
           });
         }
         if (maSachInput && tenSachInput) {
+          // Tự động chuyển mã sách thành chữ in hoa khi nhập
+          maSachInput.addEventListener('input', function () {
+            this.value = this.value.toUpperCase();
+          });
+
           maSachInput.addEventListener('blur', async function () {
-            const maSach = this.value.trim();
+            const maSach = this.value.trim().toUpperCase();
+            this.value = maSach; // Cập nhật lại giá trị in hoa
             if (!maSach) return;
 
             const book = await findBookInfo(maSach);

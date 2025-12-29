@@ -1637,8 +1637,14 @@
       ["add", "edit"].forEach((prefix) => {
         const maKhInput = document.getElementById(`${prefix}-ma-kh`);
         if (maKhInput) {
+          // Tự động chuyển mã khách hàng thành chữ in hoa khi nhập
+          maKhInput.addEventListener("input", function () {
+            this.value = this.value.toUpperCase();
+          });
+
           maKhInput.addEventListener("blur", async function () {
-            const maKhachHang = this.value;
+            const maKhachHang = this.value.toUpperCase();
+            this.value = maKhachHang; // Cập nhật lại giá trị in hoa
 
             // *** DÙNG 'await' ĐỂ ĐỢI KẾT QUẢ TỪ SERVER ***
             const customerInfo = await findCustomer(maKhachHang);
@@ -1657,9 +1663,15 @@
           `${prefix}-input-ma-sach`
         );
         if (maSachInput) {
+          // Tự động chuyển mã sách thành chữ in hoa khi nhập
+          maSachInput.addEventListener("input", function () {
+            this.value = this.value.toUpperCase();
+          });
+
           // *** THÊM 'async' VÀO HÀM XỬ LÝ SỰ KIỆN ***
           maSachInput.addEventListener("blur", async function () {
-            const maSach = this.value;
+            const maSach = this.value.toUpperCase();
+            this.value = maSach; // Cập nhật lại giá trị in hoa
             // *** DÙNG 'await' ĐỂ ĐỢI KẾT QUẢ TỪ SERVER ***
             const book = await findBookInfo(maSach);
 
@@ -1956,6 +1968,19 @@
                         <div class="footer">
                             <p>Cảm ơn quý khách và hẹn gặp lại!</p>
                         </div>
+
+                        <div class="signature-section" style="display: flex; justify-content: space-between; margin-top: 40px; padding: 0 20px;">
+                            <div class="signature-left" style="text-align: center; width: 45%;">
+                                <p style="font-weight: bold; margin-bottom: 5px;">Khách mua hàng</p>
+                                <p style="font-style: italic; font-size: 12px; margin: 0;">(Ký, ghi rõ họ tên)</p>
+                                <div style="height: 80px;"></div>
+                            </div>
+                            <div class="signature-right" style="text-align: center; width: 45%;">
+                                <p style="font-weight: bold; margin-bottom: 5px;">Người bán hàng</p>
+                                <p style="font-style: italic; font-size: 12px; margin: 0;">(Ký, ghi rõ họ tên)</p>
+                                <div style="height: 80px;"></div>
+                            </div>
+                        </div>
                     </body>
                     </html>
                     `;
@@ -1989,11 +2014,12 @@
         });
       }
 
-      // Mở Modal Sửa
-      const viewDetailBtns = document.querySelectorAll(".view-detail-btn");
-      viewDetailBtns.forEach((btn) => {
-        btn.addEventListener("click", function () {
-          const maHd = this.dataset.id;
+      // Mở Modal Sửa - Sử dụng Event Delegation để hoạt động với cả nút được thêm động
+      document.getElementById("master-table").addEventListener("click", function(e) {
+        const viewBtn = e.target.closest(".view-detail-btn");
+        if (!viewBtn) return;
+        
+        const maHd = viewBtn.dataset.id;
 
           showLoader(); // Bắt đầu hiển thị loader
 
@@ -2074,7 +2100,6 @@
               showToast(`Lỗi tải chi tiết: ${error.message}`, "error");
               console.error("Lỗi khi tải chi tiết hóa đơn:", error);
             });
-        });
       });
       let isSaveAndReset = false;
       // Logic Reset/Restore
@@ -2253,19 +2278,8 @@
               if (data.message && data.message.includes("thành công")) {
                 showToast(`Thêm hóa đơn ${MaHD} thành công!`, "success");
                 lastBillMaHD = MaHD;
-                if (isSaveAndReset) {
-                  // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
-                  resetAddForm();
-                  showToast("Đã sẵn sàng nhập hóa đơn tiếp theo.", "info");
 
-                  // Reset cờ về false sau khi xong việc
-                  isSaveAndReset = false;
-                } else {
-                  addModal.style.display = "none";
-                  resetAddForm();
-                }
-
-                // 1. Lấy dữ liệu từ form hiện tại để hiển thị
+                // 1. Lấy dữ liệu từ form hiện tại để hiển thị TRƯỚC KHI RESET
                 const tenKH = document.getElementById("add-ten-kh").value;
                 const rawDate = document.getElementById("add-ngay-lap").value; // YYYY-MM-DD
 
@@ -2307,8 +2321,21 @@
                             </td>
                         `;
 
-                // 3. Chèn vào đầu bảng hoặc cuối bảng (ở đây là cuối bảng)
+                // 3. Chèn vào cuối bảng
                 tbody.appendChild(newRow);
+
+                // 4. Reset form SAU KHI đã lấy dữ liệu hiển thị
+                if (isSaveAndReset) {
+                  // Trường hợp 1: Từ nút "Thêm mới" (Lưu -> Reset form -> Không đóng)
+                  resetAddForm();
+                  showToast("Đã sẵn sàng nhập hóa đơn tiếp theo.", "info");
+
+                  // Reset cờ về false sau khi xong việc
+                  isSaveAndReset = false;
+                } else {
+                  addModal.style.display = "none";
+                  resetAddForm();
+                }
               } else {
                 showToast(`Thêm thất bại: ${data.message}`, "error");
               }

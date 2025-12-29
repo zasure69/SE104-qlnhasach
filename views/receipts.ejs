@@ -1152,9 +1152,15 @@
         const maKhInput = document.getElementById(`${prefix}-ma-kh`);
 
         if (maKhInput) {
+          // Tự động chuyển mã khách hàng thành chữ in hoa khi nhập
+          maKhInput.addEventListener("input", function () {
+            this.value = this.value.toUpperCase();
+          });
+
           // Tự động điền thông tin khách hàng khi rời khỏi ô input (blur)
           maKhInput.addEventListener("blur", async function () {
-            const maKH = this.value.trim();
+            const maKH = this.value.trim().toUpperCase();
+            this.value = maKH; // Cập nhật lại giá trị in hoa
             const customer = await findCustomer(maKH);
 
             // Các trường cần cập nhật trong Modal Phiếu Thu (cần đảm bảo ID tồn tại)
@@ -1670,8 +1676,7 @@
                             </div>
                             <div class="signature-box">
                                 <strong>Người lập phiếu</strong><br>
-                                <span>${data.NhanVien ? `${data.NhanVien.HoTen} (${data.MaNhanVien})` : (data.MaNhanVien || '---')}</span>
-                                <p>(Ký, ghi rõ họ tên)</p>
+                                (Ký, ghi rõ họ tên)
                             </div>
                         </div>
                     </body>
