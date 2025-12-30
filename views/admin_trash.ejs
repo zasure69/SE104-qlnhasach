@@ -9,12 +9,21 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
   <%
-  // Helper function để loại bỏ suffix _deleted_xxx khi hiển thị
+  // Helper function để loại bỏ prefix/suffix đánh dấu xóa khi hiển thị số điện thoại
   function removeDeletedSuffix(value) {
     if (!value) return value;
     const str = String(value);
+    // Xử lý prefix DEL_ (format mới)
+    if (str.startsWith('DEL_')) {
+      return str.substring(4);
+    }
+    // Xử lý suffix _deleted_xxx (format cũ)
     if (str.includes('_deleted_')) {
       return str.split('_deleted_')[0];
+    }
+    // Trường hợp bị cắt ngắn do độ dài cột database
+    if (str.includes('_dele')) {
+      return str.split('_dele')[0];
     }
     return str;
   }
@@ -298,6 +307,35 @@
       background-color: #fef5f5;
     }
 
+    .data-table tbody tr.row-warning {
+      background-color: #fff8e6;
+    }
+
+    .data-table tbody tr.row-warning:hover {
+      background-color: #fff3cd;
+    }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-badge.deleted {
+      background-color: #ffe6e6;
+      color: #c0392b;
+    }
+
+    .status-badge.active {
+      background-color: #e6fff2;
+      color: #27ae60;
+    }
+
     .data-table .checkbox-col {
       width: 40px;
       text-align: center;
@@ -543,12 +581,240 @@
     }
 
     .btn-secondary {
-      background-color: #e0e0e0;
-      color: var(--text-dark);
+      background-color: #f0f0f0;
+      color: var(--text-light);
     }
 
     .btn-secondary:hover {
-      background-color: #d0d0d0;
+      background-color: #e0e0e0;
+    }
+
+    /* View detail button - Style giống bills.ejs */
+    .view-detail-btn {
+      background-color: #f0f0f0;
+      color: var(--text-light);
+    }
+
+    .view-detail-btn:hover {
+      background-color: #e0e0e0;
+    }
+
+    .view-detail-btn i {
+      margin-right: 0.25rem;
+    }
+
+    /* Detail Modal - Style giống modal chỉnh sửa bills.ejs */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1100;
+      padding: 1rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background-color: var(--white-bg);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 950px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      animation: slideIn 0.3s ease;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .close-modal {
+      font-size: 1.5rem;
+      color: var(--text-light);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-modal:hover {
+      color: var(--red-accent);
+      transform: scale(1.1);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    /* Section Wrapper - giống bills.ejs */
+    .section-wrapper {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px dashed var(--border-color);
+    }
+
+    .section-wrapper:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .section-header-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+    }
+
+    /* Grid cho thông tin chung */
+    .grid-general {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group label {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--primary-color);
+    }
+
+    .form-group span {
+      font-size: 0.95rem;
+      color: var(--text-dark);
+      padding: 0.5rem 0;
+    }
+
+    /* Summary labels */
+    .summary-label {
+      font-size: 1rem;
+      color: var(--text-light);
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .summary-value.total {
+      color: var(--secondary-color);
+    }
+
+    .summary-value.debt {
+      color: var(--red-accent);
+    }
+
+    .summary-value.paid {
+      color: var(--green-accent);
+    }
+
+    /* Grid payment */
+    .grid-payment {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .payment-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* Detail Table - Style giống bills.ejs */
+    .detail-table-wrapper {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .detail-table thead tr {
+      background-color: #f1f5f9;
+      width: 100%;
+    }
+
+    .detail-table th {
+      padding: 1rem;
+      font-size: 0.85rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--primary-color);
+      white-space: nowrap;
+    }
+
+    .detail-table td {
+      padding: 1rem;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    .detail-table tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    .detail-table tfoot td {
+      font-weight: 700;
+      background-color: #f1f5f9;
+      border-top: 2px solid var(--border-color);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* Warning text */
@@ -1012,12 +1278,13 @@
                       <th>Mã</th>
                       <th>Tên sách</th>
                       <th>Thể loại</th>
+                      <th>Trạng thái TL</th>
                       <th>Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>
                     <% deletedDauSach.forEach(ds=> { %>
-                      <tr data-id="<%= ds.MaDauSach %>">
+                      <tr data-id="<%= ds.MaDauSach %>" class="<%= ds.isTheLoaiDeleted ? 'row-warning' : '' %>">
                         <td class="checkbox-col">
                           <input type="checkbox" class="row-checkbox-dausach" value="<%= ds.MaDauSach %>" />
                         </td>
@@ -1031,11 +1298,27 @@
                           <%= ds.TheLoai?.TenTheLoai || '-' %>
                         </td>
                         <td>
+                          <% if (ds.isTheLoaiDeleted) { %>
+                            <span class="status-badge deleted" title="Thể loại này cũng đã bị xóa">
+                              <i class="fas fa-exclamation-triangle"></i> Đã xóa
+                            </span>
+                          <% } else if (ds.TheLoai) { %>
+                            <span class="status-badge active">
+                              <i class="fas fa-check"></i> Còn hoạt động
+                            </span>
+                          <% } else { %>
+                            <span>-</span>
+                          <% } %>
+                        </td>
+                        <td>
                           <i class="fas fa-undo action-icon restore-icon"
-                            onclick="restoreItem('/api/books/dausach/restore/<%= ds.MaDauSach %>')"
+                            data-ma="<%= ds.MaDauSach %>"
+                            data-deleted="<%= ds.isTheLoaiDeleted ? 'true' : 'false' %>"
+                            data-ten="<%- ds.TheLoai ? ds.TheLoai.TenTheLoai : '' %>"
+                            onclick="restoreDauSach(this)"
                             title="Khôi phục"></i>
                           <i class="fas fa-trash action-icon delete-icon"
-                            onclick="confirmHardDelete('/api/books/dausach/hard-delete/<%= ds.MaDauSach %>', '<%= ds.TenSach %>')"
+                            onclick="confirmHardDelete('/api/books/dausach/hard-delete/<%= ds.MaDauSach %>', this)" data-ten="<%- ds.TenSach %>"
                             title="Xóa vĩnh viễn"></i>
                         </td>
                       </tr>
@@ -1074,6 +1357,7 @@
                       </th>
                       <th>Mã sách</th>
                       <th>Tên sách</th>
+                      <th>Đầu sách</th>
                       <th>NXB</th>
                       <th>Năm XB</th>
                       <th>Thao tác</th>
@@ -1081,7 +1365,7 @@
                   </thead>
                   <tbody>
                     <% deletedSach.forEach(s=> { %>
-                      <tr data-id="<%= s.MaSach %>">
+                      <tr data-id="<%= s.MaSach %>" class="<%= s.isDauSachDeleted ? 'row-warning' : '' %>">
                         <td class="checkbox-col">
                           <input type="checkbox" class="row-checkbox-sach" value="<%= s.MaSach %>" />
                         </td>
@@ -1092,6 +1376,17 @@
                           <%= s.DauSach?.TenSach || '-' %>
                         </td>
                         <td>
+                          <% if (s.isDauSachDeleted) { %>
+                            <span class="status-badge deleted" title="Đầu sách này cũng đã bị xóa">
+                              <i class="fas fa-exclamation-triangle"></i> Đã xóa
+                            </span>
+                          <% } else { %>
+                            <span class="status-badge active">
+                              <i class="fas fa-check"></i> Còn hoạt động
+                            </span>
+                          <% } %>
+                        </td>
+                        <td>
                           <%= s.NhaXB || '-' %>
                         </td>
                         <td>
@@ -1099,7 +1394,10 @@
                         </td>
                         <td>
                           <i class="fas fa-undo action-icon restore-icon"
-                            onclick="restoreItem('/api/books/sach/restore/<%= s.MaSach %>')" title="Khôi phục"></i>
+                            data-ma="<%= s.MaSach %>"
+                            data-deleted="<%= s.isDauSachDeleted ? 'true' : 'false' %>"
+                            data-ten="<%- s.DauSach ? s.DauSach.TenSach : '' %>"
+                            onclick="restoreSach(this)" title="Khôi phục"></i>
                           <i class="fas fa-trash action-icon delete-icon"
                             onclick="confirmHardDelete('/api/books/sach/hard-delete/<%= s.MaSach %>', '<%= s.MaSach %>')"
                             title="Xóa vĩnh viễn"></i>
@@ -1266,12 +1564,13 @@
                       </th>
                       <th>Mã phiếu</th>
                       <th>Ngày nhập</th>
+                      <th>Trạng thái sách</th>
                       <th>Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>
                     <% deletedImports.forEach(imp=> { %>
-                      <tr data-id="<%= imp.MaPhieuNhap %>">
+                      <tr data-id="<%= imp.MaPhieuNhap %>" class="<%= imp.hasDeletedSach ? 'row-warning' : '' %>">
                         <td class="checkbox-col">
                           <input type="checkbox" class="row-checkbox-imports" value="<%= imp.MaPhieuNhap %>" />
                         </td>
@@ -1282,8 +1581,25 @@
                           <%= new Date(imp.NgayNhapPhieu).toLocaleDateString('vi-VN') %>
                         </td>
                         <td>
+                          <% if (imp.hasDeletedSach) { %>
+                            <span class="status-badge deleted" title="Có <%= imp.deletedSachCount %> sách đã bị xóa">
+                              <i class="fas fa-exclamation-triangle"></i> <%= imp.deletedSachCount %> sách đã xóa
+                            </span>
+                          <% } else { %>
+                            <span class="status-badge active">
+                              <i class="fas fa-check"></i> Bình thường
+                            </span>
+                          <% } %>
+                        </td>
+                        <td>
+                          <button class="btn btn-sm btn-secondary view-detail-btn" onclick="viewImportDetail('<%= imp.MaPhieuNhap %>')">
+                            <i class="fas fa-eye"></i> Chi tiết
+                          </button>
                           <i class="fas fa-undo action-icon restore-icon"
-                            onclick="restoreItem('/api/import/admin/restore/<%= imp.MaPhieuNhap %>')"
+                            data-ma="<%= imp.MaPhieuNhap %>"
+                            data-deleted="<%= imp.hasDeletedSach ? 'true' : 'false' %>"
+                            data-count="<%= imp.deletedSachCount || 0 %>"
+                            onclick="restoreImport(this)"
                             title="Khôi phục"></i>
                           <i class="fas fa-trash action-icon delete-icon"
                             onclick="confirmHardDelete('/api/import/admin/hard-delete/<%= imp.MaPhieuNhap %>', '<%= imp.MaPhieuNhap %>')"
@@ -1326,6 +1642,7 @@
                       </th>
                       <th>Mã HĐ</th>
                       <th>Khách hàng</th>
+                      <th>Trạng thái KH</th>
                       <th>Ngày lập</th>
                       <th>Tổng tiền</th>
                       <th>Thao tác</th>
@@ -1333,7 +1650,7 @@
                   </thead>
                   <tbody>
                     <% deletedBills.forEach(bill=> { %>
-                      <tr data-id="<%= bill.MaHoaDon %>">
+                      <tr data-id="<%= bill.MaHoaDon %>" class="<%= bill.isKhachHangDeleted ? 'row-warning' : '' %>">
                         <td class="checkbox-col">
                           <input type="checkbox" class="row-checkbox-bills" value="<%= bill.MaHoaDon %>" />
                         </td>
@@ -1344,6 +1661,19 @@
                           <%= bill.KhachHang?.HoVaTen || '-' %>
                         </td>
                         <td>
+                          <% if (bill.isKhachHangDeleted) { %>
+                            <span class="status-badge deleted" title="Khách hàng này đã bị xóa">
+                              <i class="fas fa-exclamation-triangle"></i> Đã xóa
+                            </span>
+                          <% } else if (bill.KhachHang) { %>
+                            <span class="status-badge active">
+                              <i class="fas fa-check"></i> Còn hoạt động
+                            </span>
+                          <% } else { %>
+                            <span>-</span>
+                          <% } %>
+                        </td>
+                        <td>
                           <%= new Date(bill.NgayLapHoaDon).toLocaleDateString('vi-VN') %>
                         </td>
                         <td>
@@ -1351,8 +1681,14 @@
                             đ
                         </td>
                         <td>
+                          <button class="btn btn-sm btn-secondary view-detail-btn" onclick="viewBillDetail('<%= bill.MaHoaDon %>')">
+                            <i class="fas fa-eye"></i> Chi tiết
+                          </button>
                           <i class="fas fa-undo action-icon restore-icon"
-                            onclick="restoreItem('/api/bill/admin/restore/<%= bill.MaHoaDon %>')" title="Khôi phục"></i>
+                            data-ma="<%= bill.MaHoaDon %>"
+                            data-deleted="<%= bill.isKhachHangDeleted ? 'true' : 'false' %>"
+                            data-ten="<%- bill.KhachHang ? bill.KhachHang.HoVaTen : '' %>"
+                            onclick="restoreBill(this)" title="Khôi phục"></i>
                           <i class="fas fa-trash action-icon delete-icon"
                             onclick="confirmHardDelete('/api/bill/admin/hard-delete/<%= bill.MaHoaDon %>', '<%= bill.MaHoaDon %>')"
                             title="Xóa vĩnh viễn"></i>
@@ -1394,6 +1730,7 @@
                       </th>
                       <th>Mã PT</th>
                       <th>Khách hàng</th>
+                      <th>Trạng thái KH</th>
                       <th>Ngày thu</th>
                       <th>Số tiền</th>
                       <th>Thao tác</th>
@@ -1401,7 +1738,7 @@
                   </thead>
                   <tbody>
                     <% deletedReceipts.forEach(r=> { %>
-                      <tr data-id="<%= r.MaPhieuThu %>">
+                      <tr data-id="<%= r.MaPhieuThu %>" class="<%= r.isKhachHangDeleted ? 'row-warning' : '' %>">
                         <td class="checkbox-col">
                           <input type="checkbox" class="row-checkbox-receipts" value="<%= r.MaPhieuThu %>" />
                         </td>
@@ -1412,6 +1749,19 @@
                           <%= r.KhachHang?.HoVaTen || '-' %>
                         </td>
                         <td>
+                          <% if (r.isKhachHangDeleted) { %>
+                            <span class="status-badge deleted" title="Khách hàng này đã bị xóa">
+                              <i class="fas fa-exclamation-triangle"></i> Đã xóa
+                            </span>
+                          <% } else if (r.KhachHang) { %>
+                            <span class="status-badge active">
+                              <i class="fas fa-check"></i> Còn hoạt động
+                            </span>
+                          <% } else { %>
+                            <span>-</span>
+                          <% } %>
+                        </td>
+                        <td>
                           <%= new Date(r.NgayThuTien).toLocaleDateString('vi-VN') %>
                         </td>
                         <td>
@@ -1419,7 +1769,10 @@
                         </td>
                         <td>
                           <i class="fas fa-undo action-icon restore-icon"
-                            onclick="restoreItem('/api/receipts/admin/restore/<%= r.MaPhieuThu %>')"
+                            data-ma="<%= r.MaPhieuThu %>"
+                            data-deleted="<%= r.isKhachHangDeleted ? 'true' : 'false' %>"
+                            data-ten="<%- r.KhachHang ? r.KhachHang.HoVaTen : '' %>"
+                            onclick="restoreReceipt(this)"
                             title="Khôi phục"></i>
                           <i class="fas fa-trash action-icon delete-icon"
                             onclick="confirmHardDelete('/api/receipts/admin/hard-delete/<%= r.MaPhieuThu %>', '<%= r.MaPhieuThu %>')"
@@ -1487,6 +1840,9 @@
                           <%= inv.GhiChu || '-' %>
                         </td>
                         <td>
+                          <button class="btn btn-sm btn-secondary view-detail-btn" onclick="viewInventoryDetail('<%= inv.MaPhieuKiem %>')">
+                            <i class="fas fa-eye"></i> Chi tiết
+                          </button>
                           <i class="fas fa-undo action-icon restore-icon"
                             onclick="restoreItem('/api/inventory/admin/restore/<%= inv.MaPhieuKiem %>')"
                             title="Khôi phục"></i>
@@ -1510,6 +1866,19 @@
     <div class="loader"></div>
   </div>
   <div class="toast-container" id="toast-container"></div>
+
+  <!-- Modal Chi tiết - Style giống modal chỉnh sửa bills.ejs -->
+  <div class="modal-overlay" id="detail-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="detail-modal-title">Chi tiết</h2>
+        <button class="close-modal" onclick="closeDetailModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="detail-modal-body">
+        <!-- Nội dung chi tiết sẽ được render bởi JavaScript -->
+      </div>
+    </div>
+  </div>
 
   <script>
     // Tab switching
@@ -1578,6 +1947,171 @@
       }
     }
 
+    // Restore Sách với kiểm tra đầu sách
+    async function restoreSach(el) {
+      const maSach = el.dataset.ma;
+      const isDauSachDeleted = el.dataset.deleted === 'true';
+      const tenDauSach = el.dataset.ten;
+      const baseUrl = '/api/books/sach/restore/' + maSach;
+      
+      try {
+        // Nếu đầu sách đã bị xóa, hỏi người dùng
+        if (isDauSachDeleted) {
+          const confirmMsg = `Đầu sách "${tenDauSach}" liên kết với sách này đã bị xóa.\n\nBạn có muốn khôi phục cả đầu sách không?\n\n- Nhấn OK: Khôi phục cả sách và đầu sách\n- Nhấn Cancel: Hủy thao tác`;
+          
+          if (confirm(confirmMsg)) {
+            // Khôi phục cả sách và đầu sách
+            const response = await fetch(baseUrl + '?restoreDauSach=true', { method: "PATCH" });
+            const data = await response.json();
+            
+            if (response.ok) {
+              showToast(data.message || "Khôi phục thành công!");
+              setTimeout(() => location.reload(), 1000);
+            } else {
+              showToast(data.error || data.message || "Có lỗi xảy ra!", "error");
+            }
+          }
+          // Nếu cancel, không làm gì
+          return;
+        }
+        
+        // Đầu sách không bị xóa, khôi phục bình thường
+        await restoreItem(baseUrl);
+        
+      } catch (err) {
+        console.error(err);
+        showToast("Lỗi kết nối server!", "error");
+      }
+    }
+
+    // Restore Đầu sách với kiểm tra thể loại
+    async function restoreDauSach(el) {
+      const maDauSach = el.dataset.ma;
+      const isTheLoaiDeleted = el.dataset.deleted === 'true';
+      const tenTheLoai = el.dataset.ten;
+      const baseUrl = '/api/books/dausach/restore/' + maDauSach;
+      
+      try {
+        if (isTheLoaiDeleted) {
+          const confirmMsg = `Thể loại "${tenTheLoai}" liên kết với đầu sách này đã bị xóa.\n\nBạn có muốn khôi phục cả thể loại không?\n\n- Nhấn OK: Khôi phục cả đầu sách và thể loại\n- Nhấn Cancel: Hủy thao tác`;
+          
+          if (confirm(confirmMsg)) {
+            const response = await fetch(baseUrl + '?restoreTheLoai=true', { method: "PATCH" });
+            const data = await response.json();
+            
+            if (response.ok) {
+              showToast(data.message || "Khôi phục thành công!");
+              setTimeout(() => location.reload(), 1000);
+            } else {
+              showToast(data.error || data.message || "Có lỗi xảy ra!", "error");
+            }
+          }
+          return;
+        }
+        
+        await restoreItem(baseUrl);
+      } catch (err) {
+        console.error(err);
+        showToast("Lỗi kết nối server!", "error");
+      }
+    }
+
+    // Restore Hóa đơn với kiểm tra khách hàng
+    async function restoreBill(el) {
+      const maHoaDon = el.dataset.ma;
+      const isKhachHangDeleted = el.dataset.deleted === 'true';
+      const tenKhachHang = el.dataset.ten;
+      const baseUrl = '/api/bill/admin/restore/' + maHoaDon;
+      
+      try {
+        if (isKhachHangDeleted) {
+          const confirmMsg = `Khách hàng "${tenKhachHang}" liên kết với hóa đơn này đã bị xóa.\n\nBạn có muốn khôi phục cả khách hàng không?\n\n- Nhấn OK: Khôi phục cả hóa đơn và khách hàng\n- Nhấn Cancel: Hủy thao tác`;
+          
+          if (confirm(confirmMsg)) {
+            const response = await fetch(baseUrl + '?restoreKhachHang=true', { method: "PATCH" });
+            const data = await response.json();
+            
+            if (response.ok) {
+              showToast(data.message || "Khôi phục thành công!");
+              setTimeout(() => location.reload(), 1000);
+            } else {
+              showToast(data.error || data.message || "Có lỗi xảy ra!", "error");
+            }
+          }
+          return;
+        }
+        
+        await restoreItem(baseUrl);
+      } catch (err) {
+        console.error(err);
+        showToast("Lỗi kết nối server!", "error");
+      }
+    }
+
+    // Restore Phiếu thu với kiểm tra khách hàng
+    async function restoreReceipt(el) {
+      const maPhieuThu = el.dataset.ma;
+      const isKhachHangDeleted = el.dataset.deleted === 'true';
+      const tenKhachHang = el.dataset.ten;
+      const baseUrl = '/api/receipts/admin/restore/' + maPhieuThu;
+      
+      try {
+        if (isKhachHangDeleted) {
+          const confirmMsg = `Khách hàng "${tenKhachHang}" liên kết với phiếu thu này đã bị xóa.\n\nBạn có muốn khôi phục cả khách hàng không?\n\n- Nhấn OK: Khôi phục cả phiếu thu và khách hàng\n- Nhấn Cancel: Hủy thao tác`;
+          
+          if (confirm(confirmMsg)) {
+            const response = await fetch(baseUrl + '?restoreKhachHang=true', { method: "PATCH" });
+            const data = await response.json();
+            
+            if (response.ok) {
+              showToast(data.message || "Khôi phục thành công!");
+              setTimeout(() => location.reload(), 1000);
+            } else {
+              showToast(data.error || data.message || "Có lỗi xảy ra!", "error");
+            }
+          }
+          return;
+        }
+        
+        await restoreItem(baseUrl);
+      } catch (err) {
+        console.error(err);
+        showToast("Lỗi kết nối server!", "error");
+      }
+    }
+
+    // Restore Phiếu nhập với kiểm tra sách
+    async function restoreImport(el) {
+      const maPhieuNhap = el.dataset.ma;
+      const hasDeletedSach = el.dataset.deleted === 'true';
+      const deletedSachCount = parseInt(el.dataset.count) || 0;
+      const baseUrl = '/api/import/admin/restore/' + maPhieuNhap;
+      
+      try {
+        if (hasDeletedSach) {
+          const confirmMsg = `Phiếu nhập này có ${deletedSachCount} sách đã bị xóa.\n\nBạn có muốn khôi phục cả các sách đó không?\n\n- Nhấn OK: Khôi phục cả phiếu nhập và các sách liên kết\n- Nhấn Cancel: Hủy thao tác`;
+          
+          if (confirm(confirmMsg)) {
+            const response = await fetch(baseUrl + '?restoreSach=true', { method: "PATCH" });
+            const data = await response.json();
+            
+            if (response.ok) {
+              showToast(data.message || "Khôi phục thành công!");
+              setTimeout(() => location.reload(), 1000);
+            } else {
+              showToast(data.error || data.message || "Có lỗi xảy ra!", "error");
+            }
+          }
+          return;
+        }
+        
+        await restoreItem(baseUrl);
+      } catch (err) {
+        console.error(err);
+        showToast("Lỗi kết nối server!", "error");
+      }
+    }
+
     // Restore selected items
     async function restoreSelected(type, baseUrl) {
       const ids = getSelectedIds(type);
@@ -1592,7 +2126,9 @@
     }
 
     // Confirm hard delete - sử dụng confirm đơn giản
-    async function confirmHardDelete(url, name) {
+    async function confirmHardDelete(url, el) {
+      // el có thể là string (name) hoặc element với data-ten
+      const name = typeof el === 'string' ? el : (el.dataset ? el.dataset.ten : el);
       if (
         !confirm(
           `Bạn có chắc chắn muốn xóa vĩnh viễn "${name}"?\n\n⚠️ Hành động này không thể hoàn tác!`
@@ -1661,6 +2197,312 @@
           sidebar.classList.toggle("active");
         }
       });
+    }
+
+    // ========== CHI TIẾT MODAL ==========
+    const detailModal = document.getElementById('detail-modal');
+    const detailModalTitle = document.getElementById('detail-modal-title');
+    const detailModalBody = document.getElementById('detail-modal-body');
+
+    function closeDetailModal() {
+      detailModal.classList.remove('show');
+    }
+
+    // Đóng modal khi click bên ngoài
+    detailModal.addEventListener('click', (e) => {
+      if (e.target === detailModal) {
+        closeDetailModal();
+      }
+    });
+
+    // Format số tiền
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('vi-VN').format(value || 0);
+    }
+
+    // Format ngày
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      return new Date(dateStr).toLocaleDateString('vi-VN');
+    }
+
+    // Xem chi tiết phiếu nhập
+    async function viewImportDetail(maPhieu) {
+      try {
+        const response = await fetch(`/api/import/${maPhieu}`);
+        if (!response.ok) throw new Error('Không tìm thấy phiếu nhập');
+        const data = await response.json();
+        const receipt = data.receipt || data;
+
+        detailModalTitle.textContent = `Chi tiết Phiếu Nhập Sách`;
+        
+        let detailHtml = `
+          <div class="section-wrapper">
+            <h3 class="section-header-title">Thông tin chung</h3>
+            <div class="grid-general">
+              <div class="form-group">
+                <label>Mã Phiếu Nhập:</label>
+                <span style="font-weight:bold">${receipt.MaPhieuNhap}</span>
+              </div>
+              <div class="form-group">
+                <label>Ngày Nhập:</label>
+                <span>${formatDate(receipt.NgayNhapPhieu)}</span>
+              </div>
+              <div class="form-group">
+                <label>Nhân Viên Lập:</label>
+                <span>${receipt.NhanVien?.HoTen || receipt.MaNhanVien || '-'}</span>
+              </div>
+            </div>
+          </div>
+          <div class="section-wrapper">
+            <h3 class="section-header-title">Chi tiết sách nhập</h3>
+            <div class="detail-table-wrapper">
+              <table class="detail-table">
+                <thead>
+                  <tr>
+                    <th>STT</th>
+                    <th>Mã Sách</th>
+                    <th>Tên Sách</th>
+                    <th style="text-align:right">Số Lượng</th>
+                    <th style="text-align:right">Đơn Giá Nhập</th>
+                    <th style="text-align:right">Thành Tiền</th>
+                  </tr>
+                </thead>
+                <tbody>
+        `;
+
+        let tongTien = 0;
+        let tongSL = 0;
+        const chiTiet = receipt.ChiTiet || [];
+        
+        chiTiet.forEach((ct, idx) => {
+          const thanhTien = (ct.SoLuongNhap || 0) * (ct.DonGiaNhap || 0);
+          tongTien += thanhTien;
+          tongSL += ct.SoLuongNhap || 0;
+          const tenSach = ct.Sach?.DauSach?.TenSach || ct.Sach?.MaSach || '-';
+          const isDeleted = ct.Sach?.isDeleted;
+          
+          detailHtml += `
+            <tr ${isDeleted ? 'style="background-color:#fff0f0"' : ''}>
+              <td>${idx + 1}</td>
+              <td>${ct.MaSach} ${isDeleted ? '<span class="status-badge deleted" style="font-size:0.65rem"><i class="fas fa-exclamation-triangle"></i> Đã xóa</span>' : ''}</td>
+              <td>${tenSach}</td>
+              <td style="text-align:right">${formatCurrency(ct.SoLuongNhap)}</td>
+              <td style="text-align:right">${formatCurrency(ct.DonGiaNhap)}</td>
+              <td style="text-align:right">${formatCurrency(thanhTien)}</td>
+            </tr>
+          `;
+        });
+
+        detailHtml += `
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="3" style="text-align:right"><strong>Tổng cộng:</strong></td>
+                    <td style="text-align:right"><strong>${formatCurrency(tongSL)}</strong></td>
+                    <td></td>
+                    <td style="text-align:right"><strong>${formatCurrency(tongTien)} đ</strong></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        `;
+
+        detailModalBody.innerHTML = detailHtml;
+        detailModal.classList.add('show');
+      } catch (err) {
+        console.error(err);
+        showToast('Lỗi khi tải chi tiết phiếu nhập!', 'error');
+      }
+    }
+
+    // Xem chi tiết hóa đơn
+    async function viewBillDetail(maHoaDon) {
+      try {
+        const response = await fetch(`/api/bill/${maHoaDon}`);
+        if (!response.ok) throw new Error('Không tìm thấy hóa đơn');
+        const data = await response.json();
+        const bill = data.bill || data;
+
+        detailModalTitle.textContent = `Chi tiết Hóa Đơn`;
+        
+        const conNo = (bill.TongTien || 0) - (bill.SoTienThu || 0);
+        let detailHtml = `
+          <div class="section-wrapper">
+            <h3 class="section-header-title">Thông tin chung</h3>
+            <div class="grid-general" style="grid-template-columns: 1fr 1fr 1fr 1.5fr">
+              <div class="form-group">
+                <label>Mã Hóa Đơn:</label>
+                <span style="font-weight:bold">${bill.MaHoaDon}</span>
+              </div>
+              <div class="form-group">
+                <label>Ngày Lập:</label>
+                <span>${formatDate(bill.NgayLapHoaDon)}</span>
+              </div>
+              <div class="form-group">
+                <label>Mã Khách Hàng:</label>
+                <span>${bill.MaKhachHang || '-'}</span>
+              </div>
+              <div class="form-group">
+                <label>Tên Khách Hàng:</label>
+                <span>${bill.KhachHang?.HoVaTen || '-'}</span>
+              </div>
+              <div class="form-group">
+                <label>Nhân Viên Lập:</label>
+                <span>${bill.NhanVien?.HoTen || bill.MaNhanVien || '-'}</span>
+              </div>
+            </div>
+          </div>
+          <div class="section-wrapper">
+            <h3 class="section-header-title">Chi tiết hóa đơn</h3>
+            <div class="detail-table-wrapper">
+              <table class="detail-table">
+                <thead>
+                  <tr>
+                    <th>STT</th>
+                    <th>Mã Sách</th>
+                    <th>Tên Sách</th>
+                    <th style="text-align:right">Số Lượng</th>
+                    <th style="text-align:right">Đơn Giá</th>
+                    <th style="text-align:right">Thành Tiền</th>
+                  </tr>
+                </thead>
+                <tbody>
+        `;
+
+        const chiTiet = bill.ChiTiet || bill.CT_HD || [];
+        
+        chiTiet.forEach((ct, idx) => {
+          const thanhTien = (ct.SoLuongBan || 0) * (ct.DonGiaBan || 0);
+          const tenSach = ct.Sach?.DauSach?.TenSach || ct.Sach?.MaSach || '-';
+          
+          detailHtml += `
+            <tr>
+              <td>${idx + 1}</td>
+              <td>${ct.MaSach}</td>
+              <td>${tenSach}</td>
+              <td style="text-align:right">${formatCurrency(ct.SoLuongBan)}</td>
+              <td style="text-align:right">${formatCurrency(ct.DonGiaBan)}</td>
+              <td style="text-align:right">${formatCurrency(thanhTien)}</td>
+            </tr>
+          `;
+        });
+
+        detailHtml += `
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="section-wrapper">
+            <h3 class="section-header-title">Thông tin thanh toán</h3>
+            <div class="grid-payment">
+              <div class="payment-item">
+                <span class="summary-label">Tổng tiền:</span>
+                <span class="summary-value total" style="font-size:1.2rem">${formatCurrency(bill.TongTien)} đ</span>
+              </div>
+              <div class="payment-item">
+                <span class="summary-label">Số tiền đã trả:</span>
+                <span class="summary-value paid" style="font-size:1.2rem">${formatCurrency(bill.SoTienThu)} đ</span>
+              </div>
+              <div class="payment-item">
+                <span class="summary-label">Còn nợ:</span>
+                <span class="summary-value debt" style="font-size:1.2rem;color:${conNo > 0 ? '#e74c3c' : '#27ae60'}">${formatCurrency(conNo)} đ</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        detailModalBody.innerHTML = detailHtml;
+        detailModal.classList.add('show');
+      } catch (err) {
+        console.error(err);
+        showToast('Lỗi khi tải chi tiết hóa đơn!', 'error');
+      }
+    }
+
+    // Xem chi tiết phiếu kiểm kê
+    async function viewInventoryDetail(maPhieu) {
+      try {
+        const response = await fetch(`/api/inventory/${maPhieu}`);
+        if (!response.ok) throw new Error('Không tìm thấy phiếu kiểm kê');
+        const data = await response.json();
+        const phieu = data.phieu || data;
+
+        detailModalTitle.textContent = `Chi tiết Phiếu Kiểm Kê`;
+        
+        let detailHtml = `
+          <div class="section-wrapper">
+            <h3 class="section-header-title">Thông tin chung</h3>
+            <div class="grid-general">
+              <div class="form-group">
+                <label>Mã Phiếu Kiểm:</label>
+                <span style="font-weight:bold">${phieu.MaPhieuKiem}</span>
+              </div>
+              <div class="form-group">
+                <label>Ngày Kiểm:</label>
+                <span>${formatDate(phieu.NgayKiem)}</span>
+              </div>
+              <div class="form-group">
+                <label>Nhân Viên Lập:</label>
+                <span>${phieu.NhanVien?.HoTen || phieu.MaNhanVien || '-'}</span>
+              </div>
+              <div class="form-group">
+                <label>Ghi Chú:</label>
+                <span>${phieu.GhiChu || '-'}</span>
+              </div>
+            </div>
+          </div>
+          <div class="section-wrapper">
+            <h3 class="section-header-title">Chi tiết kiểm kê</h3>
+            <div class="detail-table-wrapper">
+              <table class="detail-table">
+                <thead>
+                  <tr>
+                    <th>STT</th>
+                    <th>Mã Sách</th>
+                    <th>Tên Sách</th>
+                    <th style="text-align:right">SL Hệ Thống</th>
+                    <th style="text-align:right">SL Thực Tế</th>
+                    <th style="text-align:right">Chênh Lệch</th>
+                  </tr>
+                </thead>
+                <tbody>
+        `;
+
+        const chiTiet = phieu.ChiTietKiemKe || phieu.ChiTiet || [];
+        
+        chiTiet.forEach((ct, idx) => {
+          const chenhLech = (ct.SoLuongThucTe || 0) - (ct.SoLuongHeThong || 0);
+          const tenSach = ct.Sach?.DauSach?.TenSach || ct.Sach?.MaSach || '-';
+          
+          detailHtml += `
+            <tr>
+              <td>${idx + 1}</td>
+              <td>${ct.MaSach}</td>
+              <td>${tenSach}</td>
+              <td style="text-align:right">${formatCurrency(ct.SoLuongHeThong)}</td>
+              <td style="text-align:right">${formatCurrency(ct.SoLuongThucTe)}</td>
+              <td style="text-align:right;color:${chenhLech !== 0 ? (chenhLech > 0 ? '#27ae60' : '#e74c3c') : 'inherit'}">
+                ${chenhLech > 0 ? '+' : ''}${formatCurrency(chenhLech)}
+              </td>
+            </tr>
+          `;
+        });
+
+        detailHtml += `
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+
+        detailModalBody.innerHTML = detailHtml;
+        detailModal.classList.add('show');
+      } catch (err) {
+        console.error(err);
+        showToast('Lỗi khi tải chi tiết phiếu kiểm kê!', 'error');
+      }
     }
   </script>
 </body>
