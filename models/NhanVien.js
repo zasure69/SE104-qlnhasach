@@ -39,6 +39,14 @@ const NhanVien = sequelize.define('NhanVien', {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
     allowNull: false
+  },
+  MaVaiTro: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'VAITRO',
+      key: 'MaVaiTro'
+    }
   }
 }, {
   tableName: 'NHANVIEN', // Chỉ định rõ tên bảng trong DB 
