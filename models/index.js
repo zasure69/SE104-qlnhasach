@@ -19,6 +19,8 @@ const BaoCaoCongNo = require("./BaoCaoCongNo");
 const BaoCaoDoanhThu = require("./BaoCaoDoanhThu");
 const PhieuKiemKe = require("./PhieuKiemKe");
 const ChiTietKiemKe = require("./ChiTietKiemKe");
+const LoaiLyDoKiemKe = require("./LoaiLyDoKiemKe");
+const CT_LyDoKiemKe = require("./CT_LyDoKiemKe");
 
 // Models phân quyền
 const Quyen = require("./Quyen");
@@ -149,6 +151,21 @@ ChiTietKiemKe.belongsTo(PhieuKiemKe, { foreignKey: "MaPhieuKiem" });
 Sach.hasMany(ChiTietKiemKe, { foreignKey: "MaSach" });
 ChiTietKiemKe.belongsTo(Sach, { foreignKey: "MaSach" });
 
+// 14. CT_LyDoKiemKe - Chi tiết lý do kiểm kê (nhiều lý do cho 1 sách)
+ChiTietKiemKe.hasMany(CT_LyDoKiemKe, {
+  foreignKey: "MaPhieuKiem",
+  sourceKey: "MaPhieuKiem",
+  as: "DanhSachLyDo",
+});
+
+// Liên kết CT_LyDoKiemKe với LoaiLyDoKiemKe
+LoaiLyDoKiemKe.hasMany(CT_LyDoKiemKe, { foreignKey: "MaLyDo" });
+CT_LyDoKiemKe.belongsTo(LoaiLyDoKiemKe, { foreignKey: "MaLyDo" });
+
+// Liên kết CT_LyDoKiemKe với Sach
+Sach.hasMany(CT_LyDoKiemKe, { foreignKey: "MaSach" });
+CT_LyDoKiemKe.belongsTo(Sach, { foreignKey: "MaSach" });
+
 // Export tất cả models và sequelize instance
 module.exports = {
   sequelize,
@@ -174,4 +191,6 @@ module.exports = {
   Quyen,
   VaiTro,
   VaiTro_Quyen,
+  LoaiLyDoKiemKe,
+  CT_LyDoKiemKe,
 };

@@ -33,17 +33,55 @@ const getEmployeesPage = async (req, res) => {
       role: req.user.role,
     };
 
-    // 2. Lấy nhân viên chưa bị xóa từ database
-    //    Chúng ta dùng db.NhanVien vì nó ánh xạ đến bảng NHANVIEN
+    // 2. Xây dựng filter từ query params
+    const filters = {
+      maNhanVien: (req.query.maNhanVien || "").trim(),
+      hoTen: (req.query.hoTen || "").trim(),
+      soDienThoai: (req.query.soDienThoai || "").trim(),
+      chucVu: (req.query.chucVu || "").trim(),
+      username: (req.query.username || "").trim(),
+      fromNgayNhanViec: (req.query.fromNgayNhanViec || "").trim(),
+      toNgayNhanViec: (req.query.toNgayNhanViec || "").trim(),
+    };
+
+    // 3. Tạo điều kiện where
+    const whereConditions = { isDeleted: false };
+
+    if (filters.maNhanVien) {
+      whereConditions.MaNhanVien = { [Op.like]: `%${filters.maNhanVien}%` };
+    }
+    if (filters.hoTen) {
+      whereConditions.HoTen = { [Op.like]: `%${filters.hoTen}%` };
+    }
+    if (filters.soDienThoai) {
+      whereConditions.SoDienThoai = { [Op.like]: `%${filters.soDienThoai}%` };
+    }
+    if (filters.chucVu) {
+      whereConditions.ChucVu = filters.chucVu;
+    }
+    if (filters.username) {
+      whereConditions.Username = { [Op.like]: `%${filters.username}%` };
+    }
+    if (filters.fromNgayNhanViec) {
+      whereConditions.NgayNhanViec = whereConditions.NgayNhanViec || {};
+      whereConditions.NgayNhanViec[Op.gte] = filters.fromNgayNhanViec;
+    }
+    if (filters.toNgayNhanViec) {
+      whereConditions.NgayNhanViec = whereConditions.NgayNhanViec || {};
+      whereConditions.NgayNhanViec[Op.lte] = filters.toNgayNhanViec;
+    }
+
+    // 4. Lấy nhân viên từ database với filter
     const allEmployees = await db.NhanVien.findAll({
-      where: { isDeleted: false },
-      raw: true, // Lấy dữ liệu dạng JSON thuần
+      where: whereConditions,
+      raw: true,
     });
 
-    // 3. Render trang 'employees.ejs' VÀ TRUYỀN DỮ LIỆU VÀO
+    // 5. Render trang 'employees.ejs' VÀ TRUYỀN DỮ LIỆU VÀO
     res.render("employees", {
-      ...userInfo, // Gửi 'username' và 'role'
-      employees: allEmployees, // <-- GỬI BIẾN 'employees'
+      ...userInfo,
+      employees: allEmployees,
+      filters: filters,
     });
   } catch (err) {
     console.error("Lỗi khi lấy dữ liệu nhân viên:", err);

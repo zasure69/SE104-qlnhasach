@@ -100,8 +100,15 @@ const getBookInfo = async (req, res) => {
 //  API: TẠO HÓA ĐƠN MỚI (POST /api/bill/create)
 // =============================================================
 const create = async (req, res) => {
-  const { MaHoaDon, MaKhachHang, MaNhanVien, TongTien, SoTienTra, ConLai, Details } =
-    req.body;
+  const {
+    MaHoaDon,
+    MaKhachHang,
+    MaNhanVien,
+    TongTien,
+    SoTienTra,
+    ConLai,
+    Details,
+  } = req.body;
   const t = await sequelize.transaction();
 
   try {
@@ -110,21 +117,25 @@ const create = async (req, res) => {
     // KIỂM TRA KHÁCH HÀNG TỒN TẠI VÀ CHƯA BỊ XÓA MỀM
     const khachHang = await KhachHang.findOne({
       where: { MaKhachHang: MaKhachHang, isDeleted: false },
-      transaction: t
+      transaction: t,
     });
     if (!khachHang) {
-      throw new Error(`Khách hàng có mã ${MaKhachHang} không tồn tại hoặc đã bị xóa.`);
+      throw new Error(
+        `Khách hàng có mã ${MaKhachHang} không tồn tại hoặc đã bị xóa.`
+      );
     }
 
     // 1. KIỂM TRA TỒN KHO VÀ QUY ĐỊNH
     for (const detail of Details) {
       const sach = await Sach.findOne({
         where: { MaSach: detail.MaSach, isDeleted: false },
-        transaction: t
+        transaction: t,
       });
 
       if (!sach) {
-        throw new Error(`Sách có mã ${detail.MaSach} không tồn tại hoặc đã bị xóa.`);
+        throw new Error(
+          `Sách có mã ${detail.MaSach} không tồn tại hoặc đã bị xóa.`
+        );
       }
 
       const currentStock = sach.SoLuongTon;
@@ -418,7 +429,9 @@ const deleteBill = async (req, res) => {
     // Kiểm tra nếu hóa đơn đã bị xóa rồi
     if (bill.isDeleted) {
       await t.rollback();
-      return res.status(400).json({ message: "Hóa đơn này đã bị xóa trước đó." });
+      return res
+        .status(400)
+        .json({ message: "Hóa đơn này đã bị xóa trước đó." });
     }
 
     const details = await CT_HD.findAll({
@@ -573,8 +586,8 @@ const restoreBill = async (req, res) => {
         const newStock = sach.SoLuongTon - item.SoLuongBan;
         if (newStock < 0) {
           await t.rollback();
-          return res.status(400).json({ 
-            message: `Không thể khôi phục. Sách ${item.MaSach} không đủ tồn kho.` 
+          return res.status(400).json({
+            message: `Không thể khôi phục. Sách ${item.MaSach} không đủ tồn kho.`,
           });
         }
         await Sach.decrement("SoLuongTon", {
@@ -631,8 +644,8 @@ const hardDeleteBill = async (req, res) => {
 
     if (!bill.isDeleted) {
       await t.rollback();
-      return res.status(400).json({ 
-        message: "Chỉ có thể xóa vĩnh viễn hóa đơn đã được xóa mềm trước đó." 
+      return res.status(400).json({
+        message: "Chỉ có thể xóa vĩnh viễn hóa đơn đã được xóa mềm trước đó.",
       });
     }
 

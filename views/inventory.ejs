@@ -50,36 +50,125 @@
       border: 1px solid #feb2b2;
     }
 
-    /* Search/Filter panel (Bills-style) */
-    .search-panel-container {
-      background: #fff;
+    /* Multi-select dropdown */
+    .multi-select-container {
+      position: relative;
+    }
+    .multi-select-trigger {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
       border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      background: #fff;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 42px;
+    }
+    .multi-select-trigger:hover {
+      border-color: var(--secondary-color);
+    }
+    .multi-select-trigger .placeholder {
+      color: #999;
+    }
+    .multi-select-trigger .selected-count {
+      background: var(--secondary-color);
+      color: white;
+      padding: 0.15rem 0.5rem;
       border-radius: 12px;
-      padding: 1rem 1.25rem;
-      margin-bottom: 1.25rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .multi-select-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      max-height: 250px;
+      overflow-y: auto;
+      display: none;
+    }
+    .multi-select-dropdown.show {
+      display: block;
+    }
+    .multi-select-option {
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.15s;
+    }
+    .multi-select-option:hover {
+      background: #f0f4f8;
+    }
+    .multi-select-option input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--secondary-color);
+    }
+    .multi-select-option.selected {
+      background: #e8f4fc;
+    }
+
+
+
+    /* Search/Filter panel - Style giống customers */
+    .search-panel-container {
+      background-color: var(--white-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
     }
 
     .search-panel-header {
+      background-color: #f8f9fa;
+      padding: 1rem 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 1rem;
-      margin-bottom: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
     }
 
-    .search-panel-header h3 {
-      margin: 0;
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: var(--text-dark);
+    .search-panel-header i {
+      margin-right: 0.5rem;
+      color: var(--secondary-color);
     }
 
     .search-panel-body {
+      padding: 1.5rem;
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.9rem 1rem;
+      gap: 1.25rem;
       align-items: end;
+    }
+
+    @media (max-width: 1200px) {
+      .search-panel-body {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .search-panel-body {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     .search-panel-body .field {
@@ -144,6 +233,36 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0.75rem;
+    }
+
+    /* Sortable table headers */
+    .sortable {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .sortable:hover {
+      background: rgba(52, 152, 219, 0.1);
+    }
+    .sortable i {
+      margin-left: 0.35rem;
+      font-size: 0.75rem;
+      opacity: 0.5;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .sortable:hover i {
+      opacity: 1;
+    }
+    .sortable.asc i::before {
+      content: "\f0de"; /* fa-sort-up */
+    }
+    .sortable.desc i::before {
+      content: "\f0dd"; /* fa-sort-down */
+    }
+    .sortable.asc i,
+    .sortable.desc i {
+      opacity: 1;
+      color: var(--secondary-color);
     }
 
     @media (max-width: 1200px) {
@@ -1055,20 +1174,25 @@
       </header>
 
       <div class="content-wrapper">
-        <div class="content-header">
-          <h2>Danh sách Phiếu kiểm kê</h2>
-          <button class="btn btn-primary btn-add-new" id="open-add-modal">
-            <i class="fas fa-plus"></i> LẬP PHIẾU KIỂM KÊ
-          </button>
-        </div>
-
         <div class="search-panel-container">
           <div class="search-panel-header">
-            <h3><i class="fas fa-filter"></i> Bộ lọc tìm kiếm</h3>
+            <span><i class="fas fa-filter"></i> BỘ LỌC TÌM KIẾM</span>
+            <div style="display: flex; gap: 0.5rem;">
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-quick-today" title="Hôm nay">
+                <i class="fas fa-calendar-day"></i> Hôm nay
+              </button>
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-quick-week" title="Tuần này">
+                <i class="fas fa-calendar-week"></i> Tuần này
+              </button>
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-quick-month" title="Tháng này">
+                <i class="fas fa-calendar-alt"></i> Tháng này
+              </button>
+            </div>
           </div>
 
-          <form method="GET" action="/dashboard/inventory">
-            <div class="search-panel-body">
+          <form method="GET" action="/dashboard/inventory" id="search-form">
+            <div class="search-panel-body" style="grid-template-columns: repeat(4, 1fr);">
+              <!-- Hàng 1 -->
               <div class="field">
                 <label for="f-ma-phieu">Mã phiếu</label>
                 <input id="f-ma-phieu" name="maPhieuKiem" type="text" placeholder="VD: PK001"
@@ -1082,10 +1206,33 @@
               </div>
 
               <div class="field">
-                <label>Ngày kiểm kê</label>
-                <div class="two-col">
-                  <input name="from" type="date" value="<%= (filters && filters.from) ? filters.from : '' %>" />
-                  <input name="to" type="date" value="<%= (filters && filters.to) ? filters.to : '' %>" />
+                <label for="f-ma-sach">Mã/Tên sách</label>
+                <input id="f-ma-sach" name="maSach" type="text" placeholder="Mã hoặc tên sách..."
+                  value="<%= (filters && filters.maSach) ? filters.maSach : '' %>" />
+              </div>
+
+              <div class="field">
+                <label for="f-lydo-values">Lý do chênh lệch</label>
+                <input type="hidden" name="lyDo" id="f-lydo-values" value="<%= (filters && filters.lyDo) ? (Array.isArray(filters.lyDo) ? filters.lyDo.join(',') : String(filters.lyDo)) : '' %>" />
+                <div class="multi-select-container" id="lydo-multi-select">
+                  <div class="multi-select-trigger" id="lydo-trigger">
+                    <span class="trigger-text"><span class="placeholder">-- Tất cả lý do --</span></span>
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
+                  <div class="multi-select-dropdown" id="lydo-dropdown">
+                    <% reasonsList.forEach(function(reason) { %>
+                      <label class="multi-select-option">
+                        <input type="checkbox" value="<%= reason.MaLyDo %>" 
+                          <%= (filters && filters.lyDo && (Array.isArray(filters.lyDo) ? filters.lyDo.includes(String(reason.MaLyDo)) : filters.lyDo == reason.MaLyDo)) ? 'checked' : '' %> />
+                        <span><%= reason.TenLyDo %></span>
+                      </label>
+                    <% }); %>
+                    <label class="multi-select-option">
+                      <input type="checkbox" value="other" 
+                        <%= (filters && filters.lyDo && (Array.isArray(filters.lyDo) ? filters.lyDo.includes('other') : filters.lyDo === 'other')) ? 'checked' : '' %> />
+                      <span>📝 Lý do khác (nhập tay)</span>
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -1094,17 +1241,41 @@
                 <select id="f-status" name="status">
                   <option value="" <%= (filters && !filters.status) ? 'selected' : '' %>>-- Tất cả --</option>
                   <option value="balanced" <%= (filters && filters.status === 'balanced') ? 'selected' : '' %>>🟢 Cân bằng</option>
-                  <option value="discrepancy" <%= (filters && filters.status === 'discrepancy') ? 'selected' : '' %>>🔴 Lệch</option>
+                  <option value="discrepancy" <%= (filters && filters.status === 'discrepancy') ? 'selected' : '' %>>🔴 Có lệch</option>
                 </select>
               </div>
 
+              <!-- Hàng 2 -->
+              <div class="field">
+                <label>Ngày kiểm kê từ</label>
+                <input name="from" type="date" id="f-from" value="<%= (filters && filters.from) ? filters.from : '' %>" />
+              </div>
+
+              <div class="field">
+                <label>Đến ngày</label>
+                <input name="to" type="date" id="f-to" value="<%= (filters && filters.to) ? filters.to : '' %>" />
+              </div>
+
+              <div class="field">
+                <label>Số lượng lệch từ</label>
+                <input name="minLech" type="number" min="0" placeholder="Tối thiểu"
+                  value="<%= (filters && filters.minLech) ? filters.minLech : '' %>" />
+              </div>
+
+              <div class="field">
+                <label>Đến (cuốn)</label>
+                <input name="maxLech" type="number" min="0" placeholder="Tối đa"
+                  value="<%= (filters && filters.maxLech) ? filters.maxLech : '' %>" />
+              </div>
+
+              <!-- Hàng nút bấm -->
               <div class="field" style="grid-column: 1 / -1;">
                 <div class="search-actions">
                   <a class="btn-secondary-outline" href="/dashboard/inventory">
-                    <i class="fas fa-rotate-left"></i> Reset
+                    <i class="fas fa-rotate-left"></i> LÀM MỚI
                   </a>
                   <button class="btn btn-primary" type="submit">
-                    <i class="fas fa-magnifying-glass"></i> Tìm kiếm
+                    <i class="fas fa-magnifying-glass"></i> TÌM KIẾM
                   </button>
                 </div>
               </div>
@@ -1112,15 +1283,22 @@
           </form>
         </div>
 
+        <div class="content-header">
+          <h2>Danh sách Phiếu kiểm kê</h2>
+          <button class="btn btn-primary btn-add-new" id="open-add-modal">
+            <i class="fas fa-plus"></i> LẬP PHIẾU KIỂM KÊ
+          </button>
+        </div>
+
         <div class="table-responsive">
           <table class="data-table" id="master-table">
             <thead>
               <tr>
                 <th>STT</th>
-                <th>Mã Phiếu</th>
-                <th>Ngày Lập</th>
-                <th>Người Lập</th>
-                <th>Trạng Thái</th>
+                <th class="sortable" data-sort="maPhieu">Mã Phiếu <i class="fas fa-sort"></i></th>
+                <th class="sortable" data-sort="ngayLap">Ngày Lập <i class="fas fa-sort"></i></th>
+                <th class="sortable" data-sort="nguoiLap">Người Lập <i class="fas fa-sort"></i></th>
+                <th class="sortable" data-sort="trangThai">Trạng Thái <i class="fas fa-sort"></i></th>
                 <th></th>
               </tr>
             </thead>
@@ -1219,8 +1397,13 @@
               <input type="number" id="add-input-sl-thucte" min="0" value="0" />
             </div>
             <div class="form-group">
-              <label>Lý Do:</label>
-              <input type="text" id="add-input-ly-do" placeholder="Lý do (nếu có chênh lệch)" />
+              <label>Lý Do (nếu lệch):</label>
+              <button type="button" class="btn btn-sm btn-secondary btn-open-reasons-modal" 
+                id="btn-open-reasons-add" data-mode="add"
+                style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <i class="fas fa-list-check"></i> <span id="reasons-summary-add">Chưa có lý do</span>
+              </button>
+              <input type="hidden" id="add-input-reasons-json" value="[]" />
             </div>
             <div class="form-group">
               <button type="button" class="btn btn-primary" id="btn-add-to-list"
@@ -1321,7 +1504,12 @@
             </div>
             <div class="form-group">
               <label>Lý Do:</label>
-              <input type="text" id="edit-input-ly-do" placeholder="Lý do (nếu có chênh lệch)" />
+              <button type="button" class="btn btn-sm btn-secondary btn-open-reasons-modal" 
+                id="btn-open-reasons-edit" data-mode="edit"
+                style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <i class="fas fa-list-check"></i> <span id="reasons-summary-edit">Chưa có lý do</span>
+              </button>
+              <input type="hidden" id="edit-input-reasons-json" value="[]" />
             </div>
             <div class="form-group">
               <button type="button" class="btn btn-primary" id="btn-add-to-list-edit"
@@ -1393,7 +1581,12 @@
         </div>
         <div class="form-group" style="margin-top: 1rem">
           <label>Lý Do:</label>
-          <input type="text" id="item-edit-lydo" placeholder="Lý do (nếu có chênh lệch)" />
+          <button type="button" class="btn btn-sm btn-secondary btn-open-reasons-modal" 
+            id="btn-open-reasons-lineitem" data-mode="lineitem"
+            style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <i class="fas fa-list-check"></i> <span id="reasons-summary-lineitem">Chưa có lý do</span>
+          </button>
+          <input type="hidden" id="lineitem-input-reasons-json" value="[]" />
         </div>
       </div>
       <div class="modal-footer" style="justify-content: space-between">
@@ -1407,7 +1600,104 @@
     </div>
   </div>
 
+  <!-- Modal: Thêm lý do kiểm kê mới -->
+  <div class="modal-overlay" id="add-reason-modal" style="z-index: 2300">
+    <div class="modal-content" style="max-width: 450px">
+      <div class="modal-header">
+        <h2 style="font-size: 1.1rem"><i class="fas fa-plus-circle"></i> Thêm Lý Do Mới</h2>
+        <button class="close-modal" id="close-reason-modal"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="required">Tên Lý Do:</label>
+          <input type="text" id="new-reason-name" placeholder="VD: Sách bị côn trùng cắn" />
+        </div>
+        <div class="form-group" style="margin-top: 1rem">
+          <label>Mô Tả:</label>
+          <input type="text" id="new-reason-desc" placeholder="Mô tả chi tiết (tùy chọn)" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-warning" id="btn-cancel-reason">Hủy</button>
+        <button type="button" class="btn btn-primary" id="btn-save-reason">
+          <i class="fas fa-save"></i> Lưu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Chi tiết lý do kiểm kê (Nhiều lý do cho 1 sách) -->
+  <div class="modal-overlay" id="reasons-detail-modal" style="z-index: 2250">
+    <div class="modal-content" style="max-width: 600px">
+      <div class="modal-header">
+        <h2 style="font-size: 1.1rem"><i class="fas fa-list-check"></i> Chi Tiết Lý Do Chênh Lệch</h2>
+        <button class="close-modal" id="close-reasons-detail-modal"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+          <p style="margin: 0;"><strong>Sách:</strong> <span id="reasons-book-name">--</span></p>
+          <p style="margin: 0.5rem 0 0;"><strong>Số lượng lệch:</strong> <span id="reasons-diff-qty" style="color: var(--red-accent); font-weight: bold;">0</span> cuốn</p>
+          <p style="margin: 0.5rem 0 0; font-size: 0.85rem; color: #666;">
+            <i class="fas fa-info-circle"></i> Tổng số lượng các lý do phải bằng số lượng lệch
+          </p>
+        </div>
+
+        <!-- Thêm lý do mới -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 0.75rem; align-items: end; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px dashed var(--border-color);">
+          <div class="form-group" style="margin: 0;">
+            <label style="font-size: 0.85rem;">Lý do:</label>
+            <select id="reasons-select-lydo" style="width: 100%; padding: 0.5rem;">
+              <option value="">-- Chọn lý do --</option>
+              <% reasonsList.forEach(function(reason) { %>
+                <option value="<%= reason.MaLyDo %>"><%= reason.TenLyDo %></option>
+              <% }); %>
+              <option value="other">📝 Khác (nhập tay)</option>
+            </select>
+            <input type="text" id="reasons-input-lydo-khac" placeholder="Nhập lý do khác..." 
+              style="margin-top: 0.5rem; display: none; padding: 0.5rem;" />
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <label style="font-size: 0.85rem;">Số lượng:</label>
+            <input type="number" id="reasons-input-soluong" min="1" value="1" style="padding: 0.5rem;" />
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-add-reason-row" style="height: 38px;">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+
+        <!-- Danh sách lý do đã thêm -->
+        <div style="max-height: 250px; overflow-y: auto;">
+          <table class="detail-table" id="reasons-detail-table" style="font-size: 0.9rem;">
+            <thead>
+              <tr style="background: #e9ecef;">
+                <th style="padding: 0.5rem;">STT</th>
+                <th style="padding: 0.5rem;">Lý Do</th>
+                <th style="padding: 0.5rem; text-align: center; width: 80px;">Số Lượng</th>
+                <th style="padding: 0.5rem; width: 50px;"></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+          <span>Tổng đã khai báo: <strong id="reasons-total-declared" style="color: var(--secondary-color);">0</strong> cuốn</span>
+          <span id="reasons-validation-msg" style="font-size: 0.85rem;"></span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-reasons-detail">Hủy</button>
+        <button type="button" class="btn btn-primary" id="btn-save-reasons-detail">
+          <i class="fas fa-check"></i> Xác nhận
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // Danh sách lý do (từ server)
+    let reasonsList = <%- JSON.stringify(reasonsList || []) %>;
+    
     document.addEventListener("DOMContentLoaded", function () {
       // --- BIẾN & TIỆN ÍCH ---
       const loader = document.getElementById("loader");
@@ -1439,6 +1729,103 @@
           setTimeout(() => toast.remove(), 300);
         }, 3000);
       }
+
+      // --- MULTI-SELECT DROPDOWN FOR LÝ DO ---
+      const lydoTrigger = document.getElementById('lydo-trigger');
+      const lydoDropdown = document.getElementById('lydo-dropdown');
+      const lydoContainer = document.getElementById('lydo-multi-select');
+      const lydoHiddenInput = document.getElementById('f-lydo-values');
+      
+      function updateLydoTriggerText() {
+        const checkboxes = lydoDropdown.querySelectorAll('input[type="checkbox"]:checked');
+        const triggerText = lydoTrigger.querySelector('.trigger-text');
+
+        if (lydoHiddenInput) {
+          const values = Array.from(checkboxes).map(cb => cb.value);
+          lydoHiddenInput.value = values.join(',');
+        }
+        
+        if (checkboxes.length === 0) {
+          triggerText.innerHTML = '<span class="placeholder">-- Tất cả lý do --</span>';
+        } else if (checkboxes.length === 1) {
+          const label = checkboxes[0].closest('label').querySelector('span').textContent;
+          triggerText.innerHTML = label;
+        } else {
+          triggerText.innerHTML = `<span class="selected-count">${checkboxes.length} lý do đã chọn</span>`;
+        }
+      }
+
+      // Toggle dropdown
+      lydoTrigger?.addEventListener('click', function(e) {
+        e.stopPropagation();
+        lydoDropdown.classList.toggle('show');
+      });
+
+      // Handle checkbox change
+      lydoDropdown?.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', function() {
+          const option = this.closest('.multi-select-option');
+          option.classList.toggle('selected', this.checked);
+          updateLydoTriggerText();
+        });
+        // Init selected state
+        if (cb.checked) {
+          cb.closest('.multi-select-option').classList.add('selected');
+        }
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!lydoContainer?.contains(e.target)) {
+          lydoDropdown?.classList.remove('show');
+        }
+      });
+
+      // Init trigger text on page load
+      updateLydoTriggerText();
+
+      // --- QUICK FILTER BUTTONS ---
+      function formatDateForInput(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+
+      // Hôm nay
+      document.getElementById('btn-quick-today')?.addEventListener('click', function() {
+        const today = new Date();
+        document.getElementById('f-from').value = formatDateForInput(today);
+        document.getElementById('f-to').value = formatDateForInput(today);
+        document.getElementById('search-form').submit();
+      });
+
+      // Tuần này
+      document.getElementById('btn-quick-week')?.addEventListener('click', function() {
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        const monday = new Date(today);
+        monday.setDate(today.getDate() + mondayOffset);
+        
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        
+        document.getElementById('f-from').value = formatDateForInput(monday);
+        document.getElementById('f-to').value = formatDateForInput(sunday);
+        document.getElementById('search-form').submit();
+      });
+
+      // Tháng này
+      document.getElementById('btn-quick-month')?.addEventListener('click', function() {
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        
+        document.getElementById('f-from').value = formatDateForInput(firstDay);
+        document.getElementById('f-to').value = formatDateForInput(lastDay);
+        document.getElementById('search-form').submit();
+      });
 
       async function apiCall(url, method = "GET", body = null) {
         showLoader();
@@ -1472,6 +1859,429 @@
         }
       }
 
+      // === XỬ LÝ SORTABLE TABLE HEADERS ===
+      const masterTable = document.getElementById('master-table');
+      const tbody = masterTable?.querySelector('tbody');
+      let currentSort = { column: null, direction: 'asc' };
+
+      function sortTable(column) {
+        if (!tbody) return;
+        
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        if (rows.length === 0) return;
+
+        // Toggle direction if same column
+        if (currentSort.column === column) {
+          currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentSort.column = column;
+          currentSort.direction = 'asc';
+        }
+
+        // Update header icons
+        document.querySelectorAll('.sortable').forEach(th => {
+          th.classList.remove('asc', 'desc');
+        });
+        const activeHeader = document.querySelector(`.sortable[data-sort="${column}"]`);
+        if (activeHeader) {
+          activeHeader.classList.add(currentSort.direction);
+        }
+
+        // Sort rows
+        rows.sort((a, b) => {
+          let aVal, bVal;
+          
+          switch (column) {
+            case 'maPhieu':
+              aVal = a.cells[1]?.textContent.trim() || '';
+              bVal = b.cells[1]?.textContent.trim() || '';
+              break;
+            case 'ngayLap':
+              // Parse dd/mm/yyyy format
+              const dateA = a.cells[2]?.textContent.trim().split('/').reverse().join('-') || '';
+              const dateB = b.cells[2]?.textContent.trim().split('/').reverse().join('-') || '';
+              aVal = new Date(dateA).getTime() || 0;
+              bVal = new Date(dateB).getTime() || 0;
+              break;
+            case 'nguoiLap':
+              aVal = a.cells[3]?.textContent.trim().toLowerCase() || '';
+              bVal = b.cells[3]?.textContent.trim().toLowerCase() || '';
+              break;
+            case 'trangThai':
+              // Extract number from "Lệch X cuốn" or 0 for "Cân bằng"
+              const matchA = a.cells[4]?.textContent.match(/Lệch\s*(\d+)/);
+              const matchB = b.cells[4]?.textContent.match(/Lệch\s*(\d+)/);
+              aVal = matchA ? parseInt(matchA[1]) : 0;
+              bVal = matchB ? parseInt(matchB[1]) : 0;
+              break;
+            default:
+              aVal = a.cells[1]?.textContent.trim() || '';
+              bVal = b.cells[1]?.textContent.trim() || '';
+          }
+
+          if (typeof aVal === 'number' && typeof bVal === 'number') {
+            return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+          }
+          
+          if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+          if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+          return 0;
+        });
+
+        // Re-number STT and append sorted rows
+        rows.forEach((row, index) => {
+          row.cells[0].textContent = index + 1;
+          tbody.appendChild(row);
+        });
+      }
+
+      // Attach click handlers to sortable headers
+      document.querySelectorAll('.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+          const sortColumn = th.getAttribute('data-sort');
+          if (sortColumn) sortTable(sortColumn);
+        });
+      });
+
+      // === XỬ LÝ DROPDOWN LÝ DO ===
+      function setupReasonDropdown(selectId, inputId) {
+        const select = document.getElementById(selectId);
+        const input = document.getElementById(inputId);
+        if (!select || !input) return;
+        
+        select.addEventListener('change', function() {
+          if (this.value === 'other') {
+            input.style.display = 'block';
+            input.focus();
+          } else {
+            input.style.display = 'none';
+            input.value = '';
+          }
+        });
+      }
+      
+      // Setup các dropdown lý do
+      setupReasonDropdown('add-input-ly-do', 'add-input-ly-do-khac');
+      setupReasonDropdown('edit-input-ly-do', 'edit-input-ly-do-khac');
+      setupReasonDropdown('item-edit-lydo', 'item-edit-lydo-khac');
+      
+      // Helper: Lấy giá trị lý do từ dropdown và input
+      function getReasonValue(selectId, inputId) {
+        const select = document.getElementById(selectId);
+        const input = document.getElementById(inputId);
+        
+        if (select.value === 'other') {
+          return { MaLyDo: null, LyDoKhac: input.value.trim() || null };
+        } else if (select.value) {
+          return { MaLyDo: parseInt(select.value), LyDoKhac: null };
+        }
+        return { MaLyDo: null, LyDoKhac: null };
+      }
+      
+      // Helper: Lấy tên lý do để hiển thị
+      function getReasonDisplayName(maLyDo, lyDoKhac) {
+        if (lyDoKhac) return lyDoKhac;
+        if (maLyDo) {
+          const reason = reasonsList.find(r => r.MaLyDo == maLyDo);
+          return reason ? reason.TenLyDo : '';
+        }
+        return '';
+      }
+      
+      // === MODAL THÊM LÝ DO MỚI ===
+      const addReasonModal = document.getElementById('add-reason-modal');
+      const btnAddNewReason = document.getElementById('btn-add-new-reason');
+      const btnSaveReason = document.getElementById('btn-save-reason');
+      const btnCancelReason = document.getElementById('btn-cancel-reason');
+      const closeReasonModal = document.getElementById('close-reason-modal');
+      
+      if (btnAddNewReason) {
+        btnAddNewReason.addEventListener('click', () => {
+          addReasonModal.style.display = 'flex';
+          document.getElementById('new-reason-name').value = '';
+          document.getElementById('new-reason-desc').value = '';
+          document.getElementById('new-reason-name').focus();
+        });
+      }
+      
+      function closeReasonModalFn() {
+        addReasonModal.style.display = 'none';
+      }
+      
+      if (btnCancelReason) btnCancelReason.addEventListener('click', closeReasonModalFn);
+      if (closeReasonModal) closeReasonModal.addEventListener('click', closeReasonModalFn);
+      
+      if (btnSaveReason) {
+        btnSaveReason.addEventListener('click', async () => {
+          const tenLyDo = document.getElementById('new-reason-name').value.trim();
+          const moTa = document.getElementById('new-reason-desc').value.trim();
+          
+          if (!tenLyDo) {
+            showToast('Vui lòng nhập tên lý do!', 'error');
+            return;
+          }
+          
+          const result = await apiCall('/api/inventory/reasons', 'POST', {
+            TenLyDo: tenLyDo,
+            MoTa: moTa || null
+          });
+          
+          if (result.success) {
+            showToast('Thêm lý do mới thành công!', 'success');
+            
+            // Thêm vào danh sách local
+            const newReason = result.data.reason;
+            reasonsList.push(newReason);
+            
+            // Cập nhật tất cả các dropdown
+            updateAllReasonDropdowns(newReason);
+            
+            closeReasonModalFn();
+          } else {
+            showToast(result.data?.error || result.error || 'Lỗi khi thêm lý do!', 'error');
+          }
+        });
+      }
+      
+      function updateAllReasonDropdowns(newReason) {
+        // Cập nhật dropdown trong modal chi tiết lý do
+        const reasonsSelect = document.getElementById('reasons-select-lydo');
+        if (reasonsSelect) {
+          const otherOption = reasonsSelect.querySelector('option[value="other"]');
+          const newOption = document.createElement('option');
+          newOption.value = newReason.MaLyDo;
+          newOption.textContent = newReason.TenLyDo;
+          reasonsSelect.insertBefore(newOption, otherOption);
+        }
+      }
+
+      // === MODAL CHI TIẾT LÝ DO (Nhiều lý do cho 1 sách) ===
+      const reasonsDetailModal = document.getElementById('reasons-detail-modal');
+      const closeReasonsDetailModal = document.getElementById('close-reasons-detail-modal');
+      const btnCancelReasonsDetail = document.getElementById('btn-cancel-reasons-detail');
+      const btnSaveReasonsDetail = document.getElementById('btn-save-reasons-detail');
+      const btnAddReasonRow = document.getElementById('btn-add-reason-row');
+      
+      // Biến lưu trữ context của modal chi tiết lý do
+      let currentReasonsMode = null; // 'add', 'edit', 'lineitem'
+      let currentReasonsData = []; // Danh sách lý do hiện tại
+      let currentDiffQty = 0; // Số lượng lệch
+      let currentBookName = ''; // Tên sách
+      
+      // Setup dropdown trong modal chi tiết lý do
+      setupReasonDropdown('reasons-select-lydo', 'reasons-input-lydo-khac');
+      
+      // Mở modal chi tiết lý do
+      document.querySelectorAll('.btn-open-reasons-modal').forEach(btn => {
+        btn.addEventListener('click', function() {
+          currentReasonsMode = this.dataset.mode;
+          
+          // Lấy thông tin sách và số lượng lệch tùy theo mode
+          let slHeThong = 0, slThucTe = 0, tenSach = '';
+          
+          if (currentReasonsMode === 'add') {
+            tenSach = document.getElementById('add-input-ten-sach').value;
+            slHeThong = parseInt(document.getElementById('add-input-sl-hethong').value) || 0;
+            slThucTe = parseInt(document.getElementById('add-input-sl-thucte').value) || 0;
+            currentReasonsData = JSON.parse(document.getElementById('add-input-reasons-json').value || '[]');
+          } else if (currentReasonsMode === 'edit') {
+            tenSach = document.getElementById('edit-input-ten-sach').value;
+            slHeThong = parseInt(document.getElementById('edit-input-sl-hethong').value) || 0;
+            slThucTe = parseInt(document.getElementById('edit-input-sl-thucte').value) || 0;
+            currentReasonsData = JSON.parse(document.getElementById('edit-input-reasons-json').value || '[]');
+          } else if (currentReasonsMode === 'lineitem') {
+            tenSach = document.getElementById('item-edit-name').value;
+            slHeThong = parseInt(document.getElementById('item-edit-sl-hethong').value) || 0;
+            slThucTe = parseInt(document.getElementById('item-edit-sl-thucte').value) || 0;
+            currentReasonsData = JSON.parse(document.getElementById('lineitem-input-reasons-json').value || '[]');
+          }
+          
+          currentDiffQty = Math.abs(slThucTe - slHeThong);
+          currentBookName = tenSach;
+          
+          if (!tenSach) {
+            showToast('Vui lòng nhập mã sách trước!', 'error');
+            return;
+          }
+          
+          if (currentDiffQty === 0) {
+            showToast('Không có chênh lệch, không cần nhập lý do!', 'info');
+            return;
+          }
+          
+          // Cập nhật thông tin modal
+          document.getElementById('reasons-book-name').textContent = tenSach;
+          document.getElementById('reasons-diff-qty').textContent = currentDiffQty;
+          
+          // Render bảng lý do
+          renderReasonsTable();
+          
+          // Reset form thêm
+          document.getElementById('reasons-select-lydo').value = '';
+          document.getElementById('reasons-input-lydo-khac').value = '';
+          document.getElementById('reasons-input-lydo-khac').style.display = 'none';
+          document.getElementById('reasons-input-soluong').value = 1;
+          
+          reasonsDetailModal.style.display = 'flex';
+        });
+      });
+      
+      // Render bảng lý do
+      function renderReasonsTable() {
+        const tbody = document.querySelector('#reasons-detail-table tbody');
+        tbody.innerHTML = '';
+        
+        let totalDeclared = 0;
+        
+        currentReasonsData.forEach((item, index) => {
+          const lyDoName = getReasonDisplayName(item.MaLyDo, item.LyDoKhac);
+          totalDeclared += item.SoLuong;
+          
+          const row = tbody.insertRow();
+          row.innerHTML = `
+            <td style="text-align: center; padding: 0.5rem;">${index + 1}</td>
+            <td style="padding: 0.5rem;">${lyDoName}</td>
+            <td style="text-align: center; padding: 0.5rem;">${item.SoLuong}</td>
+            <td style="text-align: center; padding: 0.5rem;">
+              <i class="fas fa-trash action-icon" style="color: var(--red-accent); cursor: pointer;" 
+                 onclick="removeReasonRow(${index})"></i>
+            </td>
+          `;
+        });
+        
+        // Cập nhật tổng và validation
+        document.getElementById('reasons-total-declared').textContent = totalDeclared;
+        
+        const validationMsg = document.getElementById('reasons-validation-msg');
+        if (totalDeclared === currentDiffQty) {
+          validationMsg.innerHTML = '<span style="color: green;"><i class="fas fa-check-circle"></i> Hợp lệ</span>';
+        } else if (totalDeclared > currentDiffQty) {
+          validationMsg.innerHTML = '<span style="color: red;"><i class="fas fa-exclamation-triangle"></i> Vượt quá ' + (totalDeclared - currentDiffQty) + ' cuốn</span>';
+        } else {
+          validationMsg.innerHTML = '<span style="color: orange;"><i class="fas fa-info-circle"></i> Còn thiếu ' + (currentDiffQty - totalDeclared) + ' cuốn</span>';
+        }
+      }
+      
+      // Xóa dòng lý do
+      window.removeReasonRow = function(index) {
+        currentReasonsData.splice(index, 1);
+        renderReasonsTable();
+      };
+      
+      // Thêm dòng lý do mới
+      if (btnAddReasonRow) {
+        btnAddReasonRow.addEventListener('click', function() {
+          const selectLyDo = document.getElementById('reasons-select-lydo');
+          const inputLyDoKhac = document.getElementById('reasons-input-lydo-khac');
+          const inputSoLuong = document.getElementById('reasons-input-soluong');
+          
+          let maLyDo = null, lyDoKhac = null;
+          
+          if (selectLyDo.value === 'other') {
+            lyDoKhac = inputLyDoKhac.value.trim();
+            if (!lyDoKhac) {
+              showToast('Vui lòng nhập lý do khác!', 'error');
+              return;
+            }
+          } else if (selectLyDo.value) {
+            maLyDo = parseInt(selectLyDo.value);
+          } else {
+            showToast('Vui lòng chọn lý do!', 'error');
+            return;
+          }
+          
+          const soLuong = parseInt(inputSoLuong.value) || 0;
+          if (soLuong <= 0) {
+            showToast('Số lượng phải lớn hơn 0!', 'error');
+            return;
+          }
+          
+          // Kiểm tra trùng lý do
+          const exists = currentReasonsData.find(r => 
+            (maLyDo && r.MaLyDo === maLyDo) || 
+            (lyDoKhac && r.LyDoKhac === lyDoKhac)
+          );
+          
+          if (exists) {
+            // Cộng dồn số lượng
+            exists.SoLuong += soLuong;
+          } else {
+            currentReasonsData.push({ MaLyDo: maLyDo, LyDoKhac: lyDoKhac, SoLuong: soLuong });
+          }
+          
+          renderReasonsTable();
+          
+          // Reset form
+          selectLyDo.value = '';
+          inputLyDoKhac.value = '';
+          inputLyDoKhac.style.display = 'none';
+          inputSoLuong.value = 1;
+        });
+      }
+      
+      // Đóng modal chi tiết lý do
+      function closeReasonsDetailModalFn() {
+        reasonsDetailModal.style.display = 'none';
+        currentReasonsMode = null;
+      }
+      
+      if (closeReasonsDetailModal) closeReasonsDetailModal.addEventListener('click', closeReasonsDetailModalFn);
+      if (btnCancelReasonsDetail) btnCancelReasonsDetail.addEventListener('click', closeReasonsDetailModalFn);
+      
+      // Lưu chi tiết lý do
+      if (btnSaveReasonsDetail) {
+        btnSaveReasonsDetail.addEventListener('click', function() {
+          // Tính tổng đã khai báo
+          const totalDeclared = currentReasonsData.reduce((sum, r) => sum + r.SoLuong, 0);
+          
+          // BẮT BUỘC: Tổng số lượng lý do phải bằng số lượng lệch
+          if (currentReasonsData.length === 0) {
+            showToast('Vui lòng thêm ít nhất một lý do!', 'error');
+            return;
+          }
+          
+          if (totalDeclared !== currentDiffQty) {
+            showToast(`Tổng số lượng lý do (${totalDeclared}) phải bằng số lượng lệch (${currentDiffQty})!`, 'error');
+            return;
+          }
+          
+          // Lưu vào input ẩn tương ứng
+          const jsonStr = JSON.stringify(currentReasonsData);
+          let summaryText = 'Chưa có lý do';
+          
+          if (currentReasonsData.length > 0) {
+            if (currentReasonsData.length === 1) {
+              summaryText = getReasonDisplayName(currentReasonsData[0].MaLyDo, currentReasonsData[0].LyDoKhac) + ` (${currentReasonsData[0].SoLuong})`;
+            } else {
+              summaryText = `${currentReasonsData.length} lý do (${totalDeclared} cuốn)`;
+            }
+          }
+          
+          if (currentReasonsMode === 'add') {
+            document.getElementById('add-input-reasons-json').value = jsonStr;
+            document.getElementById('reasons-summary-add').textContent = summaryText;
+          } else if (currentReasonsMode === 'edit') {
+            document.getElementById('edit-input-reasons-json').value = jsonStr;
+            document.getElementById('reasons-summary-edit').textContent = summaryText;
+          } else if (currentReasonsMode === 'lineitem') {
+            document.getElementById('lineitem-input-reasons-json').value = jsonStr;
+            document.getElementById('reasons-summary-lineitem').textContent = summaryText;
+          }
+          
+          closeReasonsDetailModalFn();
+          showToast('Đã lưu chi tiết lý do!', 'success');
+        });
+      }
+      
+      // Helper: Tạo chuỗi hiển thị lý do từ mảng
+      function formatReasonsForDisplay(reasonsArray) {
+        if (!reasonsArray || reasonsArray.length === 0) return '';
+        return reasonsArray.map(r => {
+          const name = getReasonDisplayName(r.MaLyDo, r.LyDoKhac);
+          return `${name}: ${r.SoLuong}`;
+        }).join(', ');
+      }
+
       // --- HÀM XỬ LÝ BẢNG ---
       function updateDiffCount(tableId, countId) {
         const rows = document.querySelectorAll(`#${tableId} tbody tr`);
@@ -1500,6 +2310,9 @@
         let diffClass = "diff-zero";
         if (chenhLech < 0) diffClass = "diff-negative";
         else if (chenhLech > 0) diffClass = "diff-positive";
+
+        // Lưu danh sách lý do vào data attribute (JSON)
+        row.dataset.reasonsJson = JSON.stringify(data.DanhSachLyDo || []);
 
         row.innerHTML = `
                     <td class="stt-cell text-center">${tbody.rows.length}</td>
@@ -1586,9 +2399,11 @@
           const slThucTe = document.getElementById(
             "add-input-sl-thucte"
           ).value;
-          const lyDo = document
-            .getElementById("add-input-ly-do")
-            .value.trim();
+          
+          // Lấy danh sách lý do từ JSON
+          const reasonsJson = document.getElementById('add-input-reasons-json').value;
+          const danhSachLyDo = JSON.parse(reasonsJson || '[]');
+          const lyDoDisplay = formatReasonsForDisplay(danhSachLyDo);
 
           if (!maSach || !tenSach) {
             showToast("Vui lòng nhập mã sách hợp lệ!", "error");
@@ -1604,8 +2419,8 @@
           }
 
           // Kiểm tra: Nếu có chênh lệch thì phải có lý do
-          if (slThucTeNum !== slHeThongNum && !lyDo) {
-            showToast("Vui lòng nhập lý do khi có chênh lệch!", "error");
+          if (slThucTeNum !== slHeThongNum && danhSachLyDo.length === 0) {
+            showToast("Vui lòng nhập chi tiết lý do khi có chênh lệch!", "error");
             return;
           }
 
@@ -1614,7 +2429,8 @@
             tenSach,
             slHeThong: slHeThongNum,
             slThucTe: slThucTeNum,
-            lyDo,
+            lyDo: lyDoDisplay,
+            DanhSachLyDo: danhSachLyDo,
           });
 
           // Reset
@@ -1622,7 +2438,8 @@
           addTenSachInput.value = "";
           addSlHeThongInput.value = "";
           document.getElementById("add-input-sl-thucte").value = "0";
-          document.getElementById("add-input-ly-do").value = "";
+          document.getElementById("add-input-reasons-json").value = "[]";
+          document.getElementById("reasons-summary-add").textContent = "Chưa có lý do";
           addMaSachInput.focus();
         });
       }
@@ -1657,7 +2474,8 @@
         document.getElementById("add-input-ten-sach").value = "";
         document.getElementById("add-input-sl-hethong").value = "";
         document.getElementById("add-input-sl-thucte").value = "0";
-        document.getElementById("add-input-ly-do").value = "";
+        document.getElementById("add-input-reasons-json").value = "[]";
+        document.getElementById("reasons-summary-add").textContent = "Chưa có lý do";
       }
 
       // Nút "Thêm mới" - Logic tương tự books_import
@@ -1718,11 +2536,12 @@
           }
 
           const chiTiet = Array.from(rows).map((row) => {
+            const reasonsJson = row.dataset.reasonsJson || '[]';
             return {
               MaSach: row.cells[1].textContent.trim(),
               SoLuongHeThong: parseInt(row.cells[3].textContent),
               SoLuongThucTe: parseInt(row.cells[4].textContent),
-              LyDo: row.cells[6].textContent.trim(),
+              DanhSachLyDo: JSON.parse(reasonsJson),
             };
           });
 
@@ -1786,7 +2605,8 @@
           document.getElementById("edit-input-ten-sach").value = "";
           document.getElementById("edit-input-sl-hethong").value = "";
           document.getElementById("edit-input-sl-thucte").value = "0";
-          document.getElementById("edit-input-ly-do").value = "";
+          document.getElementById("edit-input-reasons-json").value = "[]";
+          document.getElementById("reasons-summary-edit").textContent = "Chưa có lý do";
 
           const tbody = document.querySelector("#edit-detail-table tbody");
           tbody.innerHTML = "";
@@ -1798,6 +2618,10 @@
               const slHeThong = item.SoLuongHeThong || 0;
               const slThucTe = item.SoLuongThucTe || 0;
               const chenhLech = slThucTe - slHeThong;
+              
+              // Lấy danh sách lý do để hiển thị
+              const danhSachLyDo = item.DanhSachLyDo || [];
+              const lyDoDisplay = formatReasonsForDisplay(danhSachLyDo);
 
               if (chenhLech !== 0) diffCount++;
 
@@ -1806,6 +2630,9 @@
               else if (chenhLech > 0) diffClass = "diff-positive";
 
               const row = tbody.insertRow();
+              // Lưu danh sách lý do vào data attribute (JSON)
+              row.dataset.reasonsJson = JSON.stringify(danhSachLyDo);
+              
               row.innerHTML = `
                   <td class="stt-cell text-center">${index + 1}</td>
                   <td>${item.MaSach}</td>
@@ -1814,7 +2641,7 @@
                   <td class="sl-thucte-cell text-center">${slThucTe}</td>
                   <td class="diff-cell text-center ${diffClass}" data-value="${chenhLech}">${chenhLech > 0 ? "+" : ""
                 }${chenhLech}</td>
-                  <td class="lydo-cell">${item.LyDo || ""}</td>
+                  <td class="lydo-cell">${lyDoDisplay}</td>
                   <td class="text-center">
                     <i class="fas fa-pencil-alt action-icon edit-row-icon" style="color:var(--secondary-color);" title="Sửa dòng này"></i>
                     <i class="fas fa-trash action-icon delete-row-icon" 
@@ -1906,11 +2733,12 @@
           }
 
           const chiTiet = Array.from(rows).map((row) => {
+            const reasonsJson = row.dataset.reasonsJson || '[]';
             return {
               MaSach: row.cells[1].textContent.trim(),
               SoLuongHeThong: parseInt(row.cells[3].textContent),
               SoLuongThucTe: parseInt(row.cells[4].textContent),
-              LyDo: row.cells[6].textContent.trim(),
+              DanhSachLyDo: JSON.parse(reasonsJson),
             };
           });
 
@@ -1971,9 +2799,11 @@
           const slThucTe = document.getElementById(
             "edit-input-sl-thucte"
           ).value;
-          const lyDo = document
-            .getElementById("edit-input-ly-do")
-            .value.trim();
+          
+          // Lấy danh sách lý do từ JSON
+          const reasonsJson = document.getElementById('edit-input-reasons-json').value;
+          const danhSachLyDo = JSON.parse(reasonsJson || '[]');
+          const lyDoDisplay = formatReasonsForDisplay(danhSachLyDo);
 
           if (!maSach || !tenSach) {
             showToast("Vui lòng nhập mã sách hợp lệ!", "error");
@@ -1989,8 +2819,8 @@
           }
 
           // Kiểm tra: Nếu có chênh lệch thì phải có lý do
-          if (slThucTeNum !== slHeThongNum && !lyDo) {
-            showToast("Vui lòng nhập lý do khi có chênh lệch!", "error");
+          if (slThucTeNum !== slHeThongNum && danhSachLyDo.length === 0) {
+            showToast("Vui lòng nhập chi tiết lý do khi có chênh lệch!", "error");
             return;
           }
 
@@ -2000,7 +2830,7 @@
           );
           for (let row of existingRows) {
             if (row.cells[1].textContent.trim() === maSach) {
-              showToast("Sách này đã có trong phiếu!", "error");
+              showToast("Sách này đã có trong phiếu!", "error")
               return;
             }
           }
@@ -2010,7 +2840,8 @@
             tenSach,
             slHeThong: slHeThongNum,
             slThucTe: slThucTeNum,
-            lyDo,
+            lyDo: lyDoDisplay,
+            DanhSachLyDo: danhSachLyDo,
           });
 
           // Reset
@@ -2018,7 +2849,8 @@
           editTenSachInput.value = "";
           editSlHeThongInput.value = "";
           document.getElementById("edit-input-sl-thucte").value = "0";
-          document.getElementById("edit-input-ly-do").value = "";
+          document.getElementById("edit-input-reasons-json").value = "[]";
+          document.getElementById("reasons-summary-edit").textContent = "Chưa có lý do";
           editMaSachInput.focus();
         });
       }
@@ -2047,16 +2879,32 @@
           const slThucTe = parseInt(
             currentEditingRow.querySelector(".sl-thucte-cell").textContent
           );
-          const lyDo =
-            currentEditingRow.querySelector(".lydo-cell").textContent;
+          
+          // Lấy danh sách lý do từ data attribute
+          const reasonsJson = currentEditingRow.dataset.reasonsJson || '[]';
+          const danhSachLyDo = JSON.parse(reasonsJson);
 
           // Lưu giá trị gốc để reset
-          originalLineItemData = { slHeThong: slHeThong, slThucTe: slThucTe, lyDo: lyDo };
+          originalLineItemData = { slHeThong, slThucTe, danhSachLyDo };
 
           document.getElementById("item-edit-name").value = tenSach;
           document.getElementById("item-edit-sl-hethong").value = slHeThong;
           document.getElementById("item-edit-sl-thucte").value = slThucTe;
-          document.getElementById("item-edit-lydo").value = lyDo;
+          
+          // Set danh sách lý do
+          document.getElementById("lineitem-input-reasons-json").value = reasonsJson;
+          
+          // Cập nhật summary
+          let summaryText = 'Chưa có lý do';
+          if (danhSachLyDo.length > 0) {
+            const totalQty = danhSachLyDo.reduce((sum, r) => sum + r.SoLuong, 0);
+            if (danhSachLyDo.length === 1) {
+              summaryText = getReasonDisplayName(danhSachLyDo[0].MaLyDo, danhSachLyDo[0].LyDoKhac) + ` (${danhSachLyDo[0].SoLuong})`;
+            } else {
+              summaryText = `${danhSachLyDo.length} lý do (${totalQty} cuốn)`;
+            }
+          }
+          document.getElementById("reasons-summary-lineitem").textContent = summaryText;
 
           lineItemModal.style.display = "flex";
         }
@@ -2074,7 +2922,11 @@
           const slThucTe = parseInt(
             document.getElementById("item-edit-sl-thucte").value
           );
-          const lyDo = document.getElementById("item-edit-lydo").value.trim();
+          
+          // Lấy danh sách lý do từ JSON
+          const reasonsJson = document.getElementById("lineitem-input-reasons-json").value;
+          const danhSachLyDo = JSON.parse(reasonsJson || '[]');
+          const lyDoDisplay = formatReasonsForDisplay(danhSachLyDo);
 
           if (isNaN(slThucTe) || slThucTe < 0) {
             showToast("Số lượng thực tế không hợp lệ!", "error");
@@ -2083,15 +2935,18 @@
 
           // Kiểm tra: Nếu có chênh lệch thì phải có lý do
           const chenhLech = slThucTe - slHeThong;
-          if (chenhLech !== 0 && !lyDo) {
-            showToast("Vui lòng nhập lý do khi có chênh lệch!", "error");
+          if (chenhLech !== 0 && danhSachLyDo.length === 0) {
+            showToast("Vui lòng nhập chi tiết lý do khi có chênh lệch!", "error");
             return;
           }
 
           // Cập nhật row
           currentEditingRow.querySelector(".sl-thucte-cell").textContent =
             slThucTe;
-          currentEditingRow.querySelector(".lydo-cell").textContent = lyDo;
+          currentEditingRow.querySelector(".lydo-cell").textContent = lyDoDisplay;
+          
+          // Cập nhật data attribute
+          currentEditingRow.dataset.reasonsJson = reasonsJson;
 
           // Cập nhật chênh lệch
           const diffCell = currentEditingRow.querySelector(".diff-cell");
@@ -2123,7 +2978,24 @@
         btnResetLineItem.addEventListener("click", () => {
           if (originalLineItemData) {
             document.getElementById("item-edit-sl-thucte").value = originalLineItemData.slThucTe;
-            document.getElementById("item-edit-lydo").value = originalLineItemData.lyDo;
+            
+            // Reset danh sách lý do
+            const danhSachLyDo = originalLineItemData.danhSachLyDo || [];
+            document.getElementById("lineitem-input-reasons-json").value = JSON.stringify(danhSachLyDo);
+            
+            // Cập nhật summary
+            let summaryText = 'Chưa có lý do';
+            if (danhSachLyDo.length > 0) {
+              const totalQty = danhSachLyDo.reduce((sum, r) => sum + r.SoLuong, 0);
+              if (danhSachLyDo.length === 1) {
+                summaryText = getReasonDisplayName(danhSachLyDo[0].MaLyDo, danhSachLyDo[0].LyDoKhac) + ` (${danhSachLyDo[0].SoLuong})`;
+              } else {
+                summaryText = `${danhSachLyDo.length} lý do (${totalQty} cuốn)`;
+              }
+            }
+            document.getElementById("reasons-summary-lineitem").textContent = summaryText;
+            
+            showToast("Đã khôi phục dữ liệu ban đầu!", "info");
           }
         });
       }
@@ -2316,19 +3188,43 @@
             // Nếu API đã trả TongLech/HasDiscrepancy thì ưu tiên dùng
             let tongLech = Number(receipt.TongLech);
             let hasDiscrepancy = Boolean(receipt.HasDiscrepancy);
+            let hasShortage = Boolean(receipt.HasShortage);
+            let hasSurplus = Boolean(receipt.HasSurplus);
 
             if (!Number.isFinite(tongLech)) {
               tongLech = 0;
               hasDiscrepancy = false;
+              hasShortage = false;
+              hasSurplus = false;
               if (receipt.ChiTiet && receipt.ChiTiet.length > 0) {
                 receipt.ChiTiet.forEach((item) => {
-                  const lech = Math.abs(
-                    (item.SoLuongThucTe || 0) - (item.SoLuongHeThong || 0)
-                  );
+                  const slHT = item.SoLuongHeThong || 0;
+                  const slTT = item.SoLuongThucTe || 0;
+                  const lech = Math.abs(slTT - slHT);
                   tongLech += lech;
-                  if (lech > 0) hasDiscrepancy = true;
+                  if (lech > 0) {
+                    hasDiscrepancy = true;
+                    if (slHT > slTT) hasShortage = true;
+                    if (slHT < slTT) hasSurplus = true;
+                  }
                 });
               }
+            }
+
+            // Determine badge
+            let badgeHtml = '';
+            if (hasDiscrepancy) {
+              if (hasShortage && hasSurplus) {
+                badgeHtml = `<span class="badge badge-mixed">🟣 Lệch hỗn hợp ${tongLech.toLocaleString("vi-VN")} cuốn</span>`;
+              } else if (hasShortage) {
+                badgeHtml = `<span class="badge badge-shortage">🔴 Lệch thiếu ${tongLech.toLocaleString("vi-VN")} cuốn</span>`;
+              } else if (hasSurplus) {
+                badgeHtml = `<span class="badge badge-surplus">🟡 Lệch thừa ${tongLech.toLocaleString("vi-VN")} cuốn</span>`;
+              } else {
+                badgeHtml = `<span class="badge badge-discrepancy">🔴 Lệch ${tongLech.toLocaleString("vi-VN")} cuốn</span>`;
+              }
+            } else {
+              badgeHtml = `<span class="badge badge-balanced">🟢 Cân bằng</span>`;
             }
 
             const row = tbody.insertRow();
@@ -2343,11 +3239,7 @@
               "---"
               }</td>
                             <td>
-                              ${hasDiscrepancy
-                                ? `<span class="badge badge-discrepancy">🔴 Lệch ${tongLech.toLocaleString(
-                                    "vi-VN"
-                                  )} cuốn</span>`
-                                : `<span class="badge badge-balanced">🟢 Cân bằng</span>`}
+                              ${badgeHtml}
                             </td>
                             <td>
                                 <button class="btn btn-sm btn-secondary view-detail-btn" data-id="${receipt.MaPhieuKiem
