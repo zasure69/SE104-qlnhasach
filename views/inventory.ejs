@@ -50,6 +50,121 @@
       border: 1px solid #feb2b2;
     }
 
+    /* Search/Filter panel (Bills-style) */
+    .search-panel-container {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .search-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .search-panel-header h3 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .search-panel-body {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.9rem 1rem;
+      align-items: end;
+    }
+
+    .search-panel-body .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .search-panel-body label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-light);
+    }
+
+    .search-panel-body input,
+    .search-panel-body select {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      background: #fff;
+    }
+
+    .search-panel-body input:focus,
+    .search-panel-body select:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+
+    .search-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .btn-secondary-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-dark);
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: center;
+      min-width: 100px;
+      text-decoration: none;
+    }
+
+    .btn-secondary-outline:hover {
+      background: var(--light-bg);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 1200px) {
+      .search-panel-body {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .search-panel-body {
+        grid-template-columns: 1fr;
+      }
+      .search-actions {
+        justify-content: stretch;
+      }
+      .search-actions .btn,
+      .search-actions .btn-secondary-outline {
+        flex: 1;
+      }
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -945,6 +1060,56 @@
           <button class="btn btn-primary btn-add-new" id="open-add-modal">
             <i class="fas fa-plus"></i> LẬP PHIẾU KIỂM KÊ
           </button>
+        </div>
+
+        <div class="search-panel-container">
+          <div class="search-panel-header">
+            <h3><i class="fas fa-filter"></i> Bộ lọc tìm kiếm</h3>
+          </div>
+
+          <form method="GET" action="/dashboard/inventory">
+            <div class="search-panel-body">
+              <div class="field">
+                <label for="f-ma-phieu">Mã phiếu</label>
+                <input id="f-ma-phieu" name="maPhieuKiem" type="text" placeholder="VD: PK001"
+                  value="<%= (filters && filters.maPhieuKiem) ? filters.maPhieuKiem : '' %>" />
+              </div>
+
+              <div class="field">
+                <label for="f-nguoi-lap">Người lập</label>
+                <input id="f-nguoi-lap" name="nguoiLap" type="text" placeholder="Tên/Username..."
+                  value="<%= (filters && filters.nguoiLap) ? filters.nguoiLap : '' %>" />
+              </div>
+
+              <div class="field">
+                <label>Ngày kiểm kê</label>
+                <div class="two-col">
+                  <input name="from" type="date" value="<%= (filters && filters.from) ? filters.from : '' %>" />
+                  <input name="to" type="date" value="<%= (filters && filters.to) ? filters.to : '' %>" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="f-status">Trạng thái</label>
+                <select id="f-status" name="status">
+                  <option value="" <%= (filters && !filters.status) ? 'selected' : '' %>>-- Tất cả --</option>
+                  <option value="balanced" <%= (filters && filters.status === 'balanced') ? 'selected' : '' %>>🟢 Cân bằng</option>
+                  <option value="discrepancy" <%= (filters && filters.status === 'discrepancy') ? 'selected' : '' %>>🔴 Lệch</option>
+                </select>
+              </div>
+
+              <div class="field" style="grid-column: 1 / -1;">
+                <div class="search-actions">
+                  <a class="btn-secondary-outline" href="/dashboard/inventory">
+                    <i class="fas fa-rotate-left"></i> Reset
+                  </a>
+                  <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-magnifying-glass"></i> Tìm kiếm
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
         </div>
 
         <div class="table-responsive">
@@ -2131,9 +2296,10 @@
         });
       });
 
-      // Load danh sách phiếu kiểm kê
+      // Load danh sách phiếu kiểm kê (tôn trọng query filters trên URL)
       async function loadInventoryList() {
-        const result = await apiCall("/api/inventory/all");
+        const qs = window.location.search || "";
+        const result = await apiCall(`/api/inventory/all${qs}`);
 
         if (!result.success) {
           showToast("Không thể tải danh sách phiếu kiểm kê!", "error");
@@ -2204,6 +2370,16 @@
 
       // Load khi vào trang
       loadInventoryList();
+
+      // Filter UX
+      (function initInventoryFilters() {
+        const maPhieu = document.getElementById("f-ma-phieu");
+        if (maPhieu) {
+          maPhieu.addEventListener("input", () => {
+            maPhieu.value = maPhieu.value.toUpperCase();
+          });
+        }
+      })();
 
       // Logout
       const logoutBtn = document.getElementById("logout-button");
