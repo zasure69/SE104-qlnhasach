@@ -1585,6 +1585,7 @@
                             }
                             fetchEmployees(); // tải lại danh sách nhân viên
                         } else {
+                            console.log(result)
                             showToast(`Thêm thất bại: ${result.error}`, 'error');
                         }
                     } catch (err) {
