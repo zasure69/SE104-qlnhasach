@@ -394,8 +394,9 @@ const deleteEmployee = async (req, res) => {
     if (user.Username && !user.Username.includes('_deleted_')) {
       user.Username = user.Username + deletedSuffix;
     }
-    if (user.SoDienThoai && !user.SoDienThoai.includes('_deleted_')) {
-      user.SoDienThoai = user.SoDienThoai + deletedSuffix;
+    // Số điện thoại: dùng prefix ngắn DEL_ để tránh vượt quá độ dài cột
+    if (user.SoDienThoai && !user.SoDienThoai.startsWith('DEL_')) {
+      user.SoDienThoai = 'DEL_' + user.SoDienThoai;
     }
     user.isDeleted = true;
     await user.save();
@@ -458,8 +459,16 @@ const restoreEmployee = async (req, res) => {
       user.Username = originalUsername;
     }
 
-    if (user.SoDienThoai && user.SoDienThoai.includes('_deleted_')) {
-      const originalSoDT = user.SoDienThoai.split('_deleted_')[0];
+    if (user.SoDienThoai && (user.SoDienThoai.startsWith('DEL_') || user.SoDienThoai.includes('_deleted_') || user.SoDienThoai.includes('_dele'))) {
+      let originalSoDT = user.SoDienThoai;
+      // Xử lý các format khác nhau
+      if (originalSoDT.startsWith('DEL_')) {
+        originalSoDT = originalSoDT.substring(4); // Bỏ 'DEL_'
+      } else if (originalSoDT.includes('_deleted_')) {
+        originalSoDT = originalSoDT.split('_deleted_')[0];
+      } else if (originalSoDT.includes('_dele')) {
+        originalSoDT = originalSoDT.split('_dele')[0];
+      }
       // Kiểm tra xem số điện thoại gốc có bị trùng không
       const existingUser = await db.NhanVien.findOne({
         where: { 

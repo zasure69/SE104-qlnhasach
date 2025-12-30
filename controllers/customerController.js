@@ -155,10 +155,9 @@ const deleteCustomer = async (req, res) => {
     }
 
     // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
-    // Thêm suffix vào trường unique để tránh trùng khi thêm mới
-    const deletedSuffix = `_deleted_${Date.now()}`;
-    if (customer.SoDienThoai && !customer.SoDienThoai.includes('_deleted_')) {
-      customer.SoDienThoai = customer.SoDienThoai + deletedSuffix;
+    // Số điện thoại: dùng prefix ngắn DEL_ để tránh vượt quá độ dài cột
+    if (customer.SoDienThoai && !customer.SoDienThoai.startsWith('DEL_')) {
+      customer.SoDienThoai = 'DEL_' + customer.SoDienThoai;
     }
     customer.isDeleted = true;
     await customer.save();
@@ -203,9 +202,17 @@ const restoreCustomer = async (req, res) => {
       return res.status(400).json({ error: 'Khách hàng này chưa bị xóa.' });
     }
 
-    // Khôi phục giá trị gốc của trường unique (loại bỏ suffix _deleted_xxx)
-    if (customer.SoDienThoai && customer.SoDienThoai.includes('_deleted_')) {
-      const originalSoDT = customer.SoDienThoai.split('_deleted_')[0];
+    // Khôi phục giá trị gốc của trường unique (loại bỏ prefix DEL_ hoặc suffix _deleted_xxx)
+    if (customer.SoDienThoai && (customer.SoDienThoai.startsWith('DEL_') || customer.SoDienThoai.includes('_deleted_') || customer.SoDienThoai.includes('_dele'))) {
+      let originalSoDT = customer.SoDienThoai;
+      // Xử lý các format khác nhau
+      if (originalSoDT.startsWith('DEL_')) {
+        originalSoDT = originalSoDT.substring(4); // Bỏ 'DEL_'
+      } else if (originalSoDT.includes('_deleted_')) {
+        originalSoDT = originalSoDT.split('_deleted_')[0];
+      } else if (originalSoDT.includes('_dele')) {
+        originalSoDT = originalSoDT.split('_dele')[0];
+      }
       // Kiểm tra xem số điện thoại gốc có bị trùng không
       const existingCustomer = await db.KhachHang.findOne({
         where: { 

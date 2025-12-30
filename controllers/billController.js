@@ -504,12 +504,21 @@ const getDeletedBills = async (req, res) => {
     const bills = await HoaDon.findAll({
       where: { isDeleted: true },
       include: [
-        { model: KhachHang, attributes: ["HoVaTen"] },
+        { model: KhachHang, attributes: ["MaKhachHang", "HoVaTen", "isDeleted"] },
         { model: CT_HD, as: "ChiTietHoaDon" },
       ],
       order: [["NgayLapHoaDon", "DESC"]],
     });
-    res.status(200).json({ bills });
+    
+    const result = bills.map(bill => {
+      const plain = bill.get({ plain: true });
+      return {
+        ...plain,
+        isKhachHangDeleted: plain.KhachHang ? plain.KhachHang.isDeleted : false
+      };
+    });
+    
+    res.status(200).json({ bills: result });
   } catch (error) {
     console.error("[billController] getDeletedBills error:", error);
     res.status(500).json({ message: "Lỗi server nội bộ" });
@@ -521,10 +530,18 @@ const getDeletedBills = async (req, res) => {
 // =====================================================
 const restoreBill = async (req, res) => {
   const MaHD = req.params.MaHD;
+  const restoreKhachHangToo = req.query.restoreKhachHang === 'true';
   const t = await sequelize.transaction();
 
   try {
-    const bill = await HoaDon.findByPk(MaHD, { transaction: t });
+    const bill = await HoaDon.findByPk(MaHD, { 
+      include: [{
+        model: KhachHang,
+        attributes: ['MaKhachHang', 'HoVaTen', 'isDeleted']
+      }],
+      transaction: t 
+    });
+    
     if (!bill) {
       await t.rollback();
       return res.status(404).json({ message: "Không tìm thấy hóa đơn." });
@@ -533,6 +550,28 @@ const restoreBill = async (req, res) => {
     if (!bill.isDeleted) {
       await t.rollback();
       return res.status(400).json({ message: "Hóa đơn này chưa bị xóa." });
+    }
+    
+    // Kiểm tra xem khách hàng liên kết có bị xóa không
+    if (bill.KhachHang && bill.KhachHang.isDeleted) {
+      if (!restoreKhachHangToo) {
+        await t.rollback();
+        return res.status(409).json({
+          error: "Khách hàng liên kết đã bị xóa",
+          requireKhachHangRestore: true,
+          khachHangInfo: {
+            MaKhachHang: bill.KhachHang.MaKhachHang,
+            HoVaTen: bill.KhachHang.HoVaTen
+          },
+          message: `Khách hàng "${bill.KhachHang.HoVaTen}" liên kết với hóa đơn này đã bị xóa. Bạn có muốn khôi phục cả khách hàng không?`
+        });
+      }
+      
+      // Khôi phục khách hàng trước
+      await KhachHang.update(
+        { isDeleted: false },
+        { where: { MaKhachHang: bill.KhachHang.MaKhachHang }, transaction: t }
+      );
     }
 
     const details = await CT_HD.findAll({
@@ -576,7 +615,12 @@ const restoreBill = async (req, res) => {
     );
 
     await t.commit();
-    res.json({ message: `Đã khôi phục hóa đơn ${MaHD} thành công.` });
+    
+    const successMessage = restoreKhachHangToo && bill.KhachHang?.isDeleted
+      ? `Đã khôi phục hóa đơn ${MaHD} và khách hàng "${bill.KhachHang.HoVaTen}" thành công.`
+      : `Đã khôi phục hóa đơn ${MaHD} thành công.`;
+    
+    res.json({ message: successMessage });
   } catch (error) {
     await t.rollback();
     console.error("Lỗi khi khôi phục hóa đơn:", error);

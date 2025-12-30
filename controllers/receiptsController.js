@@ -282,12 +282,21 @@ const getDeletedReceipts = async (req, res) => {
         {
           model: KhachHang,
           as: "KhachHang",
-          attributes: ["HoVaTen", "TongNo"],
+          attributes: ["MaKhachHang", "HoVaTen", "TongNo", "isDeleted"],
         },
       ],
       order: [["NgayThuTien", "DESC"]],
     });
-    res.status(200).json({ receipts });
+    
+    const result = receipts.map(receipt => {
+      const plain = receipt.get({ plain: true });
+      return {
+        ...plain,
+        isKhachHangDeleted: plain.KhachHang ? plain.KhachHang.isDeleted : false
+      };
+    });
+    
+    res.status(200).json({ receipts: result });
   } catch (error) {
     console.error("[receiptsController] getDeletedReceipts error:", error);
     res.status(500).json({ message: "Lỗi server nội bộ" });
@@ -299,10 +308,19 @@ const getDeletedReceipts = async (req, res) => {
 // =====================================================
 const restoreReceipt = async (req, res) => {
   const MaPhieuThu = req.params.MaPhieuThu;
+  const restoreKhachHangToo = req.query.restoreKhachHang === 'true';
   const t = await sequelize.transaction();
 
   try {
-    const receipt = await PhieuThuTien.findByPk(MaPhieuThu, { transaction: t });
+    const receipt = await PhieuThuTien.findByPk(MaPhieuThu, { 
+      include: [{
+        model: KhachHang,
+        as: 'KhachHang',
+        attributes: ['MaKhachHang', 'HoVaTen', 'isDeleted']
+      }],
+      transaction: t 
+    });
+    
     if (!receipt) {
       await t.rollback();
       return res.status(404).json({ message: "Không tìm thấy phiếu thu." });
@@ -311,6 +329,28 @@ const restoreReceipt = async (req, res) => {
     if (!receipt.isDeleted) {
       await t.rollback();
       return res.status(400).json({ message: "Phiếu thu này chưa bị xóa." });
+    }
+    
+    // Kiểm tra xem khách hàng liên kết có bị xóa không
+    if (receipt.KhachHang && receipt.KhachHang.isDeleted) {
+      if (!restoreKhachHangToo) {
+        await t.rollback();
+        return res.status(409).json({
+          error: "Khách hàng liên kết đã bị xóa",
+          requireKhachHangRestore: true,
+          khachHangInfo: {
+            MaKhachHang: receipt.KhachHang.MaKhachHang,
+            HoVaTen: receipt.KhachHang.HoVaTen
+          },
+          message: `Khách hàng "${receipt.KhachHang.HoVaTen}" liên kết với phiếu thu này đã bị xóa. Bạn có muốn khôi phục cả khách hàng không?`
+        });
+      }
+      
+      // Khôi phục khách hàng trước
+      await KhachHang.update(
+        { isDeleted: false },
+        { where: { MaKhachHang: receipt.KhachHang.MaKhachHang }, transaction: t }
+      );
     }
 
     const soTienThu = parseFloat(receipt.SoTienThu);
@@ -329,7 +369,12 @@ const restoreReceipt = async (req, res) => {
     );
 
     await t.commit();
-    res.json({ message: `Đã khôi phục phiếu thu ${MaPhieuThu} thành công.` });
+    
+    const successMessage = restoreKhachHangToo && receipt.KhachHang?.isDeleted
+      ? `Đã khôi phục phiếu thu ${MaPhieuThu} và khách hàng "${receipt.KhachHang.HoVaTen}" thành công.`
+      : `Đã khôi phục phiếu thu ${MaPhieuThu} thành công.`;
+    
+    res.json({ message: successMessage });
   } catch (error) {
     await t.rollback();
     console.error("Lỗi khi khôi phục phiếu thu:", error);
