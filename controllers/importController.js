@@ -48,9 +48,25 @@ const getImportPage = async (req, res) => {
     try {
       importReceipts = await db.PhieuNhapSach.findAll({
         where: { isDeleted: false },
-        include: [{ model: db.CT_PNS, as: "ChiTiet", required: false }],
-        order: [["NgayNhapPhieu", "DESC"]],
+        include: [
+          { model: db.CT_PNS, as: "ChiTiet", required: false },
+          { model: db.NhanVien, attributes: ["HoTen"], required: false },
+        ],
+        order: [["NgayNhapPhieu", "ASC"]],
         raw: false,
+      });
+
+      // Tính tổng số lượng cho mỗi phiếu
+      importReceipts = importReceipts.map((receipt) => {
+        const plain = receipt.get({ plain: true });
+        const tongSoLuong =
+          plain.ChiTiet && plain.ChiTiet.length > 0
+            ? plain.ChiTiet.reduce((sum, item) => sum + (item.SoLuong || 0), 0)
+            : 0;
+        return {
+          ...plain,
+          TongSoLuong: tongSoLuong,
+        };
       });
     } catch (dbError) {
       console.error("[importController] Database error:", dbError);
@@ -87,7 +103,7 @@ const getAllImportReceipts = async (req, res) => {
     const receipts = await db.PhieuNhapSach.findAll({
       where: { isDeleted: false },
       include: [{ model: db.CT_PNS, as: "ChiTiet", required: false }],
-      order: [["NgayNhapPhieu", "DESC"]],
+      order: [["NgayNhapPhieu", "ASC"]],
       raw: false,
     });
     return res.status(200).json({ receipts });

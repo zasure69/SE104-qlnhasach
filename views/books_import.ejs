@@ -920,8 +920,9 @@
                 <th>STT</th>
                 <th>Mã Phiếu</th>
                 <th>Ngày Nhập</th>
-                <th>Mã NV</th>
-                <th>Tổng Tiền</th>
+                <th>Người Lập</th>
+                <th style="text-align: center">Tổng số lượng</th>
+                <th style="text-align: right">Tổng tiền</th>
                 <th></th>
               </tr>
             </thead>
@@ -939,9 +940,12 @@
                         month: '2-digit' , year: 'numeric' }) %>
                     </td>
                     <td>
-                      <%= receipt.MaNhanVien || '---' %>
+                      <%= receipt.MaNhanVien %><%= receipt.NhanVien ? ' - ' + receipt.NhanVien.HoTen : '' %>
                     </td>
-                    <td>
+                    <td style="text-align: center">
+                      <%= new Intl.NumberFormat('vi-VN').format(receipt.TongSoLuong || 0) %>
+                    </td>
+                    <td style="text-align: right">
                       <%= new Intl.NumberFormat('vi-VN').format(receipt.TongTien) %>
                     </td>
                     <td>
@@ -1816,6 +1820,7 @@
 
           // Tính tổng tiền từ mảng chiTiet vừa gửi đi
           const tongTien = chiTiet.reduce((sum, item) => sum + (item.SoLuong * item.DonGiaNhap), 0);
+          const tongSoLuong = chiTiet.reduce((sum, item) => sum + item.SoLuong, 0);
 
           // Lấy Mã Phiếu từ phản hồi API 
           // API trả về: { maPhieu: 'PN...', tongTien: ... }
@@ -1829,7 +1834,8 @@
                           <td>${newId}</td>
                           <td>${dateDisplay}</td>
                           <td>${maNVDisplay}</td>
-                          <td>${new Intl.NumberFormat('vi-VN').format(tongTien)}</td>
+                          <td style="text-align: center">${new Intl.NumberFormat('vi-VN').format(tongSoLuong)}</td>
+                          <td style="text-align: right">${new Intl.NumberFormat('vi-VN').format(tongTien)}</td>
                           <td>
                               <button class="btn btn-sm btn-secondary view-detail-btn" data-id="${newId}">
                                   <i class="fas fa-eye"></i> Chi tiết

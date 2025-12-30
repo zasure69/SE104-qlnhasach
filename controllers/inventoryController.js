@@ -48,8 +48,31 @@ const getInventoryPage = async (req, res) => {
           { model: db.ChiTietKiemKe, as: "ChiTiet", required: false },
           { model: db.NhanVien, attributes: ["HoTen"], required: false },
         ],
-        order: [["NgayKiem", "DESC"]],
+        order: [["NgayKiem", "ASC"]],
         raw: false,
+      });
+
+      // Tính số lượng lệch và trạng thái cho mỗi phiếu
+      inventoryReceipts = inventoryReceipts.map((receipt) => {
+        const plain = receipt.get({ plain: true });
+        let tongLech = 0;
+        let hasDiscrepancy = false;
+
+        if (plain.ChiTiet && plain.ChiTiet.length > 0) {
+          plain.ChiTiet.forEach((item) => {
+            const lech = Math.abs(
+              (item.SoLuongThucTe || 0) - (item.SoLuongHeThong || 0)
+            );
+            tongLech += lech;
+            if (lech > 0) hasDiscrepancy = true;
+          });
+        }
+
+        return {
+          ...plain,
+          TongLech: tongLech,
+          HasDiscrepancy: hasDiscrepancy,
+        };
       });
     } catch (dbError) {
       console.error("[inventoryController] Database error:", dbError);
@@ -75,15 +98,39 @@ const getInventoryPage = async (req, res) => {
 // API: Lấy tất cả phiếu kiểm kê
 const getAllInventoryReceipts = async (req, res) => {
   try {
-    const receipts = await db.PhieuKiemKe.findAll({
+    let receipts = await db.PhieuKiemKe.findAll({
       where: { isDeleted: false },
       include: [
         { model: db.ChiTietKiemKe, as: "ChiTiet", required: false },
         { model: db.NhanVien, attributes: ["HoTen"], required: false },
       ],
-      order: [["NgayKiem", "DESC"]],
+      order: [["NgayKiem", "ASC"]],
       raw: false,
     });
+
+    // Bổ sung trường tính toán để client hiển thị trạng thái
+    receipts = receipts.map((receipt) => {
+      const plain = receipt.get({ plain: true });
+      let tongLech = 0;
+      let hasDiscrepancy = false;
+
+      if (plain.ChiTiet && plain.ChiTiet.length > 0) {
+        plain.ChiTiet.forEach((item) => {
+          const lech = Math.abs(
+            (item.SoLuongThucTe || 0) - (item.SoLuongHeThong || 0)
+          );
+          tongLech += lech;
+          if (lech > 0) hasDiscrepancy = true;
+        });
+      }
+
+      return {
+        ...plain,
+        TongLech: tongLech,
+        HasDiscrepancy: hasDiscrepancy,
+      };
+    });
+
     return res.status(200).json({ receipts });
   } catch (err) {
     console.error("[inventoryController] getAllInventoryReceipts error", err);

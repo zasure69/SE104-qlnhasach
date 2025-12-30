@@ -28,6 +28,28 @@
       --disabled-bg: #e9ecef;
     }
 
+    /* Badge trạng thái thanh toán */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .badge-paid {
+      color: #276749;
+      background-color: #c6f6d5;
+      border: 1px solid #9ae6b4;
+    }
+
+    .badge-debt {
+      color: #c05621;
+      background-color: #feebc8;
+      border: 1px solid #fbd38d;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -951,11 +973,16 @@
                 <th>Khách Hàng</th>
                 <th>Ngày Lập</th>
                 <th>Tổng Tiền</th>
+                <th>Đã Trả</th>
+                <th>Còn Nợ</th>
+                <th>Trạng Thái</th>
+                <th>Người Lập</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               <% bills.forEach((bill, index)=> { %>
+                <% const conNo = parseFloat(bill.ConLai) || 0; %>
                 <tr data-id="<%= bill.MaHoaDon %>">
                   <td>
                     <%= index + 1 %>
@@ -964,7 +991,7 @@
                     <%= bill.MaHoaDon %>
                   </td>
                   <td>
-                    <%= bill.KhachHang.HoVaTen %>
+                    <%= bill.KhachHang ? bill.KhachHang.HoVaTen : '' %>
                   </td>
                   <td>
                     <%= new Date(bill.NgayLapHoaDon).toLocaleDateString('vi-VN', { day: '2-digit' , month: '2-digit' ,
@@ -972,6 +999,22 @@
                   </td>
                   <td class="text-right">
                     <%= new Intl.NumberFormat('vi-VN').format(bill.TongTien) %>
+                  </td>
+                  <td class="text-right">
+                    <%= new Intl.NumberFormat('vi-VN').format(bill.SoTienTra || 0) %>
+                  </td>
+                  <td class="text-right">
+                    <%= new Intl.NumberFormat('vi-VN').format(conNo) %>
+                  </td>
+                  <td>
+                    <% if (conNo === 0) { %>
+                      <span class="badge badge-paid">🟢 Hoàn tất</span>
+                    <% } else { %>
+                      <span class="badge badge-debt">🟠 Ghi nợ</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <%= bill.NhanVien ? bill.NhanVien.HoTen : '' %>
                   </td>
                   <td>
                     <button class="btn btn-sm btn-secondary view-detail-btn" data-id="<%= bill.MaHoaDon %>">
