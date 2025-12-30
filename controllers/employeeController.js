@@ -86,6 +86,25 @@ const registerEmployee = async (req, res) => {
       ngaySinh,
     } = req.body;
 
+    // Lấy tuổi tối thiểu từ bảng THAMSO
+    const thamSoTuoiToiThieu = await db.ThamSo.findOne({
+      where: { TenThamSo: 'TuoiToiThieu' }
+    });
+    const tuoiToiThieu = thamSoTuoiToiThieu ? parseFloat(thamSoTuoiToiThieu.GiaTri) : 18; // Mặc định 18 nếu không tìm thấy
+
+    // Tính tuổi
+    const birthDate = new Date(ngaySinh);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    if (age < tuoiToiThieu) {
+      return res.status(400).json({ message: `Nhân viên phải từ ${tuoiToiThieu} tuổi trở lên.` });
+    }
+
     // Kiểm tra xem nhân viên đã tồn tại (chỉ những nhân viên chưa bị xóa mềm)
     const existingEmployee = await db.NhanVien.findOne({
       where: { Username: username, isDeleted: false }
@@ -213,6 +232,27 @@ const updateEmployee = async (req, res) => {
     const user = await db.NhanVien.findByPk(maNhanVien);
     if (!user) {
       return res.status(404).json({ error: "Không tìm thấy nhân viên." });
+    }
+
+    // Lấy tuổi tối thiểu từ bảng THAMSO cho việc cập nhật
+    if (typeof ngaySinh !== "undefined") {
+      const thamSoTuoiToiThieu = await db.ThamSo.findOne({
+        where: { TenThamSo: 'TuoiToiThieu' }
+      });
+      const tuoiToiThieu = thamSoTuoiToiThieu ? parseFloat(thamSoTuoiToiThieu.GiaTri) : 18; // Mặc định 18 nếu không tìm thấy
+
+      // Tính tuổi
+      const birthDate = new Date(ngaySinh);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      if (age < tuoiToiThieu) {
+        return res.status(400).json({ message: `Nhân viên phải từ ${tuoiToiThieu} tuổi trở lên.` });
+      }
     }
 
     // Cập nhật thông tin: CHỈ UPDATE KHI CÓ DỮ LIỆU

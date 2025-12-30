@@ -1410,10 +1410,10 @@
                         const ngaySinhInput = document.getElementById('edit-ngay-sinh').value;
                         const ngayNhanViecInput = document.getElementById('edit-ngay-nhan-viec').value;
 
-                        if (!checkAgeRequirement(ngaySinhInput, ngayNhanViecInput)) {
-                            showToast('Nhân viên chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
-                            return; // Dừng lại, không gửi dữ liệu đi
-                        }
+                        // if (!checkAgeRequirement(ngaySinhInput, ngayNhanViecInput)) {
+                        //     showToast('Nhân viên chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
+                        //     return; // Dừng lại, không gửi dữ liệu đi
+                        // }
 
                         showLoader();
                         try {
@@ -1551,11 +1551,11 @@
                     const ngaySinhInput = document.getElementById('add-ngay-sinh').value;
                     const ngayNhanViecInput = document.getElementById('add-ngay-nhan-viec').value;
 
-                    if (!checkAgeRequirement(ngaySinhInput, ngayNhanViecInput)) {
-                        showToast('Nhân viên chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
-                        isSaveAndReset = false;
-                        return; // Dừng lại, không gửi dữ liệu đi
-                    }
+                    // if (!checkAgeRequirement(ngaySinhInput, ngayNhanViecInput)) {
+                    //     showToast('Nhân viên chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
+                    //     isSaveAndReset = false;
+                    //     return; // Dừng lại, không gửi dữ liệu đi
+                    // }
                     showLoader();
                     try {
                         // --- SỬA: GỌI API 'register' ---
@@ -1585,6 +1585,7 @@
                             }
                             fetchEmployees(); // tải lại danh sách nhân viên
                         } else {
+                            console.log(result)
                             showToast(`Thêm thất bại: ${result.error}`, 'error');
                         }
                     } catch (err) {
