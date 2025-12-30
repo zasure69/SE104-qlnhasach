@@ -765,6 +765,170 @@
       color: var(--text-dark);
     }
 
+    /* --- CSS CHO LAYOUT FORM TÌM KIẾM (giống tab Khách hàng, tối ưu cho Hóa đơn) --- */
+    .search-panel-container {
+      background-color: var(--white-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    .search-panel-header {
+      background-color: #f8f9fa;
+      padding: 1rem 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+    }
+
+    .search-panel-header i {
+      margin-right: 0.5rem;
+      color: var(--secondary-color);
+    }
+
+    .search-panel-body {
+      padding: 1.5rem;
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+
+    .search-inputs-grid {
+      flex-grow: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+
+    .search-actions-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      min-width: 140px;
+      margin-top: 1.4rem;
+    }
+
+    .search-actions-col .btn {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem;
+      text-transform: uppercase;
+    }
+
+    #group-con-no {
+      display: flex !important;
+      flex-direction: row;
+      width: 100%;
+      align-items: stretch;
+    }
+
+    #fg-con-no {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+
+    #group-con-no input {
+      width: 100%;
+      flex-grow: 1;
+    }
+
+    #op-con-no {
+      width: 115px !important;
+      min-width: 115px !important;
+      text-align: center;
+      padding: 0 0.5rem;
+      background-color: #f8f9fa;
+      border: 1px solid var(--border-color);
+      border-right: none;
+      border-top-right-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+      border-top-left-radius: 6px;
+      border-bottom-left-radius: 6px;
+      cursor: pointer;
+    }
+
+    #group-con-no input {
+      flex-grow: 1;
+      border: 1px solid var(--border-color);
+      border-top-left-radius: 0 !important;
+      border-bottom-left-radius: 0 !important;
+      border-radius: 0 6px 6px 0;
+    }
+
+    #op-con-no:focus,
+    #group-con-no input:focus {
+      z-index: 2;
+      position: relative;
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+      outline: none;
+    }
+
+    #group-con-no.mode-range .range-separator {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      background-color: #f8f9fa;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      color: #555;
+      font-weight: bold;
+      padding: 0 10px;
+    }
+
+    #group-con-no.mode-range .input-2 {
+      display: block !important;
+    }
+
+    #group-con-no input:first-of-type {
+      border-radius: 0 6px 6px 0;
+    }
+
+    #group-con-no.mode-range input:first-of-type {
+      border-right: none;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    #group-con-no.mode-range .input-2 {
+      border-left: none;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-top-right-radius: 6px;
+      border-bottom-right-radius: 6px;
+    }
+
+    @media (max-width: 992px) {
+      .search-panel-body {
+        flex-direction: column;
+      }
+
+      .search-inputs-grid {
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+      }
+
+      .search-actions-col {
+        width: 100%;
+        flex-direction: row;
+        margin-top: 0;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .search-inputs-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @keyframes fadeIn {
       from {
         opacity: 0;
@@ -964,6 +1128,84 @@
           </button>
         </div>
 
+        <!-- Bộ lọc tìm kiếm (server-side) -->
+        <div class="search-panel-container">
+          <div class="search-panel-header">
+            <i class="fas fa-filter"></i> Bộ lọc tìm kiếm
+          </div>
+          <form method="GET" action="/dashboard/bills">
+            <div class="search-panel-body">
+              <div class="search-inputs-grid">
+                <div class="form-group">
+                  <label for="f-ma-hd">Mã HĐ</label>
+                  <input type="text" id="f-ma-hd" name="maHoaDon" placeholder="Nhập mã hóa đơn..."
+                    value="<%= (filters && filters.maHoaDon) ? filters.maHoaDon : '' %>" />
+                </div>
+
+                <div class="form-group">
+                  <label for="f-khach-hang">Khách hàng</label>
+                  <input type="text" id="f-khach-hang" name="khachHang" placeholder="Nhập tên khách hàng..."
+                    value="<%= (filters && filters.khachHang) ? filters.khachHang : '' %>" />
+                </div>
+
+                <div class="form-group">
+                  <label for="f-sdt">Số điện thoại</label>
+                  <input type="text" id="f-sdt" name="sdt" placeholder="Nhập SĐT..." inputmode="numeric"
+                    value="<%= (filters && filters.sdt) ? filters.sdt : '' %>" />
+                </div>
+
+                <div class="form-group">
+                  <label for="f-from">Từ ngày</label>
+                  <input type="date" id="f-from" name="from" value="<%= (filters && filters.from) ? filters.from : '' %>" />
+                </div>
+
+                <div class="form-group">
+                  <label for="f-to">Đến ngày</label>
+                  <input type="date" id="f-to" name="to" value="<%= (filters && filters.to) ? filters.to : '' %>" />
+                </div>
+
+                <div class="form-group">
+                  <label for="f-status">Trạng thái</label>
+                  <select id="f-status" name="status">
+                    <option value="" <%= (!filters || !filters.status) ? 'selected' : '' %>>Tất cả</option>
+                    <option value="paid" <%= (filters && filters.status === 'paid') ? 'selected' : '' %>>🟢 Hoàn tất</option>
+                    <option value="debt" <%= (filters && filters.status === 'debt') ? 'selected' : '' %>>🟠 Ghi nợ</option>
+                  </select>
+                </div>
+
+                <div class="form-group" id="fg-con-no">
+                  <label for="op-con-no">Còn nợ</label>
+                  <div id="group-con-no">
+                    <select id="op-con-no" name="opConNo">
+                      <option value="" <%= (!filters || !filters.opConNo) ? 'selected' : '' %>>--</option>
+                      <option value="eq" <%= (filters && filters.opConNo === 'eq') ? 'selected' : '' %>>=</option>
+                      <option value="gt" <%= (filters && filters.opConNo === 'gt') ? 'selected' : '' %>>></option>
+                      <option value="gte" <%= (filters && filters.opConNo === 'gte') ? 'selected' : '' %>>≥</option>
+                      <option value="lt" <%= (filters && filters.opConNo === 'lt') ? 'selected' : '' %><</option>
+                      <option value="lte" <%= (filters && filters.opConNo === 'lte') ? 'selected' : '' %>>≤</option>
+                      <option value="range" <%= (filters && filters.opConNo === 'range') ? 'selected' : '' %>>Khoảng</option>
+                    </select>
+                    <input type="text" id="f-con-no-1" name="conNo1" inputmode="numeric" placeholder="Số tiền..."
+                      value="<%= (filters && filters.conNo1) ? filters.conNo1 : '' %>" />
+                    <span class="range-separator" style="display:none">-</span>
+                    <input type="text" id="f-con-no-2" class="input-2" name="conNo2" inputmode="numeric" placeholder="Đến..."
+                      style="display:none" value="<%= (filters && filters.conNo2) ? filters.conNo2 : '' %>" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="search-actions-col">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-search"></i> Tìm kiếm
+                </button>
+                <a href="/dashboard/bills" class="btn btn-secondary" style="text-decoration:none">
+                  <i class="fas fa-rotate-left"></i> Làm mới
+                </a>
+              </div>
+            </div>
+          </form>
+        </div>
+
         <div class="table-responsive">
           <table class="data-table" id="master-table">
             <thead>
@@ -981,53 +1223,59 @@
               </tr>
             </thead>
             <tbody>
-              <% bills.forEach((bill, index)=> { %>
-                <% const conNo = parseFloat(bill.ConLai) || 0; %>
-                <tr data-id="<%= bill.MaHoaDon %>">
-                  <td>
-                    <%= index + 1 %>
-                  </td>
-                  <td>
-                    <%= bill.MaHoaDon %>
-                  </td>
-                  <td>
-                    <%= bill.KhachHang ? bill.KhachHang.HoVaTen : '' %>
-                  </td>
-                  <td>
-                    <%= new Date(bill.NgayLapHoaDon).toLocaleDateString('vi-VN', { day: '2-digit' , month: '2-digit' ,
-                      year: 'numeric' }) %>
-                  </td>
-                  <td class="text-right">
-                    <%= new Intl.NumberFormat('vi-VN').format(bill.TongTien) %>
-                  </td>
-                  <td class="text-right">
-                    <%= new Intl.NumberFormat('vi-VN').format(bill.SoTienTra || 0) %>
-                  </td>
-                  <td class="text-right">
-                    <%= new Intl.NumberFormat('vi-VN').format(conNo) %>
-                  </td>
-                  <td>
-                    <% if (conNo === 0) { %>
-                      <span class="badge badge-paid">🟢 Hoàn tất</span>
-                    <% } else { %>
-                      <span class="badge badge-debt">🟠 Ghi nợ</span>
-                    <% } %>
-                  </td>
-                  <td>
-                    <%= bill.NhanVien ? bill.NhanVien.HoTen : '' %>
-                  </td>
-                  <td>
-                    <button class="btn btn-sm btn-secondary view-detail-btn" data-id="<%= bill.MaHoaDon %>">
-                      <i class="fas fa-eye"></i> Chi tiết
-                    </button>
-                    <button class="btn btn-sm btn-print ml-2" data-id="<%= bill.MaHoaDon %>">
-                      <i class="fas fa-print"></i>
-                    </button>
-                    <i class="fas fa-trash action-icon delete-icon"
-                      style="margin-left: 12px; color: var(--red-accent)"></i>
-                  </td>
-                </tr>
+              <% if (bills && bills.length > 0) { %>
+                <% bills.forEach((bill, index)=> { %>
+                  <% const conNo = parseFloat(bill.ConLai) || 0; %>
+                  <tr data-id="<%= bill.MaHoaDon %>">
+                    <td>
+                      <%= index + 1 %>
+                    </td>
+                    <td>
+                      <%= bill.MaHoaDon %>
+                    </td>
+                    <td>
+                      <%= bill.KhachHang ? bill.KhachHang.HoVaTen : '' %>
+                    </td>
+                    <td>
+                      <%= new Date(bill.NgayLapHoaDon).toLocaleDateString('vi-VN', { day: '2-digit' , month: '2-digit' ,
+                        year: 'numeric' }) %>
+                    </td>
+                    <td class="text-right">
+                      <%= new Intl.NumberFormat('vi-VN').format(bill.TongTien) %>
+                    </td>
+                    <td class="text-right">
+                      <%= new Intl.NumberFormat('vi-VN').format(bill.SoTienTra || 0) %>
+                    </td>
+                    <td class="text-right">
+                      <%= new Intl.NumberFormat('vi-VN').format(conNo) %>
+                    </td>
+                    <td>
+                      <% if (conNo === 0) { %>
+                        <span class="badge badge-paid">🟢 Hoàn tất</span>
+                      <% } else { %>
+                        <span class="badge badge-debt">🟠 Ghi nợ</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <%= bill.NhanVien ? bill.NhanVien.HoTen : '' %>
+                    </td>
+                    <td>
+                      <button class="btn btn-sm btn-secondary view-detail-btn" data-id="<%= bill.MaHoaDon %>">
+                        <i class="fas fa-eye"></i> Chi tiết
+                      </button>
+                      <button class="btn btn-sm btn-print ml-2" data-id="<%= bill.MaHoaDon %>">
+                        <i class="fas fa-print"></i>
+                      </button>
+                      <i class="fas fa-trash action-icon delete-icon"
+                        style="margin-left: 12px; color: var(--red-accent)"></i>
+                    </td>
+                  </tr>
                 <% }); %>
+              <% } else { %>
+                <tr class="no-data">
+                  <td colspan="10" style="text-align:center">Không có hóa đơn phù hợp.</td>
+                </tr>
+              <% } %>
             </tbody>
           </table>
         </div>
@@ -1183,7 +1431,7 @@
             </div>
             <div class="form-group">
               <label>Mã Nhân Viên Lập Hoá Đơn:</label>
-              <input type="text" id="edit-ma-nv" placeholder="<%=bills[0].MaNhanVien%>" readonly style="background-color: #e9ecef" />
+              <input type="text" id="edit-ma-nv" placeholder="<%= MaNV %>" readonly style="background-color: #e9ecef" />
             </div>
           </div>
         </div>
@@ -1345,6 +1593,59 @@
       }
     }
     document.addEventListener("DOMContentLoaded", function () {
+      // --- Filter UI helpers (Còn nợ) ---
+      const opConNo = document.getElementById("op-con-no");
+      const groupConNo = document.getElementById("group-con-no");
+      const conNo1 = document.getElementById("f-con-no-1");
+      const conNo2 = document.getElementById("f-con-no-2");
+
+      // --- Uppercase helpers (Mã HĐ / Mã KH) ---
+      const attachUppercase = (id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener("input", function () {
+          this.value = (this.value || "").toUpperCase();
+        });
+        el.addEventListener("blur", function () {
+          this.value = (this.value || "").trim().toUpperCase();
+        });
+      };
+      attachUppercase("f-ma-hd");
+      attachUppercase("add-ma-kh");
+      attachUppercase("edit-ma-kh");
+
+      const normalizeDigits = (el) => {
+        if (!el) return;
+        el.addEventListener("input", function () {
+          this.value = (this.value || "").replace(/[^0-9]/g, "");
+        });
+      };
+      normalizeDigits(conNo1);
+      normalizeDigits(conNo2);
+      normalizeDigits(document.getElementById("f-sdt"));
+
+      const syncConNoMode = () => {
+        if (!opConNo || !groupConNo) return;
+        const isRange = opConNo.value === "range";
+        if (isRange) {
+          groupConNo.classList.add("mode-range");
+          if (conNo2) conNo2.style.display = "block";
+          const sep = groupConNo.querySelector(".range-separator");
+          if (sep) sep.style.display = "flex";
+        } else {
+          groupConNo.classList.remove("mode-range");
+          if (conNo2) {
+            conNo2.style.display = "none";
+            conNo2.value = "";
+          }
+          const sep = groupConNo.querySelector(".range-separator");
+          if (sep) sep.style.display = "none";
+        }
+      };
+
+      if (opConNo) opConNo.addEventListener("change", syncConNoMode);
+      syncConNoMode();
+
       setupPaymentValidation("add");
       setupPaymentValidation("edit");
 
@@ -2342,6 +2643,12 @@
 
                 const stt = tbody.rows.length + 1; // Tính số thứ tự mới
 
+                const conNoVal = Number(newData.ConLai) || 0;
+                const statusHtml =
+                  conNoVal === 0
+                    ? '<span class="badge badge-paid">🟢 Hoàn tất</span>'
+                    : '<span class="badge badge-debt">🟠 Ghi nợ</span>';
+
                 const newRow = document.createElement("tr");
                 newRow.setAttribute("data-id", MaHD); // Để dùng cho nút xóa
                 newRow.innerHTML = `
@@ -2352,6 +2659,12 @@
                             <td class="text-right">${formatNumber(
                   newData.TongTien
                 )}</td>
+                            <td class="text-right">${formatNumber(
+                              newData.SoTienTra || 0
+                            )}</td>
+                            <td class="text-right">${formatNumber(conNoVal)}</td>
+                            <td>${statusHtml}</td>
+                            <td>${currentUserInfo.username || ""}</td>
                             <td>
                                 <button class="btn btn-sm btn-secondary view-detail-btn" data-id="${MaHD}"> 
                                     <i class="fas fa-eye"></i> Chi tiết 
