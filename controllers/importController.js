@@ -1,4 +1,5 @@
 const db = require("../models");
+const { Op } = require("sequelize");
 
 // Helper: Generate new MaPhieuNhap
 async function generateNewPhieuNhapId() {
@@ -37,26 +38,114 @@ async function generateNewPhieuNhapId() {
 const getImportPage = async (req, res) => {
   try {
     console.log("[importController] getImportPage called");
+    console.log("[DEBUG] req.query:", req.query);
+
     const userInfo = {
       id: req.user.id,
       username: req.user?.username,
       role: req.user?.role,
     };
 
+    // Parse filters from query
+    const filters = {
+      maPhieu: (req.query.maPhieu || "").trim(),
+      nguoiLap: (req.query.nguoiLap || "").trim(),
+      maSach: (req.query.maSach || "").trim(),
+      from: (req.query.from || "").trim(),
+      to: (req.query.to || "").trim(),
+      minSoLuong: (req.query.minSoLuong || "").trim(),
+      maxSoLuong: (req.query.maxSoLuong || "").trim(),
+      minTien: (req.query.minTien || "").trim(),
+      maxTien: (req.query.maxTien || "").trim(),
+    };
+
     let importReceipts = [];
 
     try {
+      const andConditions = [{ isDeleted: false }];
+
+      // Filter by Mã phiếu
+      if (filters.maPhieu) {
+        andConditions.push({
+          MaPhieuNhap: { [Op.like]: `%${filters.maPhieu}%` },
+        });
+      }
+
+      // Filter by date range
+      if (filters.from || filters.to) {
+        let start = null;
+        let end = null;
+        if (filters.from) {
+          start = new Date(filters.from);
+          start.setHours(0, 0, 0, 0);
+        }
+        if (filters.to) {
+          end = new Date(filters.to);
+          end.setHours(23, 59, 59, 999);
+        }
+
+        if (start && end) {
+          andConditions.push({ NgayNhapPhieu: { [Op.between]: [start, end] } });
+        } else if (start) {
+          andConditions.push({ NgayNhapPhieu: { [Op.gte]: start } });
+        } else if (end) {
+          andConditions.push({ NgayNhapPhieu: { [Op.lte]: end } });
+        }
+      }
+
+      // Filter by Tổng tiền
+      if (filters.minTien || filters.maxTien) {
+        const minT = filters.minTien ? parseInt(filters.minTien, 10) : null;
+        const maxT = filters.maxTien ? parseInt(filters.maxTien, 10) : null;
+
+        if (minT !== null && maxT !== null) {
+          andConditions.push({ TongTien: { [Op.between]: [minT, maxT] } });
+        } else if (minT !== null) {
+          andConditions.push({ TongTien: { [Op.gte]: minT } });
+        } else if (maxT !== null) {
+          andConditions.push({ TongTien: { [Op.lte]: maxT } });
+        }
+      }
+
+      // Employee filter
+      const employeeWhere = {};
+      if (filters.nguoiLap) {
+        employeeWhere[Op.or] = [
+          { HoTen: { [Op.like]: `%${filters.nguoiLap}%` } },
+          { Username: { [Op.like]: `%${filters.nguoiLap}%` } },
+        ];
+      }
+      const hasEmployeeWhere = Object.keys(employeeWhere).length > 0;
+
+      const where = andConditions.length > 0 ? { [Op.and]: andConditions } : {};
+
       importReceipts = await db.PhieuNhapSach.findAll({
-        where: { isDeleted: false },
+        where,
         include: [
-          { model: db.CT_PNS, as: "ChiTiet", required: false },
-          { model: db.NhanVien, attributes: ["HoTen"], required: false },
+          {
+            model: db.CT_PNS,
+            as: "ChiTiet",
+            required: false,
+            include: [
+              {
+                model: db.Sach,
+                attributes: ["MaSach", "MaDauSach"],
+                include: [{ model: db.DauSach, attributes: ["TenSach"] }],
+              },
+            ],
+          },
+          {
+            model: db.NhanVien,
+            attributes: ["HoTen", "Username"],
+            required: hasEmployeeWhere,
+            where: hasEmployeeWhere ? employeeWhere : undefined,
+          },
         ],
-        order: [["NgayNhapPhieu", "ASC"]],
+        order: [["NgayNhapPhieu", "DESC"]],
         raw: false,
       });
 
-      // Tính tổng số lượng cho mỗi phiếu
+      // Tính tổng số lượng cho mỗi phiếu và lọc theo các filter còn lại
       importReceipts = importReceipts.map((receipt) => {
         const plain = receipt.get({ plain: true });
         const tongSoLuong =
@@ -68,6 +157,36 @@ const getImportPage = async (req, res) => {
           TongSoLuong: tongSoLuong,
         };
       });
+
+      // Filter by Mã/Tên sách (in-memory filter vì cần join nhiều bảng)
+      if (filters.maSach) {
+        const searchTerm = filters.maSach.toLowerCase();
+        importReceipts = importReceipts.filter((receipt) => {
+          if (!receipt.ChiTiet || receipt.ChiTiet.length === 0) return false;
+          return receipt.ChiTiet.some((item) => {
+            const maSach = (item.MaSach || "").toLowerCase();
+            const tenSach = (item.Sach?.DauSach?.TenSach || "").toLowerCase();
+            return maSach.includes(searchTerm) || tenSach.includes(searchTerm);
+          });
+        });
+      }
+
+      // Filter by Số lượng (in-memory vì TongSoLuong được tính từ ChiTiet)
+      if (filters.minSoLuong || filters.maxSoLuong) {
+        const minSL = filters.minSoLuong
+          ? parseInt(filters.minSoLuong, 10)
+          : null;
+        const maxSL = filters.maxSoLuong
+          ? parseInt(filters.maxSoLuong, 10)
+          : null;
+
+        importReceipts = importReceipts.filter((receipt) => {
+          const sl = receipt.TongSoLuong || 0;
+          if (minSL !== null && sl < minSL) return false;
+          if (maxSL !== null && sl > maxSL) return false;
+          return true;
+        });
+      }
     } catch (dbError) {
       console.error("[importController] Database error:", dbError);
     }
@@ -83,6 +202,7 @@ const getImportPage = async (req, res) => {
     res.render("books_import", {
       ...userInfo,
       importReceipts: importReceipts || [],
+      filters,
       currentDate: new Date().toISOString().split("T")[0],
       soLuongNhapToiThieu: soLuongNhapToiThieu,
     });
@@ -92,6 +212,7 @@ const getImportPage = async (req, res) => {
       username: req.user?.username,
       role: req.user?.role,
       importReceipts: [],
+      filters: {},
       currentDate: new Date().toISOString().split("T")[0],
       soLuongNhapToiThieu: 150,
     });
