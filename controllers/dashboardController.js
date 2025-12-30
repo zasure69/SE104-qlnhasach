@@ -81,7 +81,7 @@ const getBillsPage = async (req, res) => {
   try {
     const userInfo = getUserInfo(req);
 
-    // 1. Lấy danh sách hóa đơn chưa bị xóa, JOIN với Khách hàng
+    // 1. Lấy danh sách hóa đơn chưa bị xóa, JOIN với Khách hàng và Nhân viên
     const bills = await db.HoaDon.findAll({
       where: { isDeleted: false },
       include: [
@@ -89,6 +89,11 @@ const getBillsPage = async (req, res) => {
           model: db.KhachHang,
           as: "KhachHang",
           attributes: ["HoVaTen"], // Lấy tên khách hàng
+        },
+        {
+          model: db.NhanVien,
+          as: "NhanVien",
+          attributes: ["HoTen"], // Lấy tên nhân viên lập hóa đơn
         },
       ],
       order: [["NgayLapHoaDon", "ASC"]],

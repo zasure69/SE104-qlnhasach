@@ -33,6 +33,34 @@
       --tab-inactive-text: #6c757d;
     }
 
+    /* Badge tình trạng sách */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .badge-in-stock {
+      color: #276749;
+      background-color: #c6f6d5;
+      border: 1px solid #9ae6b4;
+    }
+
+    .badge-low-stock {
+      color: #c05621;
+      background-color: #feebc8;
+      border: 1px solid #fbd38d;
+    }
+
+    .badge-out-of-stock {
+      color: #c53030;
+      background-color: #fed7d7;
+      border: 1px solid #feb2b2;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -1263,6 +1291,7 @@
                     <th>Nhà XB</th>
                     <th>Năm XB</th>
                     <th>SL Tồn</th>
+                    <th>Tình trạng</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -1293,6 +1322,17 @@
                         </td>
                         <td>
                           <%= Math.max(0, book.SoLuongTon || 0) %>
+                        </td>
+                        <td>
+                          <% const slTon = book.SoLuongTon || 0; %>
+                          <% const slToiThieu = soLuongTonToiThieu || 20; %>
+                          <% if (slTon === 0) { %>
+                            <span class="badge badge-out-of-stock">🔴 Hết hàng</span>
+                          <% } else if (slTon <= slToiThieu) { %>
+                            <span class="badge badge-low-stock">🟠 Sắp hết</span>
+                          <% } else { %>
+                            <span class="badge badge-in-stock">🟢 Còn hàng</span>
+                          <% } %>
                         </td>
                         <td>
                           <i class="fas fa-pencil-alt action-icon open-sach-edit-modal"></i>
@@ -1371,6 +1411,7 @@
                     <th>Mã Tác giả</th>
                     <th>Họ Tên</th>
                     <th>Năm Sinh</th>
+                    <th>Số đầu sách hiện có</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -1389,6 +1430,9 @@
                         </td>
                         <td>
                           <%= author.NamSinh || '' %>
+                        </td>
+                        <td>
+                          <%= author.SoDauSach || 0 %>
                         </td>
                         <td>
                           <i class="fas fa-pencil-alt action-icon open-tacgia-edit-modal"></i>

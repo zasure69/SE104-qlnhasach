@@ -28,6 +28,28 @@
       --disabled-bg: #e9ecef;
     }
 
+    /* Badge trạng thái kiểm kê */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .badge-balanced {
+      color: #276749;
+      background-color: #c6f6d5;
+      border: 1px solid #9ae6b4;
+    }
+
+    .badge-discrepancy {
+      color: #c53030;
+      background-color: #fed7d7;
+      border: 1px solid #feb2b2;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -933,17 +955,50 @@
                 <th>Mã Phiếu</th>
                 <th>Ngày Lập</th>
                 <th>Người Lập</th>
-                <th>Tồn Hệ Thống</th>
-                <th>Tồn Thực Tế</th>
+                <th>Trạng Thái</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td colspan="7" style="text-align: center">
-                  Chưa có phiếu kiểm kê nào.
-                </td>
-              </tr>
+              <% if (inventoryReceipts && inventoryReceipts.length > 0) { %>
+                <% inventoryReceipts.forEach((receipt, index) => { %>
+                  <tr data-id="<%= receipt.MaPhieuKiem %>">
+                    <td><%= index + 1 %></td>
+                    <td><%= receipt.MaPhieuKiem %></td>
+                    <td>
+                      <%= new Date(receipt.NgayKiem).toLocaleDateString('vi-VN', { 
+                        day: '2-digit', month: '2-digit', year: 'numeric' 
+                      }) %>
+                    </td>
+                    <td>
+                      <%= receipt.NhanVien ? receipt.NhanVien.HoTen : receipt.MaNhanVien %>
+                    </td>
+                    <td>
+                      <% if (receipt.HasDiscrepancy) { %>
+                        <span class="badge badge-discrepancy">🔴 Lệch <%= receipt.TongLech %> cuốn</span>
+                      <% } else { %>
+                        <span class="badge badge-balanced">🟢 Cân bằng</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <button class="btn btn-sm btn-secondary view-detail-btn" data-id="<%= receipt.MaPhieuKiem %>">
+                        <i class="fas fa-eye"></i> Xem
+                      </button>
+                      <button class="btn btn-sm btn-print ml-2 print-btn" data-id="<%= receipt.MaPhieuKiem %>">
+                        <i class="fas fa-print"></i>
+                      </button>
+                      <i class="fas fa-trash action-icon delete-icon"
+                        style="margin-left: 12px; color: var(--red-accent)"></i>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="6" style="text-align: center">
+                    Chưa có phiếu kiểm kê nào.
+                  </td>
+                </tr>
+              <% } %>
             </tbody>
           </table>
         </div>
@@ -1516,58 +1571,8 @@
           if (result.success) {
             showToast("Thêm phiếu kiểm kê thành công!");
 
-            // Thêm dòng mới vào bảng ngay lập tức
-            const tbody = document.querySelector("#master-table tbody");
-            const firstRow = tbody.rows[0];
-
-            // Xóa dòng "Chưa có phiếu" nếu có
-            if (
-              firstRow &&
-              firstRow.cells.length === 1 &&
-              firstRow.cells[0].colSpan === 7
-            ) {
-              firstRow.remove();
-            }
-
-            const newMaPhieu = result.data.MaPhieuKiem;
-            const receipt = result.data.receipt;
-            const stt = tbody.rows.length + 1;
-
-            // Format ngày
-            const dateObj = new Date(ngayKiem);
-            const dateStr = dateObj.toLocaleDateString("vi-VN");
-
-            // Tính tổng SL từ chiTiet đã gửi
-            let tongSLHeThong = 0;
-            let tongSLThucTe = 0;
-            chiTiet.forEach((item) => {
-              tongSLHeThong += item.SoLuongHeThong || 0;
-              tongSLThucTe += item.SoLuongThucTe || 0;
-            });
-
-            const newRow = tbody.insertRow(0); // Thêm vào đầu bảng
-            newRow.innerHTML = `
-                <td>${stt}</td>
-                <td>${newMaPhieu}</td>
-                <td>${dateStr}</td>
-                <td>${receipt?.NhanVien?.HoTen || maNV}</td>
-                <td>${tongSLHeThong.toLocaleString("vi-VN")}</td>
-                <td>${tongSLThucTe.toLocaleString("vi-VN")}</td>
-                <td>
-                  <button class="btn btn-sm btn-secondary view-detail-btn" data-id="${newMaPhieu}">
-                    <i class="fas fa-eye"></i> Chi tiết
-                  </button>
-                  <button class="btn btn-sm btn-print ml-2 print-btn" data-id="${newMaPhieu}"> 
-                    <i class="fas fa-print"></i>
-                  </button>
-                  <i class="fas fa-trash action-icon delete-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
-                </td>
-              `;
-
-            // Cập nhật lại STT cho các dòng sau
-            Array.from(tbody.rows).forEach((row, index) => {
-              row.cells[0].textContent = index + 1;
-            });
+            // Reload danh sách để hiển thị đúng: Số lượng lệch + Trạng thái
+            await loadInventoryList();
 
             // Xử lý logic: Nếu bấm từ nút "Thêm mới" thì reset form, không đóng modal
             if (isSaveAndReset) {
@@ -1575,6 +1580,7 @@
               showToast("Đã sẵn sàng nhập phiếu kiểm kê tiếp theo.", "info");
               isSaveAndReset = false;
             } else {
+              resetAddForm();
               addModal.style.display = "none";
             }
           } else {
@@ -2140,14 +2146,23 @@
         const receipts = result.data.receipts;
         if (receipts && receipts.length > 0) {
           receipts.forEach((receipt, index) => {
-            // Tính tổng Tồn Hệ Thống và Tồn Thực Tế từ chi tiết
-            let tongSLHeThong = 0;
-            let tongSLThucTe = 0;
-            if (receipt.ChiTiet && receipt.ChiTiet.length > 0) {
-              receipt.ChiTiet.forEach((item) => {
-                tongSLHeThong += item.SoLuongHeThong || 0;
-                tongSLThucTe += item.SoLuongThucTe || 0;
-              });
+            // Tính tổng độ lệch tuyệt đối: Sum(Abs(ThucTe - HeThong))
+            // Nếu API đã trả TongLech/HasDiscrepancy thì ưu tiên dùng
+            let tongLech = Number(receipt.TongLech);
+            let hasDiscrepancy = Boolean(receipt.HasDiscrepancy);
+
+            if (!Number.isFinite(tongLech)) {
+              tongLech = 0;
+              hasDiscrepancy = false;
+              if (receipt.ChiTiet && receipt.ChiTiet.length > 0) {
+                receipt.ChiTiet.forEach((item) => {
+                  const lech = Math.abs(
+                    (item.SoLuongThucTe || 0) - (item.SoLuongHeThong || 0)
+                  );
+                  tongLech += lech;
+                  if (lech > 0) hasDiscrepancy = true;
+                });
+              }
             }
 
             const row = tbody.insertRow();
@@ -2161,8 +2176,13 @@
               receipt.MaNhanVien ||
               "---"
               }</td>
-                            <td>${tongSLHeThong.toLocaleString("vi-VN")}</td>
-                            <td>${tongSLThucTe.toLocaleString("vi-VN")}</td>
+                            <td>
+                              ${hasDiscrepancy
+                                ? `<span class="badge badge-discrepancy">🔴 Lệch ${tongLech.toLocaleString(
+                                    "vi-VN"
+                                  )} cuốn</span>`
+                                : `<span class="badge badge-balanced">🟢 Cân bằng</span>`}
+                            </td>
                             <td>
                                 <button class="btn btn-sm btn-secondary view-detail-btn" data-id="${receipt.MaPhieuKiem
               }">
@@ -2178,7 +2198,7 @@
           });
         } else {
           const row = tbody.insertRow();
-          row.innerHTML = `<td colspan="7" style="text-align: center;">Chưa có phiếu kiểm kê nào.</td>`;
+          row.innerHTML = `<td colspan="6" style="text-align: center;">Chưa có phiếu kiểm kê nào.</td>`;
         }
       }
 

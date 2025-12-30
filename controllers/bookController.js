@@ -310,16 +310,57 @@ const getBooksPage = async (req, res) => {
       };
     });
 
-    const [authors, types] = await Promise.all([
-      db.TacGia.findAll({ where: { isDeleted: false }, raw: true }),
-      db.TheLoai.findAll({ where: { isDeleted: false }, raw: true }),
-    ]);
+    // Lấy danh sách tác giả với số lượng đầu sách
+    const authorsRaw = await db.TacGia.findAll({
+      where: { isDeleted: false },
+      include: [
+        {
+          model: db.DauSach,
+          as: "DauSachs",
+          through: { attributes: [] },
+          where: { isDeleted: false },
+          required: false,
+          attributes: ["MaDauSach"],
+        },
+      ],
+      raw: false,
+    });
+
+    const authors = authorsRaw.map((author) => {
+      const plain = author.get({ plain: true });
+      return {
+        MaTacGia: plain.MaTacGia,
+        HoTen: plain.HoTen,
+        NamSinh: plain.NamSinh,
+        SoDauSach: plain.DauSachs ? plain.DauSachs.length : 0,
+      };
+    });
+
+    const types = await db.TheLoai.findAll({
+      where: { isDeleted: false },
+      raw: true,
+    });
+
+    // Lấy tham số SoLuongTonToiThieuSauKhiBan từ bảng THAMSO
+    let soLuongTonToiThieu = 20; // Giá trị mặc định
+    try {
+      const thamSo = await db.ThamSo.findOne({
+        where: { TenThamSo: "SoLuongTonToiThieuSauKhiBan" },
+        raw: true,
+      });
+      if (thamSo && thamSo.GiaTri !== null) {
+        soLuongTonToiThieu = thamSo.GiaTri;
+      }
+    } catch (e) {
+      console.error("Lỗi khi lấy tham số SoLuongTonToiThieuSauKhiBan:", e);
+    }
 
     console.log("[bookController] Fetched data:", {
       dauSachs: dauSachs.length,
       books: books.length,
       authors: authors.length,
       types: types.length,
+      soLuongTonToiThieu,
     });
 
     // Đảm bảo response có charset UTF-8
@@ -331,6 +372,7 @@ const getBooksPage = async (req, res) => {
       books,
       authors,
       types,
+      soLuongTonToiThieu,
       currentYear: new Date().getFullYear(),
     });
   } catch (err) {
