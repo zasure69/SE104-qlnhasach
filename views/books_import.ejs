@@ -28,6 +28,141 @@
       --disabled-bg: #e9ecef;
     }
 
+    /* Search/Filter panel - Style giống customers */
+    .search-panel-container {
+      background-color: var(--white-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    .search-panel-header {
+      background-color: #f8f9fa;
+      padding: 1rem 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .search-panel-header i {
+      margin-right: 0.5rem;
+      color: var(--secondary-color);
+    }
+
+    .search-panel-body {
+      padding: 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1.25rem;
+      align-items: end;
+    }
+
+    @media (max-width: 1200px) {
+      .search-panel-body {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .search-panel-body {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .search-panel-body .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .search-panel-body .field label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-light);
+    }
+
+    .search-panel-body input,
+    .search-panel-body select {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      background: #fff;
+    }
+
+    .search-panel-body input:focus,
+    .search-panel-body select:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+
+    .search-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .btn-secondary-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-dark);
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: center;
+      min-width: 100px;
+      text-decoration: none;
+    }
+
+    .btn-secondary-outline:hover {
+      background: var(--light-bg);
+    }
+
+    /* Sortable table headers */
+    .sortable {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .sortable:hover {
+      background: rgba(52, 152, 219, 0.1);
+    }
+    .sortable i.fa-sort,
+    .sortable i.fa-sort-up,
+    .sortable i.fa-sort-down {
+      margin-left: 0.35rem;
+      font-size: 0.75rem;
+      opacity: 0.5;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .sortable:hover i {
+      opacity: 1;
+    }
+    .sortable.asc i,
+    .sortable.desc i {
+      opacity: 1;
+      color: var(--secondary-color);
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -906,6 +1041,95 @@
       </header>
 
       <div class="content-wrapper">
+        <!-- Search Panel -->
+        <div class="search-panel-container">
+          <div class="search-panel-header">
+            <span><i class="fas fa-filter"></i> BỘ LỌC TÌM KIẾM</span>
+            <div style="display: flex; gap: 0.5rem;">
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-quick-today" title="Hôm nay">
+                <i class="fas fa-calendar-day"></i> Hôm nay
+              </button>
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-quick-week" title="Tuần này">
+                <i class="fas fa-calendar-week"></i> Tuần này
+              </button>
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-quick-month" title="Tháng này">
+                <i class="fas fa-calendar-alt"></i> Tháng này
+              </button>
+            </div>
+          </div>
+
+          <form method="GET" action="/dashboard/books_import" id="search-form">
+            <div class="search-panel-body">
+              <!-- Hàng 1 -->
+              <div class="field">
+                <label for="f-ma-phieu">Mã phiếu</label>
+                <input id="f-ma-phieu" name="maPhieu" type="text" placeholder="VD: PN001"
+                  value="<%= (filters && filters.maPhieu) ? filters.maPhieu : '' %>" />
+              </div>
+
+              <div class="field">
+                <label for="f-nguoi-lap">Người lập</label>
+                <input id="f-nguoi-lap" name="nguoiLap" type="text" placeholder="Tên/Username..."
+                  value="<%= (filters && filters.nguoiLap) ? filters.nguoiLap : '' %>" />
+              </div>
+
+              <div class="field">
+                <label for="f-ma-sach">Mã/Tên sách</label>
+                <input id="f-ma-sach" name="maSach" type="text" placeholder="Mã hoặc tên sách..."
+                  value="<%= (filters && filters.maSach) ? filters.maSach : '' %>" />
+              </div>
+
+              <div class="field">
+                <label>Ngày nhập từ</label>
+                <input name="from" type="date" id="f-from" value="<%= (filters && filters.from) ? filters.from : '' %>" />
+              </div>
+
+              <!-- Hàng 2 -->
+              <div class="field">
+                <label>Đến ngày</label>
+                <input name="to" type="date" id="f-to" value="<%= (filters && filters.to) ? filters.to : '' %>" />
+              </div>
+
+              <div class="field">
+                <label>Số lượng từ</label>
+                <input name="minSoLuong" type="number" min="0" placeholder="Tối thiểu"
+                  value="<%= (filters && filters.minSoLuong) ? filters.minSoLuong : '' %>" />
+              </div>
+
+              <div class="field">
+                <label>Đến (cuốn)</label>
+                <input name="maxSoLuong" type="number" min="0" placeholder="Tối đa"
+                  value="<%= (filters && filters.maxSoLuong) ? filters.maxSoLuong : '' %>" />
+              </div>
+
+              <div class="field">
+                <label>Tổng tiền từ</label>
+                <input name="minTien" type="number" min="0" placeholder="Tối thiểu (VNĐ)"
+                  value="<%= (filters && filters.minTien) ? filters.minTien : '' %>" />
+              </div>
+
+              <!-- Hàng 3 -->
+              <div class="field">
+                <label>Đến (VNĐ)</label>
+                <input name="maxTien" type="number" min="0" placeholder="Tối đa"
+                  value="<%= (filters && filters.maxTien) ? filters.maxTien : '' %>" />
+              </div>
+
+              <!-- Nút bấm -->
+              <div class="field" style="grid-column: span 3;">
+                <div class="search-actions">
+                  <a class="btn-secondary-outline" href="/dashboard/books_import">
+                    <i class="fas fa-rotate-left"></i> LÀM MỚI
+                  </a>
+                  <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-search"></i> TÌM KIẾM
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
         <div class="content-header">
           <h2>Danh sách Phiếu nhập sách</h2>
           <button class="btn btn-primary btn-add-new" id="open-add-modal">
@@ -918,11 +1142,11 @@
             <thead>
               <tr>
                 <th>STT</th>
-                <th>Mã Phiếu</th>
-                <th>Ngày Nhập</th>
-                <th>Người Lập</th>
-                <th style="text-align: center">Tổng số lượng</th>
-                <th style="text-align: right">Tổng tiền</th>
+                <th class="sortable" data-sort="maPhieu">Mã Phiếu <i class="fas fa-sort"></i></th>
+                <th class="sortable" data-sort="ngayNhap">Ngày Nhập <i class="fas fa-sort"></i></th>
+                <th class="sortable" data-sort="nguoiLap">Người Lập <i class="fas fa-sort"></i></th>
+                <th class="sortable" data-sort="soLuong" style="text-align: center">Tổng số lượng <i class="fas fa-sort"></i></th>
+                <th class="sortable" data-sort="tongTien" style="text-align: right">Tổng tiền <i class="fas fa-sort"></i></th>
                 <th></th>
               </tr>
             </thead>
@@ -962,8 +1186,9 @@
                   <% }) %>
                     <% } else { %>
                       <tr>
-                        <td colspan="6" style="text-align: center">
-                          Chưa có phiếu nhập sách nào.
+                        <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                          <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
+                          Không tìm thấy phiếu nhập sách nào phù hợp
                         </td>
                       </tr>
                       <% } %>
@@ -1213,6 +1438,135 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
+
+      // --- 0. QUICK FILTERS & TABLE SORTING ---
+      
+      // Quick filter buttons
+      const btnQuickToday = document.getElementById('btn-quick-today');
+      const btnQuickWeek = document.getElementById('btn-quick-week');
+      const btnQuickMonth = document.getElementById('btn-quick-month');
+      const fFrom = document.getElementById('f-from');
+      const fTo = document.getElementById('f-to');
+      const searchForm = document.getElementById('search-form');
+
+      function formatDateForInput(date) {
+        return date.toISOString().split('T')[0];
+      }
+
+      if (btnQuickToday) {
+        btnQuickToday.addEventListener('click', () => {
+          const today = new Date();
+          fFrom.value = formatDateForInput(today);
+          fTo.value = formatDateForInput(today);
+          searchForm.submit();
+        });
+      }
+
+      if (btnQuickWeek) {
+        btnQuickWeek.addEventListener('click', () => {
+          const today = new Date();
+          const firstDay = new Date(today);
+          firstDay.setDate(today.getDate() - today.getDay() + 1); // Monday
+          fFrom.value = formatDateForInput(firstDay);
+          fTo.value = formatDateForInput(today);
+          searchForm.submit();
+        });
+      }
+
+      if (btnQuickMonth) {
+        btnQuickMonth.addEventListener('click', () => {
+          const today = new Date();
+          const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+          fFrom.value = formatDateForInput(firstDay);
+          fTo.value = formatDateForInput(today);
+          searchForm.submit();
+        });
+      }
+
+      // Table sorting
+      const sortableHeaders = document.querySelectorAll('#master-table .sortable');
+      let currentSort = { column: null, direction: 'asc' };
+
+      sortableHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+          const sortKey = header.dataset.sort;
+          const tbody = document.querySelector('#master-table tbody');
+          const rows = Array.from(tbody.querySelectorAll('tr'));
+
+          // Toggle direction
+          if (currentSort.column === sortKey) {
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+          } else {
+            currentSort.column = sortKey;
+            currentSort.direction = 'asc';
+          }
+
+          // Update header icons
+          sortableHeaders.forEach(h => {
+            h.classList.remove('asc', 'desc');
+            const icon = h.querySelector('i');
+            if (icon) {
+              icon.className = 'fas fa-sort';
+            }
+          });
+          header.classList.add(currentSort.direction);
+          const icon = header.querySelector('i');
+          if (icon) {
+            icon.className = currentSort.direction === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+          }
+
+          // Sort rows
+          rows.sort((a, b) => {
+            let aVal, bVal;
+            
+            switch (sortKey) {
+              case 'maPhieu':
+                aVal = a.cells[1]?.textContent.trim() || '';
+                bVal = b.cells[1]?.textContent.trim() || '';
+                break;
+              case 'ngayNhap':
+                aVal = parseVietnameseDate(a.cells[2]?.textContent.trim() || '');
+                bVal = parseVietnameseDate(b.cells[2]?.textContent.trim() || '');
+                return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+              case 'nguoiLap':
+                aVal = a.cells[3]?.textContent.trim() || '';
+                bVal = b.cells[3]?.textContent.trim() || '';
+                break;
+              case 'soLuong':
+                aVal = parseNumber(a.cells[4]?.textContent.trim() || '0');
+                bVal = parseNumber(b.cells[4]?.textContent.trim() || '0');
+                return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+              case 'tongTien':
+                aVal = parseNumber(a.cells[5]?.textContent.trim() || '0');
+                bVal = parseNumber(b.cells[5]?.textContent.trim() || '0');
+                return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+              default:
+                return 0;
+            }
+            
+            return currentSort.direction === 'asc' 
+              ? aVal.localeCompare(bVal, 'vi') 
+              : bVal.localeCompare(aVal, 'vi');
+          });
+
+          // Re-append rows
+          rows.forEach((row, idx) => {
+            tbody.appendChild(row);
+            if (row.cells.length > 1) {
+              row.cells[0].textContent = idx + 1;
+            }
+          });
+        });
+      });
+
+      function parseVietnameseDate(dateStr) {
+        // Format: DD/MM/YYYY
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+          return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+        }
+        return 0;
+      }
 
       // --- 1. BIẾN TOÀN CỤC & TIỆN ÍCH ---
       const loader = document.getElementById('loader');
@@ -2055,7 +2409,7 @@
                   // Nếu <tbody> không còn hàng nào
                   const newRow = tableBody.insertRow(); // Thêm 1 hàng mới
                   // Thêm ô "Không có phiếu nhập sách nào"
-                  newRow.innerHTML = `<td colspan="6" style="text-align: center;">Chưa có phiếu nhập sách nào.</td>`;
+                  newRow.innerHTML = `<td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-light);"><i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>Không tìm thấy phiếu nhập sách nào phù hợp</td>`;
                 }
               } else {
                 showToast(result.error || 'Có lỗi xảy ra!', 'error');

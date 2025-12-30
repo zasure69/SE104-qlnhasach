@@ -246,6 +246,116 @@
             font-weight: 700;
         }
 
+        /* --- Search/Filter Panel (Style giống customers) --- */
+        .search-panel-container {
+            background-color: var(--white-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+        }
+
+        .search-panel-header {
+            background-color: #f8f9fa;
+            padding: 1rem 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        .search-panel-header i {
+            margin-right: 0.5rem;
+            color: var(--secondary-color);
+        }
+
+        .search-panel-body {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1.25rem;
+            align-items: end;
+        }
+
+        @media (max-width: 1200px) {
+            .search-panel-body {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .search-panel-body {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .search-panel-body .field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .search-panel-body label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .search-panel-body input,
+        .search-panel-body select {
+            width: 100%;
+            padding: 0.65rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: #fff;
+        }
+
+        .search-panel-body input:focus,
+        .search-panel-body select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .search-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .btn-secondary-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+            min-width: 100px;
+            text-decoration: none;
+        }
+
+        .btn-secondary-outline:hover {
+            background: var(--light-bg);
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
         /* --- Các loại nút --- */
         .btn {
             padding: 0.75rem 1.25rem;
@@ -886,10 +996,75 @@
             </header>
 
             <div class="content-wrapper">
+                <!-- Bộ lọc tìm kiếm -->
+                <div class="search-panel-container">
+                    <div class="search-panel-header">
+                        <span><i class="fas fa-filter"></i> BỘ LỌC TÌM KIẾM</span>
+                    </div>
+                    <form method="GET" action="/dashboard/employees">
+                        <div class="search-panel-body">
+                            <div class="field">
+                                <label for="f-ma-nv">Mã NV</label>
+                                <input id="f-ma-nv" name="maNhanVien" type="text" placeholder="VD: NV001"
+                                    value="<%= (filters && filters.maNhanVien) ? filters.maNhanVien : '' %>" />
+                            </div>
+
+                            <div class="field">
+                                <label for="f-ho-ten">Họ tên</label>
+                                <input id="f-ho-ten" name="hoTen" type="text" placeholder="Nhập họ tên..."
+                                    value="<%= (filters && filters.hoTen) ? filters.hoTen : '' %>" />
+                            </div>
+
+                            <div class="field">
+                                <label for="f-sdt">Số điện thoại</label>
+                                <input id="f-sdt" name="soDienThoai" type="text" placeholder="Nhập SĐT..."
+                                    value="<%= (filters && filters.soDienThoai) ? filters.soDienThoai : '' %>" />
+                            </div>
+
+                            <div class="field">
+                                <label for="f-chuc-vu">Chức vụ</label>
+                                <select id="f-chuc-vu" name="chucVu">
+                                    <option value="" <%= (!filters || !filters.chucVu) ? 'selected' : '' %>>Tất cả</option>
+                                    <option value="Admin" <%= (filters && filters.chucVu === 'Admin') ? 'selected' : '' %>>Admin</option>
+                                    <option value="Chủ cửa hàng" <%= (filters && filters.chucVu === 'Chủ cửa hàng') ? 'selected' : '' %>>Chủ cửa hàng</option>
+                                    <option value="Thủ kho" <%= (filters && filters.chucVu === 'Thủ kho') ? 'selected' : '' %>>Thủ kho</option>
+                                    <option value="Nhân viên" <%= (filters && filters.chucVu === 'Nhân viên') ? 'selected' : '' %>>Nhân viên</option>
+                                </select>
+                            </div>
+
+                            <div class="field">
+                                <label for="f-username">Username</label>
+                                <input id="f-username" name="username" type="text" placeholder="Nhập username..."
+                                    value="<%= (filters && filters.username) ? filters.username : '' %>" />
+                            </div>
+
+                            <div class="field">
+                                <label>Ngày nhận việc</label>
+                                <div class="two-col">
+                                    <input type="date" name="fromNgayNhanViec" placeholder="Từ ngày"
+                                        value="<%= (filters && filters.fromNgayNhanViec) ? filters.fromNgayNhanViec : '' %>" />
+                                    <input type="date" name="toNgayNhanViec" placeholder="Đến ngày"
+                                        value="<%= (filters && filters.toNgayNhanViec) ? filters.toNgayNhanViec : '' %>" />
+                                </div>
+                            </div>
+
+                            <div class="field search-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> TÌM KIẾM
+                                </button>
+                                <a href="/dashboard/employees" class="btn-secondary-outline" style="text-decoration:none">
+                                    <i class="fas fa-redo"></i> LÀM MỚI
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Content header với danh sách và nút thêm mới -->
                 <div class="content-header">
                     <h2>Danh sách Nhân viên</h2>
                     <button class="btn btn-primary btn-add-new" id="open-add-modal">
-                        <i class="fas fa-plus"></i> Thêm mới Nhân viên
+                        <i class="fas fa-plus"></i> THÊM MỚI NHÂN VIÊN
                     </button>
                 </div>
 
