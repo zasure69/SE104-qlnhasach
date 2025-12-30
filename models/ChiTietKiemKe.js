@@ -16,7 +16,7 @@ const ChiTietKiemKe = sequelize.define(
       },
     },
     MaSach: {
-      type: DataTypes.STRING(15), // QUAN TRỌNG: Khớp với Sach
+      type: DataTypes.STRING(15),
       primaryKey: true,
       allowNull: false,
       references: {
@@ -31,9 +31,6 @@ const ChiTietKiemKe = sequelize.define(
     SoLuongThucTe: {
       type: DataTypes.INTEGER,
       allowNull: false,
-    },
-    LyDo: {
-      type: DataTypes.TEXT,
     },
   },
   {

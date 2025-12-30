@@ -1401,6 +1401,7 @@
                 <thead>
                   <tr>
                     <th style="width: 50px;">STT</th>
+                    <th style="width: 60px;">Ảnh</th>
                     <th>Mã sách</th>
                     <th>Tên sách</th>
                     <th>Thể loại</th>
@@ -1418,6 +1419,11 @@
                       <tr data-id="<%= book.MaSach %>">
                         <td>
                           <%= index + 1 %>
+                        </td>
+                        <td>
+                          <div class="book-thumb">
+                            <i class="fas fa-book"></i>
+                          </div>
                         </td>
                         <td>
                           <%= book.MaSach %>
@@ -1460,7 +1466,7 @@
                       <% }) %>
                   <% } else { %>
                     <tr>
-                      <td colspan="10" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                      <td colspan="11" style="text-align: center; padding: 2rem; color: var(--text-light);">
                         <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
                         Không tìm thấy sách nào phù hợp
                       </td>
@@ -1814,6 +1820,19 @@
             <div class="form-group">
               <label for="edit-so-luong-ton-s">Số lượng tồn</label>
               <input type="number" min="0" id="edit-so-luong-ton-s" readonly />
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label for="edit-anh-bia-s">Ảnh bìa</label>
+              <input type="file" id="edit-anh-bia-s" name="anhBia" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" />
+              <small style="color: #666; display: block; margin-top: 5px;">
+                Chấp nhận: JPEG, JPG, PNG, GIF, WEBP. Tối đa 5MB
+              </small>
+              <div id="edit-image-preview" style="margin-top: 10px; display: none;">
+                <img id="edit-preview-img" src="" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;" />
+                <button type="button" id="edit-remove-image" class="btn btn-secondary btn-sm" style="display: block; margin-top: 5px;">
+                  <i class="fas fa-times"></i> Xóa ảnh
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -2424,22 +2443,20 @@
       if (addSachForm) {
         addSachForm.addEventListener('submit', async (e) => {
           e.preventDefault();
-          
+          const formData = {
+            MaDauSach: document.getElementById('add-ma-dau-sach-s').value.trim(),
+            NhaXB: document.getElementById('add-nxb-s').value.trim(),
+            NamXB: document.getElementById('add-nam-xb-s').value.trim()
+            // Không gửi SoLuongTon - sẽ được tính tự động từ phiếu nhập
+          };
+
+          console.log('[DEBUG] Calling POST /api/books/createSach with:', formData);
           showLoader();
           try {
-            const createData = {
-              MaDauSach: document.getElementById('add-ma-dau-sach-s').value.trim(),
-              NhaXB: document.getElementById('add-nxb-s').value.trim(),
-              NamXB: document.getElementById('add-nam-xb-s').value.trim()
-            };
-
-            console.log('[DEBUG] Calling POST /api/books/createSach with JSON:', createData);
             const response = await fetch('/api/books/createSach', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(createData)
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(formData)
             });
             const data = await response.json();
             hideLoader();
@@ -2470,10 +2487,9 @@
                         <td>${document.getElementById('add-ten-sach-s').value}</td>
                         <td>${document.getElementById('add-the-loai-s').value}</td>
                         <td>${document.getElementById('add-tac-gia-s').value}</td>
-                        <td>${createData.NhaXB || ''}</td>
-                        <td>${createData.NamXB || ''}</td>
+                        <td>${formData.NhaXB || ''}</td>
+                        <td>${formData.NamXB || ''}</td>
                         <td>0</td>
-                        <td><span class="badge badge-in-stock">🟢 Còn hàng</span></td>
                         <td>
                             <i class="fas fa-pencil-alt action-icon open-sach-edit-modal"></i>
                             <i class="fas fa-trash action-icon delete-icon delete-sach-icon" style="margin-left: 12px; color: var(--red-accent);"></i>
@@ -2502,62 +2518,31 @@
       const editSachForm = document.getElementById('edit-sach-form');
       let originalSachData = null; // Lưu dữ liệu ban đầu
 
-      document.getElementById('table-sach').addEventListener('click', async (e) => {
+      document.getElementById('table-sach').addEventListener('click', (e) => {
         if (e.target.classList.contains('open-sach-edit-modal') ||
           e.target.closest('.open-sach-edit-modal')) {
           const row = e.target.closest('tr');
           if (!row) return;
 
           const cells = row.cells;
-          const maSach = cells[1].textContent.trim();
-          
-          // Load dữ liệu từ API
-          try {
-            const response = await fetch(`/api/books/getSach/${maSach}`);
-            const data = await response.json();
-            
-            if (response.ok && data.sach) {
-              document.getElementById('edit-ma-sach-s').value = data.sach.MaSach;
-              document.getElementById('edit-ten-sach-s').value = data.sach.DauSach?.TenSach || cells[2].textContent.trim();
-              document.getElementById('edit-tac-gia-s').value = cells[4].textContent.trim();
-              document.getElementById('edit-the-loai-s').value = cells[3].textContent.trim();
-              document.getElementById('edit-nxb-s').value = data.sach.NhaXB || '';
-              document.getElementById('edit-nam-xb-s').value = data.sach.NamXB || '';
-              document.getElementById('edit-so-luong-ton-s').value = data.sach.SoLuongTon || '0';
-              
-              // Lưu dữ liệu ban đầu
-              originalSachData = {
-                maSach: data.sach.MaSach,
-                tenSach: data.sach.DauSach?.TenSach || cells[2].textContent.trim(),
-                tacGia: cells[4].textContent.trim(),
-                theLoai: cells[3].textContent.trim(),
-                nhaXB: data.sach.NhaXB || '',
-                namXB: data.sach.NamXB || '',
-                soLuongTon: data.sach.SoLuongTon || '0'
-              };
-            }
-          } catch (error) {
-            console.error('[ERROR] getSach:', error);
-            // Fallback to table data
-            document.getElementById('edit-ma-sach-s').value = cells[1].textContent.trim();
-            document.getElementById('edit-ten-sach-s').value = cells[2].textContent.trim();
-            document.getElementById('edit-tac-gia-s').value = cells[4].textContent.trim();
-            document.getElementById('edit-the-loai-s').value = cells[3].textContent.trim();
-            document.getElementById('edit-nxb-s').value = cells[5].textContent.trim();
-            document.getElementById('edit-nam-xb-s').value = cells[6].textContent.trim();
-            document.getElementById('edit-so-luong-ton-s').value = cells[7].textContent.trim();
+          document.getElementById('edit-ma-sach-s').value = cells[1].textContent.trim();
+          document.getElementById('edit-ten-sach-s').value = cells[2].textContent.trim();
+          document.getElementById('edit-tac-gia-s').value = cells[4].textContent.trim();
+          document.getElementById('edit-the-loai-s').value = cells[3].textContent.trim();
+          document.getElementById('edit-nxb-s').value = cells[5].textContent.trim();
+          document.getElementById('edit-nam-xb-s').value = cells[6].textContent.trim();
+          document.getElementById('edit-so-luong-ton-s').value = cells[7].textContent.trim();
 
-            // Lưu dữ liệu ban đầu
-            originalSachData = {
-              maSach: cells[1].textContent.trim(),
-              tenSach: cells[2].textContent.trim(),
-              tacGia: cells[4].textContent.trim(),
-              theLoai: cells[3].textContent.trim(),
-              nhaXB: cells[5].textContent.trim(),
-              namXB: cells[6].textContent.trim(),
-              soLuongTon: cells[7].textContent.trim()
-            };
-          }
+          // Lưu dữ liệu ban đầu
+          originalSachData = {
+            maSach: cells[1].textContent.trim(),
+            tenSach: cells[2].textContent.trim(),
+            tacGia: cells[4].textContent.trim(),
+            theLoai: cells[3].textContent.trim(),
+            nhaXB: cells[5].textContent.trim(),
+            namXB: cells[6].textContent.trim(),
+            soLuongTon: cells[7].textContent.trim()
+          };
 
           editSachModal.style.display = 'flex';
         }
@@ -2603,20 +2588,19 @@
         editSachForm.addEventListener('submit', async (e) => {
           e.preventDefault();
           const maSach = document.getElementById('edit-ma-sach-s').value;
-          
-          // Chuẩn bị data JSON để update
-          const updateData = {
+          const formData = {
             NhaXB: document.getElementById('edit-nxb-s').value.trim(),
             NamXB: document.getElementById('edit-nam-xb-s').value.trim()
+            // Không gửi SoLuongTon - nó được tính tự động từ phiếu nhập và hóa đơn
           };
 
-          console.log(`[DEBUG] Calling PATCH /api/books/updateSach/${maSach} with:`, updateData);
+          console.log(`[DEBUG] Calling PATCH /api/books/updateSach/${maSach} with:`, formData);
           showLoader();
           try {
             const response = await fetch(`/api/books/updateSach/${maSach}`, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(updateData)
+              body: JSON.stringify(formData)
             });
             const data = await response.json();
             hideLoader();
@@ -2629,10 +2613,8 @@
               // Cập nhật UI trực tiếp - tìm và cập nhật row
               const row = document.querySelector(`#table-sach tr[data-id="${maSach}"]`);
               if (row) {
-                const nhaXB = document.getElementById('edit-nxb-s').value.trim();
-                const namXB = document.getElementById('edit-nam-xb-s').value.trim();
-                row.cells[5].textContent = nhaXB || '';
-                row.cells[6].textContent = namXB || '';
+                row.cells[5].textContent = formData.NhaXB || '';
+                row.cells[6].textContent = formData.NamXB || '';
               }
             } else {
               showToast(data.error || 'Có lỗi xảy ra!', 'error');

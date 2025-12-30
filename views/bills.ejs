@@ -1560,6 +1560,7 @@
       role: "<%= role %>",
       MaNV: "<%= MaNV %>", // Biến này lấy từ dashboardController
     };
+    
     function setupPaymentValidation(prefix) {
       const paidInput = document.getElementById(`${prefix}-amount-paid`);
       // Giả sử tổng tiền được lưu trong input hidden hoặc span có id là total-amount
@@ -1589,9 +1590,12 @@
             // Cách 2: Hoặc chỉ đơn giản là không cho nhập số đó (hoàn tác)
             // Nhưng cách 1 UX tốt hơn vì giúp khách trả đủ ngay lập tức.
           }
+          
+          // Kiểm tra và hiển thị thông báo hoàn tiền nếu cần
         });
       }
     }
+    
     document.addEventListener("DOMContentLoaded", function () {
       // --- Filter UI helpers (Còn nợ) ---
       const opConNo = document.getElementById("op-con-no");
@@ -1761,6 +1765,8 @@
 
         const prefix = tableId.split("-")[0]; // 'add' hoặc 'edit'
         calculateRemaining(prefix);
+        
+        // Kiểm tra thông báo hoàn tiền khi cập nhật tổng (chỉ cho modal edit)
       };
 
       // Hàm tính tiền nợ
@@ -2780,7 +2786,7 @@
                 editModal.style.display = "none";
                 setTimeout(() => {
                   location.reload();
-                }, 1000);
+                }, 1500);
               } else {
                 showToast(`Cập nhật thất bại: ${data.message}`, "error");
               }
