@@ -671,11 +671,47 @@ const getDeletedImportReceipts = async (req, res) => {
   try {
     const receipts = await db.PhieuNhapSach.findAll({
       where: { isDeleted: true },
-      include: [{ model: db.CT_PNS, as: "ChiTiet", required: false }],
+      include: [{
+        model: db.CT_PNS,
+        as: "ChiTiet",
+        required: false,
+        include: [{
+          model: db.Sach,
+          attributes: ['MaSach', 'isDeleted'],
+          include: [{
+            model: db.DauSach,
+            attributes: ['TenSach']
+          }]
+        }]
+      }],
       order: [["NgayNhapPhieu", "DESC"]],
       raw: false,
     });
-    return res.status(200).json({ receipts });
+    
+    const result = receipts.map(receipt => {
+      const plain = receipt.get({ plain: true });
+      
+      // Kiểm tra xem có sách nào đã bị xóa không
+      let hasDeletedSach = false;
+      let deletedSachCount = 0;
+      
+      if (plain.ChiTiet) {
+        for (const detail of plain.ChiTiet) {
+          if (detail.Sach && detail.Sach.isDeleted) {
+            hasDeletedSach = true;
+            deletedSachCount++;
+          }
+        }
+      }
+      
+      return {
+        ...plain,
+        hasDeletedSach,
+        deletedSachCount
+      };
+    });
+    
+    return res.status(200).json({ receipts: result });
   } catch (err) {
     console.error("[importController] getDeletedImportReceipts error", err);
     return res.status(500).json({ error: "Lỗi server nội bộ" });
@@ -688,7 +724,22 @@ const getDeletedImportReceipts = async (req, res) => {
 const restoreImportReceipt = async (req, res) => {
   try {
     const maPhieu = req.params.maPhieu;
-    const receipt = await db.PhieuNhapSach.findByPk(maPhieu);
+    const restoreSachToo = req.query.restoreSach === 'true';
+    
+    const receipt = await db.PhieuNhapSach.findByPk(maPhieu, {
+      include: [{
+        model: db.CT_PNS,
+        as: 'ChiTiet',
+        include: [{
+          model: db.Sach,
+          attributes: ['MaSach', 'isDeleted'],
+          include: [{
+            model: db.DauSach,
+            attributes: ['TenSach']
+          }]
+        }]
+      }]
+    });
 
     if (!receipt) {
       return res.status(404).json({ error: "Không tìm thấy phiếu nhập" });
@@ -697,9 +748,42 @@ const restoreImportReceipt = async (req, res) => {
     if (!receipt.isDeleted) {
       return res.status(400).json({ error: "Phiếu nhập này chưa bị xóa." });
     }
+    
+    // Kiểm tra xem có sách nào đã bị xóa không
+    const deletedSachList = [];
+    if (receipt.ChiTiet) {
+      for (const detail of receipt.ChiTiet) {
+        if (detail.Sach && detail.Sach.isDeleted) {
+          deletedSachList.push({
+            MaSach: detail.Sach.MaSach,
+            TenSach: detail.Sach.DauSach?.TenSach || detail.Sach.MaSach
+          });
+        }
+      }
+    }
+    
+    if (deletedSachList.length > 0 && !restoreSachToo) {
+      const sachNames = deletedSachList.map(s => `"${s.TenSach}" (${s.MaSach})`).join(', ');
+      return res.status(409).json({
+        error: "Có sách liên kết đã bị xóa",
+        requireSachRestore: true,
+        deletedSachList: deletedSachList,
+        message: `Các sách sau đã bị xóa: ${sachNames}. Bạn có muốn khôi phục cả các sách này không?`
+      });
+    }
 
     // Khôi phục phiếu nhập và cộng lại tồn kho
     await db.sequelize.transaction(async (t) => {
+      // Khôi phục các sách đã bị xóa nếu cần
+      if (restoreSachToo && deletedSachList.length > 0) {
+        for (const sachInfo of deletedSachList) {
+          await db.Sach.update(
+            { isDeleted: false },
+            { where: { MaSach: sachInfo.MaSach }, transaction: t }
+          );
+        }
+      }
+      
       const details = await db.CT_PNS.findAll({
         where: { MaPhieuNhap: maPhieu },
         transaction: t,
@@ -717,10 +801,12 @@ const restoreImportReceipt = async (req, res) => {
 
       await receipt.update({ isDeleted: false }, { transaction: t });
     });
+    
+    const successMessage = restoreSachToo && deletedSachList.length > 0
+      ? `Khôi phục phiếu nhập và ${deletedSachList.length} sách liên kết thành công!`
+      : "Khôi phục phiếu nhập thành công!";
 
-    return res
-      .status(200)
-      .json({ message: "Khôi phục phiếu nhập thành công!" });
+    return res.status(200).json({ message: successMessage });
   } catch (err) {
     console.error("[importController] restoreImportReceipt error", err);
     return res.status(500).json({ error: "Lỗi server nội bộ" });

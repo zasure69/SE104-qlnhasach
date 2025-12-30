@@ -1585,8 +1585,8 @@
                         const ngaySinhInput = document.getElementById('edit-ngay-sinh').value;
                         const ngayNhanViecInput = document.getElementById('edit-ngay-nhan-viec').value;
 
-                        if (!checkAgeRequirement(ngaySinhInput, ngayNhanViecInput)) {
-                            showToast('Nhân viên chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
+                        if (!checkDateRequirement(ngaySinhInput, ngayNhanViecInput)) {
+                            showToast('Ngày nhận việc phải nằm sau ngày sinh!', 'error');
                             return; // Dừng lại, không gửi dữ liệu đi
                         }
 
@@ -1726,8 +1726,8 @@
                     const ngaySinhInput = document.getElementById('add-ngay-sinh').value;
                     const ngayNhanViecInput = document.getElementById('add-ngay-nhan-viec').value;
 
-                    if (!checkAgeRequirement(ngaySinhInput, ngayNhanViecInput)) {
-                        showToast('Nhân viên chưa đủ 18 tuổi tính đến ngày nhận việc!', 'error');
+                    if (!checkDateRequirement(ngaySinhInput, ngayNhanViecInput)) {
+                        showToast('Ngày nhận việc phải nằm sau ngày sinh!', 'error');
                         isSaveAndReset = false;
                         return; // Dừng lại, không gửi dữ liệu đi
                     }
@@ -1760,6 +1760,7 @@
                             }
                             fetchEmployees(); // tải lại danh sách nhân viên
                         } else {
+                            console.log(result)
                             showToast(`Thêm thất bại: ${result.error}`, 'error');
                         }
                     } catch (err) {
@@ -1872,23 +1873,19 @@
             // Gọi hàm khởi tạo validation
             setupInputValidation();
 
-            // --- 8. HÀM KIỂM TRA ĐỦ 18 TUỔI (MỚI) ---
-            function checkAgeRequirement(ngaySinhStr, ngayNhanViecStr) {
+            // --- 8. HÀM KIỂM TRA NGÀY NHẬN VIỆC PHẢI SAU NGÀY SINH ---
+            function checkDateRequirement(ngaySinhStr, ngayNhanViecStr) {
                 if (!ngaySinhStr || !ngayNhanViecStr) return true; // Để validator của HTML lo nếu rỗng
 
                 const ngaySinh = new Date(ngaySinhStr);
                 const ngayNhanViec = new Date(ngayNhanViecStr);
 
-                // Tính ngày sinh nhật thứ 18
-                const sinhNhatThu18 = new Date(ngaySinh);
-                sinhNhatThu18.setFullYear(ngaySinh.getFullYear() + 18);
-
-                // So sánh: Nếu ngày vào làm < ngày sinh nhật thứ 18 -> Chưa đủ tuổi
                 // setHours(0,0,0,0) để chỉ so sánh ngày, bỏ qua giờ giấc
+                ngaySinh.setHours(0, 0, 0, 0);
                 ngayNhanViec.setHours(0, 0, 0, 0);
-                sinhNhatThu18.setHours(0, 0, 0, 0);
 
-                if (ngayNhanViec < sinhNhatThu18) {
+                // Kiểm tra: Ngày nhận việc phải nằm sau ngày sinh
+                if (ngayNhanViec < ngaySinh) {
                     return false;
                 }
                 return true;
