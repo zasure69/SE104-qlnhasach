@@ -344,21 +344,116 @@ const getReceiptsPage = async (req, res) => {
   try {
     const userInfo = getUserInfo(req);
 
-    // 1. Lấy danh sách phiếu thu chưa bị xóa, JOIN với Khách hàng
+    const filters = {
+      maPhieuThu: (req.query.maPhieuThu || "").trim(),
+      khachHang: (req.query.khachHang || "").trim(),
+      sdt: (req.query.sdt || "").trim(),
+      from: (req.query.from || "").trim(),
+      to: (req.query.to || "").trim(),
+      opSoTien: (req.query.opSoTien || "").trim(),
+      soTien1: (req.query.soTien1 || "").trim(),
+      soTien2: (req.query.soTien2 || "").trim(),
+      nguoiLap: (req.query.nguoiLap || "").trim(),
+    };
+
+    const andConditions = [{ isDeleted: false }];
+
+    if (filters.maPhieuThu) {
+      andConditions.push({
+        MaPhieuThu: { [Op.like]: `%${filters.maPhieuThu}%` },
+      });
+    }
+
+    if (filters.from || filters.to) {
+      let start = null;
+      let end = null;
+      if (filters.from) {
+        start = new Date(filters.from);
+        start.setHours(0, 0, 0, 0);
+      }
+      if (filters.to) {
+        end = new Date(filters.to);
+        end.setHours(23, 59, 59, 999);
+      }
+
+      if (start && end) {
+        andConditions.push({ NgayThuTien: { [Op.between]: [start, end] } });
+      } else if (start) {
+        andConditions.push({ NgayThuTien: { [Op.gte]: start } });
+      } else if (end) {
+        andConditions.push({ NgayThuTien: { [Op.lte]: end } });
+      }
+    }
+
+    if (filters.opSoTien) {
+      const soTien1 = parseFloat(filters.soTien1);
+      const soTien2 = parseFloat(filters.soTien2);
+
+      if (filters.opSoTien === "range") {
+        if (!Number.isNaN(soTien1) && !Number.isNaN(soTien2)) {
+          const min = Math.min(soTien1, soTien2);
+          const max = Math.max(soTien1, soTien2);
+          andConditions.push({ SoTienThu: { [Op.between]: [min, max] } });
+        } else if (!Number.isNaN(soTien1)) {
+          andConditions.push({ SoTienThu: { [Op.gte]: soTien1 } });
+        }
+      } else {
+        const opMap = {
+          eq: Op.eq,
+          gt: Op.gt,
+          gte: Op.gte,
+          lt: Op.lt,
+          lte: Op.lte,
+        };
+        const sequelizeOp = opMap[filters.opSoTien];
+        if (sequelizeOp && !Number.isNaN(soTien1)) {
+          andConditions.push({ SoTienThu: { [sequelizeOp]: soTien1 } });
+        }
+      }
+    }
+
+    const where = andConditions.length > 0 ? { [Op.and]: andConditions } : {};
+
+    const customerWhere = {};
+    if (filters.khachHang) {
+      customerWhere.HoVaTen = { [Op.like]: `%${filters.khachHang}%` };
+    }
+    if (filters.sdt) {
+      customerWhere.SoDienThoai = { [Op.like]: `%${filters.sdt}%` };
+    }
+    const hasCustomerWhere = Object.keys(customerWhere).length > 0;
+
+    const employeeWhere = {};
+    if (filters.nguoiLap) {
+      employeeWhere[Op.or] = [
+        { HoTen: { [Op.like]: `%${filters.nguoiLap}%` } },
+        { Username: { [Op.like]: `%${filters.nguoiLap}%` } },
+      ];
+    }
+    const hasEmployeeWhere = Object.keys(employeeWhere).length > 0;
+
+    // 1. Lấy danh sách phiếu thu chưa bị xóa, JOIN với Khách hàng + Nhân viên
     const receipts = await db.PhieuThuTien.findAll({
-      where: { isDeleted: false },
-      // PhieuThuTien.belongsTo(KhachHang) đã được thiết lập trong index.js
+      where,
       include: [
         {
           model: db.KhachHang,
-          as: "KhachHang", // Đảm bảo alias này khớp với mối quan hệ đã định nghĩa
-          attributes: ["HoVaTen", "TongNo"], // Lấy tên và nợ của khách hàng
+          as: "KhachHang",
+          attributes: ["HoVaTen", "TongNo", "SoDienThoai"],
+          required: hasCustomerWhere,
+          ...(hasCustomerWhere ? { where: customerWhere } : {}),
+        },
+        {
+          model: db.NhanVien,
+          attributes: ["MaNhanVien", "HoTen", "Username"],
+          required: hasEmployeeWhere,
+          ...(hasEmployeeWhere ? { where: employeeWhere } : {}),
         },
       ],
       order: [
+        ["NgayThuTien", "ASC"],
         ["MaPhieuThu", "ASC"],
-        ["NgayThuTien", "DESC"],
-      ], // Sắp xếp theo ngày mới nhất
+      ],
     });
 
     // 2. Render trang receipts.ejs và truyền dữ liệu
@@ -366,6 +461,7 @@ const getReceiptsPage = async (req, res) => {
       ...userInfo,
       currentActivePage: "receipts", // Thiết lập active page cho menu
       receipts: receipts, // Truyền dữ liệu Phiếu Thu Tiền
+      filters,
     });
   } catch (err) {
     console.error("Lỗi render trang phiếu thu tiền:", err);
