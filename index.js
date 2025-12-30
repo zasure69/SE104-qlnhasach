@@ -81,6 +81,10 @@ protectedRoutes.use("/api/inventory", inventoryRoutes);
 const employeesRoutes = require("./routes/employeesRoutes");
 protectedRoutes.use("/api/employees", employeesRoutes);
 
+// Routes phân quyền
+const permissionRoutes = require("./routes/permissionRoutes");
+protectedRoutes.use("/permissions", permissionRoutes);
+
 app.use(protectedRoutes);
 
 // --- Khởi động Server và Đồng bộ Database ---

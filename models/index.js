@@ -20,6 +20,28 @@ const BaoCaoDoanhThu = require("./BaoCaoDoanhThu");
 const PhieuKiemKe = require("./PhieuKiemKe");
 const ChiTietKiemKe = require("./ChiTietKiemKe");
 
+// Models phân quyền
+const Quyen = require("./Quyen");
+const VaiTro = require("./VaiTro");
+const VaiTro_Quyen = require("./VaiTro_Quyen");
+
+// ========== PHÂN QUYỀN RELATIONSHIPS ==========
+// VaiTro <-> Quyen (Many-to-Many)
+VaiTro.belongsToMany(Quyen, {
+  through: VaiTro_Quyen,
+  foreignKey: "MaVaiTro",
+  otherKey: "MaQuyen"
+});
+Quyen.belongsToMany(VaiTro, {
+  through: VaiTro_Quyen,
+  foreignKey: "MaQuyen",
+  otherKey: "MaVaiTro"
+});
+
+// NhanVien <-> VaiTro (Many-to-One)
+VaiTro.hasMany(NhanVien, { foreignKey: "MaVaiTro" });
+NhanVien.belongsTo(VaiTro, { foreignKey: "MaVaiTro" });
+
 // 1. NhanVien Relationships
 NhanVien.hasMany(PhieuNhapSach, {
   foreignKey: "MaNhanVien",
@@ -148,4 +170,8 @@ module.exports = {
   BaoCaoDoanhThu,
   PhieuKiemKe,
   ChiTietKiemKe,
+  // Models phân quyền
+  Quyen,
+  VaiTro,
+  VaiTro_Quyen,
 };
