@@ -3,6 +3,12 @@ const router = express.Router();
 const inventoryController = require("../controllers/inventoryController");
 const authorizeAdmin = require("../middleware/authAdminMiddleware");
 
+// === API: Loại lý do kiểm kê ===
+router.get("/reasons", inventoryController.getAllReasons);
+router.post("/reasons", inventoryController.createReason);
+router.patch("/reasons/:maLyDo", inventoryController.updateReason);
+router.delete("/reasons/:maLyDo", inventoryController.deleteReason);
+
 // CRUD routes cho Phiếu kiểm kê
 router.get("/all", inventoryController.getAllInventoryReceipts);
 router.get("/:maPhieu", inventoryController.getInventoryReceiptById);
