@@ -336,9 +336,28 @@ const getBooksPage = async (req, res) => {
       };
     });
 
-    const types = await db.TheLoai.findAll({
+    // Lấy danh sách thể loại với số lượng đầu sách
+    const typesRaw = await db.TheLoai.findAll({
       where: { isDeleted: false },
-      raw: true,
+      include: [
+        {
+          model: db.DauSach,
+          where: { isDeleted: false },
+          required: false,
+          attributes: ["MaDauSach"],
+        },
+      ],
+      raw: false,
+    });
+
+    const types = typesRaw.map((type) => {
+      const plain = type.get({ plain: true });
+      return {
+        MaTheLoai: plain.MaTheLoai,
+        TenTheLoai: plain.TenTheLoai,
+        MoTa: plain.MoTa,
+        SoDauSach: plain.DauSaches ? plain.DauSaches.length : 0,
+      };
     });
 
     // Lấy tham số SoLuongTonToiThieuSauKhiBan từ bảng THAMSO

@@ -1,4 +1,5 @@
 const db = require("../models");
+const { Op } = require("sequelize");
 
 // Helper: Generate new MaPhieuKiem
 async function generateNewPhieuKiemId() {
@@ -39,14 +40,67 @@ const getInventoryPage = async (req, res) => {
       role: req.user?.role,
     };
 
+    const filters = {
+      maPhieuKiem: (req.query.maPhieuKiem || "").trim(),
+      nguoiLap: (req.query.nguoiLap || "").trim(),
+      from: (req.query.from || "").trim(),
+      to: (req.query.to || "").trim(),
+      status: (req.query.status || "").trim(), // balanced | discrepancy
+    };
+
     let inventoryReceipts = [];
 
     try {
+      const andConditions = [{ isDeleted: false }];
+
+      if (filters.maPhieuKiem) {
+        andConditions.push({
+          MaPhieuKiem: { [Op.like]: `%${filters.maPhieuKiem}%` },
+        });
+      }
+
+      if (filters.from || filters.to) {
+        let start = null;
+        let end = null;
+        if (filters.from) {
+          start = new Date(filters.from);
+          start.setHours(0, 0, 0, 0);
+        }
+        if (filters.to) {
+          end = new Date(filters.to);
+          end.setHours(23, 59, 59, 999);
+        }
+
+        if (start && end) {
+          andConditions.push({ NgayKiem: { [Op.between]: [start, end] } });
+        } else if (start) {
+          andConditions.push({ NgayKiem: { [Op.gte]: start } });
+        } else if (end) {
+          andConditions.push({ NgayKiem: { [Op.lte]: end } });
+        }
+      }
+
+      const employeeWhere = {};
+      if (filters.nguoiLap) {
+        employeeWhere[Op.or] = [
+          { HoTen: { [Op.like]: `%${filters.nguoiLap}%` } },
+          { Username: { [Op.like]: `%${filters.nguoiLap}%` } },
+        ];
+      }
+      const hasEmployeeWhere = Object.keys(employeeWhere).length > 0;
+
+      const where = andConditions.length > 0 ? { [Op.and]: andConditions } : {};
+
       inventoryReceipts = await db.PhieuKiemKe.findAll({
-        where: { isDeleted: false },
+        where,
         include: [
           { model: db.ChiTietKiemKe, as: "ChiTiet", required: false },
-          { model: db.NhanVien, attributes: ["HoTen"], required: false },
+          {
+            model: db.NhanVien,
+            attributes: ["HoTen", "Username"],
+            required: hasEmployeeWhere,
+            ...(hasEmployeeWhere ? { where: employeeWhere } : {}),
+          },
         ],
         order: [["NgayKiem", "ASC"]],
         raw: false,
@@ -74,6 +128,12 @@ const getInventoryPage = async (req, res) => {
           HasDiscrepancy: hasDiscrepancy,
         };
       });
+
+      if (filters.status === "balanced") {
+        inventoryReceipts = inventoryReceipts.filter((r) => !r.HasDiscrepancy);
+      } else if (filters.status === "discrepancy") {
+        inventoryReceipts = inventoryReceipts.filter((r) => r.HasDiscrepancy);
+      }
     } catch (dbError) {
       console.error("[inventoryController] Database error:", dbError);
     }
@@ -82,6 +142,7 @@ const getInventoryPage = async (req, res) => {
       ...userInfo,
       inventoryReceipts: inventoryReceipts || [],
       currentDate: new Date().toISOString().split("T")[0],
+      filters,
     });
   } catch (err) {
     console.error("[inventoryController] Error:", err);
@@ -91,6 +152,13 @@ const getInventoryPage = async (req, res) => {
       id: req.user?.id,
       inventoryReceipts: [],
       currentDate: new Date().toISOString().split("T")[0],
+      filters: {
+        maPhieuKiem: "",
+        nguoiLap: "",
+        from: "",
+        to: "",
+        status: "",
+      },
     });
   }
 };
@@ -98,11 +166,63 @@ const getInventoryPage = async (req, res) => {
 // API: Lấy tất cả phiếu kiểm kê
 const getAllInventoryReceipts = async (req, res) => {
   try {
+    const filters = {
+      maPhieuKiem: (req.query.maPhieuKiem || "").trim(),
+      nguoiLap: (req.query.nguoiLap || "").trim(),
+      from: (req.query.from || "").trim(),
+      to: (req.query.to || "").trim(),
+      status: (req.query.status || "").trim(),
+    };
+
+    const andConditions = [{ isDeleted: false }];
+    if (filters.maPhieuKiem) {
+      andConditions.push({
+        MaPhieuKiem: { [Op.like]: `%${filters.maPhieuKiem}%` },
+      });
+    }
+
+    if (filters.from || filters.to) {
+      let start = null;
+      let end = null;
+      if (filters.from) {
+        start = new Date(filters.from);
+        start.setHours(0, 0, 0, 0);
+      }
+      if (filters.to) {
+        end = new Date(filters.to);
+        end.setHours(23, 59, 59, 999);
+      }
+
+      if (start && end) {
+        andConditions.push({ NgayKiem: { [Op.between]: [start, end] } });
+      } else if (start) {
+        andConditions.push({ NgayKiem: { [Op.gte]: start } });
+      } else if (end) {
+        andConditions.push({ NgayKiem: { [Op.lte]: end } });
+      }
+    }
+
+    const employeeWhere = {};
+    if (filters.nguoiLap) {
+      employeeWhere[Op.or] = [
+        { HoTen: { [Op.like]: `%${filters.nguoiLap}%` } },
+        { Username: { [Op.like]: `%${filters.nguoiLap}%` } },
+      ];
+    }
+    const hasEmployeeWhere = Object.keys(employeeWhere).length > 0;
+
+    const where = andConditions.length > 0 ? { [Op.and]: andConditions } : {};
+
     let receipts = await db.PhieuKiemKe.findAll({
-      where: { isDeleted: false },
+      where,
       include: [
         { model: db.ChiTietKiemKe, as: "ChiTiet", required: false },
-        { model: db.NhanVien, attributes: ["HoTen"], required: false },
+        {
+          model: db.NhanVien,
+          attributes: ["HoTen", "Username"],
+          required: hasEmployeeWhere,
+          ...(hasEmployeeWhere ? { where: employeeWhere } : {}),
+        },
       ],
       order: [["NgayKiem", "ASC"]],
       raw: false,
@@ -130,6 +250,12 @@ const getAllInventoryReceipts = async (req, res) => {
         HasDiscrepancy: hasDiscrepancy,
       };
     });
+
+    if (filters.status === "balanced") {
+      receipts = receipts.filter((r) => !r.HasDiscrepancy);
+    } else if (filters.status === "discrepancy") {
+      receipts = receipts.filter((r) => r.HasDiscrepancy);
+    }
 
     return res.status(200).json({ receipts });
   } catch (err) {

@@ -363,6 +363,108 @@
       color: var(--blue-accent-hover);
     }
 
+    /* Search/Filter panel (Bills-style) */
+    .search-panel-container {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .search-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .search-panel-header h3 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .search-panel-body {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.9rem 1rem;
+      align-items: end;
+    }
+
+    .search-panel-body .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .search-panel-body label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-light);
+    }
+
+    .search-panel-body input,
+    .search-panel-body select {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      background: #fff;
+    }
+
+    .search-panel-body input:focus,
+    .search-panel-body select:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+
+    .search-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .btn-secondary-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-dark);
+    }
+
+    .btn-secondary-outline:hover {
+      background: var(--light-bg);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 1200px) {
+      .search-panel-body {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .search-panel-body {
+        grid-template-columns: 1fr;
+      }
+      .search-actions {
+        justify-content: stretch;
+      }
+      .search-actions .btn {
+        flex: 1;
+      }
+    }
+
     /* Filter */
     .report-filter {
       display: flex;
@@ -897,6 +999,82 @@
           </button>
         </div>
 
+        <div class="search-panel-container">
+          <div class="search-panel-header">
+            <h3><i class="fas fa-filter"></i> Bộ lọc tìm kiếm</h3>
+          </div>
+
+          <form method="GET" action="/dashboard/receipts">
+            <div class="search-panel-body">
+              <div class="field">
+                <label for="f-ma-phieu">Mã phiếu</label>
+                <input id="f-ma-phieu" name="maPhieuThu" type="text" placeholder="VD: PT001"
+                  value="<%= (filters && filters.maPhieuThu) ? filters.maPhieuThu : '' %>" />
+              </div>
+
+              <div class="field">
+                <label for="f-kh">Khách hàng</label>
+                <input id="f-kh" name="khachHang" type="text" placeholder="Nhập họ tên..."
+                  value="<%= (filters && filters.khachHang) ? filters.khachHang : '' %>" />
+              </div>
+
+              <div class="field">
+                <label for="f-sdt">SĐT</label>
+                <input id="f-sdt" name="sdt" type="text" placeholder="Nhập SĐT..."
+                  value="<%= (filters && filters.sdt) ? filters.sdt : '' %>" />
+              </div>
+
+              <div class="field">
+                <label for="f-nguoi-lap">Người lập</label>
+                <input id="f-nguoi-lap" name="nguoiLap" type="text" placeholder="Tên/Username..."
+                  value="<%= (filters && filters.nguoiLap) ? filters.nguoiLap : '' %>" />
+              </div>
+
+              <div class="field">
+                <label>Ngày thu</label>
+                <div class="two-col">
+                  <input name="from" type="date" value="<%= (filters && filters.from) ? filters.from : '' %>" />
+                  <input name="to" type="date" value="<%= (filters && filters.to) ? filters.to : '' %>" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Số tiền thu</label>
+                <div class="two-col">
+                  <select id="f-op-so-tien" name="opSoTien">
+                    <option value="" <%= (filters && !filters.opSoTien) ? 'selected' : '' %>>-- Bỏ lọc --</option>
+                    <option value="eq" <%= (filters && filters.opSoTien === 'eq') ? 'selected' : '' %>>=</option>
+                    <option value="gt" <%= (filters && filters.opSoTien === 'gt') ? 'selected' : '' %>>&gt;</option>
+                    <option value="gte" <%= (filters && filters.opSoTien === 'gte') ? 'selected' : '' %>>&ge;</option>
+                    <option value="lt" <%= (filters && filters.opSoTien === 'lt') ? 'selected' : '' %>>&lt;</option>
+                    <option value="lte" <%= (filters && filters.opSoTien === 'lte') ? 'selected' : '' %>>&le;</option>
+                    <option value="range" <%= (filters && filters.opSoTien === 'range') ? 'selected' : '' %>>Khoảng</option>
+                  </select>
+                  <input id="f-so-tien-1" name="soTien1" type="number" min="0" step="1" placeholder="0"
+                    value="<%= (filters && filters.soTien1) ? filters.soTien1 : '' %>" />
+                </div>
+              </div>
+
+              <div class="field" id="so-tien-2-wrapper" style="display:none;">
+                <label>Đến</label>
+                <input id="f-so-tien-2" name="soTien2" type="number" min="0" step="1" placeholder="0"
+                  value="<%= (filters && filters.soTien2) ? filters.soTien2 : '' %>" />
+              </div>
+
+              <div class="field" style="grid-column: 1 / -1;">
+                <div class="search-actions">
+                  <a class="btn btn-secondary-outline" href="/dashboard/receipts">
+                    <i class="fas fa-rotate-left"></i> Reset
+                  </a>
+                  <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-magnifying-glass"></i> Tìm kiếm
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
         <div class="table-responsive">
           <table class="data-table" id="receipt-table">
             <thead>
@@ -906,6 +1084,7 @@
                 <th>Khách Hàng</th>
                 <th>Ngày Thu</th>
                 <th>Số Tiền Thu</th>
+                <th>Người Lập</th>
                 <th></th>
               </tr>
             </thead>
@@ -919,7 +1098,7 @@
                       <%= receipt.MaPhieuThu %>
                     </td>
                     <td>
-                      <%= receipt.KhachHang.HoVaTen %>
+                      <%= receipt.KhachHang ? receipt.KhachHang.HoVaTen : '' %>
                     </td>
                     <td>
                       <% const thuDate=new Date(receipt.NgayThuTien); %>
@@ -929,6 +1108,10 @@
 
                     <td>
                       <%= parseFloat(receipt.SoTienThu).toLocaleString('vi-VN') %>
+                    </td>
+
+                    <td>
+                      <%= receipt.NhanVien ? receipt.NhanVien.HoTen : '' %>
                     </td>
 
                     <td class="action-column">
@@ -944,7 +1127,7 @@
                   </tr>
                   <% }); } else { %>
                     <tr>
-                      <td colspan="6" class="no-data">
+                      <td colspan="7" class="no-data">
                         Chưa có phiếu thu tiền nào được lập.
                       </td>
                     </tr>
@@ -1282,11 +1465,57 @@
         });
       }
 
-      // --- 6. LOGIC ICON XÓA (NGOÀI BẢNG DANH SÁCH) ---
+      const editModal = document.getElementById("edit-modal");
+      let currentEditingMaPhieuThu = null;
+
+      function openEditModalById(MaPhieuThu) {
+        currentEditingMaPhieuThu = MaPhieuThu;
+
+        fetch(`/api/receipts/${MaPhieuThu}`)
+          .then((response) => {
+            if (!response.ok) throw new Error("Không tìm thấy phiếu thu.");
+            return response.json();
+          })
+          .then((data) => {
+            document.getElementById("edit-ngay-thu").value = data.NgayThuTien;
+            document.getElementById("edit-ma-kh").value = data.MaKhachHang;
+            document.getElementById("edit-ten-kh").value = data.KhachHang.HoVaTen;
+            document.getElementById("edit-dia-chi").value = data.KhachHang.DiaChi;
+            document.getElementById("edit-sdt").value = data.KhachHang.SoDienThoai;
+
+            const soTienThu = parseFloat(data.SoTienThu).toLocaleString("vi-VN");
+            document.getElementById("edit-so-tien").value = soTienThu;
+
+            setTimeout(() => {
+              originalEditState = getEditState();
+            }, 100);
+
+            if (editModal) editModal.style.display = "flex";
+          })
+          .catch((error) => {
+            console.error("Lỗi khi tải chi tiết phiếu thu:", error);
+            showToast(
+              `Lỗi: ${error.message || "Không thể tải chi tiết phiếu thu."}`,
+              "error"
+            );
+            if (editModal) editModal.style.display = "none";
+          });
+      }
+
+      // --- 6. LOGIC ICON (SỬA / XÓA) Ở BẢNG DANH SÁCH ---
       const receiptTable = document.getElementById("receipt-table");
       if (receiptTable) {
         receiptTable.addEventListener("click", async function (e) {
-          // Kiểm tra click vào icon xóa (hoặc phần tử con của nó)
+          const editBtn = e.target.classList.contains("open-edit-modal")
+            ? e.target
+            : e.target.closest(".open-edit-modal");
+
+          if (editBtn) {
+            const MaPhieuThu = editBtn.dataset.id;
+            if (MaPhieuThu) openEditModalById(MaPhieuThu);
+            return;
+          }
+
           const deleteBtn = e.target.classList.contains("delete-icon")
             ? e.target
             : e.target.closest(".delete-icon");
@@ -1295,7 +1524,7 @@
             const row = deleteBtn.closest("tr");
 
             // Lấy Mã Phiếu Thu: Ưu tiên lấy từ data-id (chuẩn xác hơn), nếu không có thì lấy từ cột
-            const maPhieu = row.dataset.id || row.cells[0].textContent.trim();
+            const maPhieu = row.dataset.id || (row.cells[1] ? row.cells[1].textContent.trim() : "");
 
             // Cảnh báo người dùng (Thêm thông tin về việc hoàn tác nợ)
             if (
@@ -1327,7 +1556,7 @@
                   const tbody = receiptTable.querySelector("tbody");
                   if (tbody && tbody.children.length === 0) {
                     tbody.innerHTML =
-                      '<tr><td colspan="5" class="no-data" style="text-align: center; padding: 20px;">Chưa có phiếu thu nào.</td></tr>';
+                      '<tr><td colspan="7" class="no-data" style="text-align: center; padding: 20px;">Chưa có phiếu thu nào.</td></tr>';
                   }
                 } else {
                   // Thất bại: Hiển thị lỗi từ server
@@ -1353,68 +1582,7 @@
         });
       }
 
-      // Mở Modal Sửa (Giả lập load dữ liệu)
-      const openEditBtns = document.querySelectorAll(".open-edit-modal");
-      const editModal = document.getElementById("edit-modal");
-      let currentEditingMaPhieuThu = null;
-
-      openEditBtns.forEach((btn) => {
-        btn.addEventListener("click", function () {
-          const MaPhieuThu = this.dataset.id;
-          currentEditingMaPhieuThu = MaPhieuThu; // Lưu lại để dùng khi Lưu (btn-save-edit)
-          const editModal = document.getElementById("edit-modal"); // Giả định Modal có ID này
-
-          // 2. GỌI API LẤY CHI TIẾT PHIẾU THU
-          fetch(`/api/receipts/${MaPhieuThu}`)
-            .then((response) => {
-              if (!response.ok) throw new Error("Không tìm thấy phiếu thu.");
-              return response.json();
-            })
-            .then((data) => {
-              // 3. ĐIỀN DỮ LIỆU VÀO INPUTS
-              document.getElementById("edit-ngay-thu").value =
-                data.NgayThuTien;
-              document.getElementById("edit-ma-kh").value = data.MaKhachHang;
-              document.getElementById("edit-ten-kh").value =
-                data.KhachHang.HoVaTen;
-              document.getElementById("edit-dia-chi").value =
-                data.KhachHang.DiaChi;
-              document.getElementById("edit-sdt").value =
-                data.KhachHang.SoDienThoai;
-
-              // Định dạng số tiền
-              const soTienThu = parseFloat(data.SoTienThu).toLocaleString(
-                "vi-VN"
-              );
-              document.getElementById("edit-so-tien").value = soTienThu;
-
-              // Cập nhật nợ hiện tại để người dùng dễ theo dõi
-              const tongNo = parseFloat(data.KhachHang.TongNo).toLocaleString(
-                "vi-VN"
-              );
-              // document.getElementById('edit-tong-no').value = tongNo;
-
-              // 4. LƯU SNAPSHOT (Sau khi dữ liệu đã load xong)
-              setTimeout(() => {
-                // Bạn cần hàm getEditState() định nghĩa trước đó
-                originalEditState = getEditState();
-              }, 100);
-
-              // Hiển thị Modal ngay lập tức
-              editModal.style.display = "flex";
-              // showToast('Tải dữ liệu thành công!', 'success');
-            })
-            .catch((error) => {
-              console.error("Lỗi khi tải chi tiết phiếu thu:", error);
-              showToast(
-                `Lỗi: ${error.message || "Không thể tải chi tiết phiếu thu."
-                }`,
-                "error"
-              );
-              editModal.style.display = "none"; // Đóng modal nếu lỗi nghiêm trọng
-            });
-        });
-      });
+      // Mở Modal Sửa: đã dùng event delegation ở bảng
 
       // Đóng Modal
       const closeBtns = document.querySelectorAll(".close-modal");
@@ -1517,6 +1685,10 @@
               // 1. Lấy dữ liệu hiển thị
               const tenKhachHang =
                 document.getElementById("add-ten-kh").value || "---";
+              const nguoiLap =
+                (result.receipt && result.receipt.NhanVien && result.receipt.NhanVien.HoTen)
+                  ? result.receipt.NhanVien.HoTen
+                  : "<%= username %>";
               const tbody = document.querySelector("#receipt-table tbody");
               addForm.reset();
               // Reset các trường thông tin khách hàng (nếu có auto-fill)
@@ -1559,6 +1731,7 @@
                                 <td>${tenKhachHang}</td>
                                 <td>${dateDisplay}</td>
                                 <td>${moneyDisplay}</td>
+                        <td>${nguoiLap}</td>
                                 <td class="action-column">
                                     <i class="fas fa-pencil-alt action-icon open-edit-modal" 
                                     data-id="${newMaPhieuThu}" title="Sửa"></i>
@@ -1806,6 +1979,31 @@
         });
       }
     });
+
+      // Filter UX
+      (function initReceiptFilters() {
+        const opSelect = document.getElementById("f-op-so-tien");
+        const toWrapper = document.getElementById("so-tien-2-wrapper");
+        const toInput = document.getElementById("f-so-tien-2");
+
+        function sync() {
+          const isRange = opSelect && opSelect.value === "range";
+          if (toWrapper) toWrapper.style.display = isRange ? "block" : "none";
+          if (!isRange && toInput) toInput.value = "";
+        }
+
+        if (opSelect) {
+          opSelect.addEventListener("change", sync);
+          sync();
+        }
+
+        const maPhieu = document.getElementById("f-ma-phieu");
+        if (maPhieu) {
+          maPhieu.addEventListener("input", () => {
+            maPhieu.value = maPhieu.value.toUpperCase();
+          });
+        }
+      })();
   </script>
 </body>
 
