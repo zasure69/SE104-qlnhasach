@@ -955,7 +955,6 @@
                 <th>Mã Phiếu</th>
                 <th>Ngày Lập</th>
                 <th>Người Lập</th>
-                <th style="text-align: right">Số lượng lệch</th>
                 <th>Trạng Thái</th>
                 <th></th>
               </tr>
@@ -973,9 +972,6 @@
                     </td>
                     <td>
                       <%= receipt.NhanVien ? receipt.NhanVien.HoTen : receipt.MaNhanVien %>
-                    </td>
-                    <td style="text-align: right">
-                      <%= receipt.TongLech || 0 %>
                     </td>
                     <td>
                       <% if (receipt.HasDiscrepancy) { %>
@@ -998,7 +994,7 @@
                 <% }) %>
               <% } else { %>
                 <tr>
-                  <td colspan="7" style="text-align: center">
+                  <td colspan="6" style="text-align: center">
                     Chưa có phiếu kiểm kê nào.
                   </td>
                 </tr>
@@ -2118,7 +2114,7 @@
               const tableBody = document.querySelector("#master-table tbody");
               if (tableBody.rows.length === 0) {
                 const newRow = tableBody.insertRow();
-                newRow.innerHTML = `<td colspan="7" style="text-align: center;">Chưa có phiếu kiểm kê nào.</td>`;
+                newRow.innerHTML = `<td colspan="6" style="text-align: center;">Chưa có phiếu kiểm kê nào.</td>`;
               }
             } else {
               showToast(result.error || "Có lỗi xảy ra!", "error");
@@ -2180,9 +2176,6 @@
               receipt.MaNhanVien ||
               "---"
               }</td>
-                            <td style="text-align: right">${tongLech.toLocaleString(
-                              "vi-VN"
-                            )}</td>
                             <td>
                               ${hasDiscrepancy
                                 ? `<span class="badge badge-discrepancy">🔴 Lệch ${tongLech.toLocaleString(
@@ -2205,7 +2198,7 @@
           });
         } else {
           const row = tbody.insertRow();
-          row.innerHTML = `<td colspan="7" style="text-align: center;">Chưa có phiếu kiểm kê nào.</td>`;
+          row.innerHTML = `<td colspan="6" style="text-align: center;">Chưa có phiếu kiểm kê nào.</td>`;
         }
       }
 
