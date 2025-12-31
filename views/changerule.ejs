@@ -1030,7 +1030,7 @@
                         if (response.ok) {
                             if (currentEditingRow) {
                                 // Cập nhật giá trị mới vào bảng
-                                currentEditingRow.cells[1].textContent = newValue;
+                                currentEditingRow.cells[2].textContent = newValue;
                             }
                             editModal.style.display = 'none'; // Đóng modal
                             showToast('Cập nhật quy định thành công!', 'success');
