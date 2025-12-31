@@ -16,16 +16,17 @@ const {
 // =============================================================
 //  API: LẤY THÔNG TIN KHÁCH HÀNG (GET /api/bill/customer/:id)
 // =============================================================
-async function getMinStockRule() {
+async function getRules() {
   try {
-    // Lấy tham số SoLuongTonToiThieuSauKhiBan từ database
-    const rule = await ThamSo.findOne({
-      where: { TenThamSo: "SoLuongTonToiThieuSauKhiBan" },
-    });
-    return rule ? parseInt(rule.GiaTri) : 20; // Mặc định là 20 nếu chưa cấu hình
+      const minStockRule = await db.ThamSo.findOne({ where: { TenThamSo: 'SoLuongTonToiThieu' } });
+      const maxDebtRule = await db.ThamSo.findOne({ where: { TenThamSo: 'SoTienNoToiDa' } });
+      
+      return {
+          minStock: minStockRule ? parseInt(minStockRule.GiaTri) : 20,    // Mặc định 20
+          maxDebt: maxDebtRule ? parseFloat(maxDebtRule.GiaTri) : 20000   // Mặc định 20.000
+      };
   } catch (e) {
-    console.error("Lỗi khi lấy tham số SoLuongTonToiThieuSauKhiBan:", e);
-    return 20; // Mặc định là 20 nếu lỗi
+      return { minStock: 0, maxDebt: 999999999 };
   }
 }
 
@@ -100,116 +101,72 @@ const getBookInfo = async (req, res) => {
 //  API: TẠO HÓA ĐƠN MỚI (POST /api/bill/create)
 // =============================================================
 const create = async (req, res) => {
-  const {
-    MaHoaDon,
-    MaKhachHang,
-    MaNhanVien,
-    TongTien,
-    SoTienTra,
-    ConLai,
-    Details,
-  } = req.body;
+  const { MaHoaDon, MaKhachHang, TongTien, SoTienTra, ConLai, Details } = req.body;
   const t = await sequelize.transaction();
 
   try {
-    const minStock = await getMinStockRule(); // Lấy quy định tồn tối thiểu
+      const { minStock, maxDebt } = await getRules(); // Lấy quy định
+      const noPhatSinh = parseFloat(ConLai); // Số tiền nợ thêm từ hóa đơn này
 
-    // KIỂM TRA KHÁCH HÀNG TỒN TẠI VÀ CHƯA BỊ XÓA MỀM
-    const khachHang = await KhachHang.findOne({
-      where: { MaKhachHang: MaKhachHang, isDeleted: false },
-      transaction: t,
-    });
-    if (!khachHang) {
-      throw new Error(
-        `Khách hàng có mã ${MaKhachHang} không tồn tại hoặc đã bị xóa.`
-      );
-    }
-
-    // 1. KIỂM TRA TỒN KHO VÀ QUY ĐỊNH
-    for (const detail of Details) {
-      const sach = await Sach.findOne({
-        where: { MaSach: detail.MaSach, isDeleted: false },
-        transaction: t,
-      });
-
-      if (!sach) {
-        throw new Error(
-          `Sách có mã ${detail.MaSach} không tồn tại hoặc đã bị xóa.`
-        );
+      // 1. KIỂM TRA QUY ĐỊNH NỢ TỐI ĐA
+      // Lấy thông tin khách hàng để biết nợ hiện tại
+      const khachHang = await KhachHang.findByPk(MaKhachHang, { attributes: ['TongNo', 'HoVaTen'], transaction: t });
+      
+      if (!khachHang) {
+          throw new Error('Khách hàng không tồn tại.');
       }
 
-      const currentStock = sach.SoLuongTon;
-      const sellQty = parseInt(detail.SoLuongBan);
-      const remainingStock = currentStock - sellQty;
+      const noHienTai = parseFloat(khachHang.TongNo);
+      const tongNoSauKhiMua = noHienTai + noPhatSinh;
 
-      // Kiểm tra 1: Không đủ sách để bán
-      if (remainingStock < 0) {
-        throw new Error(
-          `Sách "${sach.TenSach}" chỉ còn ${currentStock}, không đủ để bán ${sellQty}.`
-        );
+      if (tongNoSauKhiMua > maxDebt) {
+          throw new Error(
+              `Không thể lập hóa đơn! Khách hàng ${khachHang.HoVaTen} đang nợ ${new Intl.NumberFormat('vi-VN').format(noHienTai)}. ` +
+              `Nếu nợ thêm ${new Intl.NumberFormat('vi-VN').format(noPhatSinh)} sẽ vượt quá giới hạn nợ tối đa (${new Intl.NumberFormat('vi-VN').format(maxDebt)}).`
+          );
       }
 
-      // Kiểm tra 2: Vi phạm quy định tồn tối thiểu (Sau khi bán phải còn >= minStock)
-      if (remainingStock < minStock) {
-        throw new Error(
-          `Không thể bán sách "${sach.TenSach}". ` +
-            `Tồn kho hiện tại: ${currentStock}. ` +
-            `Sau khi bán ${sellQty} sẽ còn ${remainingStock}, thấp hơn quy định tối thiểu (${minStock}).`
-        );
+      // 2. KIỂM TRA TỒN KHO (Giữ nguyên logic cũ)
+      for (const detail of Details) {
+          const sach = await Sach.findByPk(detail.MaSach, { transaction: t });
+          if (!sach) throw new Error(`Sách ${detail.MaSach} không tồn tại.`);
+
+          const currentStock = sach.SoLuongTon;
+          const sellQty = parseInt(detail.SoLuongBan);
+          const remainingStock = currentStock - sellQty;
+
+          if (remainingStock < 0) throw new Error(`Sách "${sach.TenSach}" không đủ số lượng (Còn: ${currentStock}).`);
+          
+          if (remainingStock < minStock) {
+              throw new Error(`Bán sách "${sach.TenSach}" sẽ vi phạm quy định tồn tối thiểu (Sau khi bán còn ${remainingStock} < ${minStock}).`);
+          }
       }
-    }
 
-    // 2. TẠO HÓA ĐƠN
-    await HoaDon.create(
-      {
-        MaHoaDon,
-        NgayLapHoaDon: new Date(),
-        MaKhachHang,
-        MaNhanVien,
-        TongTien,
-        SoTienTra,
-        ConLai,
-      },
-      { transaction: t }
-    );
+      // 3. TẠO HÓA ĐƠN & CHI TIẾT
+      await HoaDon.create({
+          MaHoaDon, NgayLapHoaDon: new Date(), MaKhachHang, TongTien, SoTienTra, ConLai
+      }, { transaction: t });
 
-    // 3. TẠO CHI TIẾT & TRỪ KHO
-    for (const detail of Details) {
-      // Tạo chi tiết
-      await CT_HD.create(
-        {
-          MaHoaDon,
-          MaSach: detail.MaSach,
-          SoLuongBan: detail.SoLuongBan,
-          DonGiaBan: detail.DonGiaBan,
-          ThanhTien: detail.ThanhTien,
-        },
-        { transaction: t }
-      );
+      for (const detail of Details) {
+          await CT_HD.create({
+              MaHoaDon, MaSach: detail.MaSach, SoLuongBan: detail.SoLuongBan, DonGiaBan: detail.DonGiaBan, ThanhTien: detail.ThanhTien
+          }, { transaction: t });
 
-      // Trừ kho (Đã kiểm tra an toàn ở bước 1)
-      await Sach.increment("SoLuongTon", {
-        by: -parseInt(detail.SoLuongBan),
-        where: { MaSach: detail.MaSach },
-        transaction: t,
-      });
-    }
+          await Sach.increment('SoLuongTon', { by: -parseInt(detail.SoLuongBan), where: { MaSach: detail.MaSach }, transaction: t });
+      }
 
-    // 4. CẬP NHẬT NỢ KHÁCH HÀNG
-    if (parseFloat(ConLai) > 0) {
-      await KhachHang.increment("TongNo", {
-        by: parseFloat(ConLai),
-        where: { MaKhachHang },
-        transaction: t,
-      });
-    }
+      // 4. CẬP NHẬT NỢ
+      if (noPhatSinh > 0) {
+          await KhachHang.increment('TongNo', { by: noPhatSinh, where: { MaKhachHang }, transaction: t });
+      }
 
-    await t.commit();
-    res.json({ message: `Lập hóa đơn ${MaHoaDon} thành công!` });
+      await t.commit();
+      res.json({ message: `Lập hóa đơn ${MaHoaDon} thành công!` });
+
   } catch (error) {
-    await t.rollback();
-    console.error("Lỗi lập hóa đơn:", error);
-    res.status(400).json({ message: error.message }); // Trả về thông báo lỗi cụ thể (số lượng tồn...)
+      await t.rollback();
+      console.error("Lỗi lập hóa đơn:", error);
+      res.status(400).json({ message: error.message });
   }
 };
 
@@ -304,111 +261,85 @@ const updateBill = async (req, res) => {
   const t = await sequelize.transaction();
 
   try {
-    const minStock = await getMinStockRule();
+      const { minStock, maxDebt } = await getRules();
+      const noMoiPhatSinh = parseFloat(ConLai); // Nợ MỚI của hóa đơn
 
-    // --- BƯỚC 1: HOÀN TÁC DỮ LIỆU CŨ ---
-    const oldBill = await HoaDon.findByPk(MaHD, { transaction: t });
-    if (!oldBill) throw new Error("Hóa đơn không tồn tại.");
+      // --- BƯỚC 1: LẤY DỮ LIỆU CŨ & HOÀN TÁC ---
+      const oldBill = await HoaDon.findByPk(MaHD, { transaction: t });
+      if (!oldBill) throw new Error('Hóa đơn không tồn tại.');
 
-    const oldDetails = await CT_HD.findAll({
-      where: { MaHoaDon: MaHD },
-      transaction: t,
-    });
+      const oldDetails = await CT_HD.findAll({ where: { MaHoaDon: MaHD }, transaction: t });
 
-    // 1.1. Trả lại sách vào kho (Hoàn tác tồn kho)
-    for (const detail of oldDetails) {
-      await Sach.increment("SoLuongTon", {
-        by: detail.SoLuongBan, // Cộng lại số lượng đã bán
-        where: { MaSach: detail.MaSach },
-        transaction: t,
-      });
-    }
-
-    // 1.2. Hoàn tác nợ cũ
-    if (oldBill.ConLai > 0) {
-      await KhachHang.increment("TongNo", {
-        by: -parseFloat(oldBill.ConLai),
-        where: { MaKhachHang: oldBill.MaKhachHang },
-        transaction: t,
-      });
-    }
-
-    // 1.3. Xóa chi tiết cũ
-    await CT_HD.destroy({ where: { MaHoaDon: MaHD }, transaction: t });
-
-    // --- BƯỚC 2: KIỂM TRA & ÁP DỤNG DỮ LIỆU MỚI ---
-    // Lúc này, kho đã đầy đủ như chưa từng bán hóa đơn này. Ta kiểm tra quy định lại từ đầu.
-
-    for (const detail of Details) {
-      const sellQty = parseInt(detail.SoLuongBan);
-
-      // Lấy lại thông tin sách mới nhất (sau khi đã được hoàn tác ở bước 1.1)
-      const sach = await Sach.findByPk(detail.MaSach, { transaction: t });
-
-      if (!sach) throw new Error(`Sách ${detail.MaSach} không tồn tại.`);
-
-      const currentStock = sach.SoLuongTon; // Đây là tồn kho thực tế + số lượng vừa trả lại
-      const remainingStock = currentStock - sellQty;
-      const dausach = await DauSach.findByPk(sach.MaDauSach, {
-        transaction: t,
-      });
-      const tensach = dausach.TenSach;
-
-      // Kiểm tra tồn tối thiểu
-      if (remainingStock < minStock) {
-        throw new Error(
-          `Không thể cập nhật sách "${tensach}". ` +
-            `Tồn kho thực tế: ${currentStock}. ` +
-            `Bán ${sellQty} cuốn sẽ còn ${remainingStock} (Quy định tối thiểu: ${minStock}).`
-        );
+      // 1.1 Hoàn tác kho
+      for (const detail of oldDetails) {
+          await Sach.increment('SoLuongTon', { by: detail.SoLuongBan, where: { MaSach: detail.MaSach }, transaction: t });
       }
 
-      // Nếu thỏa mãn -> Trừ kho lại
-      await Sach.increment("SoLuongTon", {
-        by: -sellQty,
-        where: { MaSach: detail.MaSach },
-        transaction: t,
-      });
-    }
+      // 1.2 Tính toán lại nợ GỐC (Nợ thực tế trước khi có hóa đơn này)
+      // Logic: Lấy Tổng Nợ hiện tại trong DB TRỪ đi Nợ Cũ của hóa đơn này
+      const khachHang = await KhachHang.findByPk(oldBill.MaKhachHang, { attributes: ['TongNo', 'HoVaTen'], transaction: t });
+      const noHienTaiTrongDB = parseFloat(khachHang.TongNo);
+      const noCuCuaHoaDon = parseFloat(oldBill.ConLai);
+      
+      const noGocThucTe = noHienTaiTrongDB - noCuCuaHoaDon; // Đây là nợ của khách nếu không tính hóa đơn này
 
-    // --- BƯỚC 3: CẬP NHẬT HÓA ĐƠN & CHI TIẾT MỚI ---
+      // --- BƯỚC 2: KIỂM TRA QUY ĐỊNH NỢ ---
+      // Nợ Dự Kiến = Nợ Gốc + Nợ Mới
+      const tongNoDuKien = noGocThucTe + noMoiPhatSinh;
 
-    // 3.1. Tạo chi tiết mới
-    const newDetailsData = Details.map((d) => ({
-      MaHoaDon: MaHD,
-      MaSach: d.MaSach,
-      SoLuongBan: d.SoLuongBan,
-      DonGiaBan: d.DonGiaBan,
-      ThanhTien: d.ThanhTien,
-    }));
-    await CT_HD.bulkCreate(newDetailsData, { transaction: t });
+      if (tongNoDuKien > maxDebt) {
+          throw new Error(
+              `Cập nhật thất bại! Tổng nợ dự kiến (${new Intl.NumberFormat('vi-VN').format(tongNoDuKien)}) ` +
+              `sẽ vượt quá giới hạn nợ tối đa (${new Intl.NumberFormat('vi-VN').format(maxDebt)}).`
+          );
+      }
 
-    // 3.2. Cập nhật thông tin chính Hóa Đơn
-    await HoaDon.update(
-      {
-        MaKhachHang,
-        TongTien,
-        SoTienTra,
-        ConLai,
-      },
-      { where: { MaHoaDon: MaHD }, transaction: t }
-    );
+      // --- BƯỚC 3: KIỂM TRA KHO & ÁP DỤNG MỚI ---
+      // Xóa chi tiết cũ
+      await CT_HD.destroy({ where: { MaHoaDon: MaHD }, transaction: t });
 
-    // 3.3. Cập nhật nợ mới
-    if (parseFloat(ConLai) > 0) {
-      await KhachHang.increment("TongNo", {
-        by: parseFloat(ConLai),
-        where: { MaKhachHang },
-        transaction: t,
-      });
-    }
+      // Kiểm tra tồn kho mới và trừ kho
+      for (const detail of Details) {
+          const sellQty = parseInt(detail.SoLuongBan);
+          const sach = await Sach.findByPk(detail.MaSach, { transaction: t });
+          
+          // Lưu ý: Lúc này kho đã được hoàn tác (cộng lại) ở Bước 1.1
+          const currentStock = sach.SoLuongTon; 
+          const remainingStock = currentStock - sellQty;
 
-    await t.commit();
-    res.json({ message: "Cập nhật hóa đơn thành công!" });
+          if (remainingStock < minStock) {
+              throw new Error(`Sách "${sach.TenSach}" không đủ điều kiện tồn tối thiểu (Sau bán còn ${remainingStock} < ${minStock}).`);
+          }
+
+          await Sach.increment('SoLuongTon', { by: -sellQty, where: { MaSach: detail.MaSach }, transaction: t });
+      }
+
+      // --- BƯỚC 4: CẬP NHẬT HÓA ĐƠN & NỢ KHÁCH HÀNG ---
+      
+      // Tạo chi tiết mới
+      const newDetailsData = Details.map(d => ({
+          MaHoaDon: MaHD, MaSach: d.MaSach, SoLuongBan: d.SoLuongBan, DonGiaBan: d.DonGiaBan, ThanhTien: d.ThanhTien
+      }));
+      await CT_HD.bulkCreate(newDetailsData, { transaction: t });
+
+      // Update Hóa Đơn
+      await HoaDon.update({ MaKhachHang, TongTien, SoTienTra, ConLai }, { where: { MaHoaDon: MaHD }, transaction: t });
+
+      // Cập nhật Nợ Khách Hàng (Dựa trên chênh lệch)
+      // Cách tính: Update lại Tổng Nợ = Nợ Gốc + Nợ Mới
+      // Vì nãy ta chưa trừ nợ cũ trong DB, nên ta dùng hàm update trực tiếp set giá trị mới cho chuẩn
+      await KhachHang.update(
+          { TongNo: tongNoDuKien }, 
+          { where: { MaKhachHang: oldBill.MaKhachHang }, transaction: t }
+      );
+
+      await t.commit();
+      res.json({ message: 'Cập nhật hóa đơn thành công!' });
+
   } catch (error) {
-    await t.rollback();
-    console.error("Lỗi cập nhật hóa đơn:", error);
-    res.status(400).json({ message: error.message });
+      await t.rollback();
+      console.error("Lỗi cập nhật hóa đơn:", error);
+      res.status(400).json({ message: error.message });
   }
 };
 
