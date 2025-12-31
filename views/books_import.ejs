@@ -1068,7 +1068,7 @@
               <!-- Hàng 1 -->
               <div class="field">
                 <label for="f-ma-phieu">Mã phiếu</label>
-                <input id="f-ma-phieu" name="maPhieu" type="text" placeholder="VD: PN001"
+                <input id="f-ma-phieu" name="maPhieu" type="text" placeholder="VD: PNS001"
                   value="<%= (filters && filters.maPhieu) ? filters.maPhieu : '' %>" />
               </div>
 
@@ -1579,6 +1579,7 @@
 
       // Tham số quy định từ database
       const soLuongNhapToiThieu = <%= soLuongNhapToiThieu %>;
+      const tiLeTinhDonGiaBan = <%= tiLeTinhDonGiaBan %>;
 
       // Biến dùng cho việc sửa dòng
       let currentRowToEdit = null;
@@ -1736,10 +1737,10 @@
 
           const newQty = parseInt(document.getElementById('item-edit-qty').value);
           const newPrice = parseNumber(document.getElementById('item-edit-price').value);
-          const newSellPrice = Math.round(newPrice * 1.05); // Tự động tính giá bán = giá nhập * 1.05
+          const newSellPrice = Math.round(newPrice * tiLeTinhDonGiaBan); // Tự động tính giá bán = giá nhập * tỉ lệ từ DB
 
-          // QUY ĐỊNH: Số lượng nhập ít nhất là 150
-          if (!newQty || newQty < 150) { showToast('Số lượng nhập phải từ 150 trở lên!', 'error'); return; }
+          // QUY ĐỊNH: Số lượng nhập ít nhất là soLuongNhapToiThieu (từ database)
+          if (!newQty || newQty < soLuongNhapToiThieu) { showToast(`Số lượng nhập phải từ ${soLuongNhapToiThieu} trở lên!`, 'error'); return; }
           if (!newPrice || newPrice < 0) { showToast('Đơn giá nhập không hợp lệ!', 'error'); return; }
 
           // Cập nhật lại dòng trong bảng
@@ -1797,10 +1798,10 @@
           const val = this.value.replace(/[^0-9]/g, '');
           this.value = val ? val : '';
 
-          // Tự động tính đơn giá bán = đơn giá nhập * 1.05
+          // Tự động tính đơn giá bán = đơn giá nhập * tỉ lệ từ DB
           if (val && itemEditSellPriceInput) {
             const giaNhap = parseFloat(val);
-            const giaBan = Math.round(giaNhap * 1.05);
+            const giaBan = Math.round(giaNhap * tiLeTinhDonGiaBan);
             itemEditSellPriceInput.value = giaBan;
           }
         });
@@ -1887,9 +1888,9 @@
               if (donGiaInput && !donGiaInput.value && book.DonGia) {
                 const giaNhap = book.DonGia;
                 donGiaInput.value = giaNhap;
-                // Tự động tính giá bán
+                // Tự động tính giá bán với tỉ lệ từ DB
                 if (donGiaBanInput) {
-                  donGiaBanInput.value = Math.round(giaNhap * 1.05);
+                  donGiaBanInput.value = Math.round(giaNhap * tiLeTinhDonGiaBan);
                 }
               }
             } else {
@@ -1904,10 +1905,10 @@
             const val = this.value.replace(/[^0-9]/g, '');
             this.value = val ? val : '';
 
-            // Tự động tính đơn giá bán = đơn giá nhập * 1.05
+            // Tự động tính đơn giá bán = đơn giá nhập * tỉ lệ từ DB
             if (val && donGiaBanInput) {
               const giaNhap = parseFloat(val);
-              const giaBan = Math.round(giaNhap * 1.05);
+              const giaBan = Math.round(giaNhap * tiLeTinhDonGiaBan);
               donGiaBanInput.value = giaBan;
             }
           });

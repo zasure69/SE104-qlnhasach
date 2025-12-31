@@ -2326,7 +2326,7 @@
     // Xem chi tiết hóa đơn
     async function viewBillDetail(maHoaDon) {
       try {
-        const response = await fetch(`/api/bill/${maHoaDon}`);
+        const response = await fetch(`/api/bill/detail/${maHoaDon}`);
         if (!response.ok) throw new Error('Không tìm thấy hóa đơn');
         const data = await response.json();
         const bill = data.bill || data;
@@ -2377,7 +2377,7 @@
                 <tbody>
         `;
 
-        const chiTiet = bill.ChiTiet || bill.CT_HD || [];
+        const chiTiet = bill.ChiTiet || bill.CT_HDs || bill.CT_HD || [];
         
         chiTiet.forEach((ct, idx) => {
           const thanhTien = (ct.SoLuongBan || 0) * (ct.DonGiaBan || 0);

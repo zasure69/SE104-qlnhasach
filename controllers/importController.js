@@ -199,12 +199,21 @@ const getImportPage = async (req, res) => {
       ? parseInt(soLuongNhapToiThieuParam.GiaTri)
       : 150;
 
+    // Lấy tham số TiLeTinhDonGiaBan từ database
+    const tiLeTinhDonGiaBanParam = await db.ThamSo.findOne({
+      where: { TenThamSo: "TiLeTinhDonGiaBan" },
+    });
+    const tiLeTinhDonGiaBan = tiLeTinhDonGiaBanParam
+      ? parseFloat(tiLeTinhDonGiaBanParam.GiaTri)
+      : 1.05;
+
     res.render("books_import", {
       ...userInfo,
       importReceipts: importReceipts || [],
       filters,
       currentDate: new Date().toISOString().split("T")[0],
       soLuongNhapToiThieu: soLuongNhapToiThieu,
+      tiLeTinhDonGiaBan: tiLeTinhDonGiaBan,
     });
   } catch (err) {
     console.error("[importController] Error:", err);
@@ -215,6 +224,7 @@ const getImportPage = async (req, res) => {
       filters: {},
       currentDate: new Date().toISOString().split("T")[0],
       soLuongNhapToiThieu: 150,
+      tiLeTinhDonGiaBan: 1.05,
     });
   }
 };
@@ -671,30 +681,36 @@ const getDeletedImportReceipts = async (req, res) => {
   try {
     const receipts = await db.PhieuNhapSach.findAll({
       where: { isDeleted: true },
-      include: [{
-        model: db.CT_PNS,
-        as: "ChiTiet",
-        required: false,
-        include: [{
-          model: db.Sach,
-          attributes: ['MaSach', 'isDeleted'],
-          include: [{
-            model: db.DauSach,
-            attributes: ['TenSach']
-          }]
-        }]
-      }],
+      include: [
+        {
+          model: db.CT_PNS,
+          as: "ChiTiet",
+          required: false,
+          include: [
+            {
+              model: db.Sach,
+              attributes: ["MaSach", "isDeleted"],
+              include: [
+                {
+                  model: db.DauSach,
+                  attributes: ["TenSach"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
       order: [["NgayNhapPhieu", "DESC"]],
       raw: false,
     });
-    
-    const result = receipts.map(receipt => {
+
+    const result = receipts.map((receipt) => {
       const plain = receipt.get({ plain: true });
-      
+
       // Kiểm tra xem có sách nào đã bị xóa không
       let hasDeletedSach = false;
       let deletedSachCount = 0;
-      
+
       if (plain.ChiTiet) {
         for (const detail of plain.ChiTiet) {
           if (detail.Sach && detail.Sach.isDeleted) {
@@ -703,14 +719,14 @@ const getDeletedImportReceipts = async (req, res) => {
           }
         }
       }
-      
+
       return {
         ...plain,
         hasDeletedSach,
-        deletedSachCount
+        deletedSachCount,
       };
     });
-    
+
     return res.status(200).json({ receipts: result });
   } catch (err) {
     console.error("[importController] getDeletedImportReceipts error", err);
@@ -724,21 +740,27 @@ const getDeletedImportReceipts = async (req, res) => {
 const restoreImportReceipt = async (req, res) => {
   try {
     const maPhieu = req.params.maPhieu;
-    const restoreSachToo = req.query.restoreSach === 'true';
-    
+    const restoreSachToo = req.query.restoreSach === "true";
+
     const receipt = await db.PhieuNhapSach.findByPk(maPhieu, {
-      include: [{
-        model: db.CT_PNS,
-        as: 'ChiTiet',
-        include: [{
-          model: db.Sach,
-          attributes: ['MaSach', 'isDeleted'],
-          include: [{
-            model: db.DauSach,
-            attributes: ['TenSach']
-          }]
-        }]
-      }]
+      include: [
+        {
+          model: db.CT_PNS,
+          as: "ChiTiet",
+          include: [
+            {
+              model: db.Sach,
+              attributes: ["MaSach", "isDeleted"],
+              include: [
+                {
+                  model: db.DauSach,
+                  attributes: ["TenSach"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     });
 
     if (!receipt) {
@@ -748,7 +770,7 @@ const restoreImportReceipt = async (req, res) => {
     if (!receipt.isDeleted) {
       return res.status(400).json({ error: "Phiếu nhập này chưa bị xóa." });
     }
-    
+
     // Kiểm tra xem có sách nào đã bị xóa không
     const deletedSachList = [];
     if (receipt.ChiTiet) {
@@ -756,19 +778,21 @@ const restoreImportReceipt = async (req, res) => {
         if (detail.Sach && detail.Sach.isDeleted) {
           deletedSachList.push({
             MaSach: detail.Sach.MaSach,
-            TenSach: detail.Sach.DauSach?.TenSach || detail.Sach.MaSach
+            TenSach: detail.Sach.DauSach?.TenSach || detail.Sach.MaSach,
           });
         }
       }
     }
-    
+
     if (deletedSachList.length > 0 && !restoreSachToo) {
-      const sachNames = deletedSachList.map(s => `"${s.TenSach}" (${s.MaSach})`).join(', ');
+      const sachNames = deletedSachList
+        .map((s) => `"${s.TenSach}" (${s.MaSach})`)
+        .join(", ");
       return res.status(409).json({
         error: "Có sách liên kết đã bị xóa",
         requireSachRestore: true,
         deletedSachList: deletedSachList,
-        message: `Các sách sau đã bị xóa: ${sachNames}. Bạn có muốn khôi phục cả các sách này không?`
+        message: `Các sách sau đã bị xóa: ${sachNames}. Bạn có muốn khôi phục cả các sách này không?`,
       });
     }
 
@@ -783,7 +807,7 @@ const restoreImportReceipt = async (req, res) => {
           );
         }
       }
-      
+
       const details = await db.CT_PNS.findAll({
         where: { MaPhieuNhap: maPhieu },
         transaction: t,
@@ -801,10 +825,11 @@ const restoreImportReceipt = async (req, res) => {
 
       await receipt.update({ isDeleted: false }, { transaction: t });
     });
-    
-    const successMessage = restoreSachToo && deletedSachList.length > 0
-      ? `Khôi phục phiếu nhập và ${deletedSachList.length} sách liên kết thành công!`
-      : "Khôi phục phiếu nhập thành công!";
+
+    const successMessage =
+      restoreSachToo && deletedSachList.length > 0
+        ? `Khôi phục phiếu nhập và ${deletedSachList.length} sách liên kết thành công!`
+        : "Khôi phục phiếu nhập thành công!";
 
     return res.status(200).json({ message: successMessage });
   } catch (err) {
