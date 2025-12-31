@@ -301,6 +301,125 @@
             color: var(--text-light);
         }
 
+        /* --- Bộ lọc tìm kiếm trong bảng báo cáo --- */
+        .report-search-panel {
+            background-color: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .report-search-panel .search-header {
+            background-color: #eef2f5;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .report-search-panel .search-header i {
+            color: var(--secondary-color);
+        }
+
+        .report-search-panel .search-body {
+            padding: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .report-search-panel .search-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            min-width: 150px;
+        }
+
+        .report-search-panel .search-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .report-search-panel .search-group input,
+        .report-search-panel .search-group select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .report-search-panel .search-group input:focus,
+        .report-search-panel .search-group select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .report-search-panel .search-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+
+        .report-search-panel .btn-search {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .report-search-panel .btn-search:hover {
+            background-color: #2980b9;
+        }
+
+        .report-search-panel .btn-reset {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .report-search-panel .btn-reset:hover {
+            background-color: #5a6268;
+        }
+
+        @media (max-width: 768px) {
+            .report-search-panel .search-body {
+                flex-direction: column;
+            }
+            .report-search-panel .search-group {
+                width: 100%;
+            }
+            .report-search-panel .search-actions {
+                width: 100%;
+                margin-left: 0;
+            }
+            .report-search-panel .search-actions button {
+                flex: 1;
+            }
+        }
+
         /* Wrapper cho input date có icon lịch */
         .date-input-wrapper {
             position: relative;
@@ -999,6 +1118,37 @@
 
                         <div class="table-responsive">
                             <h3 class="table-caption">Chi tiết báo cáo</h3>
+                            
+                            <!-- Bộ lọc tìm kiếm báo cáo tồn -->
+                            <div class="report-search-panel">
+                                <div class="search-header">
+                                    <i class="fas fa-filter"></i> Bộ lọc tìm kiếm
+                                </div>
+                                <div class="search-body">
+                                    <div class="search-group">
+                                        <label for="search-ton-sach">Tên sách</label>
+                                        <input type="text" id="search-ton-sach" placeholder="Nhập tên sách..." />
+                                    </div>
+                                    <div class="search-group">
+                                        <label for="search-ton-status">Trạng thái tồn</label>
+                                        <select id="search-ton-status">
+                                            <option value="">Tất cả</option>
+                                            <option value="increase">📈 Tăng tồn</option>
+                                            <option value="decrease">📉 Giảm tồn</option>
+                                            <option value="nochange">➖ Không đổi</option>
+                                        </select>
+                                    </div>
+                                    <div class="search-actions">
+                                        <button type="button" class="btn-search" id="btn-search-ton">
+                                            <i class="fas fa-search"></i> Tìm
+                                        </button>
+                                        <button type="button" class="btn-reset" id="btn-reset-search-ton">
+                                            <i class="fas fa-sync-alt"></i> Làm mới
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                             <table class="data-table" id="inventory-report-table">
                                 <thead>
                                     <tr>
@@ -1093,6 +1243,42 @@
                         </div>
                         <div class="table-responsive">
                             <h3 class="table-caption">Chi tiết báo cáo</h3>
+                            
+                            <!-- Bộ lọc tìm kiếm báo cáo công nợ -->
+                            <div class="report-search-panel">
+                                <div class="search-header">
+                                    <i class="fas fa-filter"></i> Bộ lọc tìm kiếm
+                                </div>
+                                <div class="search-body">
+                                    <div class="search-group">
+                                        <label for="search-congno-makh">Mã KH</label>
+                                        <input type="text" id="search-congno-makh" placeholder="Nhập mã KH..." />
+                                    </div>
+                                    <div class="search-group">
+                                        <label for="search-congno-ten">Tên KH</label>
+                                        <input type="text" id="search-congno-ten" placeholder="Nhập tên KH..." />
+                                    </div>
+                                    <div class="search-group">
+                                        <label for="search-congno-status">Trạng thái nợ</label>
+                                        <select id="search-congno-status">
+                                            <option value="">Tất cả</option>
+                                            <option value="hasdebt">🔴 Còn nợ</option>
+                                            <option value="nodebt">🟢 Hết nợ</option>
+                                            <option value="increase">📈 Nợ tăng</option>
+                                            <option value="decrease">📉 Nợ giảm</option>
+                                        </select>
+                                    </div>
+                                    <div class="search-actions">
+                                        <button type="button" class="btn-search" id="btn-search-congno">
+                                            <i class="fas fa-search"></i> Tìm
+                                        </button>
+                                        <button type="button" class="btn-reset" id="btn-reset-search-congno">
+                                            <i class="fas fa-sync-alt"></i> Làm mới
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                             <table class="data-table" id="debt-report-table">
                                 <thead>
                                     <tr>
@@ -1181,6 +1367,32 @@
                             <div class="report-summary" id="display-tong-doanh-thu">
                                 Tổng doanh thu: 0 đ
                             </div>
+                            
+                            <!-- Bộ lọc tìm kiếm báo cáo doanh thu -->
+                            <div class="report-search-panel">
+                                <div class="search-header">
+                                    <i class="fas fa-filter"></i> Bộ lọc tìm kiếm
+                                </div>
+                                <div class="search-body">
+                                    <div class="search-group">
+                                        <label for="search-doanhthu-theloai">Thể loại</label>
+                                        <input type="text" id="search-doanhthu-theloai" placeholder="Nhập thể loại..." />
+                                    </div>
+                                    <div class="search-group">
+                                        <label for="search-doanhthu-tile">Tỉ lệ tối thiểu (%)</label>
+                                        <input type="number" id="search-doanhthu-tile" placeholder="VD: 10" min="0" max="100" />
+                                    </div>
+                                    <div class="search-actions">
+                                        <button type="button" class="btn-search" id="btn-search-doanhthu">
+                                            <i class="fas fa-search"></i> Tìm
+                                        </button>
+                                        <button type="button" class="btn-reset" id="btn-reset-search-doanhthu">
+                                            <i class="fas fa-sync-alt"></i> Làm mới
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                             <table class="data-table" id="revenue-report-table">
                                 <thead>
                                     <tr>
@@ -1975,6 +2187,251 @@
                     sortReportTable(column, tableId);
                 });
             });
+
+            // ==============================
+            // SEARCH/FILTER FUNCTIONALITY FOR REPORT TABLES
+            // ==============================
+
+            // --- Tìm kiếm Báo cáo Tồn kho ---
+            const btnSearchTon = document.getElementById('btn-search-ton');
+            const btnResetSearchTon = document.getElementById('btn-reset-search-ton');
+
+            if (btnSearchTon) {
+                btnSearchTon.addEventListener('click', function() {
+                    const sachQuery = document.getElementById('search-ton-sach').value.toLowerCase().trim();
+                    const statusQuery = document.getElementById('search-ton-status').value;
+
+                    const tbody = document.querySelector('#inventory-report-table tbody');
+                    const rows = Array.from(tbody.querySelectorAll('tr:not(.no-results-row)'));
+                    let resultsFound = 0;
+
+                    rows.forEach(row => {
+                        if (row.textContent.toLowerCase().includes('không có')) {
+                            row.style.display = 'none';
+                            return;
+                        }
+
+                        // Cột: 0-STT | 1-Sách | 2-Tồn đầu | 3-Nhập | 4-Bán | 5-Tồn cuối
+                        const sachCell = (row.cells[1]?.textContent || '').toLowerCase();
+                        const tonDau = parseNumber(row.cells[2]?.textContent || '0');
+                        const tonCuoi = parseNumber(row.cells[5]?.textContent || '0');
+
+                        let matchSach = sachCell.includes(sachQuery);
+                        let matchStatus = true;
+
+                        if (statusQuery) {
+                            if (statusQuery === 'increase') {
+                                matchStatus = tonCuoi > tonDau;
+                            } else if (statusQuery === 'decrease') {
+                                matchStatus = tonCuoi < tonDau;
+                            } else if (statusQuery === 'nochange') {
+                                matchStatus = tonCuoi === tonDau;
+                            }
+                        }
+
+                        if (matchSach && matchStatus) {
+                            row.style.display = '';
+                            resultsFound++;
+                            row.cells[0].textContent = resultsFound;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    // Xử lý không tìm thấy
+                    let noResultsRow = tbody.querySelector('.no-results-row');
+                    if (noResultsRow) noResultsRow.remove();
+
+                    if (resultsFound === 0) {
+                        noResultsRow = tbody.insertRow();
+                        noResultsRow.classList.add('no-results-row');
+                        noResultsRow.innerHTML = `<td colspan="6" style="text-align:center; padding:1rem;">Không tìm thấy kết quả phù hợp</td>`;
+                    }
+
+                    showToast(`Tìm thấy ${resultsFound} kết quả.`, 'success');
+                });
+            }
+
+            if (btnResetSearchTon) {
+                btnResetSearchTon.addEventListener('click', function() {
+                    document.getElementById('search-ton-sach').value = '';
+                    document.getElementById('search-ton-status').value = '';
+
+                    const tbody = document.querySelector('#inventory-report-table tbody');
+                    const rows = Array.from(tbody.querySelectorAll('tr:not(.no-results-row)'));
+                    let stt = 0;
+
+                    rows.forEach(row => {
+                        row.style.display = '';
+                        stt++;
+                        row.cells[0].textContent = stt;
+                    });
+
+                    const noResultsRow = tbody.querySelector('.no-results-row');
+                    if (noResultsRow) noResultsRow.remove();
+
+                    showToast('Đã làm mới bộ lọc.', 'success');
+                });
+            }
+
+            // --- Tìm kiếm Báo cáo Công nợ ---
+            const btnSearchCongNo = document.getElementById('btn-search-congno');
+            const btnResetSearchCongNo = document.getElementById('btn-reset-search-congno');
+
+            if (btnSearchCongNo) {
+                btnSearchCongNo.addEventListener('click', function() {
+                    const maKHQuery = document.getElementById('search-congno-makh').value.toLowerCase().trim();
+                    const tenKHQuery = document.getElementById('search-congno-ten').value.toLowerCase().trim();
+                    const statusQuery = document.getElementById('search-congno-status').value;
+
+                    const tbody = document.querySelector('#debt-report-table tbody');
+                    const rows = Array.from(tbody.querySelectorAll('tr:not(.no-results-row)'));
+                    let resultsFound = 0;
+
+                    rows.forEach(row => {
+                        if (row.textContent.toLowerCase().includes('không có')) {
+                            row.style.display = 'none';
+                            return;
+                        }
+
+                        // Cột: 0-STT | 1-Mã KH | 2-Tên KH | 3-Nợ đầu | 4-Nợ phát sinh | 5-Nợ cuối
+                        const maKHCell = (row.cells[1]?.textContent || '').toLowerCase();
+                        const tenKHCell = (row.cells[2]?.textContent || '').toLowerCase();
+                        const noDau = parseNumber(row.cells[3]?.textContent || '0');
+                        const noCuoi = parseNumber(row.cells[5]?.textContent || '0');
+
+                        let matchMaKH = maKHCell.includes(maKHQuery);
+                        let matchTenKH = tenKHCell.includes(tenKHQuery);
+                        let matchStatus = true;
+
+                        if (statusQuery) {
+                            if (statusQuery === 'hasdebt') {
+                                matchStatus = noCuoi > 0;
+                            } else if (statusQuery === 'nodebt') {
+                                matchStatus = noCuoi === 0;
+                            } else if (statusQuery === 'increase') {
+                                matchStatus = noCuoi > noDau;
+                            } else if (statusQuery === 'decrease') {
+                                matchStatus = noCuoi < noDau;
+                            }
+                        }
+
+                        if (matchMaKH && matchTenKH && matchStatus) {
+                            row.style.display = '';
+                            resultsFound++;
+                            row.cells[0].textContent = resultsFound;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    // Xử lý không tìm thấy
+                    let noResultsRow = tbody.querySelector('.no-results-row');
+                    if (noResultsRow) noResultsRow.remove();
+
+                    if (resultsFound === 0) {
+                        noResultsRow = tbody.insertRow();
+                        noResultsRow.classList.add('no-results-row');
+                        noResultsRow.innerHTML = `<td colspan="6" style="text-align:center; padding:1rem;">Không tìm thấy kết quả phù hợp</td>`;
+                    }
+
+                    showToast(`Tìm thấy ${resultsFound} kết quả.`, 'success');
+                });
+            }
+
+            if (btnResetSearchCongNo) {
+                btnResetSearchCongNo.addEventListener('click', function() {
+                    document.getElementById('search-congno-makh').value = '';
+                    document.getElementById('search-congno-ten').value = '';
+                    document.getElementById('search-congno-status').value = '';
+
+                    const tbody = document.querySelector('#debt-report-table tbody');
+                    const rows = Array.from(tbody.querySelectorAll('tr:not(.no-results-row)'));
+                    let stt = 0;
+
+                    rows.forEach(row => {
+                        row.style.display = '';
+                        stt++;
+                        row.cells[0].textContent = stt;
+                    });
+
+                    const noResultsRow = tbody.querySelector('.no-results-row');
+                    if (noResultsRow) noResultsRow.remove();
+
+                    showToast('Đã làm mới bộ lọc.', 'success');
+                });
+            }
+
+            // --- Tìm kiếm Báo cáo Doanh thu ---
+            const btnSearchDoanhThu = document.getElementById('btn-search-doanhthu');
+            const btnResetSearchDoanhThu = document.getElementById('btn-reset-search-doanhthu');
+
+            if (btnSearchDoanhThu) {
+                btnSearchDoanhThu.addEventListener('click', function() {
+                    const theLoaiQuery = document.getElementById('search-doanhthu-theloai').value.toLowerCase().trim();
+                    const tiLeMin = parseFloat(document.getElementById('search-doanhthu-tile').value) || 0;
+
+                    const tbody = document.querySelector('#revenue-report-table tbody');
+                    const rows = Array.from(tbody.querySelectorAll('tr:not(.no-results-row)'));
+                    let resultsFound = 0;
+
+                    rows.forEach(row => {
+                        if (row.textContent.toLowerCase().includes('không có')) {
+                            row.style.display = 'none';
+                            return;
+                        }
+
+                        // Cột: 0-STT | 1-Thể loại | 2-SL bán | 3-Thành tiền | 4-Tỉ lệ
+                        const theLoaiCell = (row.cells[1]?.textContent || '').toLowerCase();
+                        const tiLeCell = parsePercent(row.cells[4]?.textContent || '0');
+
+                        let matchTheLoai = theLoaiCell.includes(theLoaiQuery);
+                        let matchTiLe = tiLeCell >= tiLeMin;
+
+                        if (matchTheLoai && matchTiLe) {
+                            row.style.display = '';
+                            resultsFound++;
+                            row.cells[0].textContent = resultsFound;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    // Xử lý không tìm thấy
+                    let noResultsRow = tbody.querySelector('.no-results-row');
+                    if (noResultsRow) noResultsRow.remove();
+
+                    if (resultsFound === 0) {
+                        noResultsRow = tbody.insertRow();
+                        noResultsRow.classList.add('no-results-row');
+                        noResultsRow.innerHTML = `<td colspan="5" style="text-align:center; padding:1rem;">Không tìm thấy kết quả phù hợp</td>`;
+                    }
+
+                    showToast(`Tìm thấy ${resultsFound} kết quả.`, 'success');
+                });
+            }
+
+            if (btnResetSearchDoanhThu) {
+                btnResetSearchDoanhThu.addEventListener('click', function() {
+                    document.getElementById('search-doanhthu-theloai').value = '';
+                    document.getElementById('search-doanhthu-tile').value = '';
+
+                    const tbody = document.querySelector('#revenue-report-table tbody');
+                    const rows = Array.from(tbody.querySelectorAll('tr:not(.no-results-row)'));
+                    let stt = 0;
+
+                    rows.forEach(row => {
+                        row.style.display = '';
+                        stt++;
+                        row.cells[0].textContent = stt;
+                    });
+
+                    const noResultsRow = tbody.querySelector('.no-results-row');
+                    if (noResultsRow) noResultsRow.remove();
+
+                    showToast('Đã làm mới bộ lọc.', 'success');
+                });
+            }
 
 
         });

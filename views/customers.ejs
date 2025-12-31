@@ -1163,6 +1163,11 @@
             <div class="search-panel-body">
               <div class="search-inputs-grid">
                 <div class="form-group">
+                  <label for="search-ma-kh">Mã KH</label>
+                  <input type="text" id="search-ma-kh" placeholder="Nhập mã khách hàng..." />
+                </div>
+
+                <div class="form-group">
                   <label for="search-ho-ten">Họ Tên</label>
                   <input type="text" id="search-ho-ten" placeholder="Nhập tên khách hàng..." />
                 </div>
@@ -2139,6 +2144,9 @@
 
           setTimeout(() => {
             // 1. Lấy giá trị input
+            const maKHQuery = document
+              .getElementById("search-ma-kh")
+              .value.toLowerCase();
             const hoTenQuery = document
               .getElementById("search-ho-ten")
               .value.toLowerCase();
@@ -2170,6 +2178,7 @@
               // Cấu trúc cột trong customers.ejs:
               // 0: STT | 1: Mã | 2: Tên | 3: NS | 4: SĐT | 5: GT | 6: ĐC | 7: Nợ | 8: Action
 
+              const maKHCell = (row.cells[1]?.textContent || "").toLowerCase();
               const hoTenCell = (
                 row.cells[2]?.textContent || ""
               ).toLowerCase();
@@ -2184,6 +2193,7 @@
                 parseFloat(rawDebt.replace(/\./g, "").replace(/,/g, "")) || 0;
 
               // 3. Kiểm tra điều kiện match
+              const maKHMatch = maKHCell.includes(maKHQuery);
               const hoTenMatch = hoTenCell.includes(hoTenQuery);
               const sdtMatch = sdtCell.includes(sdtQuery);
               const diaChiMatch = diaChiCell.includes(diaChiQuery);
@@ -2219,7 +2229,7 @@
               }
 
               // 4. Ẩn/Hiện hàng
-              if (hoTenMatch && sdtMatch && diaChiMatch && tongNoMatch) {
+              if (maKHMatch && hoTenMatch && sdtMatch && diaChiMatch && tongNoMatch) {
                 row.style.display = "";
                 resultsFound++;
                 // Cập nhật lại STT (cột 0) cho đẹp mắt

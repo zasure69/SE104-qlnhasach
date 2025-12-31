@@ -2629,12 +2629,14 @@
         if (!viewBtn) return;
         
         const maHd = viewBtn.dataset.id;
+        console.log("Đang tải chi tiết hóa đơn:", maHd);
 
           showLoader(); // Bắt đầu hiển thị loader
 
           // SỬA LỖI URL: Sử dụng endpoint chính xác từ billRoutes.js
           fetch(`/api/bill/detail/${maHd}`)
             .then((response) => {
+              console.log("Response status:", response.status);
               if (!response.ok) {
                 // Xử lý lỗi 404 hoặc 500 từ server
                 throw new Error("Không tìm thấy hóa đơn hoặc lỗi máy chủ.");
@@ -2643,10 +2645,15 @@
             })
             .then((data) => {
               hideLoader();
+              console.log("Dữ liệu nhận được:", data);
 
               // Trích xuất dữ liệu Master và Detail theo cấu trúc JSON của Controller
               const masterBill = data.HoaDon;
-              const detailLines = masterBill.CT_HDs;
+              // Sequelize trả về CT_HDs (pluralized) khi không có alias
+              const detailLines = masterBill.CT_HDs || [];
+              
+              console.log("Master bill:", masterBill);
+              console.log("Detail lines:", detailLines);
 
               // --- 1. Đổ dữ liệu HÓA ĐƠN (HOADON) vào các trường Master ---
               document.getElementById("edit-ma-hd").value =
@@ -2661,7 +2668,7 @@
                 masterBill.MaKhachHang;
               // Truy cập tên khách hàng qua mối quan hệ Sequelize (masterBill.KhachHang.HoVaTen)
               document.getElementById("edit-ten-kh").value =
-                masterBill.KhachHang.HoVaTen;
+                masterBill.KhachHang ? masterBill.KhachHang.HoVaTen : '';
 
               // --- 2. Đổ dữ liệu CHI TIẾT HÓA ĐƠN (CT_HD) vào bảng ---
               const tbody = document.querySelector(
@@ -2671,9 +2678,9 @@
 
               detailLines.forEach((item) => {
                 // Tên sách được lồng 3 cấp: CT_HD -> Sach -> DauSach
-                const tenSach = item.Sach.DauSach.TenSach;
+                const tenSach = item.Sach?.DauSach?.TenSach || 'N/A';
                 const tenTheLoai =
-                  item.Sach.DauSach.TheLoai?.TenTheLoai || "Chưa phân loại";
+                  item.Sach?.DauSach?.TheLoai?.TenTheLoai || "Chưa phân loại";
 
                 // Gọi hàm thêm dòng chi tiết đã được định nghĩa trong file của bạn
                 addRowToDetailTable(
