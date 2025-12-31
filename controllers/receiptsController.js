@@ -1,8 +1,20 @@
 // controllers/receiptsController.js
 const db = require("../models");
-const { PhieuThuTien, KhachHang, NhanVien, sequelize } = db;
+const { PhieuThuTien, KhachHang, NhanVien, ThamSo, sequelize } = db;
 const { Op } = require("sequelize"); // Cần cho các truy vấn phức tạp
 
+
+async function getRules() {
+  try {
+      const checkDebtRule = await ThamSo.findOne({ where: { TenThamSo: 'ApDungQDKiemTraTienNo' } });
+      
+      return {
+          allowOverpay: checkDebtRule ? parseInt(checkDebtRule.GiaTri) : false 
+      };
+  } catch (e) {
+      return { allowOverpay: false };
+  }
+}
 // =============================================================
 //  API: LẤY THÔNG TIN KHÁCH HÀNG (GET /api/receipts/customer/:MaKH)
 // =============================================================
@@ -53,6 +65,7 @@ const createReceipt = async (req, res) => {
 
   try {
     // 1. Kiểm tra Khách hàng (phải tồn tại và chưa bị xóa mềm) và Số tiền thu
+    const { allowOverpay } = await getRules();
     const customer = await KhachHang.findOne({
       where: { MaKhachHang: MaKhachHang, isDeleted: false },
       attributes: ["TongNo"],
@@ -75,16 +88,18 @@ const createReceipt = async (req, res) => {
 
     // --- CHECK LOGIC MỚI: KHÔNG ĐƯỢC THU QUÁ SỐ NỢ ---
     const currentDebt = parseFloat(customer.TongNo);
-    if (thuTien > currentDebt) {
-      await t.rollback();
-      return res
-        .status(400)
-        .json({
-          message: `Số tiền thu (${thuTien}) không được vượt quá số nợ hiện tại (${currentDebt}).`,
-        });
+    if (allowOverpay === 0) {
+      if (thuTien > currentDebt) {
+        await t.rollback();
+        return res
+          .status(400)
+          .json({
+            message: `Số tiền thu (${thuTien}) không được vượt quá số nợ hiện tại (${currentDebt}).`,
+          });
+      }
     }
     // ------------------------------------------------
-
+    
     // 2. Tạo Phiếu Thu Tiền
     await PhieuThuTien.create(
       {
@@ -141,6 +156,7 @@ const updateReceipt = async (req, res) => {
   const t = await sequelize.transaction();
 
   try {
+    const { allowOverpay } = await getRules();
     const newThuTien = parseFloat(SoTienThu);
 
     // 1. Tìm Phiếu Thu cũ
@@ -153,24 +169,35 @@ const updateReceipt = async (req, res) => {
     }
 
     const oldThuTien = parseFloat(oldReceipt.SoTienThu);
-    const difference = newThuTien - oldThuTien; // Chênh lệch (Mới - Cũ)
-
+    
     if (newThuTien <= 0) {
       await t.rollback();
       return res.status(400).json({ message: "Số tiền thu phải lớn hơn 0." });
     }
 
-    // 2. Hoàn tác và Áp dụng Nợ (Chỉ cập nhật nợ nếu số tiền thay đổi)
-    if (difference !== 0) {
-      // Cập nhật Tổng Nợ (Giảm nợ cũ, thêm nợ mới)
-      // Nếu difference > 0: Nợ giảm thêm (trừ đi difference)
-      // Nếu difference < 0: Nợ tăng (cộng thêm trị tuyệt đối của difference)
-      await KhachHang.increment("TongNo", {
-        by: -difference,
-        where: { MaKhachHang: MaKhachHang },
-        transaction: t,
-      });
+    const khachHang = await KhachHang.findByPk(oldReceipt.MaKhachHang, { transaction: t });
+    const noHienTai = parseFloat(khachHang.TongNo);
+
+    const noGoc = noHienTai + oldThuTien;
+
+    if (allowOverpay === 0) {
+      if (newThuTien > noGoc) {
+        await t.rollback();
+        return res
+          .status(400)
+          .json({
+            message: `Số tiền thu mới (${newThuTien}) không được vượt quá số nợ gốc (${noGoc}).`,
+          });
+      }
     }
+
+    const newTongNo = noGoc - newThuTien;
+
+    // 2. Hoàn tác và Áp dụng Nợ (Chỉ cập nhật nợ nếu số tiền thay đổi)
+    await KhachHang.update(
+      { TongNo: newTongNo },
+      { where: { MaKhachHang: oldReceipt.MaKhachHang }, transaction: t }
+  );
 
     // 3. Cập nhật Phiếu Thu
     await PhieuThuTien.update(
