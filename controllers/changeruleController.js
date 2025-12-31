@@ -17,6 +17,14 @@ const updateRule = async (req, res) => {
             return res.status(404).json({ error: 'Không tìm thấy quy định.' });
         }
 
+        // LOGIC MỚI: Kiểm tra nếu là ApDungQDKiemTraTienNo thì chỉ cho phép 0 hoặc 1
+        if (tenThamSo === 'ApDungQDKiemTraTienNo') {
+            const parsedValue = parseInt(GiaTri, 10);
+            if (parsedValue !== 0 && parsedValue !== 1) {
+                return res.status(400).json({ error: 'Giá trị không hợp lệ. Chỉ chấp nhận 0 (Không áp dụng) hoặc 1 (Áp dụng).' });
+            }
+        }
+
         // 4. Cập nhật giá trị
         rule.GiaTri = GiaTri;
         await rule.save(); // Lưu thay đổi

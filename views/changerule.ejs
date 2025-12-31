@@ -1013,7 +1013,21 @@
                     const tenThamSo = currentEditingRow.dataset.id; // Lấy 'TenThamSo' từ data-id
                     const newValue = inputParamValue.value.trim();
                     console.log('Cập nhật:', tenThamSo, '->', newValue);
-
+                    // --- LOGIC KIỂM TRA INPUT ---
+                    if (tenThamSo === 'ApDungQDKiemTraTienNo') {
+                        if (newValue !== '0' && newValue !== '1') {
+                            showToast('Giá trị phải là 0 hoặc 1.', 'error');
+                            return; // Dừng lại
+                        }
+                    } else {
+                        // Kiểm tra các tham số khác phải là số không âm
+                        const isNumber = /^\d+(\.\d+)?$/.test(newValue) && parseFloat(newValue) >= 0;
+                        if (!isNumber) {
+                            showToast('Vui lòng chỉ nhập số không âm.', 'error');
+                            return; // Dừng lại
+                        }
+                    }
+                    
                     showLoader(); // Hiển thị loader
 
                     try {
@@ -1037,7 +1051,7 @@
                             currentEditingRow = null; // Reset
                         } else {
                             // Nếu lỗi, không đóng modal
-                            showToast('Cập nhật thất bại! Vui lòng thử lại.', 'error');
+                            showToast('Cập nhật thất bại: ' + result.error, 'error');
                         }
                     } catch (err) {
                         hideLoader();
