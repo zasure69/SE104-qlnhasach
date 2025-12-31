@@ -966,6 +966,11 @@
                                                                             class="fas fa-trash-alt"></i><span> Thùng
                                                                             rác</span></a></li>
                                                                 <% } %>
+                                                            <% if (role==='Admin') { %>
+                                                                <li><a href="/permissions/page"><i
+                                                                            class="fas fa-user-shield"></i><span> Phân
+                                                                            quyền</span></a></li>
+                                                            <% } %>
                 </ul>
             </nav>
         </aside>
@@ -1025,10 +1030,11 @@
                                 <label for="f-chuc-vu">Chức vụ</label>
                                 <select id="f-chuc-vu" name="chucVu">
                                     <option value="" <%= (!filters || !filters.chucVu) ? 'selected' : '' %>>Tất cả</option>
-                                    <option value="Admin" <%= (filters && filters.chucVu === 'Admin') ? 'selected' : '' %>>Admin</option>
-                                    <option value="Chủ cửa hàng" <%= (filters && filters.chucVu === 'Chủ cửa hàng') ? 'selected' : '' %>>Chủ cửa hàng</option>
-                                    <option value="Thủ kho" <%= (filters && filters.chucVu === 'Thủ kho') ? 'selected' : '' %>>Thủ kho</option>
-                                    <option value="Nhân viên" <%= (filters && filters.chucVu === 'Nhân viên') ? 'selected' : '' %>>Nhân viên</option>
+                                    <% if (typeof vaiTros !== 'undefined' && vaiTros && vaiTros.length > 0) { %>
+                                        <% vaiTros.forEach(vt => { %>
+                                            <option value="<%= vt.TenVaiTro %>" <%= (filters && filters.chucVu === vt.TenVaiTro) ? 'selected' : '' %>><%= vt.TenVaiTro %></option>
+                                        <% }) %>
+                                    <% } %>
                                 </select>
                             </div>
 
@@ -1089,7 +1095,8 @@
                                 <% employees.forEach((employee, index) => { %>
                                     <tr data-id="<%= employee.MaNhanVien %>"
                                         data-ngay-sinh="<%= new Date(employee.NgaySinh).toISOString().split('T')[0] %>"
-                                        data-ngay-nhan-viec="<%= new Date(employee.NgayNhanViec).toISOString().split('T')[0] %>">
+                                        data-ngay-nhan-viec="<%= new Date(employee.NgayNhanViec).toISOString().split('T')[0] %>"
+                                        data-ma-vai-tro="<%= employee.MaVaiTro || '' %>">
                                         <td><%= index + 1 %></td>
                                         <td><%= employee.MaNhanVien %></td>
                                         <td><%= employee.HoTen %></td>
@@ -1192,11 +1199,14 @@
                             </div>
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
-                            <label for="add-chuc-vu" class="required">Chức vụ</label>
-                            <select id="add-chuc-vu" required>
-                                <option value="Nhân viên">Nhân viên</option>
-                                <option value="Thủ kho">Thủ kho</option>
-                                <option value="Chủ cửa hàng">Chủ cửa hàng</option>
+                            <label for="add-vai-tro" class="required">Vai trò (Chức vụ)</label>
+                            <select id="add-vai-tro" required>
+                                <option value="">-- Chọn vai trò --</option>
+                                <% if (typeof vaiTros !== 'undefined' && vaiTros.length > 0) { %>
+                                    <% vaiTros.forEach(vt => { %>
+                                        <option value="<%= vt.MaVaiTro %>" data-ten="<%= vt.TenVaiTro %>"><%= vt.TenVaiTro %></option>
+                                    <% }); %>
+                                <% } %>
                             </select>
                         </div>
                     </div>
@@ -1253,11 +1263,14 @@
                             </div>
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
-                            <label for="edit-chuc-vu">Chức vụ</label>
-                            <select id="edit-chuc-vu" required>
-                                <option value="Nhân viên" selected>Nhân viên</option>
-                                <option value="Thủ kho">Thủ kho</option>
-                                <option value="Chủ cửa hàng">Chủ cửa hàng</option>
+                            <label for="edit-vai-tro">Vai trò (Chức vụ)</label>
+                            <select id="edit-vai-tro" required>
+                                <option value="">-- Chọn vai trò --</option>
+                                <% if (typeof vaiTros !== 'undefined' && vaiTros.length > 0) { %>
+                                    <% vaiTros.forEach(vt => { %>
+                                        <option value="<%= vt.MaVaiTro %>" data-ten="<%= vt.TenVaiTro %>"><%= vt.TenVaiTro %></option>
+                                    <% }); %>
+                                <% } %>
                             </select>
                         </div>
                     </div>
@@ -1525,10 +1538,16 @@
                             // Giả lập ngày sinh (do format hiển thị khác value input)
                             document.getElementById('edit-ngay-sinh').value = currentEditingRow.dataset.ngaySinh;
                             document.getElementById('edit-sdt').value = cells[4].textContent;
-                            document.getElementById('edit-chuc-vu').value = cells[5].textContent; // Value option phải khớp text
                             document.getElementById('edit-username').value = cells[6].textContent;
                             document.getElementById('edit-ngay-nhan-viec').value = currentEditingRow.dataset.ngayNhanViec;
                             document.getElementById('edit-password').value = ''; // Reset mật khẩu
+                            // Load vai trò hiện tại
+                            const editVaiTro = document.getElementById('edit-vai-tro');
+                            if (editVaiTro && currentEditingRow.dataset.maVaiTro) {
+                                editVaiTro.value = currentEditingRow.dataset.maVaiTro;
+                            } else if (editVaiTro) {
+                                editVaiTro.value = '';
+                            }
 
                             // SAU KHI điền xong, lưu lại trạng thái gốc ngay lập tức
                             setTimeout(() => {
@@ -1548,13 +1567,17 @@
                         if (!currentEditingRow) return;
 
                         const maNV = currentEditingRow.dataset.id;
+                        const vaiTroSelect = document.getElementById('edit-vai-tro');
+                        const selectedOption = vaiTroSelect.options[vaiTroSelect.selectedIndex];
+                        const tenVaiTro = selectedOption ? selectedOption.dataset.ten || selectedOption.text : '';
                         const data = {
                             hoTen: document.getElementById('edit-ho-ten').value,
                             ngaySinh: document.getElementById('edit-ngay-sinh').value,
                             soDienThoai: document.getElementById('edit-sdt').value,
-                            chucVu: document.getElementById('edit-chuc-vu').value,
+                            chucVu: tenVaiTro, // Lấy tên vai trò làm chức vụ
                             ngayNhanViec: document.getElementById('edit-ngay-nhan-viec').value,
-                            password: document.getElementById('edit-password').value // Gửi cả password (trống hoặc mới)
+                            password: document.getElementById('edit-password').value, // Gửi cả password (trống hoặc mới)
+                            maVaiTro: vaiTroSelect.value || null
                         };
 
                         // Validate số điện thoại phải đủ 10 số
@@ -1685,14 +1708,18 @@
                 addEmployeeForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
 
+                    const vaiTroSelect = document.getElementById('add-vai-tro');
+                    const selectedOption = vaiTroSelect.options[vaiTroSelect.selectedIndex];
+                    const tenVaiTro = selectedOption ? selectedOption.dataset.ten || selectedOption.text : '';
                     const data = {
                         hoTen: document.getElementById('add-ho-ten').value,
                         ngaySinh: document.getElementById('add-ngay-sinh').value,
                         soDienThoai: document.getElementById('add-sdt').value,
-                        chucVu: document.getElementById('add-chuc-vu').value,
+                        chucVu: tenVaiTro, // Lấy tên vai trò làm chức vụ
                         username: document.getElementById('add-username').value,
                         password: document.getElementById('add-password').value,
                         ngayNhanViec: document.getElementById('add-ngay-nhan-viec').value,
+                        maVaiTro: vaiTroSelect.value || null,
                     };
 
                     // Validate số điện thoại phải đủ 10 số

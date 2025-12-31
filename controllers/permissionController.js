@@ -1,7 +1,13 @@
 /**
  * Controller quản lý phân quyền
  */
-const { VaiTro, Quyen, VaiTro_Quyen, NhanVien, sequelize } = require('../models');
+const {
+  VaiTro,
+  Quyen,
+  VaiTro_Quyen,
+  NhanVien,
+  sequelize,
+} = require("../models");
 
 // ========== QUẢN LÝ VAI TRÒ ==========
 
@@ -11,22 +17,24 @@ const { VaiTro, Quyen, VaiTro_Quyen, NhanVien, sequelize } = require('../models'
 const getAllVaiTro = async (req, res) => {
   try {
     const vaiTros = await VaiTro.findAll({
-      include: [{
-        model: Quyen,
-        through: { attributes: [] }
-      }],
-      order: [['MaVaiTro', 'ASC']]
+      include: [
+        {
+          model: Quyen,
+          through: { attributes: [] },
+        },
+      ],
+      order: [["MaVaiTro", "ASC"]],
     });
 
     res.json({
       success: true,
-      data: vaiTros
+      data: vaiTros,
     });
   } catch (error) {
-    console.error('Error getting vai tro:', error);
+    console.error("Error getting vai tro:", error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi lấy danh sách vai trò'
+      message: "Lỗi khi lấy danh sách vai trò",
     });
   }
 };
@@ -38,28 +46,30 @@ const getVaiTroById = async (req, res) => {
   try {
     const { id } = req.params;
     const vaiTro = await VaiTro.findByPk(id, {
-      include: [{
-        model: Quyen,
-        through: { attributes: [] }
-      }]
+      include: [
+        {
+          model: Quyen,
+          through: { attributes: [] },
+        },
+      ],
     });
 
     if (!vaiTro) {
       return res.status(404).json({
         success: false,
-        message: 'Không tìm thấy vai trò'
+        message: "Không tìm thấy vai trò",
       });
     }
 
     res.json({
       success: true,
-      data: vaiTro
+      data: vaiTro,
     });
   } catch (error) {
-    console.error('Error getting vai tro:', error);
+    console.error("Error getting vai tro:", error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi lấy thông tin vai trò'
+      message: "Lỗi khi lấy thông tin vai trò",
     });
   }
 };
@@ -78,22 +88,25 @@ const createVaiTro = async (req, res) => {
       await t.rollback();
       return res.status(400).json({
         success: false,
-        message: 'Tên vai trò đã tồn tại'
+        message: "Tên vai trò đã tồn tại",
       });
     }
 
     // Tạo vai trò mới
-    const vaiTro = await VaiTro.create({
-      TenVaiTro,
-      MoTa,
-      isActive: true
-    }, { transaction: t });
+    const vaiTro = await VaiTro.create(
+      {
+        TenVaiTro,
+        MoTa,
+        isActive: true,
+      },
+      { transaction: t }
+    );
 
     // Gán quyền nếu có
     if (Quyens && Quyens.length > 0) {
-      const vaiTroQuyens = Quyens.map(maQuyen => ({
+      const vaiTroQuyens = Quyens.map((maQuyen) => ({
         MaVaiTro: vaiTro.MaVaiTro,
-        MaQuyen: maQuyen
+        MaQuyen: maQuyen,
       }));
       await VaiTro_Quyen.bulkCreate(vaiTroQuyens, { transaction: t });
     }
@@ -102,20 +115,20 @@ const createVaiTro = async (req, res) => {
 
     // Lấy lại vai trò với quyền đã gán
     const result = await VaiTro.findByPk(vaiTro.MaVaiTro, {
-      include: [{ model: Quyen, through: { attributes: [] } }]
+      include: [{ model: Quyen, through: { attributes: [] } }],
     });
 
     res.status(201).json({
       success: true,
-      message: 'Tạo vai trò thành công',
-      data: result
+      message: "Tạo vai trò thành công",
+      data: result,
     });
   } catch (error) {
     await t.rollback();
-    console.error('Error creating vai tro:', error);
+    console.error("Error creating vai tro:", error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi tạo vai trò'
+      message: "Lỗi khi tạo vai trò",
     });
   }
 };
@@ -134,7 +147,7 @@ const updateVaiTro = async (req, res) => {
       await t.rollback();
       return res.status(404).json({
         success: false,
-        message: 'Không tìm thấy vai trò'
+        message: "Không tìm thấy vai trò",
       });
     }
 
@@ -145,31 +158,34 @@ const updateVaiTro = async (req, res) => {
         await t.rollback();
         return res.status(400).json({
           success: false,
-          message: 'Tên vai trò đã tồn tại'
+          message: "Tên vai trò đã tồn tại",
         });
       }
     }
 
     // Cập nhật thông tin vai trò
-    await vaiTro.update({
-      TenVaiTro: TenVaiTro || vaiTro.TenVaiTro,
-      MoTa: MoTa !== undefined ? MoTa : vaiTro.MoTa,
-      isActive: isActive !== undefined ? isActive : vaiTro.isActive
-    }, { transaction: t });
+    await vaiTro.update(
+      {
+        TenVaiTro: TenVaiTro || vaiTro.TenVaiTro,
+        MoTa: MoTa !== undefined ? MoTa : vaiTro.MoTa,
+        isActive: isActive !== undefined ? isActive : vaiTro.isActive,
+      },
+      { transaction: t }
+    );
 
     // Cập nhật quyền nếu có
     if (Quyens !== undefined) {
       // Xóa tất cả quyền cũ
       await VaiTro_Quyen.destroy({
         where: { MaVaiTro: id },
-        transaction: t
+        transaction: t,
       });
 
       // Thêm quyền mới
       if (Quyens.length > 0) {
-        const vaiTroQuyens = Quyens.map(maQuyen => ({
+        const vaiTroQuyens = Quyens.map((maQuyen) => ({
           MaVaiTro: id,
-          MaQuyen: maQuyen
+          MaQuyen: maQuyen,
         }));
         await VaiTro_Quyen.bulkCreate(vaiTroQuyens, { transaction: t });
       }
@@ -179,20 +195,20 @@ const updateVaiTro = async (req, res) => {
 
     // Lấy lại vai trò với quyền mới
     const result = await VaiTro.findByPk(id, {
-      include: [{ model: Quyen, through: { attributes: [] } }]
+      include: [{ model: Quyen, through: { attributes: [] } }],
     });
 
     res.json({
       success: true,
-      message: 'Cập nhật vai trò thành công',
-      data: result
+      message: "Cập nhật vai trò thành công",
+      data: result,
     });
   } catch (error) {
     await t.rollback();
-    console.error('Error updating vai tro:', error);
+    console.error("Error updating vai tro:", error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi cập nhật vai trò'
+      message: "Lỗi khi cập nhật vai trò",
     });
   }
 };
@@ -210,7 +226,7 @@ const deleteVaiTro = async (req, res) => {
       await t.rollback();
       return res.status(404).json({
         success: false,
-        message: 'Không tìm thấy vai trò'
+        message: "Không tìm thấy vai trò",
       });
     }
 
@@ -220,14 +236,14 @@ const deleteVaiTro = async (req, res) => {
       await t.rollback();
       return res.status(400).json({
         success: false,
-        message: `Không thể xóa vai trò đang được ${usersWithRole} nhân viên sử dụng`
+        message: `Không thể xóa vai trò đang được ${usersWithRole} nhân viên sử dụng`,
       });
     }
 
     // Xóa liên kết vai trò - quyền
     await VaiTro_Quyen.destroy({
       where: { MaVaiTro: id },
-      transaction: t
+      transaction: t,
     });
 
     // Xóa vai trò
@@ -237,14 +253,14 @@ const deleteVaiTro = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Xóa vai trò thành công'
+      message: "Xóa vai trò thành công",
     });
   } catch (error) {
     await t.rollback();
-    console.error('Error deleting vai tro:', error);
+    console.error("Error deleting vai tro:", error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi xóa vai trò'
+      message: "Lỗi khi xóa vai trò",
     });
   }
 };
@@ -257,13 +273,16 @@ const deleteVaiTro = async (req, res) => {
 const getAllQuyen = async (req, res) => {
   try {
     const quyens = await Quyen.findAll({
-      order: [['NhomQuyen', 'ASC'], ['MaQuyen', 'ASC']]
+      order: [
+        ["NhomQuyen", "ASC"],
+        ["MaQuyen", "ASC"],
+      ],
     });
 
     // Nhóm quyền theo NhomQuyen
     const grouped = {};
-    quyens.forEach(q => {
-      const nhom = q.NhomQuyen || 'other';
+    quyens.forEach((q) => {
+      const nhom = q.NhomQuyen || "other";
       if (!grouped[nhom]) {
         grouped[nhom] = [];
       }
@@ -273,13 +292,13 @@ const getAllQuyen = async (req, res) => {
     res.json({
       success: true,
       data: quyens,
-      grouped: grouped
+      grouped: grouped,
     });
   } catch (error) {
-    console.error('Error getting quyen:', error);
+    console.error("Error getting quyen:", error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi lấy danh sách quyền'
+      message: "Lỗi khi lấy danh sách quyền",
     });
   }
 };
@@ -297,7 +316,7 @@ const assignVaiTroToNhanVien = async (req, res) => {
     if (!nhanVien) {
       return res.status(404).json({
         success: false,
-        message: 'Không tìm thấy nhân viên'
+        message: "Không tìm thấy nhân viên",
       });
     }
 
@@ -307,7 +326,7 @@ const assignVaiTroToNhanVien = async (req, res) => {
       if (!vaiTro) {
         return res.status(404).json({
           success: false,
-          message: 'Không tìm thấy vai trò'
+          message: "Không tìm thấy vai trò",
         });
       }
     }
@@ -317,13 +336,69 @@ const assignVaiTroToNhanVien = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Gán vai trò thành công'
+      message: "Gán vai trò thành công",
     });
   } catch (error) {
-    console.error('Error assigning vai tro:', error);
+    console.error("Error assigning vai tro:", error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi gán vai trò'
+      message: "Lỗi khi gán vai trò",
+    });
+  }
+};
+
+/**
+ * Tự động gán vai trò cho tất cả nhân viên dựa trên ChucVu
+ */
+const autoAssignVaiTro = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    // Mapping ChucVu -> TenVaiTro
+    const chucVuToVaiTro = {
+      Admin: "Admin",
+      "Chủ cửa hàng": "Chủ cửa hàng",
+      "Nhân viên": "Nhân viên",
+      "Thủ kho": "Thủ kho",
+    };
+
+    // Lấy tất cả vai trò
+    const vaiTros = await VaiTro.findAll({ transaction: t });
+    const vaiTroMap = {};
+    vaiTros.forEach((vt) => {
+      vaiTroMap[vt.TenVaiTro] = vt.MaVaiTro;
+    });
+
+    // Lấy tất cả nhân viên chưa có vai trò hoặc cần cập nhật
+    const nhanViens = await NhanVien.findAll({
+      where: { isDeleted: false },
+      transaction: t,
+    });
+
+    let updatedCount = 0;
+    for (const nv of nhanViens) {
+      const tenVaiTro = chucVuToVaiTro[nv.ChucVu];
+      if (tenVaiTro && vaiTroMap[tenVaiTro]) {
+        const maVaiTro = vaiTroMap[tenVaiTro];
+        if (nv.MaVaiTro !== maVaiTro) {
+          await nv.update({ MaVaiTro: maVaiTro }, { transaction: t });
+          updatedCount++;
+        }
+      }
+    }
+
+    await t.commit();
+
+    res.json({
+      success: true,
+      message: `Đã tự động gán vai trò cho ${updatedCount} nhân viên`,
+      updatedCount,
+    });
+  } catch (error) {
+    await t.rollback();
+    console.error("Error auto assigning vai tro:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi khi tự động gán vai trò",
     });
   }
 };
@@ -335,23 +410,25 @@ const getNhanVienWithVaiTro = async (req, res) => {
   try {
     const nhanViens = await NhanVien.findAll({
       where: { isDeleted: false },
-      include: [{
-        model: VaiTro,
-        required: false
-      }],
-      attributes: ['MaNhanVien', 'HoTen', 'ChucVu', 'MaVaiTro'],
-      order: [['HoTen', 'ASC']]
+      include: [
+        {
+          model: VaiTro,
+          required: false,
+        },
+      ],
+      attributes: ["MaNhanVien", "HoTen", "ChucVu", "MaVaiTro"],
+      order: [["HoTen", "ASC"]],
     });
 
     res.json({
       success: true,
-      data: nhanViens
+      data: nhanViens,
     });
   } catch (error) {
-    console.error('Error getting nhan vien:', error);
+    console.error("Error getting nhan vien:", error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi lấy danh sách nhân viên'
+      message: "Lỗi khi lấy danh sách nhân viên",
     });
   }
 };
@@ -365,17 +442,20 @@ const renderPermissionPage = async (req, res) => {
   try {
     const vaiTros = await VaiTro.findAll({
       include: [{ model: Quyen, through: { attributes: [] } }],
-      order: [['MaVaiTro', 'ASC']]
+      order: [["MaVaiTro", "ASC"]],
     });
 
     const quyens = await Quyen.findAll({
-      order: [['NhomQuyen', 'ASC'], ['MaQuyen', 'ASC']]
+      order: [
+        ["NhomQuyen", "ASC"],
+        ["MaQuyen", "ASC"],
+      ],
     });
 
     // Nhóm quyền theo NhomQuyen
     const groupedQuyens = {};
-    quyens.forEach(q => {
-      const nhom = q.NhomQuyen || 'other';
+    quyens.forEach((q) => {
+      const nhom = q.NhomQuyen || "other";
       if (!groupedQuyens[nhom]) {
         groupedQuyens[nhom] = [];
       }
@@ -385,26 +465,26 @@ const renderPermissionPage = async (req, res) => {
     const nhanViens = await NhanVien.findAll({
       where: { isDeleted: false },
       include: [{ model: VaiTro, required: false }],
-      attributes: ['MaNhanVien', 'HoTen', 'ChucVu', 'MaVaiTro'],
-      order: [['HoTen', 'ASC']]
+      attributes: ["MaNhanVien", "HoTen", "ChucVu", "MaVaiTro"],
+      order: [["HoTen", "ASC"]],
     });
 
-    res.render('permissions', {
-      title: 'Quản lý phân quyền',
-      vaiTros: vaiTros.map(v => v.toJSON()),
-      quyens: quyens.map(q => q.toJSON()),
+    res.render("permissions", {
+      title: "Quản lý phân quyền",
+      vaiTros: vaiTros.map((v) => v.toJSON()),
+      quyens: quyens.map((q) => q.toJSON()),
       groupedQuyens,
-      nhanViens: nhanViens.map(n => n.toJSON()),
+      nhanViens: nhanViens.map((n) => n.toJSON()),
       username: req.user?.username,
       role: req.user?.role,
-      MaNV: req.user?.id || req.user?.MaNV
+      MaNV: req.user?.id || req.user?.MaNV,
     });
   } catch (error) {
-    console.error('Error rendering permission page:', error);
-    res.status(500).render('error', {
-      title: 'Lỗi',
-      message: 'Lỗi khi tải trang quản lý phân quyền',
-      error: { status: 500 }
+    console.error("Error rendering permission page:", error);
+    res.status(500).render("error", {
+      title: "Lỗi",
+      message: "Lỗi khi tải trang quản lý phân quyền",
+      error: { status: 500 },
     });
   }
 };
@@ -417,6 +497,7 @@ module.exports = {
   deleteVaiTro,
   getAllQuyen,
   assignVaiTroToNhanVien,
+  autoAssignVaiTro,
   getNhanVienWithVaiTro,
-  renderPermissionPage
+  renderPermissionPage,
 };

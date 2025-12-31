@@ -118,9 +118,63 @@
     }
 
     .user-menu {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-light);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .user-menu .user-trigger {
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .user-menu .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background-color: var(--white-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      min-width: 150px;
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    .user-menu:hover .dropdown-menu {
+      display: block;
+    }
+
+    .user-menu .dropdown-menu a {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      text-decoration: none;
+      color: var(--text-dark);
+      font-size: 0.9rem;
+      transition: background-color 0.2s ease;
+    }
+
+    .user-menu .dropdown-menu a:hover {
+      background-color: var(--light-bg);
+      color: var(--red-accent);
+    }
+
+    .user-menu .dropdown-menu a i {
+      width: 16px;
+      text-align: center;
+      color: var(--text-light);
+      transition: color 0.2s ease;
+    }
+
+    .user-menu .dropdown-menu a:hover i {
+      color: var(--red-accent);
     }
 
     /* Tabs */
@@ -584,6 +638,32 @@
     .group-icon {
       margin-right: 0.5rem;
     }
+
+    /* Checkbox toàn quyền */
+    .group-header label {
+      background: rgba(30, 228, 172, 0.1);
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      border: 1px solid var(--green-accent);
+      color: var(--green-accent);
+      transition: all 0.2s ease;
+    }
+
+    .group-header label:hover {
+      background: rgba(30, 228, 172, 0.2);
+    }
+
+    .group-header input[type="checkbox"]:checked + span,
+    .group-header label:has(input:checked) {
+      background: var(--green-accent);
+      color: white;
+    }
+
+    /* Toast styling enhancement */
+    .toast {
+      min-width: 300px;
+      max-width: 500px;
+    }
   </style>
 </head>
 
@@ -593,22 +673,22 @@
     <aside class="sidebar">
       <div class="sidebar-header">
         <i class="fas fa-book-open"></i>
-        <h2>Quản lý nhà sách</h2>
+        <h2>NHÀ SÁCH ABC</h2>
       </div>
       <nav class="sidebar-nav">
         <ul>
-          <li><a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-          <li><a href="/books"><i class="fas fa-book"></i> Quản lý sách</a></li>
-          <li><a href="/booksimport"><i class="fas fa-truck-loading"></i> Nhập sách</a></li>
-          <li><a href="/bills"><i class="fas fa-file-invoice-dollar"></i> Bán sách</a></li>
-          <li><a href="/receipts"><i class="fas fa-receipt"></i> Thu tiền</a></li>
-          <li><a href="/customers"><i class="fas fa-users"></i> Khách hàng</a></li>
-          <li><a href="/employees"><i class="fas fa-user-tie"></i> Nhân viên</a></li>
-          <li><a href="/inventory"><i class="fas fa-warehouse"></i> Kiểm kê</a></li>
-          <li><a href="/report"><i class="fas fa-chart-line"></i> Báo cáo</a></li>
-          <li><a href="/changerule"><i class="fas fa-cogs"></i> Quy định</a></li>
+          <li><a href="/dashboard"><i class="fas fa-home"></i> Tổng quan</a></li>
+          <li><a href="/dashboard/employees"><i class="fas fa-users"></i> QL Nhân viên</a></li>
+          <li><a href="/dashboard/books"><i class="fas fa-book"></i> QL Sách</a></li>
+          <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i> QL Khách hàng</a></li>
+          <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i> QL Phiếu nhập sách</a></li>
+          <li><a href="/dashboard/inventory"><i class="fas fa-clipboard-check"></i> QL Phiếu kiểm kê</a></li>
+          <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i> QL Phiếu thu tiền</a></li>
+          <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i> QL Hóa đơn</a></li>
+          <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+          <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i> Thay đổi quy định</a></li>
+          <li><a href="/dashboard/trash"><i class="fas fa-trash-alt"></i> Thùng rác</a></li>
           <li><a href="/permissions/page" class="active"><i class="fas fa-user-shield"></i> Phân quyền</a></li>
-          <li><a href="/admin/trash"><i class="fas fa-trash-alt"></i> Thùng rác</a></li>
         </ul>
       </nav>
     </aside>
@@ -618,10 +698,15 @@
       <div class="top-bar">
         <h1><i class="fas fa-user-shield"></i> Quản lý Phân quyền</h1>
         <div class="user-menu">
-          <span>Xin chào, <strong><%= username %></strong></span>
-          <a href="/logout" class="btn btn-secondary btn-sm">
-            <i class="fas fa-sign-out-alt"></i> Đăng xuất
-          </a>
+          <span class="user-trigger">
+            Chào, <strong><%= username %></strong>
+            <i class="fas fa-chevron-down"></i>
+          </span>
+          <div class="dropdown-menu">
+            <a href="#" id="logout-button">
+              <i class="fas fa-sign-out-alt"></i> Đăng xuất
+            </a>
+          </div>
         </div>
       </div>
 
@@ -708,6 +793,9 @@
             <div class="card">
               <div class="card-header">
                 <h3>Gán vai trò cho nhân viên</h3>
+                <button class="btn btn-primary" onclick="autoAssignRoles()">
+                  <i class="fas fa-magic"></i> Tự động gán theo chức vụ
+                </button>
               </div>
               <div class="card-body">
                 <div id="nhanvien-list">
@@ -978,10 +1066,29 @@
 
         const groupInfo = groupNames[groupKey] || { name: groupKey, icon: 'fa-folder' };
         
+        // Kiểm tra xem tất cả quyền trong nhóm đã được chọn chưa
+        const allGroupPermissions = quyens.map(q => q.MaQuyen);
+        const isAllChecked = allGroupPermissions.every(p => currentRolePermissions.includes(p));
+        
+        // Nhóm admin và caidat không có checkbox toàn quyền riêng
+        const showFullPermissionCheckbox = !['caidat'].includes(groupKey);
+        
         html += `
           <tr>
             <td colspan="3" class="group-header">
-              <i class="fas ${groupInfo.icon} group-icon"></i> ${groupInfo.name}
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span><i class="fas ${groupInfo.icon} group-icon"></i> ${groupInfo.name}</span>
+                ${showFullPermissionCheckbox ? `
+                  <label style="font-size: 0.85rem; font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" 
+                      data-group="${groupKey}"
+                      ${isAllChecked ? 'checked' : ''}
+                      onchange="toggleGroupPermissions('${groupKey}', this.checked)"
+                      style="cursor: pointer;">
+                    ${groupKey === 'admin' ? 'Toàn quyền hệ thống' : 'Toàn quyền'}
+                  </label>
+                ` : ''}
+              </div>
             </td>
           </tr>
         `;
@@ -993,9 +1100,11 @@
               <th>${q.TenQuyen}</th>
               <td>
                 <input type="checkbox" 
+                  class="perm-checkbox perm-${groupKey}"
                   data-maquyen="${q.MaQuyen}" 
+                  data-group="${groupKey}"
                   ${isChecked ? 'checked' : ''}
-                  onchange="togglePermission('${q.MaQuyen}', this.checked)">
+                  onchange="togglePermission('${q.MaQuyen}', this.checked, '${groupKey}')">
               </td>
               <td style="font-size: 0.85rem; color: var(--text-light)">${q.MoTa || '-'}</td>
             </tr>
@@ -1016,7 +1125,72 @@
       document.getElementById('permission-matrix-container').innerHTML = html;
     }
 
-    function togglePermission(maQuyen, isChecked) {
+    // Toggle tất cả quyền trong một nhóm
+    function toggleGroupPermissions(groupKey, isChecked) {
+      const quyens = groupedQuyensData[groupKey];
+      if (!quyens) return;
+
+      // Nếu là nhóm admin và đang bật, bật tất cả quyền
+      if (groupKey === 'admin' && isChecked) {
+        // Bật tất cả quyền trong hệ thống
+        quyensData.forEach(q => {
+          if (!currentRolePermissions.includes(q.MaQuyen)) {
+            currentRolePermissions.push(q.MaQuyen);
+          }
+        });
+        // Render lại để cập nhật tất cả checkbox
+        renderPermissionMatrix();
+        showToast('Đã bật toàn quyền hệ thống', 'success');
+        return;
+      }
+
+      // Nếu là nhóm admin và đang tắt, tắt tất cả quyền
+      if (groupKey === 'admin' && !isChecked) {
+        currentRolePermissions = [];
+        renderPermissionMatrix();
+        showToast('Đã tắt toàn quyền hệ thống', 'success');
+        return;
+      }
+
+      // Toggle quyền trong nhóm cụ thể
+      quyens.forEach(q => {
+        if (isChecked) {
+          if (!currentRolePermissions.includes(q.MaQuyen)) {
+            currentRolePermissions.push(q.MaQuyen);
+          }
+        } else {
+          currentRolePermissions = currentRolePermissions.filter(p => p !== q.MaQuyen);
+        }
+      });
+
+      // Cập nhật UI cho các checkbox trong nhóm
+      document.querySelectorAll(`.perm-${groupKey}`).forEach(cb => {
+        cb.checked = isChecked;
+      });
+
+      // Cập nhật trạng thái checkbox toàn quyền của các nhóm khác nếu cần
+      updateGroupCheckboxStates();
+    }
+
+    // Cập nhật trạng thái các checkbox toàn quyền
+    function updateGroupCheckboxStates() {
+      const groupOrder = ['admin', 'sach', 'nhapsach', 'hoadon', 'phieuthu', 'khachhang', 'nhanvien', 'kiemke', 'baocao', 'caidat'];
+      
+      groupOrder.forEach(groupKey => {
+        const quyens = groupedQuyensData[groupKey];
+        if (!quyens) return;
+        
+        const allGroupPermissions = quyens.map(q => q.MaQuyen);
+        const isAllChecked = allGroupPermissions.every(p => currentRolePermissions.includes(p));
+        
+        const groupCheckbox = document.querySelector(`input[data-group="${groupKey}"]:not(.perm-checkbox)`);
+        if (groupCheckbox) {
+          groupCheckbox.checked = isAllChecked;
+        }
+      });
+    }
+
+    function togglePermission(maQuyen, isChecked, groupKey) {
       if (isChecked) {
         if (!currentRolePermissions.includes(maQuyen)) {
           currentRolePermissions.push(maQuyen);
@@ -1024,6 +1198,9 @@
       } else {
         currentRolePermissions = currentRolePermissions.filter(p => p !== maQuyen);
       }
+      
+      // Cập nhật trạng thái checkbox toàn quyền của nhóm
+      updateGroupCheckboxStates();
     }
 
     async function savePermissions() {
@@ -1043,7 +1220,7 @@
         const data = await response.json();
         
         if (data.success) {
-          showToast('Cập nhật quyền thành công');
+          showToast('Cập nhật quyền thành công! Các nhân viên có vai trò này sẽ được áp dụng quyền mới ngay lập tức.');
         } else {
           showToast(data.message, 'error');
         }
@@ -1057,6 +1234,7 @@
     async function assignRole(select) {
       const maNhanVien = select.dataset.manv;
       const maVaiTro = select.value || null;
+      const nhanVienName = select.closest('.nhanvien-row').querySelector('strong').textContent;
 
       showLoader();
       try {
@@ -1069,12 +1247,45 @@
         const data = await response.json();
         
         if (data.success) {
-          showToast('Gán vai trò thành công');
+          const roleName = maVaiTro ? select.options[select.selectedIndex].text : 'không có vai trò';
+          showToast(`Đã gán vai trò "${roleName}" cho ${nhanVienName}. Quyền truy cập được cập nhật ngay lập tức!`);
+        } else {
+          showToast(data.message, 'error');
+          // Reset lại giá trị cũ nếu lỗi
+          select.value = select.dataset.originalValue || '';
+        }
+      } catch (error) {
+        showToast('Lỗi khi gán vai trò', 'error');
+      }
+      hideLoader();
+    }
+
+    // ========== AUTO ASSIGN ROLES ==========
+    async function autoAssignRoles() {
+      if (!confirm('Tự động gán vai trò cho tất cả nhân viên dựa trên chức vụ?')) {
+        return;
+      }
+
+      showLoader();
+      try {
+        const response = await fetch('/permissions/auto-assign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast(data.message);
+          // Reload trang để cập nhật danh sách
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
         } else {
           showToast(data.message, 'error');
         }
       } catch (error) {
-        showToast('Lỗi khi gán vai trò', 'error');
+        showToast('Lỗi khi tự động gán vai trò', 'error');
       }
       hideLoader();
     }
@@ -1083,6 +1294,17 @@
     document.getElementById('role-modal').addEventListener('click', function(e) {
       if (e.target === this) closeRoleModal();
     });
+
+    // ========== LOGOUT ==========
+    const logoutButton = document.getElementById('logout-button');
+    if (logoutButton) {
+      logoutButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+          window.location.href = '/logout';
+        }
+      });
+    }
   </script>
 </body>
 

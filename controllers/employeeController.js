@@ -84,13 +84,16 @@ const registerEmployee = async (req, res) => {
       chucVu,
       ngayNhanViec,
       ngaySinh,
+      maVaiTro,
     } = req.body;
 
     // Lấy tuổi tối thiểu từ bảng THAMSO
     const thamSoTuoiToiThieu = await db.ThamSo.findOne({
-      where: { TenThamSo: 'TuoiToiThieu' }
+      where: { TenThamSo: "TuoiToiThieu" },
     });
-    const tuoiToiThieu = thamSoTuoiToiThieu ? parseFloat(thamSoTuoiToiThieu.GiaTri) : 18; // Mặc định 18 nếu không tìm thấy
+    const tuoiToiThieu = thamSoTuoiToiThieu
+      ? parseFloat(thamSoTuoiToiThieu.GiaTri)
+      : 18; // Mặc định 18 nếu không tìm thấy
 
     // Tính tuổi
     const birthDate = new Date(ngaySinh);
@@ -102,12 +105,14 @@ const registerEmployee = async (req, res) => {
     }
 
     if (age < tuoiToiThieu) {
-      return res.status(400).json({ message: `Nhân viên phải từ ${tuoiToiThieu} tuổi trở lên.` });
+      return res
+        .status(400)
+        .json({ message: `Nhân viên phải từ ${tuoiToiThieu} tuổi trở lên.` });
     }
 
     // Kiểm tra xem nhân viên đã tồn tại (chỉ những nhân viên chưa bị xóa mềm)
     const existingEmployee = await db.NhanVien.findOne({
-      where: { Username: username, isDeleted: false }
+      where: { Username: username, isDeleted: false },
     });
 
     if (existingEmployee) {
@@ -116,7 +121,7 @@ const registerEmployee = async (req, res) => {
 
     // Kiểm tra số điện thoại đã tồn tại chưa (chỉ những nhân viên chưa bị xóa mềm)
     const existingPhone = await db.NhanVien.findOne({
-      where: { SoDienThoai: soDienThoai, isDeleted: false }
+      where: { SoDienThoai: soDienThoai, isDeleted: false },
     });
 
     if (existingPhone) {
@@ -138,14 +143,13 @@ const registerEmployee = async (req, res) => {
       Username: username,
       Password: hashedPassword,
       NgayNhanViec: ngayNhanViec || new Date(),
+      MaVaiTro: maVaiTro || null,
     });
 
-    res
-      .status(201)
-      .json({
-        message: "Tạo tài khoản thành công!",
-        userId: newUser.MaNhanVien,
-      });
+    res.status(201).json({
+      message: "Tạo tài khoản thành công!",
+      userId: newUser.MaNhanVien,
+    });
   } catch (err) {
     if (err.name === "SequelizeUniqueConstraintError") {
       return res.status(409).json({ message: "Username hoặc SĐT đã tồn tại" });
@@ -187,10 +191,10 @@ const login = async (req, res) => {
 
     // Mapping ChucVu từ tiếng Việt sang tiếng Anh cho phân quyền
     const roleMapping = {
-      'Admin': 'Admin',
-      'Chủ cửa hàng': 'Owner',
-      'Nhân viên': 'Staff',
-      'Thủ kho': 'Warehouse',
+      Admin: "Admin",
+      "Chủ cửa hàng": "Owner",
+      "Nhân viên": "Staff",
+      "Thủ kho": "Warehouse",
     };
     const mappedRole = roleMapping[user.ChucVu] || user.ChucVu;
     console.log("ChucVu:", user.ChucVu, "-> Mapped role:", mappedRole);
@@ -225,8 +229,15 @@ const login = async (req, res) => {
 // =============================================================
 const updateEmployee = async (req, res) => {
   const maNhanVien = req.params.maNV;
-  const { hoTen, ngaySinh, soDienThoai, chucVu, ngayNhanViec, password } =
-    req.body;
+  const {
+    hoTen,
+    ngaySinh,
+    soDienThoai,
+    chucVu,
+    ngayNhanViec,
+    password,
+    maVaiTro,
+  } = req.body;
 
   try {
     const user = await db.NhanVien.findByPk(maNhanVien);
@@ -237,9 +248,11 @@ const updateEmployee = async (req, res) => {
     // Lấy tuổi tối thiểu từ bảng THAMSO cho việc cập nhật
     if (typeof ngaySinh !== "undefined") {
       const thamSoTuoiToiThieu = await db.ThamSo.findOne({
-        where: { TenThamSo: 'TuoiToiThieu' }
+        where: { TenThamSo: "TuoiToiThieu" },
       });
-      const tuoiToiThieu = thamSoTuoiToiThieu ? parseFloat(thamSoTuoiToiThieu.GiaTri) : 18; // Mặc định 18 nếu không tìm thấy
+      const tuoiToiThieu = thamSoTuoiToiThieu
+        ? parseFloat(thamSoTuoiToiThieu.GiaTri)
+        : 18; // Mặc định 18 nếu không tìm thấy
 
       // Tính tuổi
       const birthDate = new Date(ngaySinh);
@@ -251,7 +264,9 @@ const updateEmployee = async (req, res) => {
       }
 
       if (age < tuoiToiThieu) {
-        return res.status(400).json({ message: `Nhân viên phải từ ${tuoiToiThieu} tuổi trở lên.` });
+        return res
+          .status(400)
+          .json({ message: `Nhân viên phải từ ${tuoiToiThieu} tuổi trở lên.` });
       }
     }
 
@@ -261,6 +276,7 @@ const updateEmployee = async (req, res) => {
     if (typeof soDienThoai !== "undefined") user.SoDienThoai = soDienThoai;
     if (typeof chucVu !== "undefined") user.ChucVu = chucVu;
     if (typeof ngayNhanViec !== "undefined") user.NgayNhanViec = ngayNhanViec;
+    if (typeof maVaiTro !== "undefined") user.MaVaiTro = maVaiTro || null;
 
     // Chỉ cập nhật mật khẩu NẾU nó được cung cấp
     if (password && password.length > 0) {
@@ -313,12 +329,10 @@ const checkEmployeeExists = async (req, res) => {
     if (employee) {
       res.status(200).json({ exists: true });
     } else {
-      res
-        .status(200)
-        .json({
-          exists: false,
-          message: "Mã nhân viên không tồn tại trong hệ thống.",
-        });
+      res.status(200).json({
+        exists: false,
+        message: "Mã nhân viên không tồn tại trong hệ thống.",
+      });
     }
   } catch (err) {
     console.error("Lỗi khi kiểm tra nhân viên:", err);
@@ -340,12 +354,16 @@ const deleteEmployee = async (req, res) => {
 
     // Kiểm tra nếu nhân viên đã bị xóa rồi
     if (user.isDeleted) {
-      return res.status(400).json({ error: "Nhân viên này đã bị xóa trước đó." });
+      return res
+        .status(400)
+        .json({ error: "Nhân viên này đã bị xóa trước đó." });
     }
 
     // Không cho phép xóa chính mình
     if (req.user && req.user.id === maNhanVien) {
-      return res.status(403).json({ error: 'Bạn không thể tự xóa chính mình.' });
+      return res
+        .status(403)
+        .json({ error: "Bạn không thể tự xóa chính mình." });
     }
 
     // KIỂM TRA RÀNG BUỘC KHÓA NGOẠI: Kiểm tra có hóa đơn liên kết không (chỉ hóa đơn chưa xóa)
@@ -391,16 +409,16 @@ const deleteEmployee = async (req, res) => {
     // Soft delete: đánh dấu isDeleted = true thay vì xóa thật
     // Thêm suffix vào các trường unique để tránh trùng khi thêm mới
     const deletedSuffix = `_deleted_${Date.now()}`;
-    if (user.Username && !user.Username.includes('_deleted_')) {
+    if (user.Username && !user.Username.includes("_deleted_")) {
       user.Username = user.Username + deletedSuffix;
     }
     // Số điện thoại: dùng prefix ngắn DEL_ để tránh vượt quá độ dài cột
-    if (user.SoDienThoai && !user.SoDienThoai.startsWith('DEL_')) {
-      user.SoDienThoai = 'DEL_' + user.SoDienThoai;
+    if (user.SoDienThoai && !user.SoDienThoai.startsWith("DEL_")) {
+      user.SoDienThoai = "DEL_" + user.SoDienThoai;
     }
     user.isDeleted = true;
     await user.save();
-    
+
     res.status(200).json({ message: "Xóa nhân viên thành công!" });
   } catch (err) {
     console.error(err);
@@ -441,45 +459,50 @@ const restoreEmployee = async (req, res) => {
     }
 
     // Khôi phục giá trị gốc của các trường unique (loại bỏ suffix _deleted_xxx)
-    if (user.Username && user.Username.includes('_deleted_')) {
-      const originalUsername = user.Username.split('_deleted_')[0];
+    if (user.Username && user.Username.includes("_deleted_")) {
+      const originalUsername = user.Username.split("_deleted_")[0];
       // Kiểm tra xem username gốc có bị trùng không
       const existingUser = await db.NhanVien.findOne({
-        where: { 
-          Username: originalUsername, 
+        where: {
+          Username: originalUsername,
           isDeleted: false,
-          MaNhanVien: { [db.Sequelize.Op.ne]: maNhanVien }
-        }
+          MaNhanVien: { [db.Sequelize.Op.ne]: maNhanVien },
+        },
       });
       if (existingUser) {
-        return res.status(400).json({ 
-          error: `Không thể khôi phục! Username "${originalUsername}" đã được sử dụng bởi nhân viên khác.` 
+        return res.status(400).json({
+          error: `Không thể khôi phục! Username "${originalUsername}" đã được sử dụng bởi nhân viên khác.`,
         });
       }
       user.Username = originalUsername;
     }
 
-    if (user.SoDienThoai && (user.SoDienThoai.startsWith('DEL_') || user.SoDienThoai.includes('_deleted_') || user.SoDienThoai.includes('_dele'))) {
+    if (
+      user.SoDienThoai &&
+      (user.SoDienThoai.startsWith("DEL_") ||
+        user.SoDienThoai.includes("_deleted_") ||
+        user.SoDienThoai.includes("_dele"))
+    ) {
       let originalSoDT = user.SoDienThoai;
       // Xử lý các format khác nhau
-      if (originalSoDT.startsWith('DEL_')) {
+      if (originalSoDT.startsWith("DEL_")) {
         originalSoDT = originalSoDT.substring(4); // Bỏ 'DEL_'
-      } else if (originalSoDT.includes('_deleted_')) {
-        originalSoDT = originalSoDT.split('_deleted_')[0];
-      } else if (originalSoDT.includes('_dele')) {
-        originalSoDT = originalSoDT.split('_dele')[0];
+      } else if (originalSoDT.includes("_deleted_")) {
+        originalSoDT = originalSoDT.split("_deleted_")[0];
+      } else if (originalSoDT.includes("_dele")) {
+        originalSoDT = originalSoDT.split("_dele")[0];
       }
       // Kiểm tra xem số điện thoại gốc có bị trùng không
       const existingUser = await db.NhanVien.findOne({
-        where: { 
-          SoDienThoai: originalSoDT, 
+        where: {
+          SoDienThoai: originalSoDT,
           isDeleted: false,
-          MaNhanVien: { [db.Sequelize.Op.ne]: maNhanVien }
-        }
+          MaNhanVien: { [db.Sequelize.Op.ne]: maNhanVien },
+        },
       });
       if (existingUser) {
-        return res.status(400).json({ 
-          error: `Không thể khôi phục! Số điện thoại ${originalSoDT} đã được sử dụng bởi nhân viên khác.` 
+        return res.status(400).json({
+          error: `Không thể khôi phục! Số điện thoại ${originalSoDT} đã được sử dụng bởi nhân viên khác.`,
         });
       }
       user.SoDienThoai = originalSoDT;
@@ -487,7 +510,7 @@ const restoreEmployee = async (req, res) => {
 
     user.isDeleted = false;
     await user.save();
-    
+
     res.status(200).json({ message: "Khôi phục nhân viên thành công!" });
   } catch (err) {
     console.error(err);
@@ -509,17 +532,20 @@ const hardDeleteEmployee = async (req, res) => {
 
     // Chỉ cho phép xóa vĩnh viễn những nhân viên đã soft delete
     if (!user.isDeleted) {
-      return res.status(400).json({ 
-        error: "Chỉ có thể xóa vĩnh viễn nhân viên đã được xóa mềm trước đó." 
+      return res.status(400).json({
+        error: "Chỉ có thể xóa vĩnh viễn nhân viên đã được xóa mềm trước đó.",
       });
     }
 
     await user.destroy();
-    res.status(200).json({ message: "Đã xóa vĩnh viễn nhân viên khỏi hệ thống!" });
+    res
+      .status(200)
+      .json({ message: "Đã xóa vĩnh viễn nhân viên khỏi hệ thống!" });
   } catch (err) {
     if (err.name === "SequelizeForeignKeyConstraintError") {
       return res.status(400).json({
-        error: "Xóa thất bại! Nhân viên này có dữ liệu liên quan trong hệ thống.",
+        error:
+          "Xóa thất bại! Nhân viên này có dữ liệu liên quan trong hệ thống.",
       });
     }
     console.error(err);
