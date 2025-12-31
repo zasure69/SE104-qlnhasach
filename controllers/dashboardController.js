@@ -71,17 +71,31 @@ const getEmployeesPage = async (req, res) => {
       whereConditions.NgayNhanViec[Op.lte] = filters.toNgayNhanViec;
     }
 
-    // 4. Lấy nhân viên từ database với filter
+    // 4. Lấy nhân viên từ database với filter (bao gồm VaiTro)
     const allEmployees = await db.NhanVien.findAll({
       where: whereConditions,
+      include: [
+        {
+          model: db.VaiTro,
+          required: false,
+        },
+      ],
+      raw: false,
+    });
+
+    // 5. Lấy danh sách vai trò để hiển thị trong dropdown
+    const vaiTros = await db.VaiTro.findAll({
+      where: { isActive: true },
+      order: [["TenVaiTro", "ASC"]],
       raw: true,
     });
 
-    // 5. Render trang 'employees.ejs' VÀ TRUYỀN DỮ LIỆU VÀO
+    // 6. Render trang 'employees.ejs' VÀ TRUYỀN DỮ LIỆU VÀO
     res.render("employees", {
       ...userInfo,
-      employees: allEmployees,
+      employees: allEmployees.map((e) => e.toJSON()),
       filters: filters,
+      vaiTros: vaiTros,
     });
   } catch (err) {
     console.error("Lỗi khi lấy dữ liệu nhân viên:", err);
@@ -532,14 +546,22 @@ const getTrashPage = async (req, res) => {
       db.DauSach.findAll({
         where: { isDeleted: true },
         include: [
-          { model: db.TheLoai, attributes: ["TenTheLoai", "isDeleted"], required: false },
+          {
+            model: db.TheLoai,
+            attributes: ["TenTheLoai", "isDeleted"],
+            required: false,
+          },
         ],
         raw: false,
       }),
       db.Sach.findAll({
         where: { isDeleted: true },
         include: [
-          { model: db.DauSach, attributes: ["TenSach", "isDeleted"], required: false },
+          {
+            model: db.DauSach,
+            attributes: ["TenSach", "isDeleted"],
+            required: false,
+          },
         ],
         raw: false,
       }),
@@ -547,21 +569,29 @@ const getTrashPage = async (req, res) => {
       db.TacGia.findAll({ where: { isDeleted: true }, raw: true }),
       db.PhieuNhapSach.findAll({
         where: { isDeleted: true },
-        include: [{
-          model: db.CT_PNS,
-          as: "ChiTiet",
-          required: false,
-          include: [{
-            model: db.Sach,
-            attributes: ['MaSach', 'isDeleted'],
-          }]
-        }],
+        include: [
+          {
+            model: db.CT_PNS,
+            as: "ChiTiet",
+            required: false,
+            include: [
+              {
+                model: db.Sach,
+                attributes: ["MaSach", "isDeleted"],
+              },
+            ],
+          },
+        ],
         raw: false,
       }),
       db.HoaDon.findAll({
         where: { isDeleted: true },
         include: [
-          { model: db.KhachHang, attributes: ["HoVaTen", "isDeleted"], required: false },
+          {
+            model: db.KhachHang,
+            attributes: ["HoVaTen", "isDeleted"],
+            required: false,
+          },
         ],
         raw: false,
       }),
@@ -591,7 +621,7 @@ const getTrashPage = async (req, res) => {
       const plain = d.get({ plain: true });
       return {
         ...plain,
-        isTheLoaiDeleted: plain.TheLoai ? plain.TheLoai.isDeleted : false
+        isTheLoaiDeleted: plain.TheLoai ? plain.TheLoai.isDeleted : false,
       };
     });
 
@@ -600,7 +630,7 @@ const getTrashPage = async (req, res) => {
       const plain = s.get({ plain: true });
       return {
         ...plain,
-        isDauSachDeleted: plain.DauSach ? plain.DauSach.isDeleted : false
+        isDauSachDeleted: plain.DauSach ? plain.DauSach.isDeleted : false,
       };
     });
 
@@ -609,7 +639,7 @@ const getTrashPage = async (req, res) => {
       const plain = b.get({ plain: true });
       return {
         ...plain,
-        isKhachHangDeleted: plain.KhachHang ? plain.KhachHang.isDeleted : false
+        isKhachHangDeleted: plain.KhachHang ? plain.KhachHang.isDeleted : false,
       };
     });
 
@@ -618,7 +648,7 @@ const getTrashPage = async (req, res) => {
       const plain = r.get({ plain: true });
       return {
         ...plain,
-        isKhachHangDeleted: plain.KhachHang ? plain.KhachHang.isDeleted : false
+        isKhachHangDeleted: plain.KhachHang ? plain.KhachHang.isDeleted : false,
       };
     });
 
@@ -627,7 +657,7 @@ const getTrashPage = async (req, res) => {
       const plain = imp.get({ plain: true });
       let hasDeletedSach = false;
       let deletedSachCount = 0;
-      
+
       if (plain.ChiTiet) {
         for (const detail of plain.ChiTiet) {
           if (detail.Sach && detail.Sach.isDeleted) {
@@ -636,11 +666,11 @@ const getTrashPage = async (req, res) => {
           }
         }
       }
-      
+
       return {
         ...plain,
         hasDeletedSach,
-        deletedSachCount
+        deletedSachCount,
       };
     });
 

@@ -1,9 +1,14 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const changeruleController = require('../controllers/changeruleController');
-const authorizeAdmin = require('../middleware/authAdminMiddleware');
+const changeruleController = require("../controllers/changeruleController");
+const authorizeAdmin = require("../middleware/authAdminMiddleware");
+const { checkPermission } = require("../middleware/permissionMiddleware");
 
 // PATCH /api/change-rules (Dùng PATCH vì đây là cập nhật)
-router.patch('/:tenThamSo', authorizeAdmin, changeruleController.updateRule); // <-- 2. THÊM ROUTE NÀY
+router.patch(
+  "/:tenThamSo",
+  checkPermission("caidat.thamso", "admin.full"),
+  changeruleController.updateRule
+);
 
 module.exports = router;

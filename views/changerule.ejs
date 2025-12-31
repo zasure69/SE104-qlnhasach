@@ -773,6 +773,11 @@
                                                                             class="fas fa-trash-alt"></i><span>Thùng
                                                                             rác</span></a></li>
                                                                 <% } %>
+                                                            <% if (role==='Admin') { %>
+                                                                <li><a href="/permissions/page"><i
+                                                                            class="fas fa-user-shield"></i><span>Phân
+                                                                            quyền</span></a></li>
+                                                            <% } %>
                 </ul>
             </nav>
         </aside>

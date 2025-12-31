@@ -382,11 +382,46 @@
       text-transform: uppercase;
       font-size: 0.95rem;
       letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .search-panel-header i {
       margin-right: 0.5rem;
       color: var(--secondary-color);
+    }
+
+    .quick-filters {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .quick-filter-btn {
+      padding: 0.4rem 0.85rem;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      background: white;
+      color: var(--text-light);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    .quick-filter-btn:hover {
+      border-color: var(--secondary-color);
+      color: var(--secondary-color);
+      background: #f0f7ff;
+    }
+
+    .quick-filter-btn.active {
+      background: var(--secondary-color);
+      color: white;
+      border-color: var(--secondary-color);
     }
 
     .search-panel-body {
@@ -965,6 +1000,11 @@
                                   <a href="/dashboard/trash"><i class="fas fa-trash-alt"></i><span> Thùng rác</span></a>
                                 </li>
                                 <% } %>
+                              <% if (role==='Admin') { %>
+                                <li>
+                                  <a href="/permissions/page"><i class="fas fa-user-shield"></i><span> Phân quyền</span></a>
+                                </li>
+                              <% } %>
         </ul>
       </nav>
     </aside>
@@ -997,9 +1037,20 @@
         <div class="search-panel-container">
           <div class="search-panel-header">
             <span><i class="fas fa-filter"></i> BỘ LỌC TÌM KIẾM</span>
+            <div class="quick-filters">
+              <button type="button" class="quick-filter-btn" data-filter="today">
+                <i class="fas fa-calendar-day"></i> Hôm nay
+              </button>
+              <button type="button" class="quick-filter-btn" data-filter="week">
+                <i class="fas fa-calendar-week"></i> Tuần này
+              </button>
+              <button type="button" class="quick-filter-btn" data-filter="month">
+                <i class="fas fa-calendar-alt"></i> Tháng này
+              </button>
+            </div>
           </div>
 
-          <form method="GET" action="/dashboard/receipts">
+          <form method="GET" action="/dashboard/receipts" id="filter-form">
             <div class="search-panel-body">
               <div class="field">
                 <label for="f-ma-phieu">Mã phiếu</label>
@@ -1028,8 +1079,8 @@
               <div class="field">
                 <label>Ngày thu</label>
                 <div class="two-col">
-                  <input name="from" type="date" value="<%= (filters && filters.from) ? filters.from : '' %>" />
-                  <input name="to" type="date" value="<%= (filters && filters.to) ? filters.to : '' %>" />
+                  <input id="f-from" name="from" type="date" value="<%= (filters && filters.from) ? filters.from : '' %>" />
+                  <input id="f-to" name="to" type="date" value="<%= (filters && filters.to) ? filters.to : '' %>" />
                 </div>
               </div>
 
@@ -1308,6 +1359,82 @@
           if (window.innerWidth <= 992) sidebar.classList.toggle("active");
           else container.classList.toggle("sidebar-collapsed");
         });
+
+      // --- 2.5 QUICK FILTERS (Hôm nay, Tuần này, Tháng này) ---
+      const quickFilterBtns = document.querySelectorAll('.quick-filter-btn');
+      const filterForm = document.getElementById('filter-form');
+      const fromDateInput = document.getElementById('f-from');
+      const toDateInput = document.getElementById('f-to');
+
+      // Helper: Format date to YYYY-MM-DD
+      const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      // Helper: Get date range based on filter type
+      const getDateRange = (filterType) => {
+        const today = new Date();
+        let from, to;
+
+        switch (filterType) {
+          case 'today':
+            from = to = formatDate(today);
+            break;
+          case 'week':
+            const dayOfWeek = today.getDay();
+            const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + mondayOffset);
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            from = formatDate(monday);
+            to = formatDate(sunday);
+            break;
+          case 'month':
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            from = formatDate(firstDay);
+            to = formatDate(lastDay);
+            break;
+        }
+        return { from, to };
+      };
+
+      // Check if current filters match a quick filter
+      const checkActiveQuickFilter = () => {
+        const currentFrom = fromDateInput ? fromDateInput.value : '';
+        const currentTo = toDateInput ? toDateInput.value : '';
+
+        quickFilterBtns.forEach(btn => {
+          const filterType = btn.dataset.filter;
+          const range = getDateRange(filterType);
+          if (currentFrom === range.from && currentTo === range.to) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        });
+      };
+
+      // Handle quick filter button clicks
+      quickFilterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const filterType = btn.dataset.filter;
+          const range = getDateRange(filterType);
+
+          if (fromDateInput) fromDateInput.value = range.from;
+          if (toDateInput) toDateInput.value = range.to;
+
+          // Submit form
+          if (filterForm) filterForm.submit();
+        });
+      });
+
+      // Check active quick filter on page load
+      checkActiveQuickFilter();
 
       // --- 3. AUTO-FILL LOGIC (MOCK DATA) ---
       async function findCustomer(maKH) {

@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý phân quyền</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --green-accent: #1EE4AC;
+      --green-accent-hover: #1ac096;
+      --red-accent: #e74c3c;
+      --red-accent-hover: #c0392b;
+      --orange-accent: #f39c12;
+      --light-bg: #f0f4f8;
+      --white-bg: #ffffff;
+      --text-dark: #222;
+      --text-light: #555;
+      --text-white: #ecf0f1;
+      --border-color: #e0e0e0;
+      --disabled-bg: #e9ecef;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--light-bg);
+      color: var(--text-dark);
+    }
+
+    .dashboard-container {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background-color: var(--primary-color);
+      color: var(--text-white);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .sidebar-header i {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar-header h2 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .sidebar-nav ul {
+      list-style: none;
+    }
+
+    .sidebar-nav li {
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text-white);
+      font-weight: 500;
+      transition: background-color 0.2s ease;
+    }
+
+    .sidebar-nav a:hover,
+    .sidebar-nav a.active {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-nav a.active {
+      background-color: var(--green-accent);
+      color: var(--primary-color);
+    }
+
+    /* Main content */
+    .main-content {
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .top-bar h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .user-menu {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-light);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .user-menu .user-trigger {
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .user-menu .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background-color: var(--white-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      min-width: 150px;
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    .user-menu:hover .dropdown-menu {
+      display: block;
+    }
+
+    .user-menu .dropdown-menu a {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      text-decoration: none;
+      color: var(--text-dark);
+      font-size: 0.9rem;
+      transition: background-color 0.2s ease;
+    }
+
+    .user-menu .dropdown-menu a:hover {
+      background-color: var(--light-bg);
+      color: var(--red-accent);
+    }
+
+    .user-menu .dropdown-menu a i {
+      width: 16px;
+      text-align: center;
+      color: var(--text-light);
+      transition: color 0.2s ease;
+    }
+
+    .user-menu .dropdown-menu a:hover i {
+      color: var(--red-accent);
+    }
+
+    /* Tabs */
+    .tabs-container {
+      background-color: var(--white-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+
+    .tabs-header {
+      display: flex;
+      background-color: #f9f9f9;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+      padding: 1rem 1.5rem;
+      border: none;
+      background: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-light);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-dark);
+      background-color: rgba(0, 0, 0, 0.03);
+    }
+
+    .tab-btn.active {
+      color: var(--green-accent);
+      background-color: var(--white-bg);
+    }
+
+    .tab-btn.active::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: var(--green-accent);
+    }
+
+    .tabs-body {
+      padding: 1.5rem;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Cards */
+    .card {
+      background-color: var(--white-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-header h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background-color: var(--green-accent);
+      color: var(--primary-color);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--green-accent-hover);
+    }
+
+    .btn-secondary {
+      background-color: #e0e0e0;
+      color: var(--text-dark);
+    }
+
+    .btn-secondary:hover {
+      background-color: #d0d0d0;
+    }
+
+    .btn-danger {
+      background-color: var(--red-accent);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: var(--red-accent-hover);
+    }
+
+    .btn-sm {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: var(--text-dark);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+
+    /* Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .data-table thead th {
+      background-color: #f9f9f9;
+      font-weight: 600;
+      color: var(--text-light);
+    }
+
+    .data-table tbody tr:hover {
+      background-color: #f5f5f5;
+    }
+
+    /* Permission Matrix */
+    .permission-matrix {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .permission-matrix th,
+    .permission-matrix td {
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .permission-matrix thead th {
+      background-color: #f1f5f9;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .permission-matrix tbody th {
+      text-align: left;
+      background-color: #f9f9f9;
+      font-weight: 500;
+    }
+
+    .permission-matrix .group-header {
+      background-color: var(--primary-color) !important;
+      color: white;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+    }
+
+    .permission-matrix input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    /* Role list */
+    .role-list {
+      list-style: none;
+    }
+
+    .role-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      transition: all 0.2s ease;
+    }
+
+    .role-item:hover {
+      border-color: var(--secondary-color);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .role-item.selected {
+      border-color: var(--green-accent);
+      background-color: rgba(30, 228, 172, 0.05);
+    }
+
+    .role-info h4 {
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .role-info p {
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    .role-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 20px;
+    }
+
+    .badge-success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .badge-warning {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .badge-secondary {
+      background-color: #e9ecef;
+      color: #6c757d;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background-color: var(--white-bg);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-light);
+    }
+
+    .modal-close:hover {
+      color: var(--red-accent);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+
+    /* Nhan vien assignment */
+    .nhanvien-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+
+    .nhanvien-info {
+      flex: 1;
+    }
+
+    .nhanvien-info strong {
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+
+    .nhanvien-info small {
+      color: var(--text-light);
+    }
+
+    .nhanvien-row select {
+      width: 200px;
+      padding: 0.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 2000;
+    }
+
+    .toast {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: slideIn 0.3s ease;
+    }
+
+    .toast.success {
+      background-color: #27ae60;
+    }
+
+    .toast.error {
+      background-color: var(--red-accent);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Loader */
+    .loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+    }
+
+    .loader-overlay.show {
+      display: flex;
+    }
+
+    .loader {
+      width: 50px;
+      height: 50px;
+      border: 4px solid var(--border-color);
+      border-top-color: var(--green-accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Group name mapping */
+    .group-icon {
+      margin-right: 0.5rem;
+    }
+
+    /* Checkbox toàn quyền */
+    .group-header label {
+      background: rgba(30, 228, 172, 0.1);
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      border: 1px solid var(--green-accent);
+      color: var(--green-accent);
+      transition: all 0.2s ease;
+    }
+
+    .group-header label:hover {
+      background: rgba(30, 228, 172, 0.2);
+    }
+
+    .group-header input[type="checkbox"]:checked + span,
+    .group-header label:has(input:checked) {
+      background: var(--green-accent);
+      color: white;
+    }
+
+    /* Toast styling enhancement */
+    .toast {
+      min-width: 300px;
+      max-width: 500px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <i class="fas fa-book-open"></i>
+        <h2>NHÀ SÁCH ABC</h2>
+      </div>
+      <nav class="sidebar-nav">
+        <ul>
+          <li><a href="/dashboard"><i class="fas fa-home"></i> Tổng quan</a></li>
+          <li><a href="/dashboard/employees"><i class="fas fa-users"></i> QL Nhân viên</a></li>
+          <li><a href="/dashboard/books"><i class="fas fa-book"></i> QL Sách</a></li>
+          <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i> QL Khách hàng</a></li>
+          <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i> QL Phiếu nhập sách</a></li>
+          <li><a href="/dashboard/inventory"><i class="fas fa-clipboard-check"></i> QL Phiếu kiểm kê</a></li>
+          <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i> QL Phiếu thu tiền</a></li>
+          <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i> QL Hóa đơn</a></li>
+          <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
+          <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i> Thay đổi quy định</a></li>
+          <li><a href="/dashboard/trash"><i class="fas fa-trash-alt"></i> Thùng rác</a></li>
+          <li><a href="/permissions/page" class="active"><i class="fas fa-user-shield"></i> Phân quyền</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="top-bar">
+        <h1><i class="fas fa-user-shield"></i> Quản lý Phân quyền</h1>
+        <div class="user-menu">
+          <span class="user-trigger">
+            Chào, <strong><%= username %></strong>
+            <i class="fas fa-chevron-down"></i>
+          </span>
+          <div class="dropdown-menu">
+            <a href="#" id="logout-button">
+              <i class="fas fa-sign-out-alt"></i> Đăng xuất
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs-container">
+        <div class="tabs-header">
+          <button class="tab-btn active" data-tab="roles">
+            <i class="fas fa-user-tag"></i> Vai trò
+          </button>
+          <button class="tab-btn" data-tab="permissions">
+            <i class="fas fa-key"></i> Ma trận quyền
+          </button>
+          <button class="tab-btn" data-tab="assign">
+            <i class="fas fa-user-cog"></i> Gán vai trò
+          </button>
+        </div>
+
+        <div class="tabs-body">
+          <!-- Tab: Vai trò -->
+          <div id="tab-roles" class="tab-content active">
+            <div class="card">
+              <div class="card-header">
+                <h3>Danh sách vai trò</h3>
+                <button class="btn btn-primary" onclick="openAddRoleModal()">
+                  <i class="fas fa-plus"></i> Thêm vai trò
+                </button>
+              </div>
+              <div class="card-body">
+                <ul class="role-list" id="role-list">
+                  <% vaiTros.forEach(vt => { %>
+                  <li class="role-item" data-id="<%= vt.MaVaiTro %>">
+                    <div class="role-info">
+                      <h4><%= vt.TenVaiTro %></h4>
+                      <p><%= vt.MoTa || 'Không có mô tả' %></p>
+                      <small>
+                        <span class="badge <%= vt.isActive ? 'badge-success' : 'badge-secondary' %>">
+                          <%= vt.isActive ? 'Đang hoạt động' : 'Vô hiệu' %>
+                        </span>
+                        <span class="badge badge-secondary" style="margin-left: 0.5rem">
+                          <%= vt.Quyens ? vt.Quyens.length : 0 %> quyền
+                        </span>
+                      </small>
+                    </div>
+                    <div class="role-actions">
+                      <button class="btn btn-secondary btn-sm" onclick="editRole(<%= vt.MaVaiTro %>)">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn btn-danger btn-sm" onclick="deleteRole(<%= vt.MaVaiTro %>, '<%= vt.TenVaiTro %>')">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </li>
+                  <% }); %>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: Ma trận quyền -->
+          <div id="tab-permissions" class="tab-content">
+            <div class="card">
+              <div class="card-header">
+                <h3>Chỉnh sửa quyền cho vai trò</h3>
+                <div>
+                  <select id="select-role-for-perms" class="form-control" style="padding: 0.5rem; border-radius: 4px;">
+                    <option value="">-- Chọn vai trò --</option>
+                    <% vaiTros.forEach(vt => { %>
+                    <option value="<%= vt.MaVaiTro %>"><%= vt.TenVaiTro %></option>
+                    <% }); %>
+                  </select>
+                </div>
+              </div>
+              <div class="card-body">
+                <div id="permission-matrix-container">
+                  <p style="text-align: center; color: var(--text-light); padding: 2rem;">
+                    <i class="fas fa-info-circle"></i> Vui lòng chọn vai trò để chỉnh sửa quyền
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: Gán vai trò -->
+          <div id="tab-assign" class="tab-content">
+            <div class="card">
+              <div class="card-header">
+                <h3>Gán vai trò cho nhân viên</h3>
+                <button class="btn btn-primary" onclick="autoAssignRoles()">
+                  <i class="fas fa-magic"></i> Tự động gán theo chức vụ
+                </button>
+              </div>
+              <div class="card-body">
+                <div id="nhanvien-list">
+                  <% nhanViens.forEach(nv => { %>
+                  <div class="nhanvien-row" data-manv="<%= nv.MaNhanVien %>">
+                    <div class="nhanvien-info">
+                      <strong><%= nv.HoTen %></strong>
+                      <small><%= nv.MaNhanVien %> - <%= nv.ChucVu || 'Chưa có chức vụ' %></small>
+                    </div>
+                    <select class="role-select" data-manv="<%= nv.MaNhanVien %>" onchange="assignRole(this)">
+                      <option value="">-- Chưa có vai trò --</option>
+                      <% vaiTros.forEach(vt => { %>
+                      <option value="<%= vt.MaVaiTro %>" <%= nv.MaVaiTro == vt.MaVaiTro ? 'selected' : '' %>>
+                        <%= vt.TenVaiTro %>
+                      </option>
+                      <% }); %>
+                    </select>
+                  </div>
+                  <% }); %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Thêm/Sửa Vai trò -->
+  <div class="modal-overlay" id="role-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="role-modal-title">Thêm vai trò mới</h3>
+        <button class="modal-close" onclick="closeRoleModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="role-form">
+          <input type="hidden" id="role-id">
+          <div class="form-group">
+            <label>Tên vai trò <span style="color: red">*</span></label>
+            <input type="text" id="role-name" required placeholder="VD: Nhân viên bán hàng">
+          </div>
+          <div class="form-group">
+            <label>Mô tả</label>
+            <textarea id="role-desc" rows="3" placeholder="Mô tả vai trò..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="role-active" checked> Kích hoạt vai trò
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeRoleModal()">Hủy</button>
+        <button class="btn btn-primary" onclick="saveRole()">Lưu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loader -->
+  <div class="loader-overlay" id="loader">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    // Data từ server
+    const vaiTrosData = <%- JSON.stringify(vaiTros) %>;
+    const quyensData = <%- JSON.stringify(quyens) %>;
+    const groupedQuyensData = <%- JSON.stringify(groupedQuyens) %>;
+
+    // Tên hiển thị cho các nhóm quyền
+    const groupNames = {
+      'admin': { name: 'Quản trị', icon: 'fa-crown' },
+      'sach': { name: 'Quản lý sách', icon: 'fa-book' },
+      'nhapsach': { name: 'Nhập sách', icon: 'fa-truck-loading' },
+      'hoadon': { name: 'Hóa đơn', icon: 'fa-file-invoice-dollar' },
+      'phieuthu': { name: 'Phiếu thu', icon: 'fa-receipt' },
+      'khachhang': { name: 'Khách hàng', icon: 'fa-users' },
+      'nhanvien': { name: 'Nhân viên', icon: 'fa-user-tie' },
+      'kiemke': { name: 'Kiểm kê', icon: 'fa-warehouse' },
+      'baocao': { name: 'Báo cáo', icon: 'fa-chart-line' },
+      'caidat': { name: 'Cài đặt', icon: 'fa-cogs' },
+      'other': { name: 'Khác', icon: 'fa-ellipsis-h' }
+    };
+
+    // ========== TAB SWITCHING ==========
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // ========== TOAST ==========
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // ========== LOADER ==========
+    function showLoader() {
+      document.getElementById('loader').classList.add('show');
+    }
+
+    function hideLoader() {
+      document.getElementById('loader').classList.remove('show');
+    }
+
+    // ========== ROLE MODAL ==========
+    function openAddRoleModal() {
+      document.getElementById('role-modal-title').textContent = 'Thêm vai trò mới';
+      document.getElementById('role-id').value = '';
+      document.getElementById('role-name').value = '';
+      document.getElementById('role-desc').value = '';
+      document.getElementById('role-active').checked = true;
+      document.getElementById('role-modal').classList.add('show');
+    }
+
+    function closeRoleModal() {
+      document.getElementById('role-modal').classList.remove('show');
+    }
+
+    async function editRole(id) {
+      showLoader();
+      try {
+        const response = await fetch(`/permissions/vaitro/${id}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          const vt = data.data;
+          document.getElementById('role-modal-title').textContent = 'Chỉnh sửa vai trò';
+          document.getElementById('role-id').value = vt.MaVaiTro;
+          document.getElementById('role-name').value = vt.TenVaiTro;
+          document.getElementById('role-desc').value = vt.MoTa || '';
+          document.getElementById('role-active').checked = vt.isActive;
+          document.getElementById('role-modal').classList.add('show');
+        } else {
+          showToast(data.message, 'error');
+        }
+      } catch (error) {
+        showToast('Lỗi khi tải thông tin vai trò', 'error');
+      }
+      hideLoader();
+    }
+
+    async function saveRole() {
+      const id = document.getElementById('role-id').value;
+      const TenVaiTro = document.getElementById('role-name').value.trim();
+      const MoTa = document.getElementById('role-desc').value.trim();
+      const isActive = document.getElementById('role-active').checked;
+
+      if (!TenVaiTro) {
+        showToast('Vui lòng nhập tên vai trò', 'error');
+        return;
+      }
+
+      showLoader();
+      try {
+        const url = id ? `/permissions/vaitro/${id}` : '/permissions/vaitro';
+        const method = id ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ TenVaiTro, MoTa, isActive })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast(data.message);
+          closeRoleModal();
+          location.reload();
+        } else {
+          showToast(data.message, 'error');
+        }
+      } catch (error) {
+        showToast('Lỗi khi lưu vai trò', 'error');
+      }
+      hideLoader();
+    }
+
+    async function deleteRole(id, name) {
+      if (!confirm(`Bạn có chắc muốn xóa vai trò "${name}"?`)) return;
+
+      showLoader();
+      try {
+        const response = await fetch(`/permissions/vaitro/${id}`, { method: 'DELETE' });
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast(data.message);
+          location.reload();
+        } else {
+          showToast(data.message, 'error');
+        }
+      } catch (error) {
+        showToast('Lỗi khi xóa vai trò', 'error');
+      }
+      hideLoader();
+    }
+
+    // ========== PERMISSION MATRIX ==========
+    let currentRoleId = null;
+    let currentRolePermissions = [];
+
+    document.getElementById('select-role-for-perms').addEventListener('change', async function() {
+      const roleId = this.value;
+      if (!roleId) {
+        document.getElementById('permission-matrix-container').innerHTML = `
+          <p style="text-align: center; color: var(--text-light); padding: 2rem;">
+            <i class="fas fa-info-circle"></i> Vui lòng chọn vai trò để chỉnh sửa quyền
+          </p>
+        `;
+        return;
+      }
+
+      showLoader();
+      try {
+        const response = await fetch(`/permissions/vaitro/${roleId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          currentRoleId = roleId;
+          currentRolePermissions = data.data.Quyens?.map(q => q.MaQuyen) || [];
+          renderPermissionMatrix();
+        } else {
+          showToast(data.message, 'error');
+        }
+      } catch (error) {
+        showToast('Lỗi khi tải quyền', 'error');
+      }
+      hideLoader();
+    });
+
+    function renderPermissionMatrix() {
+      let html = `
+        <table class="permission-matrix">
+          <thead>
+            <tr>
+              <th style="width: 40%">Quyền</th>
+              <th style="width: 15%">Cho phép</th>
+              <th style="width: 45%">Mô tả</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      // Sắp xếp nhóm theo thứ tự
+      const groupOrder = ['admin', 'sach', 'nhapsach', 'hoadon', 'phieuthu', 'khachhang', 'nhanvien', 'kiemke', 'baocao', 'caidat'];
+      
+      groupOrder.forEach(groupKey => {
+        const quyens = groupedQuyensData[groupKey];
+        if (!quyens || quyens.length === 0) return;
+
+        const groupInfo = groupNames[groupKey] || { name: groupKey, icon: 'fa-folder' };
+        
+        // Kiểm tra xem tất cả quyền trong nhóm đã được chọn chưa
+        const allGroupPermissions = quyens.map(q => q.MaQuyen);
+        const isAllChecked = allGroupPermissions.every(p => currentRolePermissions.includes(p));
+        
+        // Nhóm admin và caidat không có checkbox toàn quyền riêng
+        const showFullPermissionCheckbox = !['caidat'].includes(groupKey);
+        
+        html += `
+          <tr>
+            <td colspan="3" class="group-header">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span><i class="fas ${groupInfo.icon} group-icon"></i> ${groupInfo.name}</span>
+                ${showFullPermissionCheckbox ? `
+                  <label style="font-size: 0.85rem; font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" 
+                      data-group="${groupKey}"
+                      ${isAllChecked ? 'checked' : ''}
+                      onchange="toggleGroupPermissions('${groupKey}', this.checked)"
+                      style="cursor: pointer;">
+                    ${groupKey === 'admin' ? 'Toàn quyền hệ thống' : 'Toàn quyền'}
+                  </label>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+
+        quyens.forEach(q => {
+          const isChecked = currentRolePermissions.includes(q.MaQuyen);
+          html += `
+            <tr>
+              <th>${q.TenQuyen}</th>
+              <td>
+                <input type="checkbox" 
+                  class="perm-checkbox perm-${groupKey}"
+                  data-maquyen="${q.MaQuyen}" 
+                  data-group="${groupKey}"
+                  ${isChecked ? 'checked' : ''}
+                  onchange="togglePermission('${q.MaQuyen}', this.checked, '${groupKey}')">
+              </td>
+              <td style="font-size: 0.85rem; color: var(--text-light)">${q.MoTa || '-'}</td>
+            </tr>
+          `;
+        });
+      });
+
+      html += `
+          </tbody>
+        </table>
+        <div style="margin-top: 1.5rem; text-align: right;">
+          <button class="btn btn-primary" onclick="savePermissions()">
+            <i class="fas fa-save"></i> Lưu thay đổi
+          </button>
+        </div>
+      `;
+
+      document.getElementById('permission-matrix-container').innerHTML = html;
+    }
+
+    // Toggle tất cả quyền trong một nhóm
+    function toggleGroupPermissions(groupKey, isChecked) {
+      const quyens = groupedQuyensData[groupKey];
+      if (!quyens) return;
+
+      // Nếu là nhóm admin và đang bật, bật tất cả quyền
+      if (groupKey === 'admin' && isChecked) {
+        // Bật tất cả quyền trong hệ thống
+        quyensData.forEach(q => {
+          if (!currentRolePermissions.includes(q.MaQuyen)) {
+            currentRolePermissions.push(q.MaQuyen);
+          }
+        });
+        // Render lại để cập nhật tất cả checkbox
+        renderPermissionMatrix();
+        showToast('Đã bật toàn quyền hệ thống', 'success');
+        return;
+      }
+
+      // Nếu là nhóm admin và đang tắt, tắt tất cả quyền
+      if (groupKey === 'admin' && !isChecked) {
+        currentRolePermissions = [];
+        renderPermissionMatrix();
+        showToast('Đã tắt toàn quyền hệ thống', 'success');
+        return;
+      }
+
+      // Toggle quyền trong nhóm cụ thể
+      quyens.forEach(q => {
+        if (isChecked) {
+          if (!currentRolePermissions.includes(q.MaQuyen)) {
+            currentRolePermissions.push(q.MaQuyen);
+          }
+        } else {
+          currentRolePermissions = currentRolePermissions.filter(p => p !== q.MaQuyen);
+        }
+      });
+
+      // Cập nhật UI cho các checkbox trong nhóm
+      document.querySelectorAll(`.perm-${groupKey}`).forEach(cb => {
+        cb.checked = isChecked;
+      });
+
+      // Cập nhật trạng thái checkbox toàn quyền của các nhóm khác nếu cần
+      updateGroupCheckboxStates();
+    }
+
+    // Cập nhật trạng thái các checkbox toàn quyền
+    function updateGroupCheckboxStates() {
+      const groupOrder = ['admin', 'sach', 'nhapsach', 'hoadon', 'phieuthu', 'khachhang', 'nhanvien', 'kiemke', 'baocao', 'caidat'];
+      
+      groupOrder.forEach(groupKey => {
+        const quyens = groupedQuyensData[groupKey];
+        if (!quyens) return;
+        
+        const allGroupPermissions = quyens.map(q => q.MaQuyen);
+        const isAllChecked = allGroupPermissions.every(p => currentRolePermissions.includes(p));
+        
+        const groupCheckbox = document.querySelector(`input[data-group="${groupKey}"]:not(.perm-checkbox)`);
+        if (groupCheckbox) {
+          groupCheckbox.checked = isAllChecked;
+        }
+      });
+    }
+
+    function togglePermission(maQuyen, isChecked, groupKey) {
+      if (isChecked) {
+        if (!currentRolePermissions.includes(maQuyen)) {
+          currentRolePermissions.push(maQuyen);
+        }
+      } else {
+        currentRolePermissions = currentRolePermissions.filter(p => p !== maQuyen);
+      }
+      
+      // Cập nhật trạng thái checkbox toàn quyền của nhóm
+      updateGroupCheckboxStates();
+    }
+
+    async function savePermissions() {
+      if (!currentRoleId) {
+        showToast('Vui lòng chọn vai trò', 'error');
+        return;
+      }
+
+      showLoader();
+      try {
+        const response = await fetch(`/permissions/vaitro/${currentRoleId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ Quyens: currentRolePermissions })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast('Cập nhật quyền thành công! Các nhân viên có vai trò này sẽ được áp dụng quyền mới ngay lập tức.');
+        } else {
+          showToast(data.message, 'error');
+        }
+      } catch (error) {
+        showToast('Lỗi khi lưu quyền', 'error');
+      }
+      hideLoader();
+    }
+
+    // ========== ASSIGN ROLE ==========
+    async function assignRole(select) {
+      const maNhanVien = select.dataset.manv;
+      const maVaiTro = select.value || null;
+      const nhanVienName = select.closest('.nhanvien-row').querySelector('strong').textContent;
+
+      showLoader();
+      try {
+        const response = await fetch('/permissions/assign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ maNhanVien, maVaiTro })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          const roleName = maVaiTro ? select.options[select.selectedIndex].text : 'không có vai trò';
+          showToast(`Đã gán vai trò "${roleName}" cho ${nhanVienName}. Quyền truy cập được cập nhật ngay lập tức!`);
+        } else {
+          showToast(data.message, 'error');
+          // Reset lại giá trị cũ nếu lỗi
+          select.value = select.dataset.originalValue || '';
+        }
+      } catch (error) {
+        showToast('Lỗi khi gán vai trò', 'error');
+      }
+      hideLoader();
+    }
+
+    // ========== AUTO ASSIGN ROLES ==========
+    async function autoAssignRoles() {
+      if (!confirm('Tự động gán vai trò cho tất cả nhân viên dựa trên chức vụ?')) {
+        return;
+      }
+
+      showLoader();
+      try {
+        const response = await fetch('/permissions/auto-assign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast(data.message);
+          // Reload trang để cập nhật danh sách
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        } else {
+          showToast(data.message, 'error');
+        }
+      } catch (error) {
+        showToast('Lỗi khi tự động gán vai trò', 'error');
+      }
+      hideLoader();
+    }
+
+    // Close modal on click outside
+    document.getElementById('role-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeRoleModal();
+    });
+
+    // ========== LOGOUT ==========
+    const logoutButton = document.getElementById('logout-button');
+    if (logoutButton) {
+      logoutButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+          window.location.href = '/logout';
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>
