@@ -1370,6 +1370,11 @@
                 <div class="search-panel-body">
                   <div class="search-inputs-grid">
                     <div class="form-group">
+                      <label for="search-book-ma">Mã sách</label>
+                      <input type="text" id="search-book-ma" placeholder="Nhập mã sách..." />
+                    </div>
+
+                    <div class="form-group">
                       <label for="search-book-ten">Tên sách</label>
                       <input type="text" id="search-book-ten" placeholder="Nhập tên sách..." />
                     </div>
@@ -3493,6 +3498,7 @@
 
           setTimeout(() => {
             // A. Lấy giá trị input
+            const maQuery = document.getElementById('search-book-ma').value.toLowerCase().trim();
             const tenQuery = document.getElementById('search-book-ten').value.toLowerCase().trim();
             const tacGiaQuery = document.getElementById('search-book-tacgia').value.toLowerCase().trim();
             const theLoaiQuery = document.getElementById('search-book-theloai').value.toLowerCase().trim();
@@ -3510,6 +3516,7 @@
               // Cấu trúc cột ĐÚNG:
               // 0: STT | 1: Mã | 2: Tên | 3: Thể loại | 4: Tác giả | 5: NXB | 6: Năm | 7: SL Tồn | 8: Tình trạng | 9: Actions
 
+              const maCell = (row.cells[1]?.textContent || '').toLowerCase();
               const tenCell = (row.cells[2]?.textContent || '').toLowerCase();
               const theLoaiCell = (row.cells[3]?.textContent || '').toLowerCase();
               const tacGiaCell = (row.cells[4]?.textContent || '').toLowerCase();
@@ -3518,6 +3525,7 @@
               const slTonCell = parseFloat(row.cells[7]?.textContent || 0);
 
               // C. So sánh chuỗi
+              const matchMa = maCell.includes(maQuery);
               const matchTen = tenCell.includes(tenQuery);
               const matchTG = tacGiaCell.includes(tacGiaQuery);
               const matchTL = !theLoaiQuery || theLoaiCell.includes(theLoaiQuery);
@@ -3537,7 +3545,7 @@
               }
 
               // E. Kết quả
-              if (matchTen && matchTG && matchTL && matchNXB && matchNamXB && matchStatus) {
+              if (matchMa && matchTen && matchTG && matchTL && matchNXB && matchNamXB && matchStatus) {
                 row.style.display = '';
                 resultsFound++;
                 row.cells[0].textContent = resultsFound; // Cập nhật lại STT

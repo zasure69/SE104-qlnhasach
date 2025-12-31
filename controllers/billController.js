@@ -245,7 +245,7 @@ const getDetail = async (req, res) => {
         },
         {
           model: CT_HD,
-          as: "CT_HDs", // PHẢI KHỚP với alias đã định nghĩa trong index.js
+          // Không dùng alias vì model index.js không định nghĩa alias
           // Chỉ lấy các trường cần thiết của CT_HD
           attributes: ["MaSach", "SoLuongBan", "DonGiaBan", "ThanhTien"],
           include: [
@@ -262,8 +262,9 @@ const getDetail = async (req, res) => {
                   include: [
                     {
                       model: TheLoai,
+                      // Không dùng alias vì model không định nghĩa alias
                       attributes: ["TenTheLoai"],
-                      required: true,
+                      required: false, // Cho phép sách không có thể loại
                     },
                   ],
                 },
@@ -271,7 +272,7 @@ const getDetail = async (req, res) => {
               required: true, // Bắt buộc phải có Sach
             },
           ],
-          required: true, // Bắt buộc phải có CT_HD
+          required: false, // Cho phép hóa đơn không có chi tiết (trường hợp hiếm)
         },
       ],
     });
@@ -504,20 +505,23 @@ const getDeletedBills = async (req, res) => {
     const bills = await HoaDon.findAll({
       where: { isDeleted: true },
       include: [
-        { model: KhachHang, attributes: ["MaKhachHang", "HoVaTen", "isDeleted"] },
+        {
+          model: KhachHang,
+          attributes: ["MaKhachHang", "HoVaTen", "isDeleted"],
+        },
         { model: CT_HD, as: "ChiTietHoaDon" },
       ],
       order: [["NgayLapHoaDon", "DESC"]],
     });
-    
-    const result = bills.map(bill => {
+
+    const result = bills.map((bill) => {
       const plain = bill.get({ plain: true });
       return {
         ...plain,
-        isKhachHangDeleted: plain.KhachHang ? plain.KhachHang.isDeleted : false
+        isKhachHangDeleted: plain.KhachHang ? plain.KhachHang.isDeleted : false,
       };
     });
-    
+
     res.status(200).json({ bills: result });
   } catch (error) {
     console.error("[billController] getDeletedBills error:", error);
@@ -530,18 +534,20 @@ const getDeletedBills = async (req, res) => {
 // =====================================================
 const restoreBill = async (req, res) => {
   const MaHD = req.params.MaHD;
-  const restoreKhachHangToo = req.query.restoreKhachHang === 'true';
+  const restoreKhachHangToo = req.query.restoreKhachHang === "true";
   const t = await sequelize.transaction();
 
   try {
-    const bill = await HoaDon.findByPk(MaHD, { 
-      include: [{
-        model: KhachHang,
-        attributes: ['MaKhachHang', 'HoVaTen', 'isDeleted']
-      }],
-      transaction: t 
+    const bill = await HoaDon.findByPk(MaHD, {
+      include: [
+        {
+          model: KhachHang,
+          attributes: ["MaKhachHang", "HoVaTen", "isDeleted"],
+        },
+      ],
+      transaction: t,
     });
-    
+
     if (!bill) {
       await t.rollback();
       return res.status(404).json({ message: "Không tìm thấy hóa đơn." });
@@ -551,7 +557,7 @@ const restoreBill = async (req, res) => {
       await t.rollback();
       return res.status(400).json({ message: "Hóa đơn này chưa bị xóa." });
     }
-    
+
     // Kiểm tra xem khách hàng liên kết có bị xóa không
     if (bill.KhachHang && bill.KhachHang.isDeleted) {
       if (!restoreKhachHangToo) {
@@ -561,12 +567,12 @@ const restoreBill = async (req, res) => {
           requireKhachHangRestore: true,
           khachHangInfo: {
             MaKhachHang: bill.KhachHang.MaKhachHang,
-            HoVaTen: bill.KhachHang.HoVaTen
+            HoVaTen: bill.KhachHang.HoVaTen,
           },
-          message: `Khách hàng "${bill.KhachHang.HoVaTen}" liên kết với hóa đơn này đã bị xóa. Bạn có muốn khôi phục cả khách hàng không?`
+          message: `Khách hàng "${bill.KhachHang.HoVaTen}" liên kết với hóa đơn này đã bị xóa. Bạn có muốn khôi phục cả khách hàng không?`,
         });
       }
-      
+
       // Khôi phục khách hàng trước
       await KhachHang.update(
         { isDeleted: false },
@@ -615,11 +621,12 @@ const restoreBill = async (req, res) => {
     );
 
     await t.commit();
-    
-    const successMessage = restoreKhachHangToo && bill.KhachHang?.isDeleted
-      ? `Đã khôi phục hóa đơn ${MaHD} và khách hàng "${bill.KhachHang.HoVaTen}" thành công.`
-      : `Đã khôi phục hóa đơn ${MaHD} thành công.`;
-    
+
+    const successMessage =
+      restoreKhachHangToo && bill.KhachHang?.isDeleted
+        ? `Đã khôi phục hóa đơn ${MaHD} và khách hàng "${bill.KhachHang.HoVaTen}" thành công.`
+        : `Đã khôi phục hóa đơn ${MaHD} thành công.`;
+
     res.json({ message: successMessage });
   } catch (error) {
     await t.rollback();
