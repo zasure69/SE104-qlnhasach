@@ -1122,20 +1122,23 @@
                         </thead>
                         <tbody>
                             <% if (employees && employees.length > 0) { %>
-                                <% employees.forEach((employee, index) => { %>
+                                <% employees.forEach((employee, index) => { 
+                                    const ngaySinh = employee.NgaySinh && !isNaN(new Date(employee.NgaySinh).getTime()) ? new Date(employee.NgaySinh) : null;
+                                    const ngayNhanViec = employee.NgayNhanViec && !isNaN(new Date(employee.NgayNhanViec).getTime()) ? new Date(employee.NgayNhanViec) : null;
+                                %>
                                     <tr data-id="<%= employee.MaNhanVien %>"
-                                        data-ngay-sinh="<%= new Date(employee.NgaySinh).toISOString().split('T')[0] %>"
-                                        data-ngay-nhan-viec="<%= new Date(employee.NgayNhanViec).toISOString().split('T')[0] %>"
+                                        data-ngay-sinh="<%= ngaySinh ? ngaySinh.toISOString().split('T')[0] : '' %>"
+                                        data-ngay-nhan-viec="<%= ngayNhanViec ? ngayNhanViec.toISOString().split('T')[0] : '' %>"
                                         data-ma-vai-tro="<%= employee.MaVaiTro || '' %>">
                                         <td><%= index + 1 %></td>
                                         <td><%= employee.MaNhanVien %></td>
                                         <td><%= employee.HoTen %></td>
-                                        <td><%= new Date(employee.NgaySinh).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
+                                        <td><%= ngaySinh ? ngaySinh.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '' %></td>
                                         <td><%= employee.SoDienThoai %></td>
                                         <td><%= employee.ChucVu %></td>
                                         <td><%= employee.Username %></td>
                                         <td>******</td>
-                                        <td><%= new Date(employee.NgayNhanViec).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
+                                        <td><%= ngayNhanViec ? ngayNhanViec.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '' %></td>
                                         <td>
                                             <% if (employee.Username !== 'admin') { %>
                                                 <i class="fas fa-pencil-alt action-icon open-edit-modal"></i>
