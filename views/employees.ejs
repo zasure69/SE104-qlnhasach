@@ -1763,6 +1763,7 @@
                                 currentEditingRow = null;
                             } else {
                                 restoreFormData(editForm, originalFormData); // Reset form
+                                showToast('Cập nhật thất bại: ' + result.message, 'error')
                                 showToast('Đã khôi phục dữ liệu gốc!', 'success');
                             }
                         } catch (err) {
@@ -1907,7 +1908,7 @@
                             fetchEmployees(); // tải lại danh sách nhân viên
                         } else {
                             console.log(result)
-                            showToast(`Thêm thất bại: ${result.error}`, 'error');
+                            showToast(`Thêm thất bại: ${result.message}`, 'error');
                         }
                     } catch (err) {
                         hideLoader();
