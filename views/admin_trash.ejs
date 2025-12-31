@@ -2433,17 +2433,17 @@
         const response = await fetch(`/api/inventory/${maPhieu}`);
         if (!response.ok) throw new Error('Không tìm thấy phiếu kiểm kê');
         const data = await response.json();
-        const phieu = data.phieu || data;
+        const phieu = data.receipt || data;
 
         detailModalTitle.textContent = `Chi tiết Phiếu Kiểm Kê`;
         
         let detailHtml = `
           <div class="section-wrapper">
-            <h3 class="section-header-title">Thông tin chung</h3>
+            <h3 class="section-header-title" style="color:#e74c3c">THÔNG TIN CHUNG</h3>
             <div class="grid-general">
               <div class="form-group">
                 <label>Mã Phiếu Kiểm:</label>
-                <span style="font-weight:bold">${phieu.MaPhieuKiem}</span>
+                <span style="font-weight:bold">${phieu.MaPhieuKiem || '-'}</span>
               </div>
               <div class="form-group">
                 <label>Ngày Kiểm:</label>
@@ -2460,7 +2460,7 @@
             </div>
           </div>
           <div class="section-wrapper">
-            <h3 class="section-header-title">Chi tiết kiểm kê</h3>
+            <h3 class="section-header-title" style="color:#e74c3c">CHI TIẾT KIỂM KÊ</h3>
             <div class="detail-table-wrapper">
               <table class="detail-table">
                 <thead>
@@ -2476,25 +2476,33 @@
                 <tbody>
         `;
 
-        const chiTiet = phieu.ChiTietKiemKe || phieu.ChiTiet || [];
+        const chiTiet = phieu.ChiTiet || [];
         
-        chiTiet.forEach((ct, idx) => {
-          const chenhLech = (ct.SoLuongThucTe || 0) - (ct.SoLuongHeThong || 0);
-          const tenSach = ct.Sach?.DauSach?.TenSach || ct.Sach?.MaSach || '-';
-          
+        if (chiTiet.length === 0) {
           detailHtml += `
             <tr>
-              <td>${idx + 1}</td>
-              <td>${ct.MaSach}</td>
-              <td>${tenSach}</td>
-              <td style="text-align:right">${formatCurrency(ct.SoLuongHeThong)}</td>
-              <td style="text-align:right">${formatCurrency(ct.SoLuongThucTe)}</td>
-              <td style="text-align:right;color:${chenhLech !== 0 ? (chenhLech > 0 ? '#27ae60' : '#e74c3c') : 'inherit'}">
-                ${chenhLech > 0 ? '+' : ''}${formatCurrency(chenhLech)}
-              </td>
+              <td colspan="6" style="text-align:center;color:#999">Không có chi tiết kiểm kê</td>
             </tr>
           `;
-        });
+        } else {
+          chiTiet.forEach((ct, idx) => {
+            const chenhLech = (ct.SoLuongThucTe || 0) - (ct.SoLuongHeThong || 0);
+            const tenSach = ct.Sach?.DauSach?.TenSach || ct.Sach?.MaSach || '-';
+            
+            detailHtml += `
+              <tr>
+                <td>${idx + 1}</td>
+                <td>${ct.MaSach}</td>
+                <td>${tenSach}</td>
+                <td style="text-align:right">${formatCurrency(ct.SoLuongHeThong)}</td>
+                <td style="text-align:right">${formatCurrency(ct.SoLuongThucTe)}</td>
+                <td style="text-align:right;color:${chenhLech !== 0 ? (chenhLech > 0 ? '#27ae60' : '#e74c3c') : 'inherit'}">
+                  ${chenhLech > 0 ? '+' : ''}${formatCurrency(chenhLech)}
+                </td>
+              </tr>
+            `;
+          });
+        }
 
         detailHtml += `
                 </tbody>
@@ -2502,6 +2510,61 @@
             </div>
           </div>
         `;
+
+        // Hiển thị chi tiết lý do nếu có
+        const lyDoItems = [];
+        chiTiet.forEach(ct => {
+          if (ct.DanhSachLyDo && ct.DanhSachLyDo.length > 0) {
+            ct.DanhSachLyDo.forEach(lyDo => {
+              lyDoItems.push({
+                MaSach: ct.MaSach,
+                TenSach: ct.Sach?.DauSach?.TenSach || ct.Sach?.MaSach || '-',
+                TenLyDo: lyDo.LoaiLyDoKiemKe?.TenLyDo || lyDo.LyDoKhac || '-',
+                LyDoKhac: lyDo.LyDoKhac,
+                SoLuong: lyDo.SoLuong || 0
+              });
+            });
+          }
+        });
+
+        if (lyDoItems.length > 0) {
+          detailHtml += `
+            <div class="section-wrapper">
+              <h3 class="section-header-title" style="color:#e74c3c">CHI TIẾT LÝ DO CHÊNH LỆCH</h3>
+              <div class="detail-table-wrapper">
+                <table class="detail-table">
+                  <thead>
+                    <tr>
+                      <th>STT</th>
+                      <th>Mã Sách</th>
+                      <th>Tên Sách</th>
+                      <th>Lý Do</th>
+                      <th style="text-align:right">Số Lượng</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+          `;
+
+          lyDoItems.forEach((item, idx) => {
+            const lyDoDisplay = item.LyDoKhac ? `${item.TenLyDo} (${item.LyDoKhac})` : item.TenLyDo;
+            detailHtml += `
+              <tr>
+                <td>${idx + 1}</td>
+                <td>${item.MaSach}</td>
+                <td>${item.TenSach}</td>
+                <td>${lyDoDisplay}</td>
+                <td style="text-align:right">${formatCurrency(item.SoLuong)}</td>
+              </tr>
+            `;
+          });
+
+          detailHtml += `
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          `;
+        }
 
         detailModalBody.innerHTML = detailHtml;
         detailModal.classList.add('show');
