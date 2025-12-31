@@ -1351,23 +1351,25 @@ const getDeletedDauSach = async (req, res) => {
   try {
     const dauSachs = await db.DauSach.findAll({
       where: { isDeleted: true },
-      include: [{
-        model: db.TheLoai,
-        attributes: ['MaTheLoai', 'TenTheLoai', 'isDeleted'],
-        required: false
-      }],
-      raw: false
+      include: [
+        {
+          model: db.TheLoai,
+          attributes: ["MaTheLoai", "TenTheLoai", "isDeleted"],
+          required: false,
+        },
+      ],
+      raw: false,
     });
-    
-    const result = dauSachs.map(ds => {
+
+    const result = dauSachs.map((ds) => {
       const plain = ds.get({ plain: true });
       return {
         ...plain,
         TheLoai: plain.TheLoai || null,
-        isTheLoaiDeleted: plain.TheLoai ? plain.TheLoai.isDeleted : false
+        isTheLoaiDeleted: plain.TheLoai ? plain.TheLoai.isDeleted : false,
       };
     });
-    
+
     return res.status(200).json(result);
   } catch (err) {
     console.error("[bookController] getDeletedDauSach error", err);
@@ -1379,24 +1381,26 @@ const getDeletedSach = async (req, res) => {
   try {
     const sachList = await db.Sach.findAll({
       where: { isDeleted: true },
-      include: [{
-        model: db.DauSach,
-        attributes: ['MaDauSach', 'TenSach', 'isDeleted'],
-        required: false
-      }],
-      raw: false
+      include: [
+        {
+          model: db.DauSach,
+          attributes: ["MaDauSach", "TenSach", "isDeleted"],
+          required: false,
+        },
+      ],
+      raw: false,
     });
-    
+
     // Transform data để bao gồm thông tin trạng thái đầu sách
-    const result = sachList.map(sach => {
+    const result = sachList.map((sach) => {
       const plain = sach.get({ plain: true });
       return {
         ...plain,
         DauSach: plain.DauSach || null,
-        isDauSachDeleted: plain.DauSach ? plain.DauSach.isDeleted : false
+        isDauSachDeleted: plain.DauSach ? plain.DauSach.isDeleted : false,
       };
     });
-    
+
     return res.status(200).json(result);
   } catch (err) {
     console.error("[bookController] getDeletedSach error", err);
@@ -1436,22 +1440,24 @@ const getDeletedTacGia = async (req, res) => {
 const restoreDauSach = async (req, res) => {
   try {
     const maDS = req.params.maDS;
-    const restoreTheLoaiToo = req.query.restoreTheLoai === 'true';
-    
+    const restoreTheLoaiToo = req.query.restoreTheLoai === "true";
+
     const dauSach = await db.DauSach.findByPk(maDS, {
-      include: [{
-        model: db.TheLoai,
-        attributes: ['MaTheLoai', 'TenTheLoai', 'isDeleted']
-      }]
+      include: [
+        {
+          model: db.TheLoai,
+          attributes: ["MaTheLoai", "TenTheLoai", "isDeleted"],
+        },
+      ],
     });
-    
+
     if (!dauSach) {
       return res.status(404).json({ error: "Không tìm thấy Đầu sách" });
     }
     if (!dauSach.isDeleted) {
       return res.status(400).json({ error: "Đầu sách này chưa bị xóa." });
     }
-    
+
     // Kiểm tra xem thể loại liên kết có bị xóa không
     if (dauSach.TheLoai && dauSach.TheLoai.isDeleted) {
       if (!restoreTheLoaiToo) {
@@ -1460,26 +1466,27 @@ const restoreDauSach = async (req, res) => {
           requireTheLoaiRestore: true,
           theLoaiInfo: {
             MaTheLoai: dauSach.TheLoai.MaTheLoai,
-            TenTheLoai: dauSach.TheLoai.TenTheLoai
+            TenTheLoai: dauSach.TheLoai.TenTheLoai,
           },
-          message: `Thể loại "${dauSach.TheLoai.TenTheLoai}" liên kết với đầu sách này đã bị xóa. Bạn có muốn khôi phục cả thể loại không?`
+          message: `Thể loại "${dauSach.TheLoai.TenTheLoai}" liên kết với đầu sách này đã bị xóa. Bạn có muốn khôi phục cả thể loại không?`,
         });
       }
-      
+
       // Khôi phục thể loại trước
       await db.TheLoai.update(
         { isDeleted: false },
         { where: { MaTheLoai: dauSach.TheLoai.MaTheLoai } }
       );
     }
-    
+
     dauSach.isDeleted = false;
     await dauSach.save();
-    
-    const successMessage = restoreTheLoaiToo && dauSach.TheLoai?.isDeleted
-      ? `Khôi phục đầu sách và thể loại "${dauSach.TheLoai.TenTheLoai}" thành công!`
-      : "Khôi phục đầu sách thành công!";
-    
+
+    const successMessage =
+      restoreTheLoaiToo && dauSach.TheLoai?.isDeleted
+        ? `Khôi phục đầu sách và thể loại "${dauSach.TheLoai.TenTheLoai}" thành công!`
+        : "Khôi phục đầu sách thành công!";
+
     return res.status(200).json({ message: successMessage });
   } catch (err) {
     console.error("[bookController] restoreDauSach error", err);
@@ -1490,22 +1497,24 @@ const restoreDauSach = async (req, res) => {
 const restoreSach = async (req, res) => {
   try {
     const maSach = req.params.maSach;
-    const restoreDauSachToo = req.query.restoreDauSach === 'true'; // Query param để xác định có khôi phục đầu sách không
-    
+    const restoreDauSachToo = req.query.restoreDauSach === "true"; // Query param để xác định có khôi phục đầu sách không
+
     const sach = await db.Sach.findByPk(maSach, {
-      include: [{
-        model: db.DauSach,
-        attributes: ['MaDauSach', 'TenSach', 'isDeleted']
-      }]
+      include: [
+        {
+          model: db.DauSach,
+          attributes: ["MaDauSach", "TenSach", "isDeleted"],
+        },
+      ],
     });
-    
+
     if (!sach) {
       return res.status(404).json({ error: "Không tìm thấy Sách" });
     }
     if (!sach.isDeleted) {
       return res.status(400).json({ error: "Sách này chưa bị xóa." });
     }
-    
+
     // Kiểm tra xem đầu sách liên kết có bị xóa không
     if (sach.DauSach && sach.DauSach.isDeleted) {
       if (!restoreDauSachToo) {
@@ -1515,27 +1524,28 @@ const restoreSach = async (req, res) => {
           requireDauSachRestore: true,
           dauSachInfo: {
             MaDauSach: sach.DauSach.MaDauSach,
-            TenSach: sach.DauSach.TenSach
+            TenSach: sach.DauSach.TenSach,
           },
-          message: `Đầu sách "${sach.DauSach.TenSach}" (${sach.DauSach.MaDauSach}) liên kết với sách này đã bị xóa. Bạn có muốn khôi phục cả đầu sách không?`
+          message: `Đầu sách "${sach.DauSach.TenSach}" (${sach.DauSach.MaDauSach}) liên kết với sách này đã bị xóa. Bạn có muốn khôi phục cả đầu sách không?`,
         });
       }
-      
+
       // Khôi phục đầu sách trước
       await db.DauSach.update(
         { isDeleted: false },
         { where: { MaDauSach: sach.DauSach.MaDauSach } }
       );
     }
-    
+
     // Khôi phục sách
     sach.isDeleted = false;
     await sach.save();
-    
-    const successMessage = restoreDauSachToo && sach.DauSach?.isDeleted
-      ? `Khôi phục sách và đầu sách "${sach.DauSach.TenSach}" thành công!`
-      : "Khôi phục sách thành công!";
-    
+
+    const successMessage =
+      restoreDauSachToo && sach.DauSach?.isDeleted
+        ? `Khôi phục sách và đầu sách "${sach.DauSach.TenSach}" thành công!`
+        : "Khôi phục sách thành công!";
+
     return res.status(200).json({ message: successMessage });
   } catch (err) {
     console.error("[bookController] restoreSach error", err);
