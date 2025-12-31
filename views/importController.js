@@ -141,14 +141,7 @@ const getImportPage = async (req, res) => {
             where: hasEmployeeWhere ? employeeWhere : undefined,
           },
         ],
-        order: [
-          [
-            db.sequelize.literal(
-              "CAST(SUBSTRING(PhieuNhapSach.MaPhieuNhap, 3) AS UNSIGNED)"
-            ),
-            "ASC",
-          ],
-        ],
+        order: [[db.sequelize.literal("CAST(SUBSTRING(MaPhieuNhap, 3) AS UNSIGNED)"), "ASC"]],
         raw: false,
       });
 
