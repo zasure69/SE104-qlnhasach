@@ -33,6 +33,36 @@
       --tab-inactive-text: #6c757d;
     }
 
+    /* Sortable table headers */
+    .sortable {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .sortable:hover {
+      background: rgba(52, 152, 219, 0.1);
+    }
+    .sortable i {
+      margin-left: 0.35rem;
+      font-size: 0.75rem;
+      opacity: 0.5;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .sortable:hover i {
+      opacity: 1;
+    }
+    .sortable.asc i::before {
+      content: "\f0de";
+    }
+    .sortable.desc i::before {
+      content: "\f0dd";
+    }
+    .sortable.asc i,
+    .sortable.desc i {
+      opacity: 1;
+      color: var(--secondary-color);
+    }
+
     /* Badge tình trạng sách */
     .badge {
       display: inline-block;
@@ -1261,10 +1291,10 @@
                 <thead>
                   <tr>
                     <th>STT</th>
-                    <th>Mã Đầu sách</th>
-                    <th>Tên Sách</th>
-                    <th>Thể loại</th>
-                    <th>Tác giả</th>
+                    <th class="sortable" data-sort="maDauSach" data-table="table-dau-sach">Mã Đầu sách <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="tenSach" data-table="table-dau-sach">Tên Sách <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="theLoai" data-table="table-dau-sach">Thể loại <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="tacGia" data-table="table-dau-sach">Tác giả <i class="fas fa-sort"></i></th>
                     <th>Mô tả</th>
                     <th></th>
                   </tr>
@@ -1404,14 +1434,14 @@
                 <thead>
                   <tr>
                     <th style="width: 50px;">STT</th>
-                    <th>Mã sách</th>
-                    <th>Tên sách</th>
-                    <th>Thể loại</th>
-                    <th>Tác giả</th>
-                    <th>Nhà XB</th>
-                    <th>Năm XB</th>
-                    <th>Số lượng tồn</th>
-                    <th>Tình trạng</th>
+                    <th class="sortable" data-sort="maSach" data-table="table-sach">Mã sách <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="tenSach" data-table="table-sach">Tên sách <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="theLoai" data-table="table-sach">Thể loại <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="tacGia" data-table="table-sach">Tác giả <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="nhaXB" data-table="table-sach">Nhà XB <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="namXB" data-table="table-sach">Năm XB <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="soLuongTon" data-table="table-sach">Số lượng tồn <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="tinhTrang" data-table="table-sach">Tình trạng <i class="fas fa-sort"></i></th>
                     <th></th>
                   </tr>
                 </thead>
@@ -1487,10 +1517,10 @@
                 <thead>
                   <tr>
                     <th>STT</th>
-                    <th>Mã Thể loại</th>
-                    <th>Tên thể loại</th>
+                    <th class="sortable" data-sort="maTheLoai" data-table="table-the-loai">Mã Thể loại <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="tenTheLoai" data-table="table-the-loai">Tên thể loại <i class="fas fa-sort"></i></th>
                     <th>Mô tả</th>
-                    <th>Số đầu sách</th>
+                    <th class="sortable" data-sort="soDauSach" data-table="table-the-loai">Số đầu sách <i class="fas fa-sort"></i></th>
                     <th></th>
                   </tr>
                 </thead>
@@ -1539,10 +1569,10 @@
                 <thead>
                   <tr>
                     <th>STT</th>
-                    <th>Mã Tác giả</th>
-                    <th>Họ Tên</th>
-                    <th>Năm Sinh</th>
-                    <th>Số đầu sách hiện có</th>
+                    <th class="sortable" data-sort="maTacGia" data-table="table-tac-gia">Mã Tác giả <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="hoTen" data-table="table-tac-gia">Họ Tên <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="namSinh" data-table="table-tac-gia">Năm Sinh <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="soDauSach" data-table="table-tac-gia">Số đầu sách hiện có <i class="fas fa-sort"></i></th>
                     <th></th>
                   </tr>
                 </thead>
@@ -2005,6 +2035,120 @@
             this.classList.add('active');
             targetPane.classList.add('active');
           }
+        });
+      });
+
+      // === XỬ LÝ SORTABLE TABLE HEADERS ===
+      const sortStates = {};
+
+      function parseNumber(str) {
+        if (!str) return 0;
+        return parseFloat(str.toString().replace(/\./g, "")) || 0;
+      }
+
+      function sortBookTable(tableId, column) {
+        const table = document.getElementById(tableId);
+        if (!table) return;
+        
+        const tbody = table.querySelector('tbody');
+        if (!tbody) return;
+        
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        if (rows.length === 0 || rows[0].cells.length < 2) return;
+
+        if (!sortStates[tableId]) {
+          sortStates[tableId] = { column: null, direction: 'asc' };
+        }
+
+        if (sortStates[tableId].column === column) {
+          sortStates[tableId].direction = sortStates[tableId].direction === 'asc' ? 'desc' : 'asc';
+        } else {
+          sortStates[tableId].column = column;
+          sortStates[tableId].direction = 'asc';
+        }
+
+        // Update header icons for this table only
+        table.querySelectorAll('.sortable').forEach(th => {
+          th.classList.remove('asc', 'desc');
+        });
+        const activeHeader = table.querySelector(`.sortable[data-sort="${column}"]`);
+        if (activeHeader) {
+          activeHeader.classList.add(sortStates[tableId].direction);
+        }
+
+        // Define column mappings for each table
+        const columnMappings = {
+          'table-dau-sach': {
+            'maDauSach': 1,
+            'tenSach': 2,
+            'theLoai': 3,
+            'tacGia': 4
+          },
+          'table-sach': {
+            'maSach': 1,
+            'tenSach': 2,
+            'theLoai': 3,
+            'tacGia': 4,
+            'nhaXB': 5,
+            'namXB': 6,
+            'soLuongTon': 7,
+            'tinhTrang': 8
+          },
+          'table-the-loai': {
+            'maTheLoai': 1,
+            'tenTheLoai': 2,
+            'soDauSach': 4
+          },
+          'table-tac-gia': {
+            'maTacGia': 1,
+            'hoTen': 2,
+            'namSinh': 3,
+            'soDauSach': 4
+          }
+        };
+
+        const colIndex = columnMappings[tableId]?.[column];
+        if (colIndex === undefined) return;
+
+        rows.sort((a, b) => {
+          let aVal = a.cells[colIndex]?.textContent.trim() || '';
+          let bVal = b.cells[colIndex]?.textContent.trim() || '';
+
+          // Check if numeric columns
+          if (['soLuongTon', 'namXB', 'namSinh', 'soDauSach'].includes(column)) {
+            aVal = parseNumber(aVal);
+            bVal = parseNumber(bVal);
+          } else if (column === 'tinhTrang') {
+            // Sort by status: Còn hàng < Sắp hết < Hết hàng
+            const statusOrder = { 'Còn hàng': 0, 'Sắp hết': 1, 'Hết hàng': 2 };
+            aVal = statusOrder[aVal.replace(/[🟢🟠🔴\s]/g, '').trim()] ?? 3;
+            bVal = statusOrder[bVal.replace(/[🟢🟠🔴\s]/g, '').trim()] ?? 3;
+          } else {
+            aVal = aVal.toLowerCase();
+            bVal = bVal.toLowerCase();
+          }
+
+          if (typeof aVal === 'number' && typeof bVal === 'number') {
+            return sortStates[tableId].direction === 'asc' ? aVal - bVal : bVal - aVal;
+          }
+          
+          if (aVal < bVal) return sortStates[tableId].direction === 'asc' ? -1 : 1;
+          if (aVal > bVal) return sortStates[tableId].direction === 'asc' ? 1 : -1;
+          return 0;
+        });
+
+        rows.forEach((row, index) => {
+          row.cells[0].textContent = index + 1;
+          tbody.appendChild(row);
+        });
+      }
+
+      // Attach click handlers to all sortable headers
+      document.querySelectorAll('.sortable[data-table]').forEach(th => {
+        th.addEventListener('click', () => {
+          const sortColumn = th.getAttribute('data-sort');
+          const tableId = th.getAttribute('data-table');
+          if (sortColumn && tableId) sortBookTable(tableId, sortColumn);
         });
       });
 

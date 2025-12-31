@@ -364,6 +364,40 @@
             background-color: #f5f5f5;
         }
 
+        /* Sortable table headers */
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding-right: 1.8rem !important;
+        }
+
+        .sortable::before {
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            content: "\f0dc";
+            position: absolute;
+            right: 0.5rem;
+            color: #999;
+            opacity: 0.6;
+        }
+
+        .sortable.asc::before {
+            content: "\f0de";
+            color: var(--secondary-color);
+            opacity: 1;
+        }
+
+        .sortable.desc::before {
+            content: "\f0dd";
+            color: var(--secondary-color);
+            opacity: 1;
+        }
+
+        .sortable:hover::before {
+            opacity: 1;
+        }
+
         /* SỬA: CSS cho Tổng doanh thu */
         .report-summary {
             text-align: right;
@@ -969,11 +1003,11 @@
                                 <thead>
                                     <tr>
                                         <th>STT</th>
-                                        <th>Sách</th>
-                                        <th>Tồn đầu</th>
-                                        <th>Nhập trong tháng</th>
-                                        <th>Bán trong tháng</th>
-                                        <th>Tồn cuối</th>
+                                        <th class="sortable" data-sort="sach" data-table="inventory-report-table">Sách</th>
+                                        <th class="sortable" data-sort="tondau" data-table="inventory-report-table">Tồn đầu</th>
+                                        <th class="sortable" data-sort="nhap" data-table="inventory-report-table">Nhập trong tháng</th>
+                                        <th class="sortable" data-sort="ban" data-table="inventory-report-table">Bán trong tháng</th>
+                                        <th class="sortable" data-sort="toncuoi" data-table="inventory-report-table">Tồn cuối</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1063,11 +1097,11 @@
                                 <thead>
                                     <tr>
                                         <th>STT</th>
-                                        <th>Mã khách hàng</th>
-                                        <th>Tên khách hàng</th>
-                                        <th>Nợ đầu</th>
-                                        <th>Nợ phát sinh</th>
-                                        <th>Nợ cuối</th>
+                                        <th class="sortable" data-sort="ma" data-table="debt-report-table">Mã khách hàng</th>
+                                        <th class="sortable" data-sort="ten" data-table="debt-report-table">Tên khách hàng</th>
+                                        <th class="sortable" data-sort="nodau" data-table="debt-report-table">Nợ đầu</th>
+                                        <th class="sortable" data-sort="nophatsinh" data-table="debt-report-table">Nợ phát sinh</th>
+                                        <th class="sortable" data-sort="nocuoi" data-table="debt-report-table">Nợ cuối</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1151,10 +1185,10 @@
                                 <thead>
                                     <tr>
                                         <th>STT</th>
-                                        <th>Thể loại</th>
-                                        <th>Số lượng bán</th>
-                                        <th>Thành tiền</th>
-                                        <th>Tỉ lệ</th>
+                                        <th class="sortable" data-sort="theloai" data-table="revenue-report-table">Thể loại</th>
+                                        <th class="sortable" data-sort="soluong" data-table="revenue-report-table">Số lượng bán</th>
+                                        <th class="sortable" data-sort="thanhtien" data-table="revenue-report-table">Thành tiền</th>
+                                        <th class="sortable" data-sort="tile" data-table="revenue-report-table">Tỉ lệ</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1806,6 +1840,140 @@
             // In báo cáo doanh thu
             document.getElementById("btn-in-doanhthu")?.addEventListener("click", function () {
                 confirmPrint("Báo cáo doanh thu", "month-doanh-thu");
+            });
+
+            // ==============================
+            // SORTING FUNCTIONALITY FOR REPORT TABLES
+            // ==============================
+            const sortStates = {
+                'inventory-report-table': {},
+                'debt-report-table': {},
+                'revenue-report-table': {}
+            };
+
+            function parseNumber(str) {
+                if (!str) return 0;
+                const cleaned = String(str).replace(/[^\d.-]/g, '');
+                return parseFloat(cleaned) || 0;
+            }
+
+            function parsePercent(str) {
+                if (!str) return 0;
+                const cleaned = String(str).replace(/[^\d.-]/g, '');
+                return parseFloat(cleaned) || 0;
+            }
+
+            function sortReportTable(column, tableId) {
+                const table = document.getElementById(tableId);
+                if (!table) return;
+
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                
+                // Filter out "no data" rows
+                const dataRows = rows.filter(row => {
+                    const text = row.textContent.toLowerCase();
+                    return !text.includes('không có');
+                });
+
+                if (dataRows.length === 0) return;
+
+                const currentState = sortStates[tableId][column] || 'none';
+                let newState = 'asc';
+                if (currentState === 'none' || currentState === 'desc') {
+                    newState = 'asc';
+                } else {
+                    newState = 'desc';
+                }
+
+                // Update UI
+                table.querySelectorAll('th.sortable').forEach(th => {
+                    if (th.dataset.table === tableId) {
+                        th.classList.remove('asc', 'desc');
+                    }
+                });
+
+                const clickedHeader = table.querySelector(`th[data-sort="${column}"][data-table="${tableId}"]`);
+                if (clickedHeader) {
+                    clickedHeader.classList.add(newState);
+                }
+
+                sortStates[tableId] = { [column]: newState };
+
+                // Column mapping for each table
+                const columnMaps = {
+                    'inventory-report-table': {
+                        'sach': 1,
+                        'tondau': 2,
+                        'nhap': 3,
+                        'ban': 4,
+                        'toncuoi': 5
+                    },
+                    'debt-report-table': {
+                        'ma': 1,
+                        'ten': 2,
+                        'nodau': 3,
+                        'nophatsinh': 4,
+                        'nocuoi': 5
+                    },
+                    'revenue-report-table': {
+                        'theloai': 1,
+                        'soluong': 2,
+                        'thanhtien': 3,
+                        'tile': 4
+                    }
+                };
+
+                const colIndex = columnMaps[tableId][column];
+
+                dataRows.sort((a, b) => {
+                    const cellA = a.children[colIndex];
+                    const cellB = b.children[colIndex];
+
+                    if (!cellA || !cellB) return 0;
+
+                    const textA = cellA.textContent.trim();
+                    const textB = cellB.textContent.trim();
+
+                    let valA, valB;
+
+                    // Check if numeric columns
+                    if (['tondau', 'nhap', 'ban', 'toncuoi', 'nodau', 'nophatsinh', 'nocuoi', 'soluong', 'thanhtien'].includes(column)) {
+                        valA = parseNumber(textA);
+                        valB = parseNumber(textB);
+                    } else if (column === 'tile') {
+                        valA = parsePercent(textA);
+                        valB = parsePercent(textB);
+                    } else {
+                        // String comparison
+                        valA = textA.toLowerCase();
+                        valB = textB.toLowerCase();
+                    }
+
+                    if (valA < valB) return newState === 'asc' ? -1 : 1;
+                    if (valA > valB) return newState === 'asc' ? 1 : -1;
+                    return 0;
+                });
+
+                // Re-append sorted rows
+                dataRows.forEach(row => tbody.appendChild(row));
+
+                // Update STT (row numbers)
+                dataRows.forEach((row, index) => {
+                    const sttCell = row.children[0];
+                    if (sttCell) {
+                        sttCell.textContent = index + 1;
+                    }
+                });
+            }
+
+            // Attach click handlers to all sortable headers
+            document.querySelectorAll('.sortable[data-table]').forEach(header => {
+                header.addEventListener('click', function() {
+                    const column = this.dataset.sort;
+                    const tableId = this.dataset.table;
+                    sortReportTable(column, tableId);
+                });
             });
 
 

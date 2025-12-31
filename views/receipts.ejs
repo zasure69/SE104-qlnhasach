@@ -28,6 +28,36 @@
       --disabled-bg: #e9ecef;
     }
 
+    /* Sortable table headers */
+    .sortable {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .sortable:hover {
+      background: rgba(52, 152, 219, 0.1);
+    }
+    .sortable i {
+      margin-left: 0.35rem;
+      font-size: 0.75rem;
+      opacity: 0.5;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .sortable:hover i {
+      opacity: 1;
+    }
+    .sortable.asc i::before {
+      content: "\f0de"; /* fa-sort-up */
+    }
+    .sortable.desc i::before {
+      content: "\f0dd"; /* fa-sort-down */
+    }
+    .sortable.asc i,
+    .sortable.desc i {
+      opacity: 1;
+      color: var(--secondary-color);
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -1133,11 +1163,11 @@
             <thead>
               <tr>
                 <th style="width: 50px; text-align: center">STT</th>
-                <th>Mã Phiếu</th>
-                <th>Khách Hàng</th>
-                <th>Ngày Thu</th>
-                <th>Số Tiền Thu</th>
-                <th>Người Lập</th>
+                <th class="sortable" data-sort="maPhieu">Mã Phiếu <i class="fas fa-sort"></i></th>
+                <th class="sortable" data-sort="khachHang">Khách Hàng <i class="fas fa-sort"></i></th>
+                <th class="sortable" data-sort="ngayThu">Ngày Thu <i class="fas fa-sort"></i></th>
+                <th class="sortable" data-sort="soTien">Số Tiền Thu <i class="fas fa-sort"></i></th>
+                <th class="sortable" data-sort="nguoiLap">Người Lập <i class="fas fa-sort"></i></th>
                 <th></th>
               </tr>
             </thead>
@@ -1349,6 +1379,91 @@
         if (!str) return 0;
         return parseFloat(str.replace(/\./g, "")) || 0;
       }
+
+      // === XỬ LÝ SORTABLE TABLE HEADERS ===
+      const masterTable = document.getElementById('receipt-table');
+      const tbody = masterTable?.querySelector('tbody');
+      let currentSort = { column: null, direction: 'asc' };
+
+      function sortTable(column) {
+        if (!tbody) return;
+        
+        const rows = Array.from(tbody.querySelectorAll('tr:not(.no-data)'));
+        if (rows.length === 0) return;
+
+        // Toggle direction if same column
+        if (currentSort.column === column) {
+          currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentSort.column = column;
+          currentSort.direction = 'asc';
+        }
+
+        // Update header icons
+        document.querySelectorAll('.sortable').forEach(th => {
+          th.classList.remove('asc', 'desc');
+        });
+        const activeHeader = document.querySelector(`.sortable[data-sort="${column}"]`);
+        if (activeHeader) {
+          activeHeader.classList.add(currentSort.direction);
+        }
+
+        // Sort rows
+        rows.sort((a, b) => {
+          let aVal, bVal;
+          
+          switch (column) {
+            case 'maPhieu':
+              aVal = a.cells[1]?.textContent.trim() || '';
+              bVal = b.cells[1]?.textContent.trim() || '';
+              break;
+            case 'khachHang':
+              aVal = a.cells[2]?.textContent.trim().toLowerCase() || '';
+              bVal = b.cells[2]?.textContent.trim().toLowerCase() || '';
+              break;
+            case 'ngayThu':
+              // Parse dd/mm/yyyy format
+              const dateA = a.cells[3]?.textContent.trim().split('/').reverse().join('-') || '';
+              const dateB = b.cells[3]?.textContent.trim().split('/').reverse().join('-') || '';
+              aVal = new Date(dateA).getTime() || 0;
+              bVal = new Date(dateB).getTime() || 0;
+              break;
+            case 'soTien':
+              aVal = parseNumber(a.cells[4]?.textContent.trim()) || 0;
+              bVal = parseNumber(b.cells[4]?.textContent.trim()) || 0;
+              break;
+            case 'nguoiLap':
+              aVal = a.cells[5]?.textContent.trim().toLowerCase() || '';
+              bVal = b.cells[5]?.textContent.trim().toLowerCase() || '';
+              break;
+            default:
+              aVal = a.cells[1]?.textContent.trim() || '';
+              bVal = b.cells[1]?.textContent.trim() || '';
+          }
+
+          if (typeof aVal === 'number' && typeof bVal === 'number') {
+            return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+          }
+          
+          if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+          if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+          return 0;
+        });
+
+        // Re-number STT and append sorted rows
+        rows.forEach((row, index) => {
+          row.cells[0].textContent = index + 1;
+          tbody.appendChild(row);
+        });
+      }
+
+      // Attach click handlers to sortable headers
+      document.querySelectorAll('.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+          const sortColumn = th.getAttribute('data-sort');
+          if (sortColumn) sortTable(sortColumn);
+        });
+      });
 
       // --- 2. SIDEBAR ---
       const menuToggle = document.getElementById("menu-toggle");
