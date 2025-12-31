@@ -41,6 +41,58 @@
       display: grid;
       grid-template-columns: 250px 1fr;
       min-height: 100vh;
+      transition: grid-template-columns 0.3s ease-in-out;
+    }
+
+    /* Sidebar Collapsed State */
+    .dashboard-container.sidebar-collapsed {
+      grid-template-columns: 70px 1fr;
+    }
+
+    .dashboard-container.sidebar-collapsed .sidebar {
+      width: 70px;
+      padding: 1rem 0.5rem;
+    }
+
+    .dashboard-container.sidebar-collapsed .sidebar-header h2,
+    .dashboard-container.sidebar-collapsed .sidebar-nav a span {
+      display: none;
+    }
+
+    .dashboard-container.sidebar-collapsed .sidebar-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .dashboard-container.sidebar-collapsed .sidebar-header i {
+      font-size: 2rem;
+    }
+
+    .dashboard-container.sidebar-collapsed .sidebar-nav a {
+      justify-content: center;
+      padding: 0.85rem 0.5rem;
+    }
+
+    .dashboard-container.sidebar-collapsed .sidebar-nav a i {
+      width: auto;
+      font-size: 1.2rem;
+      margin-right: 0;
+    }
+
+    /* Menu Toggle Button */
+    .menu-toggle {
+      font-size: 1.5rem;
+      background: none;
+      border: none;
+      color: var(--text-dark);
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
 
     /* Sidebar */
@@ -670,25 +722,25 @@
 <body>
   <div class="dashboard-container">
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <i class="fas fa-book-open"></i>
         <h2>NHÀ SÁCH ABC</h2>
       </div>
       <nav class="sidebar-nav">
         <ul>
-          <li><a href="/dashboard"><i class="fas fa-home"></i> Tổng quan</a></li>
-          <li><a href="/dashboard/employees"><i class="fas fa-users"></i> QL Nhân viên</a></li>
-          <li><a href="/dashboard/books"><i class="fas fa-book"></i> QL Sách</a></li>
-          <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i> QL Khách hàng</a></li>
-          <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i> QL Phiếu nhập sách</a></li>
-          <li><a href="/dashboard/inventory"><i class="fas fa-clipboard-check"></i> QL Phiếu kiểm kê</a></li>
-          <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i> QL Phiếu thu tiền</a></li>
-          <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i> QL Hóa đơn</a></li>
-          <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i> Báo cáo tổng kết</a></li>
-          <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i> Thay đổi quy định</a></li>
-          <li><a href="/dashboard/trash"><i class="fas fa-trash-alt"></i> Thùng rác</a></li>
-          <li><a href="/permissions/page" class="active"><i class="fas fa-user-shield"></i> Phân quyền</a></li>
+          <li><a href="/dashboard"><i class="fas fa-home"></i><span> Tổng quan</span></a></li>
+          <li><a href="/dashboard/employees"><i class="fas fa-users"></i><span> QL Nhân viên</span></a></li>
+          <li><a href="/dashboard/books"><i class="fas fa-book"></i><span> QL Sách</span></a></li>
+          <li><a href="/dashboard/customers"><i class="fas fa-id-card"></i><span> QL Khách hàng</span></a></li>
+          <li><a href="/dashboard/books_import"><i class="fas fa-file-invoice"></i><span> QL Phiếu nhập sách</span></a></li>
+          <li><a href="/dashboard/inventory"><i class="fas fa-clipboard-check"></i><span> QL Phiếu kiểm kê</span></a></li>
+          <li><a href="/dashboard/receipts"><i class="fas fa-receipt"></i><span> QL Phiếu thu tiền</span></a></li>
+          <li><a href="/dashboard/bills"><i class="fa-solid fa-money-check-dollar"></i><span> QL Hóa đơn</span></a></li>
+          <li><a href="/dashboard/reports"><i class="fas fa-chart-line"></i><span> Báo cáo tổng kết</span></a></li>
+          <li><a href="/dashboard/change-rule"><i class="fas fa-gavel"></i><span> Thay đổi quy định</span></a></li>
+          <li><a href="/dashboard/trash"><i class="fas fa-trash-alt"></i><span> Thùng rác</span></a></li>
+          <li><a href="/permissions/page" class="active"><i class="fas fa-user-shield"></i><span> Phân quyền</span></a></li>
         </ul>
       </nav>
     </aside>
@@ -696,7 +748,12 @@
     <!-- Main Content -->
     <main class="main-content">
       <div class="top-bar">
-        <h1><i class="fas fa-user-shield"></i> Quản lý Phân quyền</h1>
+        <div class="top-bar-left">
+          <button class="menu-toggle" id="menu-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1><i class="fas fa-user-shield"></i> Quản lý Phân quyền</h1>
+        </div>
         <div class="user-menu">
           <span class="user-trigger">
             Chào, <strong><%= username %></strong>
@@ -850,7 +907,7 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeRoleModal()">Hủy</button>
+        <button class="btn btn-secondary" id="btn-reset-role" onclick="resetRoleModal()">Đặt lại</button>
         <button class="btn btn-primary" onclick="saveRole()">Lưu</button>
       </div>
     </div>
@@ -885,6 +942,21 @@
       'other': { name: 'Khác', icon: 'fa-ellipsis-h' }
     };
 
+    // ========== SIDEBAR TOGGLE ==========
+    const menuToggle = document.getElementById("menu-toggle");
+    const sidebar = document.getElementById("sidebar");
+    const container = document.querySelector(".dashboard-container");
+
+    if (menuToggle && sidebar && container) {
+      menuToggle.addEventListener("click", function () {
+        if (window.innerWidth <= 992) {
+          sidebar.classList.toggle("active");
+        } else {
+          container.classList.toggle("sidebar-collapsed");
+        }
+      });
+    }
+
     // ========== TAB SWITCHING ==========
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -918,13 +990,52 @@
     }
 
     // ========== ROLE MODAL ==========
+    let originalRoleData = null; // Lưu dữ liệu gốc để đặt lại
+    let isEditMode = false; // Kiểm tra đang ở chế độ thêm mới hay chỉnh sửa
+
     function openAddRoleModal() {
+      isEditMode = false;
+      originalRoleData = null;
       document.getElementById('role-modal-title').textContent = 'Thêm vai trò mới';
       document.getElementById('role-id').value = '';
       document.getElementById('role-name').value = '';
       document.getElementById('role-desc').value = '';
       document.getElementById('role-active').checked = true;
       document.getElementById('role-modal').classList.add('show');
+    }
+
+    function resetRoleModal() {
+      if (!isEditMode) {
+        // Ở chế độ thêm mới: xóa trắng form
+        document.getElementById('role-name').value = '';
+        document.getElementById('role-desc').value = '';
+        document.getElementById('role-active').checked = true;
+        showToast('Đã xóa trắng form', 'info');
+      } else {
+        // Ở chế độ chỉnh sửa: khôi phục dữ liệu ban đầu
+        if (originalRoleData) {
+          const currentName = document.getElementById('role-name').value;
+          const currentDesc = document.getElementById('role-desc').value;
+          const currentActive = document.getElementById('role-active').checked;
+
+          const hasChanges = currentName !== originalRoleData.TenVaiTro ||
+            currentDesc !== (originalRoleData.MoTa || '') ||
+            currentActive !== originalRoleData.isActive;
+
+          if (hasChanges) {
+            if (confirm('Khôi phục dữ liệu ban đầu?\n\n- OK: Khôi phục dữ liệu ban đầu.\n- Cancel: Tiếp tục chỉnh sửa với dữ liệu hiện tại.')) {
+              document.getElementById('role-name').value = originalRoleData.TenVaiTro;
+              document.getElementById('role-desc').value = originalRoleData.MoTa || '';
+              document.getElementById('role-active').checked = originalRoleData.isActive;
+              showToast('Đã khôi phục dữ liệu ban đầu', 'info');
+            }
+          } else {
+            showToast('Dữ liệu chưa thay đổi', 'info');
+          }
+        } else {
+          showToast('Không thể đặt lại - chưa có dữ liệu gốc', 'error');
+        }
+      }
     }
 
     function closeRoleModal() {
@@ -939,6 +1050,14 @@
         
         if (data.success) {
           const vt = data.data;
+          isEditMode = true;
+          // Lưu dữ liệu gốc để có thể đặt lại
+          originalRoleData = {
+            MaVaiTro: vt.MaVaiTro,
+            TenVaiTro: vt.TenVaiTro,
+            MoTa: vt.MoTa || '',
+            isActive: vt.isActive
+          };
           document.getElementById('role-modal-title').textContent = 'Chỉnh sửa vai trò';
           document.getElementById('role-id').value = vt.MaVaiTro;
           document.getElementById('role-name').value = vt.TenVaiTro;
