@@ -66,5 +66,10 @@ router.post(
   checkPermission("caidat.phanquyen", "admin.full"),
   permissionController.autoAssignVaiTro
 );
+router.post(
+  "/toggle-auto-assign",
+  checkPermission("caidat.phanquyen", "admin.full"),
+  permissionController.toggleAutoAssign
+);
 
 module.exports = router;

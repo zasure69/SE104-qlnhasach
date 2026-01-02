@@ -6,6 +6,7 @@ const {
   Quyen,
   VaiTro_Quyen,
   NhanVien,
+  ThamSo,
   sequelize,
 } = require("../models");
 
@@ -404,6 +405,78 @@ const autoAssignVaiTro = async (req, res) => {
 };
 
 /**
+ * Toggle cài đặt tự động gán vai trò theo chức vụ
+ */
+const toggleAutoAssign = async (req, res) => {
+  try {
+    const { enabled } = req.body;
+    const value = enabled ? "1" : "0";
+
+    // Tìm hoặc tạo tham số
+    let thamSo = await ThamSo.findByPk("TuDongGanVaiTroTheoChucVu");
+    if (thamSo) {
+      await thamSo.update({ GiaTri: value });
+    } else {
+      await ThamSo.create({
+        TenThamSo: "TuDongGanVaiTroTheoChucVu",
+        GiaTri: value,
+      });
+    }
+
+    // Nếu bật, tự động gán vai trò luôn
+    if (enabled) {
+      const chucVuToVaiTro = {
+        Admin: "Admin",
+        "Chủ cửa hàng": "Chủ cửa hàng",
+        "Nhân viên": "Nhân viên",
+        "Thủ kho": "Thủ kho",
+      };
+
+      const vaiTros = await VaiTro.findAll();
+      const vaiTroMap = {};
+      vaiTros.forEach((vt) => {
+        vaiTroMap[vt.TenVaiTro] = vt.MaVaiTro;
+      });
+
+      const nhanViens = await NhanVien.findAll({
+        where: { isDeleted: false },
+      });
+
+      let updatedCount = 0;
+      for (const nv of nhanViens) {
+        const tenVaiTro = chucVuToVaiTro[nv.ChucVu];
+        if (tenVaiTro && vaiTroMap[tenVaiTro]) {
+          const maVaiTro = vaiTroMap[tenVaiTro];
+          if (nv.MaVaiTro !== maVaiTro) {
+            await nv.update({ MaVaiTro: maVaiTro });
+            updatedCount++;
+          }
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `Đã bật tự động gán và cập nhật ${updatedCount} nhân viên`,
+        enabled: true,
+        updatedCount,
+      });
+    } else {
+      res.json({
+        success: true,
+        message: "Đã tắt tự động gán vai trò theo chức vụ",
+        enabled: false,
+      });
+    }
+  } catch (error) {
+    console.error("Error toggling auto assign:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi khi thay đổi cài đặt",
+    });
+  }
+};
+
+/**
  * Lấy danh sách nhân viên với vai trò
  */
 const getNhanVienWithVaiTro = async (req, res) => {
@@ -469,12 +542,17 @@ const renderPermissionPage = async (req, res) => {
       order: [["HoTen", "ASC"]],
     });
 
+    // Lấy cài đặt tự động gán vai trò
+    const autoAssignParam = await ThamSo.findByPk("TuDongGanVaiTroTheoChucVu");
+    const autoAssignEnabled = autoAssignParam && autoAssignParam.GiaTri === "1";
+
     res.render("permissions", {
       title: "Quản lý phân quyền",
       vaiTros: vaiTros.map((v) => v.toJSON()),
       quyens: quyens.map((q) => q.toJSON()),
       groupedQuyens,
       nhanViens: nhanViens.map((n) => n.toJSON()),
+      autoAssignEnabled,
       username: req.user?.username,
       role: req.user?.role,
       MaNV: req.user?.id || req.user?.MaNV,
@@ -498,6 +576,7 @@ module.exports = {
   getAllQuyen,
   assignVaiTroToNhanVien,
   autoAssignVaiTro,
+  toggleAutoAssign,
   getNhanVienWithVaiTro,
   renderPermissionPage,
 };

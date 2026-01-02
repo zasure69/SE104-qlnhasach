@@ -850,9 +850,10 @@
             <div class="card">
               <div class="card-header">
                 <h3>Gán vai trò cho nhân viên</h3>
-                <button class="btn btn-primary" onclick="autoAssignRoles()">
-                  <i class="fas fa-magic"></i> Tự động gán theo chức vụ
-                </button>
+                <label class="auto-assign-toggle" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                  <input type="checkbox" id="auto-assign-checkbox" <%= autoAssignEnabled ? 'checked' : '' %> onchange="toggleAutoAssign(this.checked)" style="width: 18px; height: 18px;">
+                  <span><i class="fas fa-magic"></i> Tự động gán theo chức vụ</span>
+                </label>
               </div>
               <div class="card-body">
                 <div id="nhanvien-list">
@@ -1379,6 +1380,37 @@
     }
 
     // ========== AUTO ASSIGN ROLES ==========
+    async function toggleAutoAssign(enabled) {
+      showLoader();
+      try {
+        const response = await fetch('/permissions/toggle-auto-assign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast(data.message);
+          if (enabled && data.updatedCount > 0) {
+            // Reload trang để cập nhật danh sách
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          }
+        } else {
+          showToast(data.message, 'error');
+          // Reset checkbox về trạng thái cũ
+          document.getElementById('auto-assign-checkbox').checked = !enabled;
+        }
+      } catch (error) {
+        showToast('Lỗi khi thay đổi cài đặt', 'error');
+        document.getElementById('auto-assign-checkbox').checked = !enabled;
+      }
+      hideLoader();
+    }
+
     async function autoAssignRoles() {
       if (!confirm('Tự động gán vai trò cho tất cả nhân viên dựa trên chức vụ?')) {
         return;
